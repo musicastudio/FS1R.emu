@@ -1,0 +1,5 @@
+build/
+fs1r_emu.exe
+fs1r_emu.ini
+*.wav
+*.obj

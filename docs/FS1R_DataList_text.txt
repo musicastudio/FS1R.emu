@@ -1,0 +1,3943 @@
+
+
+===== PAGE 1 =====
+
+
+===== PAGE 2 =====
+'43@PN+291.ϖʔδ
+
+===== PAGE 3 =====
+3
+Contents
+Inhaltsangabe
+Table des matières
+Performance List
+Liste der Performances
+Liste des performances ............................................................4
+Voice List
+Liste der Voices
+Liste des voix..............................................................................6
+Preset Fseq List
+Liste der vorprogrammierten Formant Sequenzen
+Liste des séquences de formant programmées “FSeqs” ......10
+Control List
+Liste der Steuerbefehle
+Liste des contrôleurs ................................................................11
+Effect Type List
+Liste mit Effekt-Typen
+Liste des type d'effets................................................................12
+Effect Parameter List
+Liste mit Effekt-Parametern
+Liste des Paramètres d'effets....................................................13
+REVERB ............................................................................................13
+VARIATION ........................................................................................17
+INSERTION........................................................................................24
+MIDI Data Format........................................................................35
+MIDI Data Tables ........................................................................38
+MIDI Implementation Chart........................................................43
+DATA LIST
+DATEN-LISTE
+LISTE DE DONNÉES
+Datalist/E  10/21/98  8:32 PM  Page 3
+
+===== PAGE 4 =====
+4
+No. Performance Name Category No. Performance Name Category No. Performance Name Category No. Performance Name Category
+1 Teck Hook Ld 65 Fifths Sc 1 Zap ! Se 65 Pure Fx
+2 Yes No Se 66 Sweepers Ld 2 Shaman Vo 66 Furry Bell Fx
+3 Choir Vo 67 Miracle Fx 3 Nightmare Fx 67 Replicant Fx
+4 EP Wide Pf 68 Platipus Ld 4 Acid King Ba 68 Miracle Fx
+5 Bleep Co 69 Backin Organ Or 5 Snow Decay Sc 69 Swarm Co
+6 B-Rave Ba 70 LoFi Acid Ba 6 Hollywood Co 70 Venus Co
+7 Earth Lead Ld 71 Zap ! Se 7 Yes No Se 71 Relaxxx Co
+8 Ensemble St 72 JMichel St 8 Fetish Ld 72 Mouth Pop Co
+9 Full B3 Or 73 Stab Br 9 Platipus Ld 73 R.P.M. Co
+10 Nebulous Pd 74 Legend Vibe Cp 10 Bots Fx 74 Solstice Co
+11 VocoTouch Vo 75 Vox Move Vo 11 Sho Fx 75 Bleep Co
+12 Bassline 1 Ba 76 Digital Ba 12 Technical Ba 76 Starship Pd
+13 Nu Suitcase Pf 77 Siam Prayer Et 13 Dirt Vocoder Vo 77 SuperPad Pd
+14 StabbaBabb Br 78 Mysterians Fx 14 Homy Vo 78 Moby II Pd
+15 Dark Se 79 Venus Co 15 BeatBox Dr 79 Spacy Pad Pd
+16 Dog Bytes Sq 80 Drum Kit 2 Dr 16 Magic Laugh Se 80 Pompeii Pd
+17 FundaBass Ba 81 Lead Horn Br 17 VocoTouch Vo 81 The Shadow Pd
+18 Magic Laugh Se 82 Mouth Pop Co 18 The Seeker Vo 82 Earth Wind Pd
+19 Breathy 5th Vo 83 Hard String Gt 19 Can You Give Vo 83 Nebulous Pd
+20 Velvet Dyno Pf 84 Baroque Ld 20 Vox Morph Vo 84 CineSweep Pd
+21 Syncorgano Ld 85 Swarm Co 21 Vox Phase Vo 85 Qwerty Pd
+22 Acid King Ba 86 Mitosis Ld 22 F-Sweep Vo 86 Warm Galaxy Pd
+23 Taxi Brass Br 87 Moving Fx 23 The Vocoder Vo 87 Octavian Pd
+24 Moby II Pd 88 Wind Pad Pd 24 Sand Voice Vo 88 Fat Line Sq
+25 Nightmare Fx 89 DistFeedback Gt 25 Everybody Vo 89 Metallic Sq
+26 Zansyo Sc 90 EP Soft Pf 26 HyperFuzz Ba 90 Superarp Sq
+27 Homy Vo 91 Shooby Do Vo 27 Dist Mini Ba 91 Noble Metal Sq
+28 Optical Ba 92 Furry Bell Fx 28 Strobe Ba 92 Perc Arp Sq
+29 Digi Clav Pf 93 Spiral Se 29 Digital Ba 93 Dog Bytes Sq
+30 Relaxxx Co 94 ChurchOrgan Or 30 Power Key Ba 94 Iron Man Sq
+31 B3 Jazz Comp Or 95 Accordion Or 31 Moon Bass Ba 95 Hard Pulse Sq
+32 TekkSet Dr 96 Drum Kit 3 Dr 32 LoFi Acid Ba 96 Zansyo Sc
+33 Strobe Ba 97 CP Hard Pf 33 Funk Bass Ba 97 Da Comp Sc
+34 HyperFuzz Ba 98 Warm Galaxy Pd 34 Matze Ba 98 Snow Pixy Sc
+35 Sho Fx 99 Superarp Sq 35 Glass Harp Ld 99 Fusion Sc
+36 Kalimba Et 100 Fetish Ld 36 Sweepers Ld 100 Funk Sc
+37 DX-Soft Br 101 B3 Perc 3rd Or 37 Nu Skool Ld 101 Manhattan Sc
+38 Technical Ba 102 Funky Tech Sc 38 Syncorgano Ld 102 Fifths Sc
+39 Obie Strings St 103 Fat Line Sq 39 Mitosis Ld 103 Vulcan Sc
+40 Caravan Fx 104 Can You Give Vo 40 Trance Cosmo Ld 104 Fluffy Sc
+41 Brassetra Br 105 Snow Pixy Sc 41 Glider Ld 105 Spellbound Sc
+42 Snow Decay Sc 106 Earth Wind Pd 42 Night Se 106 VeloSweep Sc
+43 Bots Fx 107 Prophet F Fx 43 To Warp Se 107 Raymond Sc
+44 Plastic Bass Ba 108 Obi Hornz Br 44 Space Bomb Se 108 Zapper Sc
+45 Full Tines Pf 109 Tremolo Pf 45 Open Se 109 Harry Sc
+46 Pompeii Pd 110 Open Se 46 Dark Se 110 Fast&Cheap Sc
+47 To Warp Se 111 Elise Pd 47 Walking Robo Se 111 Funky Tech Sc
+48 BoomTchak Dr 112 Drum Kit 9o9 Dr 48 Scaling Se 112 Pluck Glass Sc
+49 Compu Saw Ba 113 Matze Ba 49 Ghost Se 113 Komodo Sc
+50 Dirt Vocoder Vo 114 Strat 7II Gt 50 Saucer Se 114 Suikinkutsu Et
+51 Lightyears Vo 115 Morph Fx 51 Force Field Se 115 Gamelan Et
+52 Nu Skool Ld 116 Hollow Ld 52 Radio MW Se 116 Thai Boxing Et
+53 EtherGuitar Gt 117 Heimdal Pd 53 4-3-2-1 Se 117 Siam Prayer Et
+54 Bassline 2 Ba 118 Zapper Sc 54 Slow Attack Se 118 EthnicPercs Et
+55 Blazin' Jim Or 119 LS Night Or 55 Spiral Se 119 Mukkuri Et
+56 Shaman Vo 120 Spacious St 56 Morph Fx 120 Kalimba Et
+57 Emperor II Pd 121 Perc Arp Sq 57 Moving Fx 121 Drum Kit 1 Dr
+58 Da Comp Sc 122 Spellbound Sc 58 Prophet F Fx 122 Drum Kit 2 Dr
+59 Starship Pd 123 Trance Cosmo Ld 59 Caravan Fx 123 Drum Kit 3 Dr
+60 Jungle Bass Ba 124 Moon Bass Ba 60 FormantSweep Fx 124 Drum Kit 9o9 Dr
+61 Vulcan Sc 125 Manhattan Sc 61 Mysterians Fx 125 TechBeat Dr
+62 Sand Voice Vo 126 Angel Bells Pd 62 DippeDut Fx 126 BoomTchak Dr
+63 Hollywood Co 127 Far West Cp 63 Glacial Fx 127 TechKicks Dr
+64 Drum Kit 1 Dr 128 Spacy Aaah Vo 64 Mizu Guitar Fx 128 TekkSet Dr
+Performance List 
+Liste der Performances 
+Liste des performances
+Preset AInternal
+Datalist/E  10/21/98  8:32 PM  Page 4
+
+===== PAGE 5 =====
+5
+No. Performance Name Category No. Performance Name No. Performance Name Category No. Performance Name Category
+1 Sweepy Voice Vo 65 Perc Organ Or 1 UprightPiano Pf 65 FM Lead Sax Rd
+2 Breathy 5th Vo 66 Dirty Organ Or 2 FM Piano Pf 66 FM Dbl Reed Rd
+3 Lightyears Vo 67 ByonOrgan Or 3 EP Wide Pf 67 Dark Clar Rd
+4 Vox Move Vo 68 Blazin' Jim Or 4 CP Hard Pf 68 Moonweed Ld
+5 Vox Tron Vo 69 Backin Organ Or 5 Velvet Dyno Pf 69 Hollow Ld
+6 Spacy Aaah Vo 70 LS Night Or 6 Clear EP Pf 70 Tech Lead Ld
+7 Celebration Vo 71 Fat organ Or 7 DX Harpscd Pf 71 Retronic Ld
+8 Choir Vo 72 70s Organ Or 8 Digi Clav Pf 72 HyperFuzz Ba
+9 Human Woo Vo 73 Jazz Organ Or 9 5th Piano Pf 73 FM Piccolo Pi
+10 Human Ih Vo 74 Full Organ Or 10 Glocken Cp 74 FM Flute Pi
+11 Human Eh Vo 75 The Lounge Or 11 MusicBox Cp 75 RecoBell Pi
+12 Human Oh Vo 76 ChurchOrgan Or 12 Legend Vibe Cp 76 FM PanFlute Pi
+13 Shooby Do Vo 77 Hard String Gt 13 Marimba Cp 77 FM Bottle Pi
+14 Full Tines Pf 78 DX Jazz Gt 14 Xylophon Cp 78 Heavy Pipe Pi
+15 DX Original Pf 79 EtherGuitar Gt 15 TubulBel Cp 79 Whistle Pi
+16 Dyno Rose Pf 80 DistFeedback Gt 16 Dulcimer Cp 80 Ocarina Pi
+17 EP 1980 Pf 81 Strat 7II Gt 17 B3 Perc 3rd Or 81 Earth Lead Ld
+18 Crystal Rose Pf 82 Taxi Brass Br 18 B3 Jazz Comp Or 82 Platipus Ld
+19 DX Phase Pf 83 BrightFilter Br 19 Old Rotary Or 83 FM Lead Ld
+20 DX Classic Pf 84 Lead Horn Br 20 Full Organ Or 84 FM Lead 2 Ld
+21 EP Reece Pf 85 Bright Br 21 Dist Organ Or 85 FM Lead 3 Ld
+22 Nu Suitcase Pf 86 DX-Soft Br 22 Accordion Or 86 FM Lead 4 Ld
+23 EP Wide Pf 87 Brassetra Br 23 Chorus Harp Or 87 Sunhead Ld
+24 Velvet Dyno Pf 88 Oberhorn Br 24 ChurchOrgan Or 88 Teck Hook Ld
+25 Tremolo Pf 89 Obi Brass Br 25 Nylon Guitar Gt 89 Space  Harp Pd
+26 EP Soft Pf 90 Obi Hornz Br 26 Steel Guitar Gt 90 Fat Pad Pd
+27 Wurli Dirty Pf 91 Swell Br 27 Jazz Guitar Gt 91 Thermal Pd
+28 Wurli Clean Pf 92 Stab Br 28 Clean Guitar Gt 92 Nebulous Pd
+29 CP Hard Pf 93 Quackz Br 29 Mute Guitar Gt 93 Qwerty Pd
+30 UprightPiano Pf 94 StabbaBabb Br 30 DistFeedback Gt 94 FM Pad Pd
+31 Clavmann Pf 95 Fanfare Br 31 Dist Guitar Gt 95 Spacy Pad Pd
+32 BryteClavman Pf 96 Wind Pad Pd 32 Punch Bass Ba 96 Spacewind Pd
+33 Fat Clavmann Pf 97 Dark Pad Pd 33 Aco Bass Ba 97 Rain Sc
+34 Digi Clav Pf 98 Thermal Pd 34 Plastic Bass Ba 98 Fifths Sc
+35 Thin Clav Pf 99 Spacewind Pd 35 FM Slap Ba 99 Crystal Sc
+36 Optical Ba 100 Elise Pd 36 Fretless Ba 100 Atmospher Sc
+37 FundaBass Ba 101 OB Pad Pd 37 Pick Bass Ba 101 Bright Ens Pd
+38 B-Rave Ba 102 Reflection Pd 38 FM Slap 2 Ba 102 Goblins Sc
+39 Square Bass Ba 103 Emperor II Pd 39 Bassline 1 Ba 103 Harry Sc
+40 Ethno Bass Ba 104 Fat Pad Pd 40 Compu Saw Ba 104 Sci-Fi Sc
+41 Bassline 1 Ba 105 Polar Pd 41 Strobe Ba 105 Sitar 2 Et
+42 Bassline 2 Ba 106 Sky Bells Pd 42 Acid King Ba 106 Suikinkutsu Et
+43 JungleBass Ba 107 Heimdal Pd 43 Power Key Ba 107 Mukkuri Et
+44 Plastic Bass Ba 108 Ice Score Pd 44 5th Funk Ba 108 Kalimba Et
+45 Punch Bass Ba 109 Solair Pd 45 DX Solo Str St 109 Kalimba 2 Et
+46 Compu Saw Ba 110 Angel Bells Pd 46 Tremolo Str St 110 Bag Pipe Et
+47 Dry Syn Ba 111 Vesuvius Pd 47 FM Pizz St 111 Fiddle Et
+48 Earth Lead Ld 112 Space Harp Pd 48 FM Harp St 112 Shanai Et
+49 Hollow Ld 113 Ministry Pd 49 Spacious St 113 TnklBell Pc
+50 Samplon Ld 114 Ensemble St 50 FM Strings En 114 Agogo Pc
+51 Noodles Ld 115 Obie Strings St 51 JMichel St 115 SteelDrm Pc
+52 BigAssSynth Ld 116 JMichel St 52 Ensemble St 116 WoodBlok Pc
+53 Teck Hook Ld 117 Mild St 53 Vox Morph Vo 117 TaikoDrm Pc
+54 Sunhead Ld 118 Spacious St 54 Vox Move Vo 118 Hollywood Co
+55 Moonweed Ld 119 Oktavstrgs St 55 Vox Phase Vo 119 Bleep Co
+56 Tech Lead Ld 120 Hit En 56 Hit En 120 4-3-2-1 Se
+57 Retronic Ld 121 Accordion Or 57 FM Solo Tp Br 121 DippeDut Fx
+58 Formo Whistl Ld 122 Sitar Et 58 Fanfare Br 122 Glacial Fx
+59 Baroque Ld 123 Bag Pipe Et 59 DX-Soft Br 123 Ice Fx
+60 Full B3 Or 124 Alloy Cp 60 Lead Horn Br 124 Angle Fx
+61 B3 Jazz Comp Or 125 Tubular Cp 61 Fr.Horn Br 125 Shooby Do Vo
+62 B3 Perc 3rd Or 126 Far West Cp 62 FM Section Br 126 Everybody Vo
+63 J.Road Or 127 Small Bell Cp 63 Bright Br 127 Vox Move 2 Vo
+64 Disto-Jam Or 128 Legend Vibe Cp 64 StabbaBabb Br 128 Drum Kit 2 Dr
+Category
+Preset B Preset C
+Datalist/E  10/21/98  8:32 PM  Page 5
+
+===== PAGE 6 =====
+6
+1 Pf Ballad EP Et BagPipe Pf FortePno 1 Pf Harpsi 8 Cp DumBells Gt DX-AcstGt1 Ba BassNovo
+2 Pf Clavmann Et BagPipe-dl Pf FortePno 2 Pf Harpsi 9 Cp MellowBell Gt DX-AcstGt2 Ba BassResWp
+3 Pf Clavmann 2 Et Gamelan Pf MM-Piano 1 Pf HarpsiWire Cp Mini Bell Gt DX-AcstGt3 Ba Cutmandu
+4 Pf Digi Clav Et Gamelan2 Pf MM-Piano 2 Pf AD 1600s 1 Cp Child Bell Gt DX-AcstGt4 Ba DX-Bass 1
+5 Pf DX7Classic Et Mukkuri Pf Pianotone1 Pf AD 1600s 2 Cp PPP Thing Gt DX-AcstGt5 Ba DX-Bass 2
+6 Pf Mtrial Pno Et SuikinStr Pf Pianotone2 Pf AD 1900s Cp Stonemetal Gt GuitarBell Ba DX-Bass 3
+7 Pf MtrialPno2 Et Thai Boxin Pf Pianotone3 Pf Caffeine Cp Syn Chime Gt LuteGuitar Ba DX-Bass 4
+8 Pf MtrialPno3 Et ThumKalimb Pf 5thPiano 1 Pf RazorWire Cp Air Bell Gt DX-PickGt1 Ba DX-Bass 5
+9 Pf Real Rose Pc Big-Gamlan Pf 5thPiano 2 Pf Cembalim Cp WrapRound Gt DX-PickGt2 Ba DX-Bass 6
+10 Pf Rose Att Pc Eth-Drum1 Pf PrprdPiano Pf Cembalo Cp TempleBel1 Gt DX-PickGt3 Ba WireBass 1
+11 Pf Rose Sft1 Pc Eth-Drum2 Pf Claviano Pf ElecHarpsi Cp TempleBel2 Gt DX-PickGt4 Ba WireBass 2
+12 Pf Rose Sft2 Se Beep VoX Pf BrightPno1 Pf Syn Harpsi Cp TempleBel3 Gt DX-PickGt5 Ba HardDXBass
+13 Pf Suit Rose Se Dark Pf BrightPno2 Pf DX-Clavi 1 Cp TempleBel4 Gt DX-PickGt6 Ba SmakaBass
+14 Pf Velvt Rose Se ForceField Pf BrightPno3 Pf DX-Clavi 2 Cp TempleBel5 Gt DX-PickGt7 Ba AnaBass 1
+15 Pf 4 Op Clav Se Ghost Pf Dark Piano Pf DX-Clavi 3 Cp DX-Dlcm 1 Gt DX-PickGt8 Ba AnaBass 2
+16 Cp Da Comp Se Ghost2 Pf Digi Piano Pf DX-Clavi 4 Cp DX-Dlcm 2 Gt Synhalon Ba AnaBass 3
+17 Cp Synth Bell Se Magic Pf PianoDrops Pf DX-Clavi 5 Cp DX-Dlcm 3 Gt Picksynth Ba 81Z Bass
+18 Cp Tabla Se Night Pf PowerPiano Pf DX-Clavi 6 Cp Frozentime Gt Compitar Ba DiscBass 1
+19 Or B3JazzComp Se Open Fseq Pf CP70 1 Pf DX-Clavi 7 Cp MetalDlcmr Gt Stratish Ba DiscBass 2
+20 Or B3Perc3rd Se RadioNoise Pf CP70 2 Pf MM-Clavi 1 Cp Silk Road Gt Banjitar Ba Hop Bass 1
+21 Or DrawOrgn Se Reso SE Pf CP70 3 Pf MM-Clavi 2 Or Full Organ Gt Touch Mute Ba Hop Bass 2
+22 Or DrawOrgn2 Se Saucer Pf El.Grand 1 Pf MM-Clavi 3 Or DrawOrgan1 Gt Firenze Ba After 88
+23 Or DrawOrgn3 Se Scaling SE Pf El.Grand 2 Pf BrightClv1 Or DrawOrgan2 Gt Folknik Ba Cable Bass
+24 Or Fs-Organ Se Slow Atk Pf El.Grand 3 Pf BrightClv2 Or DrawOrgan3 Gt FunkyPluck Ba Wood Rez
+25 Or Full Drawb Se SpaceBomb Pf El.Grand 4 Pf BasoClavi Or DrawOrgan4 Gt Guitar Box Ba EazyAction
+26 Or Ham Organ Se WalkinRobo Pf MM-ElGnd 1 Pf ChorusClav Or DrawOrgan5 Gt Long Nail Ba ExciteBass
+27 Or OR-Right Se Warp1 Pf MM-ElGnd 2 Pf Clavecin Or DrawOrgan6 Gt Pianatar Ba PrkussBass
+28 Or Organ Fseq Se Warp2 Pf E.Piano 1 Pf Clavi Comp Or DrawOrgan7 Gt RhythmPluk Ba Flapstick
+29 Or The Lounge Dr 09 OpenHat Pf E.Piano 2 Pf ClaviExcel Or DrawOrgan8 Gt SteelyPick Ba Jackson
+30 Gt Jazz Gtr Dr 09ClHatBel Pf E.Piano 3 Pf ClaviPluck Or DrawOrgan9 Gt TiteGuitar Ba NipponBass
+31 Gt Stratmann Dr Beat BD Pf E.Piano 4 Pf ClaviStaff Or DrawOrgn10 Gt DX-JazzGt1 Ba Bass Knock
+32 Ba Acid King Dr Beat Cym Pf E.Piano 5 Pf Mute Clavi Or DrawOrgn11 Gt DX-JazzGt2 Ba Ana Stevie
+33 Ba Ana Bass Dr Beat SD Pf E.Piano 6 Pf Revinett Or DrawOrgn12 Gt DX-JazzGt3 Ba Munkhen
+34 Ba AttackBass Dr Beat Zap Pf E.Piano 7 Pf SkeltonClv Or DrawOrgn13 Gt DX-JazzGt4 Ba Perc Bass
+35 Ba B-Rave Dr Boom Pf E.Piano 8 Cp Celesta 1 Or DrawOrgn14 Gt DX-JazzGt5 Ba Remark
+36 Ba Bassline 1 Dr Choos Pf E.Piano 9 Cp Celesta 2 Or DrawOrgn15 Gt Guitorgan Ba SmoothBass
+37 Ba Bassline 2 Dr ClosedHat1 Pf E.Piano 10 Cp Celesta 3 Or DrawOrgn16 Gt DX-ClGt 1 Ba Ana Knock
+38 Ba BlegBass Dr ClosedHat2 Pf E.Piano 11 Cp Celesta 4 Or Organsynth Gt DX-ClGt 2 Ba Jaco Syn
+39 Ba DidgBass Dr DanceKick Pf E.Piano 12 Cp MM-Celesta Or ChorusOrgn Gt DX-ClGt 3 Ba Werksfunk
+40 Ba Dry Syn Dr FS-Kick1 Pf E.Piano 13 Cp Halloween Or RotaryOrgn Gt DX-ClGt 4 Ba ZedRubba
+41 Ba FM Bass Dr FS-Kick2 Pf E.Piano 14 Cp Glocken 1 Or CirkusOrgn Gt DX-ClGt 5 St DX-Violin1
+42 Ba FundaBass Dr FS-Kick3 Pf E.Piano 15 Cp Glocken 2 Or JazzDrwbr Gt DX-ClGt 6 St DX-Violin2
+43 Ba HyperFuzz Dr Hatty Pf E.Piano 16 Cp Glocken 3 Or Keyclick Gt DX-ClGt 7 St DX-Violin3
+44 Ba JungleBass Dr Hihat Pf E.Piano 17 Cp Glocken 4 Or VibraOrgan Gt DX-ClGt 8 St DX-Violin4
+45 Ba LoFiAcid Dr Nu Kick 1 Pf Aclectic Cp Glocken 5 Or Farf Out Gt DX-ClGt 9 St Violinz
+46 Ba Matze Dr Nu Kick 2 Pf DX-Road 1 Cp Glocken 6 Or Grinder Gt DX-ClGt 10 St DX-Viola 1
+47 Ba Moon Bass Dr Nu Kick 3 Pf DX-Road 2 Cp HamerGlock Or JazzOrgan1 Gt DX-ClGt 11 St DX-Viola 2
+48 Ba Phone Bass Dr Nu Snare 1 Pf DX-Road 3 Cp Magiglokk Or JazzOrgan2 Gt DX-ClGt 12 St DX-Viola 3
+49 Ba PlastBass Dr Nu Snare 2 Pf DX-Road 4 Cp AnvilGlock Or PercOrgan1 Gt Buzzstring St DX-Cello 1
+50 Ba PunchBass Dr Nu Snare 3 Pf DX-Road 5 Cp MetalGlock Or PercOrgan2 Gt DX-MuteGt1 St DX-Cello 2
+51 Ba Syn Bass Dr Open Hat 1 Pf BrightEP 1 Cp Perc Glock Or PercOrgan3 Gt DX-MuteGt2 St DX-Cello 3
+52 Ba Technical Dr Open Hat 2 Pf BrightEP 2 Cp Glokenring Or PercOrgan4 Gt DX-MuteGt3 St DX-Cello 4
+53 St FairyStrgs Dr PowerKick Pf EP 1967 Cp SynGlock 1 Or PercOrgan5 Gt DX-MuteGt4 St Rosin
+54 St JMichel Dr Snare Pf EP 1970 Cp SynGlock 2 Or PercOrgan6 Gt Heavy Gage St DX-Str 1
+55 St OB String Dr Tchak Pf EP 1980 Cp MusicBox 1 Or PercOrgan7 Gt DX-OvDrGt St DX-Str 2
+56 St ResoStrgs Dr Tech BD Pf EP 1985 Cp MusicBox 2 Or PercOrgan8 Gt DX-DistGt1 St DX-Str 3
+57 St Saws Dr Tech HH Pf Soft EP 1 Cp MusicBox 3 Or PercOrgan9 Gt DX-DistGt2 St DX-Str 4
+58 St SloDu Saws Dr Tech Rim Pf Soft EP 2 Cp MusicBox 4 Or PercOrgn10 Gt DX-DistGt3 St DX-Str 5
+59 St SS String Dr Tech SD Pf Soft EP 3 Cp MusicBox 5 Or PercOrgn11 Gt DX-DistGt4 St DX-Str 6
+60 St SS String2 Dr TR Kick Pf Hard EP 1 Cp MusicBox 6 Or PercOrgn12 Gt DX-DistGt5 St DX-Str 7
+61 En HitMatrial Dr TR Snare Pf Hard EP 2 Cp MusicBox 7 Or PercOrgn13 Gt Stortion1 St DX-Str 8
+62 Br ANSweep Sc DigiSQ1R Pf Hard EP 3 Cp MusicBox 8 Or PercOrgn14 Gt Pluckoww St DX-Str 9
+63 Br FS Brass Sc DigiSQ3 Pf Hard EP 4 Cp MusicBox 9 Or PercOrgn15 Gt Stortion2 St DX-Str 10
+64 Br Hook Sc DogBytes Pf Clicky EP Cp MusicBox10 Or PercOrgn16 Gt FuzzGuitar St DX-Str 11
+Bank Pre A Pre B Pre C Pre D Pre E Pre F Pre G
+PGM# Ca Voice Name Ca Voice Name Ca Voice Name Ca Voice Name Ca Voice Name Ca Voice Name Ca Voice Name
+Voice List / Liste der Voices / Liste des voix
+Program 1 ~ 64
+Datalist/E  10/21/98  8:32 PM  Page 6
+
+===== PAGE 7 =====
+7
+Br DX-Trpt 3 Et Ukabanjo Co Orch Chime Fx MM-Shock 1
+Br DX-Trpt 4 Et Xango Co Pno+Flute Fx MM-Shock 2
+Br DX-Trpt 5 Et Xanu Co StringTine Fx Wallop 1
+Br DX-Trpt 6 Et Zimbalon Co Xylo+Brass Fx Wallop 2
+Br SilverTrpt Et DX-Banjo Ld DX-SynLd 1 Fx Angel
+Br Solo Trpt Et Shamisen 1 Ld DX-SynLd 2 Fx BackSuir
+Br SynTrumpet Et Shamisen 2 Ld DX-SynLd 3 Fx Bird View
+Br Trumponica Et Shamisen 3 Ld DX-SynLd 4 Fx ChorusElms
+Br DX-Trb 1 Et DX-Koto Ld DX-SynLd 5 Fx DX-Stars
+Br DX-Trb 2 Et DX-Klmb 1 Ld DX-SynLd 6 Fx Electric
+Br DX-Trb 3 Et DX-Klmb 2 Ld DX-SynLd 7 Fx Evolution
+Br Mute Trb Et DX-Klmb 3 Ld DX-SynLd 8 Fx FM-Growth
+Br DX-Tuba 1 Et DX-Klmb 4 Ld DX-SynLd 9 Fx Paddawire
+Br DX-Tuba 2 Et DX-Klmb 5 Ld Pluck Lead Fx Fantasynt
+Br DX-Tuba 3 Et DX-Bagpipe Ld Perka Lead Fx Fluv Push
+Br DX-Horn Et DX-Fiddle Ld GuitsynLd Fx Fmilters
+Br Hornz Et African Ld DXSynLd 1 Fx Glassy
+Br Alps Horn Et Bali Ld DXSynLd 2 Fx Glastine
+Br BlunchHorn Et Tibetan Ld DXSynLd 3 Fx Glocker
+Br Horn Ens Et Charango Ld DXSynLd 4 Fx IceRevEcho
+Br MelowHorn1 Et Gamelan 1 Ld DXSynLd 5 Fx InitEnsmbl
+Br MelowHorn2 Et Gamelan 2 Ld DXSynLd 6 Fx MetalSweep
+Br SimpleHorn Et Gamelan 3 Ld DXSynLd 7 Fx SquareModd
+Br Syn Horns Et Kinzoku 1 Ld DXSynLd 8 Fx Mpndg Doom
+Br Vibra Horn Et Kinzoku 2 Ld SqueezeLd Fx Mystrian
+Br DX-Brass 1 Et ScotchTone Ld Mooganic Fx RepertRise
+Br DX-Brass 2 Pc DX-Agogo 1 Ld BrassLead1 Fx Space Trip
+Br Attack Brs Pc DX-Agogo 2 Ld BrassLead2 Fx Syn Rise
+Br Brasstring Pc DX-Bongo Ld BrassLead3 Fx Glider
+Br DX-BrsSec1 Pc Bongo Ld BrassLead4 Sc Anna DX
+Br DX-BrsSec2 Pc DX-Clave Ld Saw Lead Sc Analog-X
+Br MM-Brass 1 Pc DX-Perc Ld DX-SawLd 1 Sc DX-Atms 1
+Br MM-Brass 2 Pc Block Ld DX-SawLd 2 Sc DX-Atms 2
+Br MM-Brass 3 Pc Conga Drum Ld DX-Squar Sc DX-Bright1
+Br 5th Brass Pc Cowbell Ld DX-VoiceLd Sc DX-Bright2
+Br Blow Brass Pc Flexatone Ld DX-WahLead Sc 90 K
+Br Brass Sect Pc Glaeser Ld DXAttackLd Sc 200 K
+Br Chorus Brs Pc Log Drum Ld CaliopLd 1 Sc Arrow-X
+Br Fanfare Pc SmlShaker Ld CaliopLd 2 Sc Attacker
+Br Hard Brass Pc Metal Ld CaliopLd 3 Sc Harp Pad
+Br Sample Brs Pc Percud Ld Fifths 1 Sc ChiLight
+Br Single Brs Pc RefrsWhstl Ld Fifths 2 Sc Digi Calio
+Br ThickBrass Pc Seq Pluck Ld LdSubHarm Sc Digitar
+Br TightBrs 1 Pc BigShaker Ld Buzzer Sc Distracted
+Br TightBrs 2 Pc Side Stick Ld Au Campo Sc FinerThing
+Br DX-SynBr 1 Pc Perkabell Ld Bass Lead Sc Fuji Stabs
+Br DX-SynBr 2 Pc Spoon Ld Comp Lead Sc TouchyEdgy
+Br DX-SynBr 3 Pc DX-StelCan Ld EadgbeLead Sc Metal Box
+Br DX-SynBr 4 Pc Steel Can Ld Flap Synth Sc MilkyWays
+Br DX-SynBr 5 Pc DX-StelDr1 Ld FretlessLd Sc New Elms
+Br DX-SynBr 6 Pc DX-StelDr2 Ld Giovanni Sc Pipebells
+Br DX-SynBr 7 Pc SteelDrum1 Ld HarmoSynth Sc Synsitar
+Br FilterHorn Pc SteelDrum2 Ld Lead Line Sc OctiLate
+Br SharpBrass Pc Steel Band Ld Lead Phone Sc NoBoKuto
+Br Synthorns Pc Jamaica Ld Lyle Lead Sc Syn Bright
+Br CS80-Brs 1 Pc Tambarin Ld PekingLead Sc Ting Voice
+Br CS80-Brs 2 Pc Triangle 1 Ld Puff Pipe Sc Bottlead
+Br Ana Poly Pc Triangle 2 Ld Reed Lead Sc WhapSynth
+Br AnaFatBrs Pc BellGliss1 Ld SingleLine Se DX-Flght
+Br AnalogBrs Pc BellGliss2 Ld Super DX Se Take Off
+Br Faze Brass Pc Twincle Ld Sweep Lead Se DX-Helicpt
+Br Brassy Pc MetalBottl Ld Vibratoron Se Helicopter
+Br Court Pc NipponDrm1 Ld DX-Vocoder Se DX-Ship
+Br DX-FatBrs Pc NipponDrm2 Ld Winwood Se DX-Train
+Pre H Pre I Pre J Pre K
+Ca Voice Name Ca Voice Name Ca Voice Name Ca Voice Name
+Datalist/E  10/21/98  8:32 PM  Page 7
+
+===== PAGE 8 =====
+8
+65 Br ObiehornL Sc Fast&Cheap Pf Digitine Cp PercOrgn17 Ba DX-WoodBa1 St DX-Str 12
+66 Br ObiehornR Sc Fmt-Pluck Pf Woody EP Cp XtraPerc Ba DX-WoodBa2 St DX-Str 13
+67 Br Quackz Sc FunKey Pf Metaltine Cp Road Organ Ba DX-WoodBa3 St Quick Arco
+68 Br Stab Sc Funky Tech Pf Tinesquawk Cp Fluteorgan Ba DX-WoodBa4 St MidString1
+69 Br Swell Sc Fusion Pf FullTine 1 Cp ClickNoise Ba DX-WoodBa5 St MidString2
+70 Pi Kuchibue Sc Metallic Pf FullTine 2 Cp Novalis Ba DX-WoodBa6 St LowString1
+71 Ld Dual Saws2 Sc NoiseDecay Pf Wurli EP Cp TouchOrgan Ba DX-WoodBa7 St LowString2
+72 Ld DualSquare Sc Raymond Pf Wurli Road Cp RockOrgan1 Ba DarkWodBa1 St MM-String
+73 Ld Earth Lead Sc SawSaw Pf Dark Wurli Cp RockOrgan2 Ba DarkWodBa2 St DX-AnaSt 1
+74 Ld Fetish Sc Snow Decay Pf Big Wurlt Cp RockOrgan3 Ba BoogieBass St DX-AnaSt 2
+75 Ld Glass Harp Sc Snow Pixy Pf Andrian Cp RockOrgan4 Ba BassLegend St DX-AnaSt 3
+76 Ld Glider Sc Spellbound Pf Blustig Cp RockOrgan5 Ba DX-FngrBa1 St DX-SynSt 1
+77 Ld Lead Saw Sc Syncorgano Pf Woodmetal Cp RockOrgan6 Ba DX-FngrBa2 St DX-SynSt 2
+78 Ld Mitosis Sc Thin Mini Pf CastePiano Cp RockOrgan7 Ba DX-FngrBa3 St DX-SynSt 3
+79 Ld Retronic Sc VeloSweep Pf Chorus EP Cp RockOrgan8 Ba DX-FngrBa4 St DX-SynSt 4
+80 Ld Score Pad Sc Vox Tron Pf BigJazzyEP Cp RockOrgan9 Ba Fusit Bass St DX-SynSt 5
+81 Ld Tech Lead Sc Zansyo Pf ClearElPno Cp RockOrgn10 Ba FingerPick St DX-SynSt 6
+82 Ld Trance Csm Sc Zapper Pf NiteclubEP Cp RockOrgn11 Ba HardFinger St DX-SynSt 7
+83 Ld Voc Lead Vo Celebratn Pf CosaRosa Cp RockOrgn12 Ba Harm Bass St WarmStr 1
+84 Pd Add Pad Vo Eh Human Pf DX-Ragtime Cp RockOrgn13 Ba Inorganic St WarmStr 2
+85 Pd Beauty Vo FairyVoice Pf Digi Poly Cp RockOrgn14 Ba Nasty Bass St WarmStr 3
+86 Pd Brassetra Vo FormSweep Pf Duke EP Cp RockOrgn15 Ba SkweekBass St WarmStr 4
+87 Pd CineSweep Vo FS-Choir Pf DynoRoad Cp Vox Organ Ba DX-PickBa1 St Afternoon
+88 Pd Fat Pad Vo FS-Sweep Pf Clavarpsi Cp SynOrgan 1 Ba DX-PickBa2 St Agitate
+89 Pd FormantPad Vo Homy Pf Wack EP Cp SynOrgan 2 Ba DX-PickBa3 St AnnaString
+90 Pd FormSweep1 Vo Human Pf HollowKeys Cp PlasticOrg Ba DX-PickBa4 St Bright Str
+91 Pd FormSweep2 Vo Ih Human Pf HonkyTonk1 Cp PipeOrgan1 Ba Bass Magic St General
+92 Pd FormSweep3 Vo Man_Eh Pf HonkyTonk2 Cp PipeOrgan2 Ba Chiff Bass St GentleMind
+93 Pd FormSweep4 Vo NoisyVce Pf PotlidKeyz Cp PipeOrgan3 Ba Comped EB St Gypsy
+94 Pd FS Moby II Vo Oh Human Pf Knock EP Cp PipeOrgan4 Ba Metal Bass St MaxiString
+95 Pd Heimdal Vo Shaman Woo Pf Knock Wack Cp PipeOrgan5 Ba Owl Bass St Michelle
+96 Pd LFO Pad Vo Spacy Aaah Pf Mark III Cp PipeOrgan6 Ba Pick Pluck St MoterDrive
+97 Pd Moving Vo Spacy FX Pf XtremeTine Cp PipeOrgan7 Ba Plektrumbs St ReverbStrg
+98 Pd Nebulous Vo SpacySweep Pf Mod ElPno Cp PipeOrgan8 Ba Wired Bass St StrMachine
+99 Pd OBx Pad Vo SweepyVce Pf 3D Road Cp TheatreOrg Ba FretlesBa1 St Silk Hall
+100 Pd OBx Pad2 Vo VocoSweep Pf PinchedEP Cp SmallPipes Ba FretlesBa2 St Small Sect
+101 Pd Octavian Vo VocPhaseB Pf No Tines Cp ChorusPipe Ba FretlesBa3 St Soft Bow
+102 Pd Paddy Sq AN Arp 1 Pf Old Jazz Cp Wedding Ba FretlesBa4 St Soline
+103 Pd Qwerty Sq AN Arp 2 Pf Politti Cp DX-Chrch 1 Ba FretlesBa5 St Violtron
+104 Pd Saws&Hold Sq Compu Saw Pf Pop Piano Cp DX-Chrch 2 Ba SlapString St DX-PizzSt
+105 Pd Saws2 Sq DigiSQ1 Pf Prc ElPno Cp BrightOrgn Ba Lite Slap St PizzString
+106 Pd SleepyPad Sq DigiSQ2 Pf Prds Piano Cp TamePipe Ba RoundWound St DX-Harp 1
+107 Pd Spacy Pad Sq Drw-EuroDr Pf Ratio Dob Cp PuffOrgan1 Ba ImpactBass St DX-Harp 2
+108 Pd Starship Sq Hard Pulse Pf ThinnerEP Cp PuffOrgan2 Ba Afresh St DX-Harp 3
+109 Pd SuperPad Sq Harry Pf Rezzo EP Cp Late Down Ba WireString St Baroquen
+110 Pd SweepersVx Sq New Key Pf RubbaRoad Cp SoftReedOr Ba Clakwire St Dbl Harp 1
+111 Pd Tech Lead2 Sq Power Key Pf SawBellEP Cp SteamOrgan Ba SuperBass1 St Dbl Harp 2
+112 Pd The Seeker Sq RythmLoop2 Pf QuikPlayEP Cp StreetOrgn Ba SuperBass2 St Apollon
+113 Pd The Shadow Sq Saw Pad Pf Loud Piano Cp DX-Acrd 1 Ba DigiBass 1 St CembaHarp
+114 Pd Thermal Sq TekBass Pf Urban Cp DX-Acrd 2 Ba DigiBass 2 St ElectrHarp
+115 Pd VocPhaseA -- FseqBase01 Pf Vics EP Cp DX-Acrd 3 Ba Digit Bass St HarpStrum
+116 Pd Win Pad -- FseqBase02 Pf DX Classic Cp DX-Acrd 4 Ba Draft Bass St Lute Harp
+117 Pd Wind -- FseqBase03 Pf ToyPiano 1 Cp DX-Acrd 5 Ba Brainacus St Metal Harp
+118 Fx Caravan -- FseqBase04 Pf ToyPiano 2 Cp DX-Acrd 6 Ba DX-SynBa 1 St Orch Harp
+119 Fx DippeDut -- FseqBase05 Pf ToyPiano 3 Cp DX-TngAc Ba DX-SynBa 2 St Syn Harp
+120 Fx Furry Bell -- FseqBase06 Pf ToyPiano 4 Cp DX-Hmnc 1 Ba DX-SynBa 3 St DX-Timpani
+121 Fx Glacial -- FseqBase07 Pf Plasticky Cp DX-Hmnc 2 Ba DX-SynBa 4 St Timpanic!
+122 Fx Miracle -- FseqBase08 Pf Harpsi 1 Cp DX-Hmnc 3 Ba DX-SynBa 5 St Iron Timpa
+123 Fx MizuGuitar -- FseqBase09 Pf Harpsi 2 Cp DX-Hmnc 4 Ba DX-SynBa 6 En Ensemble
+124 Fx Morph -- FseqBase10 Pf Harpsi 3 Cp Chromonica Ba DX-SynBa 7 En HallOrch 1
+125 Fx Nightmare -- FseqBase11 Pf Harpsi 4 Cp FM-Hmnc 1 Ba DX-SynBa 8 En HallOrch 2
+126 Fx RhythmLoop -- FseqBase12 Pf Harpsi 5 Cp FM-Hmnc 2 Ba DX-SynBa 9 En Orch Brass
+127 Pd Sho -- FseqBase13 Pf Harpsi 6 Cp Bluesharp Ba AnalogBass Br DX-Trpt 1
+128 Fx Spiral -- FseqBase14 Pf Harpsi 7 Cp
+DX-Vibe 1
+DX-Vibe 2
+DX-Vibe 3
+DX-Vibe 4
+MM-Vibe 1
+MM-Vibe 2
+LFO Vibe
+Vocal Vibe
+Vibetron
+VibraPhone
+DX-Marimb1
+DX-Marimb2
+DX-Marimb3
+DX-Marimb4
+DX-Marimb5
+DX-Marimb6
+DX-Marimb7
+TineMallet
+Thumbpick
+EchoMalet1
+EchoMalet2
+EchoMalet3
+Congorimba
+Bamburimba
+BrightMrmb
+Guitarimba
+MellowMrmb
+Metal Mrmb
+DX-Xylo 1
+DX-Xylo 2
+DX-Xylo 3
+DX-Xylo 4
+DX-Xylo 5
+DX-Xylo 6
+Dual Xylo
+Xylo Log
+Syn Xylo
+Digi Xylo
+DX-Bell 1
+DX-Bell 2
+DX-Bell 3
+DX-Bell 4
+DX-Bell 5
+DX-Bell 6
+DX-Bell 7
+DX-Bell 8
+DX-Bell 9
+DX-Bell 10
+DX-Bell 11
+DX-Bell 12
+SparklBell
+Wire Bell
+DualSparkl
+BellGlassy
+MM-Bell
+Crystal 1
+Crystal 2
+SoftBell 1
+SoftBell 2
+Bell Pluck
+Blow Bell
+Carillon
+BellKeyzis
+Digi Log
+Or
+Or
+Or
+Or
+Or
+Or
+Or
+Or
+Or
+Or
+Or
+Or
+Or
+Or
+Or
+Or
+Or
+Or
+Or
+Or
+Or
+Or
+Or
+Or
+Or
+Or
+Or
+Or
+Or
+Or
+Or
+Or
+Or
+Or
+Or
+Or
+Or
+Or
+Or
+Or
+Or
+Or
+Or
+Or
+Or
+Or
+Or
+Or
+Or
+Or
+Or
+Or
+Or
+Or
+Or
+Or
+Or
+Or
+Or
+Or
+Or
+Or
+Or
+Or Buzzharp Ba Nharmonik Br DX-Trpt 2
+Bank Pre A Pre B Pre C Pre D Pre E Pre F Pre G
+PGM# Ca Voice Name Ca Voice Name Ca Voice Name Ca Voice Name Ca Voice Name Ca Voice Name Ca Voice Name
+Program 65 ~ 128
+Datalist/E  10/21/98  8:32 PM  Page 8
+
+===== PAGE 9 =====
+9
+Br RezAttack Pc Janpany Pd DrkSweeper Se Mobile
+Br FunkyRhytm Pc Nou Pd AnaBrsPad Se Motors
+Br Chiffhorns Pc Sumoh Drum Pd 8bitStrPad Se MotorCycle
+Br Juice Pc HandBell 1 Pd DX-ChoPad1 Se U Boat
+Br Kingdom Pc HandBell 2 Pd DX-ChoPad2 Se Ambulance
+Br PowerDrive Pc JingleBell Pd Bow Pad 1 Se Whiz By
+Br Rahool Brs Pc Light Year Pd Bow Pad 2 Se Out-Da-Way
+Br SyntiBrs Pc SlightBell Pd Bow Pad 3 Se Patrol Car
+Br UltraDrive Pc TracerBell Pd Glassharp Se Sirens
+Br Warm Brass Pc MM-SynDr 1 Pd Wineglass Se DX-TelBusy
+Rd SopranoSax Pc MM-SynDr 2 Pd Ice Galaxy Se DX-TelCall
+Rd DX-ASax 1 Pc Click Kick Pd Ice Heaven Se DX-TelTone
+Rd DX-ASax 2 Pc Hexagon Pd Hit Pad 1 Se DX-TlRing1
+Rd Alto Sax Pc Whapit Pd Hit Pad 2 Se DX-TlRing2
+Rd DX-Tsax Pc Hi-Hat Pd SynBrsPad1 Se Bugs&Birds
+Rd TenorSax Pc Deep Snare Pd SynBrsPad2 Se DX-Insect1
+Rd Tenorsaxes Pc DX-MtlSnr Pd SynBrsPad3 Se DX-Insect2
+Rd Oboe 1 Pc Snapie Pd SynBrsPad4 Se DX-Piyo
+Rd Oboe 2 Pc Snare Pd SynBrsPad5 Se DX-Growl 1
+Rd Oboe 3 Pc Soft Head Pd SynBrsPad6 Se DX-Growl 2
+Rd Eng.Horn Pc StreetSD Pd SynBrsPad7 Se Animals
+Rd Bassoon Pc Tom Herz Pd Vector Pad Se DX-Wolf
+Rd DX-Clari 1 Pc DX-RevCym1 Pd Pada Perka Se ManEater
+Rd DX-Clari 2 Pc DX-RevCym2 Pd DX-MetalPd Se Alarm !
+Rd Clari Solo Vo DX-Chorus1 Pd DX-SawPad Se Aura
+Rd Slow Clari Vo DX-Chorus2 Pd Anna Pad Se Chi-S&H
+Rd VibratoCla Vo DX-Chorus3 Pd Baroque Se Closing
+Pi Piccolo 1 Vo DX-Chorus4 Pd BrassyWarm Se Computer
+Pi Piccolo 2 Vo DX-Chorus5 Pd Bright Pad Se Crasher
+Pi DX-Flute 1 Vo DX-Chorus6 Pd Clavi Pad Se DX-BigBen
+Pi DX-Flute 2 Vo DX-Chorus7 Pd Digi Pad Se DX-Wave
+Pi DX-Flute 3 Vo DX-Chorus8 Pd Dispo Pad Se Descent
+Pi DX-Flute 4 Vo DX-Chorus9 Pd Ethereal Se Doppler
+Pi DX-Flute 5 Vo DX-Voice 1 Pd Film Pad Se Factory
+Pi DX-Flute 6 Vo DX-Voice 2 Pd Fl.Cloud Se GhostLine
+Pi DX-Flute 7 Vo MM-Voice 1 Pd Floating Se Heart Beat
+Pi Air Blower Vo MM-Voice 2 Pd Forest99 Se Imaging
+Pi MetalFlute Vo MM-Voice 3 Pd Gior Pad Se IronEcho 1
+Pi Song Flute Vo MM-Voice 4 Pd GreenPeace Se IronEcho 2
+Pi Recorder 1 Vo DbVoxFem Pd Grunge Pad Se MM-Fall
+Pi Recorder 2 Vo Fem Voice Pd Hyper Sqr Se MachineGun
+Pi Recorder 3 Vo Lady Vox Pd MM-Pretty Se MobbyDick
+Pi DX-PnFlute Vo Space Vox Pd MonsterPad Se On the Run
+Pi Harvest Vo Syn Vox Pd Orwell Se OuterLimit
+Pi Fuhppps! Co Bell+Pno 1 Pd PhaseSweep Se Perc Shot
+Pi DX-Bottle Co Bell+Pno 2 Pd Phasers Se Repeater
+Pi Quena Co Bell+Vibe1 Pd Glass Pad Se Jet Cars 1
+Pi Whistle 1 Co Bell+Str Pd Sanctus Se Scorchers
+Pi Whistle 2 Co Bell+Vibe2 Pd StacHeaven Se Sci-Fi Too
+Pi Whistle 3 Co Cho+Marimb Pd Sweep Pad Se Jet Cars 2
+Pi Sukiyaki Co Clavi+Bass Pd Water Log Se Speak-One
+Pi SambaWhstl Co DX-Ba+Lead Pd Spec-trail Se Stopper
+Pi Cosmowhist Co DX-HpSt Pd Whaser Pad Se Super Foot
+Pi DX-Ocrn 1 Co EP+Brass 1 Pd Whisper Se Talking DX
+Pi DX-Ocrn 2 Co EP+Brass 2 Pd WhistlePad Se Transport
+Pi DX-Ocrn 3 Co EP+Chime Fx DX-ScFi 1 Se Turn Table
+Et DX-Sitar 1 Co EP+Clavi Fx DX-ScFi 2 Se UfoTakeOff
+Et DX-Sitar 2 Co Elec Combi Fx DX-ScFi 3 Se Waterfall
+Et Ethre Four Co Glock+Brs Fx Image 1 Se Whik Shot
+Et India Co Glock+Pno Fx Image 2 Se Bubblets
+Et Juice Harp Co Harp+Flute Fx Laser 1 Se Yes Talk
+Et Syntholin Co Koto+Flute Fx Laser 2 Se Help me !
+Et Pilgrim Co MalletHorn Fx Laser 3 Se Paranoir
+Et Tenjiku Co Mrmb+Gtr Fx Ri-zer Se Screamy
+Pre H Pre I Pre J Pre K
+Ca Voice Name Ca Voice Name Ca Voice Name Ca Voice Name
+Datalist/E  10/21/98  8:32 PM  Page 9
+
+===== PAGE 10 =====
+10
+1 ShoobyDo 31 1BarBeat 61 ChowaUu
+2 2BarBeat 32 1BrBeat2 62 Everybd2
+3 D&B 33 Undo 63 Dodidowa
+4 D&B Fill 34 RndArp4 64 Check123
+5 4BarBeat 35 VoclRtm2 65 BranNewY
+6 YouCanG 36 Reiyowha 66 BoomBoom
+7 EBSayHey 37 RndArp5 67 Hi=Woo
+8 RtmSynth 38 VocalArp 68 FreeForm
+9 VocalRtm 39 CanYouGi 69 FreqPad
+10 WooWaPa 40 Pu-Yo 70 YouKnow
+11 UooLha 41 Yaof 71 OldTech
+12 FemRtm 42 MyaOh 72 B/M
+13 ByonRole 43 ChuckRtm 73 MiniJngl
+14 WowYeah 44 ILoveYou 74 EveryB-S
+15 ListenVo 45 Jan-On 75 IYaan
+16 YAMAHAFS 46 Welcome 76 Yeah
+17 Laugh 47 One-Two 77 ThankYou
+18 Laugh2 48 Edokko 78 Yes=No
+19 AreYouR 49 Everybdy 79 UnWaEDon
+20 Oiyai 50 Uwau 80 MouthPop
+21 Oiaiuo 51 YEEAAH 81 Fire
+22 UuWaUu 52 4-3-2-1 82 TBLine
+23 Wao 53 Test123 83 China
+24 RndArp1 54 CheckSnd 84 Aeiou
+25 FiltrArp 55 ShavaDo 85 YaYeYiYo
+26 RndArp2 56 R-M-H-R 86 C7Seq
+27 TechArp 57 HiSchool 87 SoundLib
+28 RndArp3 58 M.Blastr 88 IYaan2
+29 Voco-Seq 59 L&G MayI 89 Relax
+30 PopTech 60 Hellow 90 PSYAMAHA
+No. Fseq Name No. Fseq Name No. Fseq Name
+Preset Fseq List
+Liste der vorprogrammierten Formant Sequenzen
+Liste des séquences de formant programmées “FSeqs”
+Datalist/E  10/21/98  8:32 PM  Page 10
+
+===== PAGE 11 =====
+11
+Control Parameter (Destination) Explanation Notes
+off No control even if the source controller is operated.
+(Insertion Parameter 1) The source controller controls insertion effect parameters. 
+The parameters available depend on the selected insertion effect type. 
+See the effect parameter list (page 13) for details. 
+Nothing is controlled if (InsEF) appears on the display.
+Controller operation directly controls
+the tone generator without affecting
+the edit buffer. 
+(i.e. the "E" edit mark will not appear)
+(Insertion Parameter 2)
+(Insertion Parameter 3)
+(Insertion Parameter 4)
+(Insertion Parameter 5)
+(Insertion Parameter 6)
+(Insertion Parameter 7)
+(Insertion Parameter 8)
+(Insertion Parameter 9)
+(Insertion Parameter10)
+(Insertion Parameter11)
+(Insertion Parameter12)
+(Insertion Parameter13)
+(Insertion Parameter14)
+Send Insertion to Reverb The source controller controls the Send Insertion To Reverb value.
+Send Insertion to Variation The source controller controls the Send Insertion to Variation value.
+Volume The source controller controls the PLAY-Volume(Part) value. Controller operation controls the part 
+parameters and therefore overwrites 
+the edit buffer. 
+(i.e. the "E" edit mark will appear)
+Panpot The source controller controls the PLAY-Pan(Part) value.
+Reverb Send The source controller controls the PLAY-RevSend(Part) value.
+Variation Send The source controller controls the PLAY-VarSend(Part) value.
+Filter Cutoff The source controller controls the EDIT[PERFORM]-PART-Tone-Filter Freq value.
+Filter Resonance The source controller controls the EDIT[PERFORM]-PART-Tone-Filter Reso value.
+Filter EG Depth The source controller controls the EDIT[PERFORM]-PART-Tone-Flt EGDepth value.
+Attack Time The source controller controls the EDIT[PERFORM]-PART-EG-Attack Time value.
+Decay Time The source controller controls the EDIT[PERFORM]-PART-EG-Decay Time value.
+Release Time The source controller controls the EDIT[PERFORM]-PART-EG-Release Time value.
+PEG Initial Level The source controller controls the EDIT[PERFORM]-PART-EG-PEG InitLvl value.
+PEG Attack Time The source controller controls the EDIT[PERFORM]-PART-EG-PEGAtakTime value.
+PEG Release Level The source controller controls the EDIT[PERFORM]-PART-EG-PEG ReleLvl value.
+PEG Release Time The source controller controls the EDIT[PERFORM]-PART-EG-PEGReleTime value.
+V/N Balance The source controller controls the EDIT[PERFORM]-PART-Tone-V/N Balance value.
+Formant The source controller controls the EDIT[PERFORM]-PART-Tone-Formant value.
+FM The source controller controls the EDIT[PERFORM]-PART-Tone-FM value.
+Pitch Bias The source controller has the same effect as pitch bend. For example, if Vcn depth is set to 
++2 then the maximum control value is + two semitones.  If Vcn depth is set to +12 the maximum
+controllable pitch rise is one octave.
+Controller operation directly controls  
+the tone generator without affecting 
+the edit buffer.
+(i.e. the “E” edit mark will not appear)Amplitude EG Bias The source controller controls Amplitude EG Bias. Sensitivity is set by the 
+EDIT[VOICE]-OPERATOR-Sns-Amp EG Bias parameter.
+Frequency Bias The source controller controls the operator center frequency. 
+Sensitivity is set by the EDIT[VOICE]-OPERATOR-Sns-Freq Bias parameter.
+Voiced Band Width The source controller controls voiced operator bandwidth. 
+Sensitivity is set by the EDIT[VOICE]-OPERATOR-Sns-Width Bias (voiced) parameter.
+Unvoiced Band Width The source controller controls unvoiced operator bandwidth. 
+Sensitivity is set by the EDIT[VOICE]-OPERATOR-Sns-Width Bias (unvoiced) parameter.
+LFO1 pitch mod The source controller applies LFO1 pitch modulation. 
+The controller value is added to the sum of the EDIT[PERFORM]-PART-LFO1 Pmod and 
+EDIT[VOICE]-COMMON-LFO1-PitchMod Dpt values.
+LFO1 amp mod The source controller applies LFO1 amplitude modulation to the voice. 
+The controller value is added to the EDIT[VOICE]-COMMON-LFO1-AmpMod Dpt value.
+LFO1 frequency mod The source controller applies LFO1 frequency modulation to the operator center frequency. 
+The controller value is added to the EDIT[VOICE]-COMMON-LFO1-FreqModDepth value.
+LFO1 filter mod The source controller applies LFO1 cutoff frequency modulation to the voice. 
+The controller value is added to the EDIT[VOICE]-COMMON-LFO1-FilterModDpt value.
+LFO1 Speed The source controller controls LFO1 speed. 
+The controller value is added to the sum of the EDIT[PERFORM]-PART-Tone-LFO1Speed and 
+EDIT[VOICE]-COMMON-LFO1-Speed values.
+LFO2 filter mod The source controller applies LFO2 cutoff frequency modulation to the voice. 
+The controller value is added to the sum of the EDIT[PERFORM]-PART-Tone-LFO2 FltMod and 
+EDIT[VOICE]-COMMON-LFO2-FilterModDpt values.
+LFO2 Speed The source controller controls LFO2 speed. 
+The controller value is added to the sum of the EDIT[PERFORM]-PART-Tone-LFO2 Speed and 
+EDIT[VOICE]-COMMON-LFO2-Speed values.
+Fseq Speed The source controller controls Fseq playback speed. 
+The controller value is added to the EDIT[PERFORM]-COMMON-FSeq-Speed value.
+Formant scratch The source controller directly controls Fseq playback. 
+Effective when the EDIT[PERFORM]-COMMON-FSeq-Mode parameter is set to “scratch”.
+Control List
+Liste der Steuerbefehle
+Liste des contrôleurs
+Datalist/E  10/21/98  8:32 PM  Page 11
+
+===== PAGE 12 =====
+12
+Effect Type List
+Liste mit Effekt-Typen
+Liste des type d'effets
+Reverb
+Effect Type Remarks
+No Effect Turn off the effect.
+Hall1 Reverb simulating the acoustics of a hall.
+Hall2
+Room1 Reverb simulating the acoustics of a room.
+Room2
+Room3
+Stage1 Reverb appropriate for a solo instrument.
+Stage2
+Plate Reverb simulating a metal plate reverb device.
+White Room Unique short reverb with a slight initial delay.
+Tunnel Simulation of a cylindrical space extending to left and right.
+Basement Reverb with distinctive resonance following a slight initial delay.
+Canyon A hypothetical acoustic space which extends without limit.
+Delay LCR Three delay sounds L, R and C (center).
+Delay L, R Two delay sounds L and R, with two feedback delays.
+Echo Two delays L and R, with independent feedback delay for L and R.
+CrossDelay This effect crosses the feedback of two delays.
+Variation
+Effect Type Remarks
+No Effect Turns off the effect.
+Chorus A standard chorus effect, adding natural spaciousness to the sound.
+Celeste An effect which uses a 3-phase LFO to add modulation and 
+spaciousness to the sound.
+Flanger An effect reminiscent of a jet airplane taking off and landing.
+Symphonic A multi-stage version of CELESTE modulation.
+Phaser1 Cyclically changes the phase to modulate the sound.
+Phaser2
+Ens Detune Chorus effect without modulation, created by adding a slightly 
+pitch-shifted sound.
+Rotary SP Simulation of a rotary speaker.
+Tremolo An effect which cyclically modulates the volume.
+Auto Pan An effect which cyclically moves the sound between left/right and 
+front/back.
+Auto Wah Cyclically changes the center frequency of a wah filter.
+Touch Wah Changes the center frequency of a wah filter according to the input level.
+3-Band EQ EQ with equalization of LOW, MID and HIGH.
+HM Enhncer This effect adds new overtones to the input signal to make the 
+sound stand out.
+Noise Gate Gates the input when the input signal falls below a specified level. 
+Compressor Holds down the output when the input exceeds a specified level. 
+Can also be used to add a sense of attack to the sound.
+Distortion Adds distortion with an edge to the sound. 
+Overdrive Adds mild distortion to the sound.
+Amp Sim Simulation of a guitar amp. 
+Delay LCR Three delay sounds L, R and C (center).
+Delay L, R Two delay sounds L and R, with two feedback delays.
+Echo Two delays L and R, with independent feedback delay for L and R.
+CrossDelay This effect crosses the feedback of two delays.
+Karaoke Echo for karaoke.
+Hall Reverb simulating the acoustics of a hall.
+Room Reverb simulating the acoustics of a room.
+Stage Reverb appropriate for a solo instrument.
+Plate Reverb simulating a metal plate reverb device.
+Insertion
+Effect Type Remarks
+Thru Bypass without applying an effect.
+Chorus Conventional chorus effect which gives natural spaciousness to 
+the sound.
+Celeste A three-phase LFO is used to give modulation and spaciousness 
+to the sound.
+Flanger An effect reminiscent of a jet airplane taking off and landing.
+Symphonic A multi-stage version of CELESTE modulation.
+Phaser1 Cyclically changes the phase to modulate the sound.
+Phaser2
+Pitch Chng This effect changes the pitch of the input signal.
+Ens Detune Chorus effect without modulation, created by adding a slightly 
+pitch-shifted sound.
+Rotary SP Simulation of a rotary speaker.
+2WayRotary
+Tremolo An effect which cyclically modulates the volume.
+Auto Pan An effect which cyclically moves the sound between left/right and 
+front/back.
+Ambience An effect which adds spatial breadth by blurring the location of 
+the sound.
+A-Wah+Dist Applies DISTORTION to the output of AUTO WAH to distort the sound.
+A-Wah+Odrv Applies OVERDRIVE to the output of AUTO WAH to distort the sound.
+T-Wah+Dist Applies OVERDRIVE to the output of TOUCH WAH to distort the 
+sound.
+T-Wah+Odrv Changes the center frequency of a wah filter according to the input 
+level.
+Wah+DS+Dly TOUCH WAH, DISTORTION and DELAY are connected in series.
+Wah+OD+Dly TOUCH WAH, OVERDRIVE and DELAY are connected in series.
+Lo-Fi Degrades the audio quality of the input signal.
+3-Band EQ EQ with equalization of LOW, MID and HIGH.
+HM Enhncer This effect adds new overtones to the input signal to make the 
+sound stand out.
+Noise Gate Gates the input when the input signal falls below a specified level.
+Compressor Holds down the output when the input exceeds a specified level. 
+Can also be used to add a sense of attack to the sound.
+Comp+Dist Since a compressor is included in the first stage, distortion can be 
+applied evenly, regardless of the input level.
+Cmp+DS+Dly COMPRESSOR, DISTORTION and DELAY are connected in series.
+Cmp+OD+Dly COMPRESSOR, OVERDRIVE and DELAY are connected in series.
+Distortion Adds distortion with an edge to the sound.
+Dist+Delay DISTORTION and DELAY are connected in series.
+Overdrive Adds mild distortion to the sound.
+Odrv+Delay OVERDRIVE and DELAY are connected in series.
+Amp Sim Simulation of a guitar amp.
+Delay LCR Three delay sounds L, R and C (center).
+Delay L, R Two delay sounds L and R, with two feedback delays.
+Echo Two delays L and R, with independent feedback delay for L and R.
+CrossDelay This effect crosses the feedback of two delays.
+ER 1 This effect isolates only the early reflection components of the 
+reverb.ER 2
+Gate Rev Simulation of gated reverb.
+Revrs Gate Simulation of gated reverb played back in reverse.
+Datalist/E  10/21/98  8:32 PM  Page 12
+
+===== PAGE 13 =====
+13
+Effect Parameter List
+Liste mit Effekt-Parametern
+Liste des Paramètres d'effets
+Param# matches the adress of a Pafermance Effect Parameter (mm, ll ) found in MIDI data table <Table 1 >.
+REVERB
+No Effect
+Range(Default) Param# Description
+Reverb Pan L63~ C ~R63 129 Reverb Pan
+Rev Return 0~127 12A ReverbReturn Level
+Hall1
+Range(Default) Param# Description
+ReverbTime 0.3~30.0(2.0) 50 Reverb length (sec)
+Diffusion 0~10(10) 52 Spread of the reverb
+InitDelay 0.1~200.0(14.3) 54 Delay time until the early reflections (msec)
+HPF Cutoff thru,22~8.0k(315) 56 Frequency at which the high pass filter will cut the low range (Hz)
+LPFCutoff 1.0k~18.0k,thru(5.6k) 58 Frequency at which the low pass filter will cut the high range (Hz)
+Rev Delay 0.1~99.3(53.6) 62 Delay time from the early reflections until the reverberation (msec)
+Density 0~4(4) 63 Density of the reverberation
+ER/Rev E63>R~E=R~E<R63(E<R 5) 64 Level balance of the early reflections and the reverberation
+High Damp 0.1~1.0(1.0) 65 High range attenuation
+(lower values cause the high range to decay faster)
+FB Level -63~+63(+ 0) 66 Amount of feedback for the initial delay
+Reverb Pan L63~ C ~R63 129 Reverb Pan
+Rev Return 0~127 12A ReverbReturn Level
+Hall2 Same parameters for Hall1
+Range(Default) Param# Description
+ReverbTime 0.3~30.0(3.0) 50 Reverb length (sec)
+Diffusion 0~10(10) 52 Spread of the reverb
+InitDelay 0.1~200.0(44.2) 54 Delay time until the early reflections (msec)
+HPF Cutoff thru,22~8.0k(40) 56 Frequency at which the high pass filter will cut the low range (Hz)
+LPFCutoff 1.0k~18.0k,thru(4.0k) 58 Frequency at which the low pass filter will cut the high range (Hz)
+Rev Delay 0.1~99.3(44.2) 62 Delay time from the early reflections until the reverberation (msec)
+Density 0~4(3) 63 Density of the reverberation
+ER/Rev E63>R~E=R~E<R63(E<R36) 64 Level balance of the early reflections and the reverberation
+High Damp 0.1~1.0(1.0) 65 High range attenuation
+(lower values cause the high range to decay faster)
+FB Level -63~+63(+ 0) 66 Amount of feedback for the initial delay
+Reverb Pan L63~ C ~R63 129 Reverb Pan
+Rev Return 0~127 12A ReverbReturn Level
+Room1 Same parameters for Hall1
+Range(Default) Param# Description
+ReverbTime 0.3~30.0(1.4) 50 Reverb length (sec)
+Diffusion 0~10(8) 52 Spread of the reverb
+InitDelay 0.1~200.0(19.0) 54 Delay time until the early reflections (msec)
+HPF Cutoff thru,22~8.0k(355) 56 Frequency at which the high pass filter will cut the low range (Hz)
+LPFCutoff 1.0k~18.0k,thru(9.0k) 58 Frequency at which the low pass filter will cut the high range (Hz)
+Rev Delay 0.1~99.3(23.7) 62 Delay time from the early reflections until the reverberation (msec)
+Density 0~4(4) 63 Density of the reverberation
+ER/Rev E63>R~E=R~E<R63(E<R10) 64 Level balance of the early reflections and the reverberation
+High Damp 0.1~1.0(1.0) 65 High range attenuation
+(lower values cause the high range to decay faster)
+FB Level -63~+63(+ 0) 66 Amount of feedback for the initial delay
+Reverb Pan L63~ C ~R63 129 Reverb Pan
+Rev Return 0~127 12A ReverbReturn Level
+Room2 Same parameters for Hall1
+Range(Default) Param# Description
+ReverbTime 0.3~30.0(1.2) 50 Reverb length (sec)
+Diffusion 0~10(10) 52 Spread of the reverb
+InitDelay 0.1~200.0(12.7) 54 Delay time until the early reflections (msec)
+HPF Cutoff thru,22~8.0k(110) 56 Frequency at which the high pass filter will cut the low range (Hz)
+LPFCutoff 1.0k~18.0k,thru(thru) 58 Frequency at which the low pass filter will cut the high range (Hz)
+Rev Delay 0.1~99.3(17.4) 62 Delay time from the early reflections until the reverberation (msec)
+Density 0~4(4) 63 Density of the reverberation
+ER/Rev E63>R~E=R~E<R63(E18>R) 64 Level balance of the early reflections and the reverberation
+High Damp 0.1~1.0(0.7) 65 High range attenuation
+(lower values cause the high range to decay faster)
+FB Level -63~+63(+ 0) 66 Amount of feedback for the initial delay
+Reverb Pan L63~ C ~R63 129 Reverb Pan
+Rev Return 0~127 12A ReverbReturn Level
+Datalist/E  10/21/98  8:32 PM  Page 13
+
+===== PAGE 14 =====
+14
+Room3 Same parameters for Hall1
+Range(Default) Param# Description
+ReverbTime 0.3~30.0(0.9) 50 Reverb length (sec)
+Diffusion 0~10(10) 52 Spread of the reverb
+InitDelay 0.1~200.0(0.1) 54 Delay time until the early reflections (msec)
+HPF Cutoff thru,22~8.0k(110) 56 Frequency at which the high pass filter will cut the low range (Hz)
+LPFCutoff 1.0k~18.0k,thru(4.0k) 58 Frequency at which the low pass filter will cut the high range (Hz)
+Rev Delay 0.1~99.3(14.3) 62 Delay time from the early reflections until the reverberation (msec)
+Density 0~4(4) 63 Density of the reverberation
+ER/Rev E63>R~E=R~E<R63(E15>R) 64 Level balance of the early reflections and the reverberation
+High Damp 0.1~1.0(0.5) 65 High range attenuation
+(lower values cause the high range to decay faster)
+FB Level -63~+63(+ 0) 66 Amount of feedback for the initial delay
+Reverb Pan L63~ C ~R63 129 Reverb Pan
+Rev Return 0~127 12A ReverbReturn Level
+Stage1 Same parameters for Hall1
+Range(Default) Param# Description
+ReverbTime 0.3~30.0(1.5) 50 Reverb length (sec)
+Diffusion 0~10(10) 52 Spread of the reverb
+InitDelay 0.1~200.0(25.3) 54 Delay time until the early reflections (msec)
+HPF Cutoff thru,22~8.0k(45) 56 Frequency at which the high pass filter will cut the low range (Hz)
+LPFCutoff 1.0k~18.0k,thru(7.0k) 58 Frequency at which the low pass filter will cut the high range (Hz)
+Rev Delay 0.1~99.3(45.7) 62 Delay time from the early reflections until the reverberation (msec)
+Density 0~4(3) 63 Density of the reverberation
+ER/Rev E63>R~E=R~E<R63(E 3>R) 64 Level balance of the early reflections and the reverberation
+High Damp 0.1~1.0(0.5) 65 High range attenuation
+(lower values cause the high range to decay faster)
+FB Level -63~+63(+15) 66 Amount of feedback for the initial delay
+Reverb Pan L63~ C ~R63 129 Reverb Pan
+Rev Return 0~127 12A ReverbReturn Level
+Stage2 Same parameters for Hall1
+Range(Default) Param# Description
+ReverbTime 0.3~30.0(1.0) 50 Reverb length (sec)
+Diffusion 0~10(10) 52 Spread of the reverb
+InitDelay 0.1~200.0(0.1) 54 Delay time until the early reflections (msec)
+HPF Cutoff thru,22~8.0k(thru) 56 Frequency at which the high pass filter will cut the low range (Hz)
+LPFCutoff 1.0k~18.0k,thru(12.0k) 58 Frequency at which the low pass filter will cut the high range (Hz)
+Rev Delay 0.1~99.3(45.7) 62 Delay time from the early reflections until the reverberation (msec)
+Density 0~4(4) 63 Density of the reverberation
+ER/Rev E63>R~E=R~E<R63(E18>R) 64 Level balance of the early reflections and the reverberation
+High Damp 0.1~1.0(0.6) 65 High range attenuation
+(lower values cause the high range to decay faster)
+FB Level -63~+63(+9) 66 Amount of feedback for the initial delay
+Reverb Pan L63~ C ~R63 129 Reverb Pan
+Rev Return 0~127 12A ReverbReturn Level
+Plate Same parameters for Hall1
+Range(Default) Param# Description
+ReverbTime 0.3~30.0(1.8) 50 Reverb length (sec)
+Diffusion 0~10(5) 52 Spread of the reverb
+InitDelay 0.1~200.0(11.1) 54 Delay time until the early reflections (msec)
+HPF Cutoff thru,22~8.0k(40) 56 Frequency at which the high pass filter will cut the low range (Hz)
+LPFCutoff 1.0k~18.0k,thru(10.0k) 58 Frequency at which the low pass filter will cut the high range (Hz)
+Rev Delay 0.1~99.3(3.2) 62 Delay time from the early reflections until the reverberation (msec)
+Density 0~4(3) 63 Density of the reverberation
+ER/Rev E63>R~E=R~E<R63(E=R) 64 Level balance of the early reflections and the reverberation
+High Damp 0.1~1.0(0.7) 65 High range attenuation
+(lower values cause the high range to decay faster)
+FB Level -63~+63(+20) 66 Amount of feedback for the initial delay
+Reverb Pan L63~ C ~R63 129 Reverb Pan
+Rev Return 0~127 12A ReverbReturn Level
+Datalist/E  10/21/98  8:32 PM  Page 14
+
+===== PAGE 15 =====
+15
+White Room
+Range(Default) Param# Description
+ReverbTime 0.3~30.0(0.4) 50 Reverb length (sec)
+Diffusion 0~10(5) 52 Spread of the reverb
+InitDelay 0.1~200.0(0.1) 54 Delay time until the early reflections (msec)
+HPF Cutoff thru,22~8.0k(70) 56 Frequency at which the high pass filter will cut the low range (Hz)
+LPFCutoff 1.0k~18.0k,thru(1.6k) 58 Frequency at which the low pass filter will cut the high range (Hz)
+Width 0.5~10.2(4.6) 5A Width of the simulated room (m)
+Height 0.5~20.2(20.2) 5C Height of the simulated room (m)
+Depth 0.5~30.2(30.2) 5E Depth of the simulated room (m)
+Wall Vary 0~30(6) 60 Wall surface of the simulated room
+(higher values produce more random reflections)
+Rev Delay 0.1~99.3(12.7) 62 Delay time from the early reflections until the reverberation (msec)
+Density 0~4(4) 63 Density of the reverberation
+ER/Rev E63>R~E=R~E<R63(E=R) 64 Level balance of the early reflections and the reverberation
+High Damp 0.1~1.0(0.4) 65 High range attenuation
+(lower values cause the high range to decay faster)
+FB Level -63~+63(+ 5) 66 Amount of feedback for the initial delay
+Reverb Pan L63~ C ~R63 129 Reverb Pan
+Rev Return 0~127 12A ReverbReturn Level
+Tunnel Same parameters for White Room
+Range(Default) Param# Description
+ReverbTime 0.3~30.0(2.3) 50 Reverb length (sec)
+Diffusion 0~10(6) 52 Spread of the reverb
+InitDelay 0.1~200.0(15.8) 54 Delay time until the early reflections (msec)
+HPF Cutoff thru,22~8.0k(thru) 56 Frequency at which the high pass filter will cut the low range (Hz)
+LPFCutoff 1.0k~18.0k,thru(3.2k) 58 Frequency at which the low pass filter will cut the high range (Hz)
+Width 0.5~10.2(9.1) 5A Width of the simulated room (m)
+Height 0.5~20.2(14.2) 5C Height of the simulated room (m)
+Depth 0.5~30.2(19.4) 5E Depth of the simulated room (m)
+Wall Vary 0~30(16) 60 Wall surface of the simulated room
+(higher values produce more random reflections)
+Rev Delay 0.1~99.3(31.6) 62 Delay time from the early reflections until the reverberation (msec)
+Density 0~4(4) 63 Density of the reverberation
+ER/Rev E63>R~E=R~E<R63(E10>R) 64 Level balance of the early reflections and the reverberation
+High Damp 0.1~1.0(1.0) 65 High range attenuation
+(lower values cause the high range to decay faster)
+FB Level -63~+63(+43) 66 Amount of feedback for the initial delay
+Reverb Pan L63~ C ~R63 129 Reverb Pan
+Rev Return 0~127 12A ReverbReturn Level
+Basement Same parameters for White Room
+Range(Default) Param# Description
+ReverbTime 0.3~30.0(0.8) 50 Reverb length (sec)
+Diffusion 0~10(6) 52 Spread of the reverb
+InitDelay 0.1~200.0(4.8) 54 Delay time until the early reflections (msec)
+HPF Cutoff thru,22~8.0k(thru) 56 Frequency at which the high pass filter will cut the low range (Hz)
+LPFCutoff 1.0k~18.0k,thru(1.0k) 58 Frequency at which the low pass filter will cut the high range (Hz)
+Width 0.5~10.2(7.2) 5A Width of the simulated room (m)
+Height 0.5~20.2(0.5) 5C Height of the simulated room (m)
+Depth 0.5~30.2(10.2) 5E Depth of the simulated room (m)
+Wall Vary 0~30(15) 60 Wall surface of the simulated room
+(higher values produce more random reflections)
+Rev Delay 0.1~99.3(50.5) 62 Delay time from the early reflections until the reverberation (msec)
+Density 0~4(3) 63 Density of the reverberation
+ER/Rev E63>R~E=R~E<R63(E<R10) 64 Level balance of the early reflections and the reverberation
+High Damp 0.1~1.0(1.0) 65 High range attenuation
+(lower values cause the high range to decay faster)
+FB Level -63~+63(-28) 66 Amount of feedback for the initial delay
+Reverb Pan L63~ C ~R63 129 Reverb Pan
+Rev Return 0~127 12A ReverbReturn Level
+Canyon Same parameters for White Room
+Range(Default) Param# Description
+ReverbTime 0.3~30.0(12.0) 50 Reverb length (sec)
+Diffusion 0~10(6) 52 Spread of the reverb
+InitDelay 0.1~200.0(99.3) 54 Delay time until the early reflections (msec)
+HPF Cutoff thru,22~8.0k(thru) 56 Frequency at which the high pass filter will cut the low range (Hz)
+LPFCutoff 1.0k~18.0k,thru(3.6k) 58 Frequency at which the low pass filter will cut the high range (Hz)
+Width 0.5~10.2(9.4) 5A Width of the simulated room (m)
+Height 0.5~20.2(17.1) 5C Height of the simulated room (m)
+Depth 0.5~30.2(25.8) 5E Depth of the simulated room (m)
+Wall Vary 0~30(13) 60 Wall surface of the simulated room
+(higher values produce more random reflections)
+Rev Delay 0.1~99.3(17.4) 62 Delay time from the early reflections until the reverberation (msec)
+Density 0~4(4) 63 Density of the reverberation
+ER/Rev E63>R~E=R~E<R63(E<R 8) 64 Level balance of the early reflections and the reverberation
+High Damp 0.1~1.0(0.4) 65 High range attenuation
+(lower values cause the high range to decay faster)
+FB Level -63~+63(+36) 66 Amount of feedback for the initial delay
+Reverb Pan L63~ C ~R63 129 Reverb Pan
+Rev Return 0~127 12A ReverbReturn Level
+Datalist/E  10/21/98  8:32 PM  Page 15
+
+===== PAGE 16 =====
+16
+Delay LCR
+Range(Default) Param# Description
+LchDelay 0.1~1365.0(333.3) 50 Length of left channel delay (msec)
+RchDelay 0.1~1365.0(166.7) 52 Length of right channel delay (msec)
+CchDelay 0.1~1365.0(500.0) 54 Length of center channel delay (msec)
+FB Delay 0.1~1365.0(500.0) 56 Length of feedback delay (msec)
+FB Level -63~+63(+10) 58 Feedback amount
+Cch Level 0~127(100) 5A Volume of center channel
+High Damp 0.1~1.0(0.3) 5C High range attenuation
+(lower values cause the high range to decay faster)
+EQ LowFreq 32~2.0k(400) 64 Frequency at which the EQ will boost/cut the low range (Hz)
+EQ Low Gain -12~+12(+ 0) 65 Gain with which the EQ will boost/cut the low range (dB)
+EQ HiFreq 500~16.0k(4.0k) 66 Frequency at which the EQ will boost/cut the high range (Hz)
+EQ Hi Gain -12~+12(+ 0) 67 Gain with which the EQ will boost/cut the high range (dB)
+Reverb Pan L63~ C ~R63 129 Reverb Pan
+Rev Return 0~127 12A ReverbReturn Level
+Delay L,R
+Range(Default) Param# Description
+LchDelay 0.1~1365.0(250.0) 50 Length of left channel delay (msec)
+RchDelay 0.1~1365.0(375.0) 52 Length of right channel delay (msec)
+FBDelay1 0.1~1365.0(375.2) 54 Length of feedback delay 1 (msec)
+FBDelay2 0.1~1365.0(375.0) 56 Length of feedback delay 2 (msec)
+FB Level -63~+63(+23) 58 Amount of feedback
+High Damp 0.1~1.0(0.3) 5A High range attenuation
+(lower values cause the high range to decay faster)
+EQ LowFreq 32~2.0k(400) 64 Frequency at which the EQ will boost/cut the low range (Hz)
+EQ Low Gain -12~+12(+ 0) 65 Gain with which the EQ will boost/cut the low range (dB)
+EQ HiFreq 500~16.0k(4.0k) 66 Frequency at which the EQ will boost/cut the high range (Hz)
+EQ Hi Gain -12~+12(+ 0) 67 Gain with which the EQ will boost/cut the high range (dB)
+Reverb Pan L63~ C ~R63 129 Reverb Pan
+Rev Return 0~127 12A ReverbReturn Level
+Echo
+Range(Default) Param# Description
+LchDelay1 0.1~682.0(220.0) 50 Length of first delay of left channel (msec)
+Lch FB Lvl -63~+63(+22) 52 Amount of feedback for left channel
+RchDelay1 0.1~682.0(210.0) 54 Length of first delay of right channel (msec)
+Rch FB Lvl -63~+63(+21) 56 Amount of feedback for right channel
+High Damp 0.1~1.0(0.5) 58 High range attenuation
+(lower values cause the high range to decay faster)
+LchDelay2 0.1~682.0(230.0) 5A Length of second delay of left channel (msec)
+RchDelay2 0.1~682.0(235.0) 5C Length of second delay of right channel (msec)
+Delay2 Lvl 0~127(62) 5E Volume of second delay
+EQ LowFreq 32~2.0k(280) 64 Frequency at which the EQ will boost/cut the low range (Hz)
+EQ Low Gain -12~+12(-6) 65 Gain with which the EQ will boost/cut the low range (dB)
+EQ HiFreq 500~16.0k(6.3k) 66 Frequency at which the EQ will boost/cut the high range (Hz)
+EQ Hi Gain -12~+12(-1) 67 Gain with which the EQ will boost/cut the high range (dB)
+Reverb Pan L63~ C ~R63 129 Reverb Pan
+Rev Return 0~127 12A ReverbReturn Level
+CrossDelay
+Range(Default) Param# Description
+L>R Delay 0.1~682.0(365.0) 50 Delay time from left (input) to right (output)   (msec)
+R>L Delay 0.1~682.0(365.0) 52 Delay time from right (input) to left (output)   (msec)
+FB Level -63~+63(+24) 54 Amount of feedback
+InputSelect L,R,L&R(R) 56 Input select
+High Damp 0.1~1.0(0.5) 58 High range attenuation
+(lower values cause the high range to decay faster)
+EQ LowFreq 32~2.0k(355) 64 Frequency at which the EQ will boost/cut the low range (Hz)
+EQ Low Gain -12~+12(+ 0) 65 Gain with which the EQ will boost/cut the low range (dB)
+EQ HiFreq 500~16.0k(6.3k) 66 Frequency at which the EQ will boost/cut the high range (Hz)
+EQ Hi Gain -12~+12(- 2) 67 Gain with which the EQ will boost/cut the high range (dB)
+Reverb Pan L63~ C ~R63 129 Reverb Pan
+Rev Return 0~127 12A ReverbReturn Level
+Datalist/E  10/21/98  8:32 PM  Page 16
+
+===== PAGE 17 =====
+17
+VARIATION
+No Effect
+Range(Default) Param# Description
+Var Pan L63~ C ~R63 12C Variation Pan
+Var Return 0~127 12D Variation Return Level
+SendVar-Rev 0~127 12E Variation-to-Reverb Send Level
+Chorus
+Range(Default) Param# Description
+LFO Freq 0.000~43.21(0.229) 68 Delay modulation frequency (Hz)
+LFO Depth 0~127(46) 6A Delay modulation depth
+FB Level -63~+63(+28) 6C Level at which the delay output is returned to the input
+(negative values invert the phase)
+Delay Ofst 0.0~50.0(1.0) 6E Offset value for delay modulation (ms)
+EQ LowFreq 32~2.0k(200) 72 Frequency at which the EQ will boost/cut the low range (Hz)
+EQ Low Gain -12~+12(+ 0) 74 Gain with which the EQ will boost/cut the low range (dB)
+EQ HiFreq 500~16.0k(6.3k) 76 Frequency at which the EQ will boost/cut the high range (Hz)
+EQ Hi Gain -12~+12(+ 0) 78 Gain with which the EQ will boost/cut the high range (dB)
+Mode mono,stereo(stereo) 104 Mono/stereo selection for the input
+Var Pan L63~ C ~R63 12C Variation Pan
+Var Return 0~127 12D Variation Return Level
+SendVar-Rev 0~127 12E Variation-to-Reverb Send Level
+Celeste Same parameters for Chorus
+Range(Default) Param# Description
+LFO Freq 0.000~43.21(0.687) 68 Delay modulation frequency (Hz)
+LFO Depth 0~127(25) 6A Delay modulation depth
+FB Level -63~+63(+30) 6C Level at which the delay output is returned to the input
+(negative values invert the phase)
+Delay Ofst 0.0~50.0(12.2) 6E Offset value for delay modulation (ms)
+EQ LowFreq 32~2.0k(500) 72 Frequency at which the EQ will boost/cut the low range (Hz)
+EQ Low Gain -12~+12(+ 0) 74 Gain with which the EQ will boost/cut the low range (dB)
+EQ HiFreq 500~16.0k(4.0k) 76 Frequency at which the EQ will boost/cut the high range (Hz)
+EQ Hi Gain -12~+12(+ 0) 78 Gain with which the EQ will boost/cut the high range (dB)
+Mode mono,stereo(stereo) 104 Mono/stereo selection for the input
+Var Pan L63~ C ~R63 12C Variation Pan
+Var Return 0~127 12D Variation Return Level
+SendVar-Rev 0~127 12E Variation-to-Reverb Send Level
+Flanger
+Range(Default) Param# Description
+LFO Freq 0.000~43.21(0.504) 68 Frequency of delay modulation (Hz)
+LFO Depth 0~127(30) 6A Depth of delay modulation
+FB Level -63~+63(+40) 6C Level at which delay output is returned to the input
+Delay Ofst 0.0~50.0(0.2) 6E Offset value for delay modulation (ms)
+EQ LowFreq 32~2.0k(200) 72 Frequency at which the EQ will boost/cut the low range (Hz)
+EQ Low Gain -12~+12(+ 0) 74 Gain with which the EQ will boost/cut the low range (dB)
+EQ HiFreq 500~16.0k(6.3k) 76 Frequency at which the EQ will boost/cut the high range (Hz)
+EQ Hi Gain -12~+12(+ 0) 78 Gain with which the EQ will boost/cut the high range (dB)
+LFO Phase -180~+180(-180) 102 L/R phase difference of modulation waveform
+(no difference at 0 deg (=64))
+Var Pan L63~ C ~R63 12C Variation Pan
+Var Return 0~127 12D Variation Return Level
+SendVar-Rev 0~127 12E Variation-to-Reverb Send Level
+Symphonic
+Range(Default) Param# Description
+LFO Freq 0.000~43.21(0.458) 68 Frequency of delay modulation (Hz)
+LFO Depth 0~127(40) 6A Depth of delay modulation
+Delay Ofst 0.0~50.0(0.0) 6C Delay modulation offset value (ms)
+EQ LowFreq 32~2.0k(250) 72 Frequency at which the EQ will boost/cut the low range (Hz)
+EQ Low Gain -12~+12(+ 0) 74 Gain with which the EQ will boost/cut the low range (dB)
+EQ HiFreq 500~16.0k(6.3k) 76 Frequency at which the EQ will boost/cut the high range (Hz)
+EQ Hi Gain -12~+12(+ 0) 78 Gain with which the EQ will boost/cut the high range (dB)
+Var Pan L63~ C ~R63 12C Variation Pan
+Var Return 0~127 12D Variation Return Level
+SendVar-Rev 0~127 12E Variation-to-Reverb Send Level
+Datalist/E  10/21/98  8:32 PM  Page 17
+
+===== PAGE 18 =====
+18
+Phaser1
+Range(Default) Param# Description
+LFO Freq 0.000~43.21(0.916) 68 Frequency of phase modulation (Hz)
+LFO Depth 0~127(111) 6A Depth of phase modulation
+Phase Shift 0~127(76) 6C Phase shift offset value
+FB Level -63~+63(+51) 6E Level at which phaser output will be returned to the input
+(negative values invert the phase)
+Stage 4~10(6) 7C Number of phaser shifter stages
+Diffuse mono,stereo(stereo) 7E Diffusion
+EQ LowFreq 32~2.0k(280) 72 Frequency at which the EQ will boost/cut the low range (Hz)
+EQ Low Gain -12~+12(+ 0) 74 Gain with which the EQ will boost/cut the low range (dB)
+EQ HiFreq 500~16.0k(6.3k) 76 Frequency at which the EQ will boost/cut the high range (Hz)
+EQ Hi Gain -12~+12(+ 0) 78 Gain with which the EQ will boost/cut the high range (dB)
+Var Pan L63~ C ~R63 12C Variation Pan
+Var Return 0~127 12D Variation Return Level
+SendVar-Rev 0~127 12E Variation-to-Reverb Send Level
+Phaser2
+Range(Default) Param# Description
+LFO Freq 0.000~43.21(0.091) 68 Frequency of phase modulation (Hz)
+LFO Depth 0~127(127) 6A Depth of phase modulation
+Phase Shift 0~127(25) 6C Phase shift offset value
+FB Level -63~+63(+51) 6E Level at which phaser output will be returned to the input
+(negative values invert the phase)
+Stage 3~5(5) 7C Number of phaser shifter stages
+LFO Phase -180~+180(-180) 100 L/R phase difference in the modulation waveform
+(no difference at 0 deg (=64))
+EQ LowFreq 32~2.0k(200) 72 Frequency at which the EQ will boost/cut the low range (Hz)
+EQ Low Gain -12~+12(+ 0) 74 Gain with which the EQ will boost/cut the low range (dB)
+EQ HiFreq 500~16.0k(5.6k) 76 Frequency at which the EQ will boost/cut the high range (Hz)
+EQ Hi Gain -12~+12(+ 0) 78 Gain with which the EQ will boost/cut the high range (dB)
+Var Pan L63~ C ~R63 12C Variation Pan
+Var Return 0~127 12D Variation Return Level
+SendVar-Rev 0~127 12E Variation-to-Reverb Send Level
+Ens Detune
+Range(Default) Param# Description
+Detune -50~+50(-30) 68 Amount by which the pitch will be detuned (cent)
+InitDelayL 0.0~50.0(1.0) 6A Length of left channel delay (msec)
+InitDelayR 0.0~50.0(3.0) 6C Length of right channel delay (msec)
+EQ LowFreq 32~2.0k(250) 7C Frequency at which the EQ will boost/cut the low range (Hz )
+EQ Low Gain -12~+12(+ 0) 7E Gain with which the EQ will boost/cut the low range (dB)
+EQ HiFreq 500~16.0k(5.0k) 100 Frequency at which the EQ will boost/cut the high range (Hz )
+EQ Hi Gain -12~+12(+ 0) 102 Gain with which the EQ will boost/cut the high range (dB)
+Var Pan L63~ C ~R63 12C Variation Pan
+Var Return 0~127 12D Variation Return Level
+SendVar-Rev 0~127 12E Variation-to-Reverb Send Level
+Rotary SP
+Range(Default) Param# Description
+LFO Freq 0.000~43.21(2.335) 68 Rotation frequency of the speaker  (Hz)
+LFO Depth 0~127(76) 6A Depth of modulation produced by speaker rotation
+EQ LowFreq 32~2.0k(250) 72 Frequency at which the EQ will boost/cut the low range (Hz)
+EQ Low Gain -12~+12(+ 0) 74 Gain with which the EQ will boost/cut the low range (dB)
+EQ HiFreq 500~16.0k(5.0k) 76 Frequency at which the EQ will boost/cut the high range (Hz)
+EQ Hi Gain -12~+12(+ 0) 78 Gain with which the EQ will boost/cut the high range (dB)
+Var Pan L63~ C ~R63 12C Variation Pan
+Var Return 0~127 12D Variation Return Level
+SendVar-Rev 0~127 12E Variation-to-Reverb Send Level
+Datalist/E  10/21/98  8:32 PM  Page 18
+
+===== PAGE 19 =====
+19
+Tremolo
+Range(Default) Param# Description
+LFO Freq 0.000~43.21(5.493) 68 Modulation frequency (Hz)
+AM Depth 0~127(60) 6A Amplitude modulation depth
+PM Depth 0~127(20) 6C Delay modulation depth
+LFO Phase -180~+180(+0) 102 L/R phase difference of the modulation waveform
+(no difference at 0 deg (=64))
+EQ LowFreq 32~2.0k(280) 72 Frequency at which the EQ will boost/cut the low range (Hz)
+EQ Low Gain -12~+12(+0) 74 Gain with which the EQ will boost/cut the low range (dB)
+EQ HiFreq 500~16.0k(2.0k) 76 Frequency at which the EQ will boost/cut the high range (Hz)
+EQ Hi Gain -12~+12(+ 0) 78 Gain with which the EQ will boost/cut the high range (dB)
+Mode mono,stereo(mono) 104 Mono/stereo selection for the input
+Var Pan L63~ C ~R63 12C Variation Pan
+Var Return 0~127 12D Variation Return Level
+SendVar-Rev 0~127 12E Variation-to-Reverb Send Level
+Auto Pan
+Range(Default) Param# Description
+LFO Freq 0.000~43.21(4.028) 68 Auto pan frequency (Hz)
+L/R Depth 0~127(127) 6A Left/right depth of panning
+F/R Depth 0~127(32) 6C Front/rear depth of panning
+PAN Dir L<>R,L>R,L<R,Lturn,Rturn,L/R(L/R) 6E Auto pan type (L<->R is sine wave, L/R is square wave)
+EQ LowFreq 32~2.0k(225) 72 Frequency at which the EQ will boost/cut the low range (Hz)
+EQ Low Gain -12~+12(+ 0) 74 Gain with which the EQ will boost/cut the low range (dB)
+EQ HiFreq 500~16.0k(4.0k) 76 Frequency at which the EQ will boost/cut the high range (Hz)
+EQ Hi Gain -12~+12(+12) 78 Gain with which the EQ will boost/cut the high range (dB)
+Var Pan L63~ C ~R63 12C Variation Pan
+Var Return 0~127 12D Variation Return Level
+SendVar-Rev 0~127 12E Variation-to-Reverb Send Level
+Auto Wah
+Range(Default) Param# Description
+LFO Freq 0.000~43.21(1.282) 68 Modulation frequency (Hz)
+Modulation depthLFO Depth 0~127(66) 6A
+Cutoff Freq 0~127(33) 6C Cutoff Frequency (Hz)
+Resonance 1.0~12.0(3.8) 6E Resonance
+EQ LowFreq 32~2.0k(280) 72 Frequency at which the EQ will boost/cut the low range (Hz)
+EQ Low Gain -12~+12(+ 0) 74 Gain with which the EQ will boost/cut the low range (dB)
+EQ HiFreq 500~16.0k(5.0k) 76 Frequency at which the EQ will boost/cut the high range (Hz)
+EQ Hi Gain -12~+12(+ 0) 78 Gain with which the EQ will boost/cut the high range (dB)
+Var Pan L63~ C ~R63 12C Variation Pan
+Var Return 0~127 12D Variation Return Level
+SendVar-Rev 0~127 12E Variation-to-Reverb Send Level
+Touch Wah
+Range(Default) Param# Description
+Sensitivty 0~127(46) 68 Sensitivty
+Cutoff Freq 0~127(28) 6A Cutoff Frequency (Hz)
+Resonance 1.0~12.0(2.3) 6C Resonance
+EQ LowFreq 32~2.0k(180) 72 Frequency at which the EQ will boost/cut the low range (Hz)
+EQ Low Gain -12~+12(+ 0) 74 Gain with which the EQ will boost/cut the low range (dB)
+EQ HiFreq 500~16.0k(5.0k) 76 Frequency at which the EQ will boost/cut the high range (Hz)
+EQ Hi Gain -12~+12(+ 0) 78 Gain with which the EQ will boost/cut the high range (dB)
+Var Pan L63~ C ~R63 12C Variation Pan
+Var Return 0~127 12D Variation Return Level
+SendVar-Rev 0~127 12E Variation-to-Reverb Send Level
+Datalist/E  10/21/98  8:32 PM  Page 19
+
+===== PAGE 20 =====
+20
+3-Band EQ
+Range(Default) Param# Description
+Low Freq 50~2.0k(180) 72 Frequency at which the EQ will boost/cut the low range (Hz)
+Low Gain -12~+12(+ 0) 68 Amount of gain by which the EQ will boost/cut the low range (dB)
+Mid Freq 100~10.0k(1.0k) 6A Frequency at which the EQ will boost/cut the mid range (Hz)
+Mid Gain -12~+12(+ 0) 6C Amount of gain by which the EQ will boost/cut the mid range (dB)
+Mid Q 1.0~12.0(5.0) 6E Mid Q
+High Freq 500~16.0k(8.0k) 74 Frequency at which the EQ will boost/cut the high range (Hz)
+High Gain -12~+12(+ 0) 70 Amount of gain by which the EQ will boost/cut the high range (dB)
+Mode mono,stereo(mono) 104 Mono/stereo input mode selection
+Var Pan L63~ C ~R63 12C Variation Pan
+Var Return 0~127 12D Variation Return Level
+SendVar-Rev 0~127 12E Variation-to-Reverb Send Level
+HM Enhncer
+Range(Default) Param# Description
+HPFCutoff 500~16.0k(5.6k) 68 Frequency at which the high pass filter will cut the low range of
+the effect sound (Hz)
+Drive 0~127(20) 6A Degree with which the exciter effect will be applied
+Mix Level 0~127(30) 6C Level at which the effect sound will be mixed into the dry sound
+Var Pan L63~ C ~R63 12C Variation Pan
+Var Return 0~127 12D Variation Return Level
+SendVar-Rev 0~127 12E Variation-to-Reverb Send Level
+Noise Gate
+Range(Default) Param# Description
+Attack 1~40(1) 68 Time until when the gate begins to open (msec)
+Release 10~680(140) 6A Time until the gate closes (msec)
+Threshold -72~-30(-45) 6C Input level at which the gate begins to open (dB)
+OutputLevel 0~127(50) 6E Output level
+Var Pan L63~ C ~R63 12C Variation Pan
+Var Return 0~127 12D Variation Return Level
+SendVar-Rev 0~127 12E Variation-to-Reverb Send Level
+Compressor
+Range(Default) Param# Description
+Attack 1~40(12) 68 Time until when the compressor begins to take effect (msec)
+Release 10~680(25) 6A Time until the compressor effect disappears (msec)
+Threshold -48~-6(-28) 6C Input level at which compression begins to be applied (dB)
+Ratio 1.0~20.0(5.0) 6E Compression ratio of the compressor
+OutputLevel 0~127(80) 70 Output level
+Var Pan L63~ C ~R63 12C Variation Pan
+Var Return 0~127 12D Variation Return Level
+SendVar-Rev 0~127 12E Variation-to-Reverb Send Level
+Distortion
+Range(Default) Param# Description
+Drive 0~127(60) 68 Degree of distortion
+EQ LowFreq 32~2.0k(180) 6A Frequency at which the EQ will boost/cut the low range (Hz)
+EQ Low Gain -12~+12(+ 8) 6C Gain with which the EQ will boost/cut the low range (dB)
+EQMidFreq 100~10.0k(1.1k) 74 Frequency at which the EQ will boost/cut the mid range (Hz)
+EQ Mid Gain -12~+12(+10) 76 Gain with which the EQ will boost/cut the mid range (dB)
+EQ Mid Q 1.0~12.0(1.0) 78 EQ Mid Q
+LPFCutoff 1.0k~18.0k,thru(9.0k) 6E Frequency at which the filter will cut the high range (Hz)
+Edge 0~127(80) 7C Curve of distortion characteristics (sharp (127):
+ distortion begins suddenly;mild (0): distortion begins gradually)
+OutputLevel 0~127(48) 70 Output level
+Var Pan L63~ C ~R63 12C Variation Pan
+Var Return 0~127 12D Variation Return Level
+SendVar-Rev 0~127 12E Variation-to-Reverb Send Level
+Datalist/E  10/21/98  8:32 PM  Page 20
+
+===== PAGE 21 =====
+21
+Overdrive Same parameters for Distortion
+Range(Default) Param# Description
+Drive 0~127(29) 68 Degree of distortion
+EQ LowFreq 32~2.0k(315) 6A Frequency at which the EQ will boost/cut the low range (Hz)
+EQ Low Gain -12~+12(+ 4) 6C Gain with which the EQ will boost/cut the low range (dB)
+EQMidFreq 100~10.0k(1.2k) 74 Frequency at which the EQ will boost/cut the mid range (Hz)
+EQ Mid Gain -12~+12(+ 8) 76 Gain with which the EQ will boost/cut the mid range (dB)
+EQ Mid Q 1.0~12.0(1.0) 78 EQ Mid Q
+LPFCutoff 1.0k~18.0k,thru(4.0k) 6E Frequency at which the filter will cut the high range (Hz)
+Edge 0~127(104) 7C Curve of distortion characteristics (sharp (127):
+distortion begins suddenly;mild (0): distortion begins gradually)
+OutputLevel 0~127(55) 70 Output level
+Var Pan L63~ C ~R63 12C Variation Pan
+Var Return 0~127 12D Variation Return Level
+SendVar-Rev 0~127 12E Variation-to-Reverb Send Level
+Amp Sim
+Range(Default) Param# Description
+Drive 0~127(76) 68 Degree of distortion
+Amp Type off,stack,combo,tube(tube) 6A Select the type of amp to be simulated
+LPFCutoff 1.0k~18.0k,thru(2.5k) 6C Frequency at which the low pass filter will cut the high range (Hz)
+Edge 0~127(102) 7C Curve of distortion characteristics (sharp (127):
+distortion begins suddenly;mild (0): distortion begins gradually)
+OutputLevel 0~127(55) 6E Output level
+Var Pan L63~ C ~R63 12C Variation Pan
+Var Return 0~127 12D Variation Return Level
+SendVar-Rev 0~127 12E Variation-to-Reverb Send Level
+Delay LCR
+Range(Default) Param# Description
+LchDelay 0.1~1365.0(333.3) 68 Length of left channel delay (msec)
+RchDelay 0.1~1365.0(166.7) 6A Length of right channel delay (msec)
+CchDelay 0.1~1365.0(500.0) 6C Length of center channel delay (msec)
+FB Delay 0.1~1365.0(500.0) 6E Length of feedback delay (msec)
+FB Level -63~+63(+10) 70 Feedback amount
+Cch Level 0~127(100) 72 Volume of center channel
+High Damp 0.1~1.0(0.3) 74 High range attenuation
+(lower values cause the high range to decay faster)
+EQ LowFreq 32~2.0k(400) 100 Frequency at which the EQ will boost/cut the low range (Hz)
+EQ Low Gain -12~+12(+ 0) 102 Gain with which the EQ will boost/cut the low range (dB)
+EQ HiFreq 500~16.0k(4.0k) 104 Frequency at which the EQ will boost/cut the high range (Hz)
+EQ Hi Gain -12~+12(+ 0) 106 Gain with which the EQ will boost/cut the high range (dB)
+Var Pan L63~ C ~R63 12C Variation Pan
+Var Return 0~127 12D Variation Return Level
+SendVar-Rev 0~127 12E Variation-to-Reverb Send Level
+Delay L,R
+Range(Default) Param# Description
+LchDelay 0.1~1365.0(250.0) 68 Length of left channel delay (msec)
+RchDelay 0.1~1365.0(375.0) 6A Length of right channel delay (msec)
+FBDelay1 0.1~1365.0(375.2) 6C Length of feedback delay 1 (msec)
+FBDelay2 0.1~1365.0(375.0) 6E Length of feedback delay 2 (msec)
+FB Level -63~+63(+23) 70 Amount of feedback
+High Damp 0.1~1.0(0.3) 72 High range attenuation
+(lower values cause the high range to decay faster)
+EQ LowFreq 32~2.0k(400) 100 Frequency at which the EQ will boost/cut the low range (Hz)
+EQ Low Gain -12~+12(+ 0) 102 Gain with which the EQ will boost/cut the low range (dB)
+EQ HiFreq 500~16.0k(4.0k) 104 Frequency at which the EQ will boost/cut the high range (Hz)
+EQ Hi Gain -12~+12(+ 0) 106 Gain with which the EQ will boost/cut the high range (dB)
+Var Pan L63~ C ~R63 12C Variation Pan
+Var Return 0~127 12D Variation Return Level
+SendVar-Rev 0~127 12E Variation-to-Reverb Send Level
+Datalist/E  10/21/98  8:32 PM  Page 21
+
+===== PAGE 22 =====
+22
+Echo
+Range(Default) Param# Description
+LchDelay1 0.1~682.0(220.0) 68 Length of first delay of left channel (msec)
+Lch FB Lvl -63~+63(+22) 6A Amount of feedback for left channel
+RchDelay1 0.1~682.0(210.0) 6C Length of first delay of right channel (msec)
+Rch FB Lvl -63~+63(+21) 6E Amount of feedback for right channel
+High Damp 0.1~1.0(0.5) 70 High range attenuation
+(lower values cause the high range to decay faster)
+LchDelay2 0.1~682.0(230.0) 72 Length of second delay of left channel (msec)
+RchDelay2 0.1~682.0(235.0) 74 Length of second delay of right channel (msec)
+Delay2 Lvl 0~127(62) 76 Volume of second delay
+EQ LowFreq 32~2.0k(280) 100 Frequency at which the EQ will boost/cut the low range (Hz)
+EQ Low Gain -12~+12(- 6) 102 Gain with which the EQ will boost/cut the low range (dB)
+EQ HiFreq 500~16.0k(6.3k) 104 Frequency at which the EQ will boost/cut the high range (Hz)
+EQ Hi Gain -12~+12(- 1) 106 Gain with which the EQ will boost/cut the high range (dB)
+Var Pan L63~ C ~R63 12C Variation Pan
+Var Return 0~127 12D Variation Return Level
+SendVar-Rev 0~127 12E Variation-to-Reverb Send Level
+CrossDelay
+Range(Default) Param# Description
+L>R Delay 0.1~682.0(365.0) 68 Delay time from left (input) to right (output) (msec)
+R>L Delay 0.1~682.0(365.0) 6A Delay time from right (input) to left (output) (msec)
+FB Level -63~+63(+24) 6C Amount of feedback
+InputSelect L,R,L&R(R) 6E Input select
+High Damp 0.1~1.0(0.5) 70 High range attenuation
+(lower values cause the high range to decay faster)
+EQ LowFreq 32~2.0k(355) 100 Frequency at which the EQ will boost/cut the low range (Hz)
+EQ Low Gain -12~+12(+ 0) 102 Gain with which the EQ will boost/cut the low range (dB)
+EQ HiFreq 500~16.0k(6.3k) 104 Frequency at which the EQ will boost/cut the high range (Hz)
+EQ Hi Gain -12~+12(- 2) 106 Gain with which the EQ will boost/cut the high range (dB)
+Var Pan L63~ C ~R63 12C Variation Pan
+Var Return 0~127 12D Variation Return Level
+SendVar-Rev 0~127 12E Variation-to-Reverb Send Level
+Karaoke
+Range(Default) Param# Description
+DelayTime 0.1~400.0(198.5) 68 DelayTime (msec)
+FB Level -63~+63(+33) 6A Amount of feedback
+HPF Cutoff thru,22~8.0k(thru) 6C Frequency at which the high pass filter will cut the low range (Hz)
+LPFCutoff 1.0k~18.0k,thru(5.0k) 6E Frequency at which the low pass filter will cut the high range (Hz)
+Var Pan L63~ C ~R63 12C Variation Pan
+Var Return 0~127 12D Variation Return Level
+SendVar-Rev 0~127 12E Variation-to-Reverb Send Level
+Hall
+Range(Default) Param# Description
+ReverbTime 0.3~30.0(2.1) 68 Reverb length (sec)
+Diffusion 0~10(10) 6A Spread of the reverb
+InitDelay 0.1~200.0(12.7) 6C Delay time until the early reflections (msec)
+HPF Cutoff thru,22~8.0k(90) 6E Frequency at which the high pass filter will cut the low range (Hz)
+LPFCutoff 1.0k~18.0k,thru(5.6k) 70 Frequency at which the low pass filter will cut the high range (Hz)
+Density 0~4(2) 7E Density of the reverberation
+ER/Rev E63>R~E=R~E<R63(E14>R) 100 Level balance of the early reflections and the reverberation
+High Damp 0.1~1.0(0.8) 102 High range attenuation
+(lower values cause the high range to decay faster)
+FB Level -63~+63(+ 0) 104 Amount of feedback for the initial delay
+Var Pan L63~ C ~R63 12C Variation Pan
+Var Return 0~127 12D Variation Return Level
+SendVar-Rev 0~127 12E Variation-to-Reverb Send Level
+Datalist/E  10/21/98  8:32 PM  Page 22
+
+===== PAGE 23 =====
+23
+Room Same parameters for Hall
+Range(Default) Param# Description
+ReverbTime 0.3~30.0(0.8) 68 Reverb length (sec)
+Diffusion 0~10(10) 6A Spread of the reverb
+InitDelay 0.1~200.0(25.3) 6C Delay time until the early reflections (msec)
+HPF Cutoff thru,22~8.0k(32) 6E Frequency at which the high pass filter will cut the low range (Hz)
+LPFCutoff 1.0k~18.0k,thru(5.6k) 70 Frequency at which the low pass filter will cut the high range (Hz)
+Density 0~4(2) 7E Density of the reverberation
+ER/Rev E63>R~E=R~E<R63(E=R) 100 Level balance of the early reflections and the reverberation
+High Damp 0.1~1.0(0.8) 102 High range attenuation
+(lower values cause the high range to decay faster)
+FB Level -63~+63(+ 0) 104 Amount of feedback for the initial delay
+Var Pan L63~ C ~R63 12C Variation Pan
+Var Return 0~127 12D Variation Return Level
+SendVar-Rev 0~127 12E Variation-to-Reverb Send Level
+Stage Same parameters for Hall
+Range(Default) Param# Description
+ReverbTime 0.3~30.0(2.2) 68 Reverb length (sec)
+Diffusion 0~10(10) 6A Spread of the reverb
+InitDelay 0.1~200.0(25.3) 6C Delay time until the early reflections (msec)
+HPF Cutoff thru,22~8.0k(45) 6E Frequency at which the high pass filter will cut the low range (Hz)
+LPFCutoff 1.0k~18.0k,thru(10.0k) 70 Frequency at which the low pass filter will cut the high range (Hz)
+Density 0~4(2) 7E Density of the reverberation
+ER/Rev E63>R~E=R~E<R63(E=R) 100 Level balance of the early reflections and the reverberation
+High Damp 0.1~1.0(0.6) 102 High range attenuation
+(lower values cause the high range to decay faster)
+FB Level -63~+63(+ 0) 104 Amount of feedback for the initial delay
+Var Pan L63~ C ~R63 12C Variation Pan
+Var Return 0~127 12D Variation Return Level
+SendVar-Rev 0~127 12E Variation-to-Reverb Send Level
+Plate Same parameters for Hall
+Range(Default) Param# Description
+ReverbTime 0.3~30.0(2.8) 68 Reverb length (sec)
+Diffusion 0~10(10) 6A Spread of the reverb
+InitDelay 0.1~200.0(9.5) 6C Delay time until the early reflections (msec)
+HPF Cutoff thru,22~8.0k(50) 6E Frequency at which the high pass filter will cut the low range (Hz)
+LPFCutoff 1.0k~18.0k,thru(5.6k) 70 Frequency at which the low pass filter will cut the high range (Hz)
+Density 0~4(2) 7E Density of the reverberation
+ER/Rev E63>R~E=R~E<R63(E=R) 100 Level balance of the early reflections and the reverberation
+High Damp 0.1~1.0(0.5) 102 High range attenuation
+(lower values cause the high range to decay faster)
+FB Level -63~+63(+ 0) 104 Amount of feedback for the initial delay
+Var Pan L63~ C ~R63 12C Variation Pan
+Var Return 0~127 12D Variation Return Level
+SendVar-Rev 0~127 12E Variation-to-Reverb Send Level
+Datalist/E  10/21/98  8:32 PM  Page 23
+
+===== PAGE 24 =====
+24
+INSERTION
+Thru
+Range(Default) Param# Ctrl Dest Description
+Ins Pan L63~ C ~R63 130 Insertion Pan
+SendIns-Rev 0~127 131 Insertion-to-Reverb Send Level
+SendIns-Var 0~127 132 Insertion-to-Variation Send Level
+InsDryLevel 0~127 133 Insertion Dry Level
+Chorus
+Range(Default) Param# Ctrl Dest Description
+LFO Freq *0.000~43.21(0.275) 108 I:LFO Freq Delay modulation frequency (Hz)
+LFO Depth *0~127(62) 10A I:LFO Depth Delay modulation depth
+FB Level *-63~+63(+15) 10C I:FB Level Level at which the delay output is returned to the input
+(negative values invert the phase)
+Delay Ofst 0.0~50.0(8.0) 10E Offset value for delay modulation (ms)
+EQ LowFreq *32~2.0k(250) 112 I:EQLowFreq Frequency at which the EQ will boost/cut the low range (Hz)
+EQ Low Gain *-12~+12(+ 0) 114 I:EQLowGain Gain with which the EQ will boost/cut the low range (dB)
+EQMidFreq *100~10.0k(1.8k) 11C I:EQMidFreq Frequency at which the EQ will boost/cut the mid range (Hz)
+EQ Mid Gain *-12~+12(+ 0) 11E I:EQMidGain Gain with which the EQ will boost/cut the mid range (dB)
+EQ Mid Q *1.0~12.0(1.0) 120 I:EQ Mid Q EQ Mid Q
+EQ HiFreq *500~16.0k(7.0k) 116 I:EQ HiFreq Frequency at which the EQ will boost/cut the high range (Hz)
+EQ Hi Gain *-12~+12(+ 0) 118 I:EQ HiGain Gain with which the EQ will boost/cut the high range (dB)
+Mode *mono,stereo(mono) 124 I:Mode Mono/stereo selection for the input
+Dry/Wet *D63>W,D=W,D<W63(D=W) 11A I:Dry/Wet Balance of the dry sound and effect sound
+Ins Pan L63~ C ~R63 130 Insertion Pan
+SendIns-Rev 0~127 131 Insertion-to-Reverb Send Level
+SendIns-Var 0~127 132 Insertion-to-Variation Send Level
+InsDryLevel 0~127 133 Insertion Dry Level
+Celeste Same parameters for Chorus
+Range(Default) Param# Ctrl Dest Description
+LFO Freq *0.000~43.21(0.824) 108 I:LFO Freq Delay modulation frequency (Hz)
+LFO Depth *0~127(28) 10A I:LFO Depth Delay modulation depth
+FB Level *-63~+63(+ 0) 10C I:FB Level Level at which the delay output is returned to the input
+(negative values invert the phase)
+Delay Ofst 0.0~50.0(1.0) 10E Offset value for delay modulation (ms)
+EQ LowFreq *32~2.0k(110) 112 I:EQLowFreq Frequency at which the EQ will boost/cut the low range (Hz)
+EQ Low Gain *-12~+12(+ 0) 114 I:EQLowGain Gain with which the EQ will boost/cut the low range (dB)
+EQMidFreq *100~10.0k(2.0k) 11C I:EQMidFreq Frequency at which the EQ will boost/cut the mid range (Hz)
+EQ Mid Gain *-12~+12(- 2) 11E I:EQMidGain Gain with which the EQ will boost/cut the mid range (dB)
+EQ Mid Q *1.0~12.0(1.0) 120 I:EQ Mid Q EQ Mid Q
+EQ HiFreq *500~16.0k(7.0k) 116 I:EQ HiFreq Frequency at which the EQ will boost/cut the high range (Hz)
+EQ Hi Gain *-12~+12(+ 0) 118 I:EQ HiGain Gain with which the EQ will boost/cut the high range (dB)
+Mode *mono,stereo(mono) 124 I:Mode Mono/stereo selection for the input
+Dry/Wet *D63>W,D=W,D<W63(D<W63) 11A I:Dry/Wet Balance of the dry sound and effect sound
+Ins Pan L63~ C ~R63 130 Insertion Pan
+SendIns-Rev 0~127 131 Insertion-to-Reverb Send Level
+SendIns-Var 0~127 132 Insertion-to-Variation Send Level
+InsDryLevel 0~127 133 Insertion Dry Level
+Flanger
+Range(Default) Param# Ctrl Dest Description
+LFO Freq *0.000~43.21(0.504) 108 I:LFO Freq Frequency of delay modulation (Hz)
+LFO Depth *0~127(30) 10A I:LFO Depth Depth of delay modulation
+FB Level *-63~+63(+40) 10C I:FB Level Level at which delay output is returned to the input
+Delay Ofst 0.0~50.0(0.2) 10E Offset value for delay modulation (ms)
+EQ LowFreq *32~2.0k(200) 112 I:EQLowFreq Frequency at which the EQ will boost/cut the low range (Hz)
+EQ Low Gain *-12~+12(+ 0) 114 I:EQLowGain Gain with which the EQ will boost/cut the low range (dB)
+EQMidFreq *100~10.0k(1.8k) 11C I:EQMidFreq Frequency at which the EQ will boost/cut the mid range (Hz)
+EQ Mid Gain *-12~+12(+ 0) 11E I:EQMidGain Gain with which the EQ will boost/cut the mid range (dB)
+EQ Mid Q *1.0~12.0(1.0) 120 I:EQ Mid Q EQ Mid Q
+EQ HiFreq *500~16.0k(6.3k) 116 I:EQ HiFreq Frequency at which the EQ will boost/cut the high range (Hz)
+EQ Hi Gain *-12~+12(+ 0) 118 I:EQ HiGain Gain with which the EQ will boost/cut the high range (dB)
+LFO Phase -180~+180(-180) 122 L/R phase difference of modulation waveform
+(no difference at 0 deg (=64))
+Dry/Wet *D63>W,D=W,D<W63(D<W32) 11A I:Dry/Wet Balance of the dry sound and effect sound
+Ins Pan L63~ C ~R63 130 Insertion Pan
+SendIns-Rev 0~127 131 Insertion-to-Reverb Send Level
+SendIns-Var 0~127 132 Insertion-to-Variation Send Level
+InsDryLevel 0~127 133 Insertion Dry Level
+Datalist/E  10/21/98  8:32 PM  Page 24
+
+===== PAGE 25 =====
+25
+Symphonic
+Range(Default) Param# Ctrl Dest Description
+LFO Freq *0.000~43.21(0.458) 108 I:LFO Freq Frequency of delay modulation (Hz)
+LFO Depth *0~127(40) 10A I:LFO Depth Depth of delay modulation
+Delay Ofst 0.0~50.0(0.0) 10C Delay modulation offset value (ms)
+EQ LowFreq *32~2.0k(250) 112 I:EQLowFreq Frequency at which the EQ will boost/cut the low range (Hz)
+EQ Low Gain *-12~+12(+ 0) 114 I:EQLowGain Gain with which the EQ will boost/cut the low range (dB)
+EQMidFreq *100~10.0k(4.0k) 11C I:EQMidFreq Frequency at which the EQ will boost/cut the mid range (Hz)
+EQ Mid Gain *-12~+12(- 3) 11E I:EQMidGain Gain with which the EQ will boost/cut the mid range (dB)
+EQ Mid Q *1.0~12.0(1.0) 120 I:EQ Mid Q EQ Mid Q
+EQ HiFreq *500~16.0k(6.3k) 116 I:EQ HiFreq Frequency at which the EQ will boost/cut the high range (Hz)
+EQ Hi Gain *-12~+12(+ 0) 118 I:EQ HiGain Gain with which the EQ will boost/cut the high range (dB)
+Dry/Wet *D63>W,D=W,D<W63(D<W32) 11A I:Dry/Wet Balance of the dry sound and effect sound
+Ins Pan L63~ C ~R63 130 Insertion Pan
+SendIns-Rev 0~127 131 Insertion-to-Reverb Send Level
+SendIns-Var 0~127 132 Insertion-to-Variation Send Level
+InsDryLevel 0~127 133 Insertion Dry Level
+Phaser1
+Range(Default) Param# Ctrl Dest Description
+LFO Freq *0.000~43.21(0.641) 108 I:LFO Freq Frequency of phase modulation (Hz)
+LFO Depth *0~127(92) 10A I:LFO Depth Depth of phase modulation
+Phase Shift 0~127(76) 10C Phase shift offset value
+FB Level *-63~+63(+36) 10E I:FB Level Level at which phaser output will be returned to the input
+(negative values invert the phase)
+Stage *4~12(6) 11C I:Stage Number of phaser shifter stages
+Diffuse mono,stereo(stereo) 11E Diffusion
+EQ LowFreq *32~2.0k(250) 112 I:EQLowFreq Frequency at which the EQ will boost/cut the low range (Hz)
+EQ Low Gain *-12~+12(+ 0) 114 I:EQLowGain Gain with which the EQ will boost/cut the low range (dB)
+EQ HiFreq *500~16.0k(2.0k) 116 I:EQ HiFreq Frequency at which the EQ will boost/cut the high range (Hz)
+EQ Hi Gain *-12~+12(+ 0) 118 I:EQ HiGain Gain with which the EQ will boost/cut the high range (dB)
+Dry/Wet *D63>W,D=W,D<W63(D<W34) 11A I:Dry/Wet Balance of the dry sound and effect sound
+Ins Pan L63~ C ~R63 130 Insertion Pan
+SendIns-Rev 0~127 131 Insertion-to-Reverb Send Level
+SendIns-Var 0~127 132 Insertion-to-Variation Send Level
+InsDryLevel 0~127 133 Insertion Dry Level
+Phaser2
+Range(Default) Param# Ctrl Dest Description
+LFO Freq *0.000~43.21(0.091) 108 I:LFO Freq Frequency of phase modulation (Hz)
+LFO Depth *0~127(127) 10A I:LFO Depth Depth of phase modulation
+Phase Shift 0~127(25) 10C Phase shift offset value
+FB Level *-63~+63(+51) 10E I:FB Level Level at which phaser output will be returned to the input
+(negative values invert the phase)
+Stage *3~6(5) 11C I:Stage Number of phaser shifter stages
+LFO Phase -180~+180(-180) 120 L/R phase difference in the modulation waveform
+(no difference at 0 deg (=64))
+EQ LowFreq *32~2.0k(200) 112 I:EQLowFreq Frequency at which the EQ will boost/cut the low range (Hz)
+EQ Low Gain *-12~+12(+ 0) 114 I:EQLowGain Gain with which the EQ will boost/cut the low range (dB)
+EQ HiFreq *500~16.0k(5.6k) 116 I:EQ HiFreq Frequency at which the EQ will boost/cut the high range (Hz)
+EQ Hi Gain *-12~+12(+ 0) 118 I:EQ HiGain Gain with which the EQ will boost/cut the high range (dB)
+Dry/Wet *D63>W,D=W,D<W63(D<W32) 11A I:Dry/Wet Balance of the dry sound and effect sound
+Ins Pan L63~ C ~R63 130 Insertion Pan
+SendIns-Rev 0~127 131 Insertion-to-Reverb Send Level
+SendIns-Var 0~127 132 Insertion-to-Variation Send Level
+InsDryLevel 0~127 133 Insertion Dry Level
+Pitch Chng
+Range(Default) Param# Ctrl Dest Description
+Pitch -24~+24(+ 0) 108 Pitch change in semitone steps
+InitDelay 0.1~400.0(3.2) 10A Delay length (msec)
+Fine1 -50~+50(+15) 10C Fine pitch setting for first unit (cent)
+Fine2 -50~+50(-16) 10E Fine pitch setting for second unit (cent)
+FB Level *-63~+63(+ 0) 110 I:FB Level Amount of feedback
+Pan1 *L63~ C ~R63(L63) 11C I:Pan1 Panning of first unit
+Out Level1 *0~127(125) 11E I:OutLevel1 Output level of first unit
+Pan2 *L63~ C ~R63(R63) 120 I:Pan2 Panning of second unit
+Out Level2 *0~127(127) 122 I:OutLevel2 Output level of second unit
+Dry/Wet *D63>W,D=W,D<W63(D 3>W) 11A I:Dry/Wet Balance of the dry sound and effect sound
+Ins Pan L63~ C ~R63 130 Insertion Pan
+SendIns-Rev 0~127 131 Insertion-to-Reverb Send Level
+SendIns-Var 0~127 132 Insertion-to-Variation Send Level
+InsDryLevel 0~127 133 Insertion Dry Level
+Datalist/E  10/21/98  8:32 PM  Page 25
+
+===== PAGE 26 =====
+26
+Ens Detune
+Range(Default) Param# Ctrl Dest Description
+Detune -50~+50(-30) 108 Amount by which the pitch will be detuned (cent)
+InitDelayL 0.0~50.0(1.0) 10A Length of left channel delay (msec)
+InitDelayR 0.0~50.0(3.0) 10C Length of right channel delay (msec)
+EQ LowFreq *32~2.0k(250) 11C I:EQLowFreq Frequency at which the EQ will boost/cut the low range (Hz)
+EQ Low Gain *-12~+12(+ 0) 11E I:EQLowGain Gain with which the EQ will boost/cut the low range (dB)
+EQ HiFreq *500~16.0k(5.0k) 120 I:EQ HiFreq Frequency at which the EQ will boost/cut the high range (Hz)
+EQ Hi Gain *-12~+12(+ 0) 122 I:EQ HiGain Gain with which the EQ will boost/cut the high range (dB)
+Dry/Wet *D63>W,D=W,D<W63(D=W) 11A I:Dry/Wet Balance of the dry sound and effect sound
+Ins Pan L63~ C ~R63 130 Insertion Pan
+SendIns-Rev 0~127 131 Insertion-to-Reverb Send Level
+SendIns-Var 0~127 132 Insertion-to-Variation Send Level
+InsDryLevel 0~127 133 Insertion Dry Level
+Rotary SP
+Range(Default) Param# Ctrl Dest Description
+LFO Freq *0.000~43.21(5.859) 108 I:LFO Freq Rotation frequency of the speaker (Hz)
+LFO Depth *0~127(71) 10A I:LFO Depth Depth of modulation produced by speaker rotation
+EQ LowFreq *32~2.0k(250) 112 I:EQLowFreq Frequency at which the EQ will boost/cut the low range (Hz)
+EQ Low Gain *-12~+12(- 4) 114 I:EQLowGain Gain with which the EQ will boost/cut the low range (dB)
+EQMidFreq *100~10.0k(2.8k) 11C I:EQMidFreq Frequency at which the EQ will boost/cut the mid range (Hz)
+EQ Mid Gain *-12~+12(-12) 11E I:EQMidGain Gain with which the EQ will boost/cut the mid range (dB)
+EQ Mid Q *1.0~12.0(2.4) 120 I:EQ Mid Q EQ Mid Q
+EQ HiFreq *500~16.0k(7.0k) 116 I:EQ HiFreq Frequency at which the EQ will boost/cut the high range (Hz)
+EQ Hi Gain *-12~+12(-10) 118 I:EQ HiGain Gain with which the EQ will boost/cut the high range (dB)
+Dry/Wet *D63>W,D=W,D<W63(D<W63) 11A I:Dry/Wet Balance of the dry sound and effect sound
+Ins Pan L63~ C ~R63 130 Insertion Pan
+SendIns-Rev 0~127 131 Insertion-to-Reverb Send Level
+SendIns-Var 0~127 132 Insertion-to-Variation Send Level
+InsDryLevel 0~127 133 Insertion Dry Level
+2WayRotary
+Range(Default) Param# Ctrl Dest Description
+Rotor Spd *0.000~43.21(6.958) 108 I:Rotor Spd Rotation frequency of the speaker (Hz)
+Drive Low *0~127(89) 10A I:Drive Low Depth of modulation produced by low-range speaker rotation
+Drive High *0~127(62) 10C I:DriveHigh Depth of modulation produced by high-range speaker rotation
+Low/High *L63>H,L=H,L<H63(L46>H) 10E I:Low/High Volume balance between high-range speaker
+and low-range speaker
+Mic Angle 0~180(87) 11E L/R angle of mics which pick up the output (°)
+CrossFreq 100~10.0k(700) 11C Crossover frequency between high-range speaker and 
+low-range speaker (Hz)
+EQ LowFreq *32~2.0k(110) 112 I:EQLowFreq Frequency at which the EQ will boost/cut the low range (Hz)
+EQ Low Gain *-12~+12(+0) 114 I:EQLowGain Gain with which the EQ will boost/cut the low range (dB)
+EQ HiFreq= *500~16.0k(3.2k) 116 I:EQ HiFreq Frequency at which the EQ will boost/cut the high range (Hz)
+EQ Hi Gain *-12~+12(+ 0) 118 I:EQ HiGain Gain with which the EQ will boost/cut the high range (dB)
+Ins Pan L63~ C ~R63 130 Insertion Pan
+SendIns-Rev 0~127 131 Insertion-to-Reverb Send Level
+SendIns-Var 0~127 132 Insertion-to-Variation Send Level
+InsDryLevel 0~127 133 Insertion Dry Level
+Tremolo
+Range(Default) Param# Ctrl Dest Description
+LFO Freq *0.000~43.21(1.831) 108 I:LFO Freq Modulation frequency (Hz)
+AM Depth *0~127(112) 10A I:AM Depth Amplitude modulation depth
+PM Depth *0~127(0) 10C I:PM Depth Delay modulation depth
+LFO Phase -180~+180(+ 0) 122 L/R phase difference of the modulation waveform
+(no difference at 0 deg (=64))
+EQ LowFreq *32~2.0k(100) 112 I:EQLowFreq Frequency at which the EQ will boost/cut the low range (Hz)
+EQ Low Gain *-12~+12(+ 0) 114 I:EQLowGain Gain with which the EQ will boost/cut the low range (dB)
+EQMidFreq *100~10.0k(1.8k) 11C I:EQMidFreq Frequency at which the EQ will boost/cut the mid range (Hz)
+EQ Mid Gain *-12~+12(+ 0) 11E I:EQMidGain Gain with which the EQ will boost/cut the mid range (dB)
+EQ Mid Q *1.0~12.0(1.0) 120 I:EQ Mid Q EQ Mid Q
+EQ HiFreq *500~16.0k(7.0k) 116 I:EQ HiFreq Frequency at which the EQ will boost/cut the high range (Hz)
+EQ Hi Gain *-12~+12(+ 0) 118 I:EQ HiGain Gain with which the EQ will boost/cut the high range (dB)
+Mode mono,stereo(stereo) 124 Mono/stereo selection for the input
+Ins Pan L63~ C ~R63 130 Insertion Pan
+SendIns-Rev 0~127 131 Insertion-to-Reverb Send Level
+SendIns-Var 0~127 132 Insertion-to-Variation Send Level
+InsDryLevel 0~127 133 Insertion Dry Level
+Datalist/E  10/21/98  8:32 PM  Page 26
+
+===== PAGE 27 =====
+27
+Auto Pan
+Range(Default) Param# Ctrl Dest Description
+LFO Freq *0.000~43.21(1.877) 108 I:LFO Freq Auto pan frequency (Hz)
+L/R Depth *0~127(80) 10A I:L/R Depth Left/right depth of panning
+F/R Depth *0~127(32) 10C I:F/R Depth Front/rear depth of panning
+PAN Dir L<>R,L>R,L<R,Lturn,Rturn,L/R(L/R) 10E Auto pan type (L<->R is sine wave, L/R is square wave)
+EQ LowFreq *32~2.0k(140) 112 I:EQLowFreq Frequency at which the EQ will boost/cut the low range (Hz)
+EQ Low Gain *-12~+12(+ 0) 114 I:EQLowGain Gain with which the EQ will boost/cut the low range (dB)
+EQMidFreq *100~10.0k(1.8k) 11C I:EQMidFreq Frequency at which the EQ will boost/cut the mid range (Hz)
+EQ Mid Gain *-12~+12(+ 0) 11E I:EQMidGain Gain with which the EQ will boost/cut the mid range (dB)
+EQ Mid Q *1.0~12.0(1.0) 120 I:EQ Mid Q EQ Mid Q
+EQ HiFreq *500~16.0k(6.3k) 116 I:EQ HiFreq Frequency at which the EQ will boost/cut the high range (Hz)
+EQ Hi Gain *-12~+12(+ 0) 118 I:EQ HiGain Gain with which the EQ will boost/cut the high range (dB)
+Ins Pan L63~ C ~R63 130 Insertion Pan
+SendIns-Rev 0~127 131 Insertion-to-Reverb Send Level
+SendIns-Var 0~127 132 Insertion-to-Variation Send Level
+InsDryLevel 0~127 133 Insertion Dry Level
+Ambience
+Range(Default) Param# Ctrl Dest Description
+Delay Time 0.0~50.0(26.5) 108 Delay length (ms)
+Phase *normal,inverse(inverse) 10A I:Phase Invert the phase of the effect sound between L/R
+EQ LowFreq *32~2.0k(250) 112 I:EQLowFreq Frequency at which the EQ will boost/cut the low range  (Hz)
+EQ Low Gain *-12~+12(+ 0) 114 I:EQLowGain Gain with which the EQ will boost/cut the low range (dB)
+EQ HiFreq *500~16.0k(5.0k) 116 I:EQ HiFreq Frequency at which the EQ will boost/cut the high range (Hz)
+EQ Hi Gain *-12~+12(-10) 118 I:EQ HiGain Gain with which the EQ will boost/cut the high range (dB)
+Dry/Wet *D63>W,D=W,D<W63(D<W10) 11A I:Dry/Wet Balance of the dry sound and effect sound
+Ins Pan L63~ C ~R63 130 Insertion Pan
+SendIns-Rev 0~127 131 Insertion-to-Reverb Send Level
+SendIns-Var 0~127 132 Insertion-to-Variation Send Level
+InsDryLevel 0~127 133 Insertion Dry Level
+A-Wah+Dist
+Range(Default) Param# Ctrl Dest Description
+LFO Freq *0.000~43.21(1.465) 108 I:LFO Freq Modulation frequency (Hz)
+LFO Depth *0~127(84) 10A I:LFO Depth Modulation Depth
+Cutoff Freq *0~127(46) 10C I:CutofFreq Cutoff Frequency (Hz)
+Resonance *1.0~12.0(3.4) 10E I:Resonance Resonance
+EQ LowFreq *32~2.0k(250) 112 I:EQLowFreq Frequency at which the EQ will boost/cut the low range (Hz)
+EQ Low Gain *-12~+12(+ 2) 114 I:EQLowGain Gain with which the EQ will boost/cut the low range (dB)
+EQ HiFreq *500~16.0k(4.0k) 116 I:EQ HiFreq Frequency at which the EQ will boost/cut the high range (Hz)
+EQ Hi Gain *-12~+12(+ 0) 118 I:EQ HiGain Gain with which the EQ will boost/cut the high range (dB)
+Drive *0~127(60) 11C I:Drive Degree of distortion
+DS Low Gain *-12~+12(+ 8) 11E I:DSLowGain Gain with which the distortion will boost/cut the low range (dB)
+DS Mid Gain *-12~+12(+ 4) 120 I:DSMidGain Gain with which the distortion will boost/cut the middle range (dB)
+LPFCutoff *1.0k~18.0k,thru(8.0k) 122 I:LPFCutoff Frequency at which the low pass filter will cut the high range (Hz)
+OutputLevel *0~127(64) 124 I:Out Level Output Level
+Dry/Wet *D63>W,D=W,D<W63(D<W63) 11A I:Dry/Wet Balance of the dry sound and effect sound
+Ins Pan L63~ C ~R63 130 Insertion Pan
+SendIns-Rev 0~127 131 Insertion-to-Reverb Send Level
+SendIns-Var 0~127 132 Insertion-to-Variation Send Level
+InsDryLevel 0~127 133 Insertion Dry Level
+A-Wah+Odrv Same parameters for A-Wah+Dist
+Range(Default) Param# Ctrl Dest Description
+LFO Freq *0.000~43.21(1.144) 108 I:LFO Freq Modulation frequency (Hz)
+LFO Depth *0~127(64) 10A I:LFO Depth Modulation Depth
+Cutoff Freq *0~127(32) 10C I:CutofFreq Cutoff Frequency (Hz)
+Resonance *1.0~12.0(2.3) 10E I:Resonance Resonance
+EQ LowFreq *32~2.0k(250) 112 I:EQLowFreq Frequency at which the EQ will boost/cut the low range (Hz)
+EQ Low Gain *-12~+12(+ 2) 114 I:EQLowGain Gain with which the EQ will boost/cut the low range (dB)
+EQ HiFreq *500~16.0k(4.0k) 116 I:EQ HiFreq Frequency at which the EQ will boost/cut the high range (Hz)
+EQ Hi Gain *-12~+12(+ 0) 118 I:EQ HiGain Gain with which the EQ will boost/cut the high range (dB)
+Drive *0~127(16) 11C I:Drive Degree of distortion
+DS Low Gain *-12~+12(+ 4) 11E I:DSLowGain Gain with which the distortion will boost/cut the low range (dB)
+DS Mid Gain *-12~+12(+ 8) 120 I:DSMidGain Gain with which the distortion will boost/cut the middle range (dB)
+LPFCutoff *1.0k~18.0k,thru(3.6k) 122 I:LPFCutoff Frequency at which the low pass filter will cut the high range (Hz)
+OutputLevel *0~127(68) 124 I:Out Level OutputLevel
+Dry/Wet *D63>W,D=W,D<W63(D<W63) 11A I:Dry/Wet Balance of the dry sound and effect sound
+Ins Pan L63~ C ~R63 130 Insertion Pan
+SendIns-Rev 0~127 131 Insertion-to-Reverb Send Level
+SendIns-Var 0~127 132 Insertion-to-Variation Send Level
+InsDryLevel 0~127 133 Insertion Dry Level
+Datalist/E  10/21/98  8:32 PM  Page 27
+
+===== PAGE 28 =====
+28
+T-Wah+Dist
+Range(Default) Param# Ctrl Dest Description
+Sensitivty *0~127(80) 108 I:Sens Sensitivity at which the wah filter will change in response to
+the input level
+Cutoff Freq *0~127(18) 10A I:CutofFreq Offset value for the wah filter control frequency (Hz)
+Resonance *1.0~12.0(4.5) 10C I:Resonance Bandwidth of the wah filter
+Release *10~680(170) 126 I:Release Time until the wah filter is closed (msec)
+EQ LowFreq *32~2.0k(250) 112 I:EQLowFreq Frequency at which the EQ will boost/cut the low range (Hz)
+EQ Low Gain *-12~+12(+ 2) 114 I:EQLowGain Amount of gain by which the EQ will boost/cut the low range (dB)
+EQ HiFreq *500~16.0k(4.0k) 116 I:EQ HiFreq Frequency at which the EQ will boost/cut the high range (Hz)
+EQ Hi Gain *-12~+12(+ 0) 118 I:EQ HiGain Amount of gain by which the EQ will boost/cut the high range (dB)
+Drive *0~127(30) 11C I:Drive (Distortion) Degree of distortion
+DS Low Gain *-12~+12(+ 8) 11E I:DSLowGain Gain with which the distortion will boost/cut the low range (dB)
+DS Mid Gain *-12~+12(+10) 120 I:DSMidGain Gain with which the distortion will boost/cut the middle range (dB)
+LPFCutoff *1.0k~18.0k,thru(9.0k) 122 I:LPFCutoff Frequency at which the low pass filter will cut the high range (Hz)
+OutputLevel *0~127(72) 124 I:Out Level OutputLevel
+Dry/Wet *D63>W,D=W,D<W63(D<W63) 11A I:Dry/Wet Balance between the dry sound and effect sound
+Ins Pan L63~ C ~R63 130 Insertion Pan
+SendIns-Rev 0~127 131 Insertion-to-Reverb Send Level
+SendIns-Var 0~127 132 Insertion-to-Variation Send Level
+InsDryLevel 0~127 133 Insertion Dry Level
+T-Wah+Odrv Same parameters for T-Wah+Dist
+Range(Default) Param# Ctrl Dest Description
+Sensitivty *0~127(61) 108 I:Sens Sensitivity at which the wah filter will change in response to
+the input level
+Cutoff Freq *0~127(30) 10A I:CutofFreq Offset value for the wah filter control frequency (Hz)
+Resonance *1.0~12.0(4.1) 10C I:Resonance Bandwidth of the wah filter
+Release *10~680(170) 126 I:Release Time until the wah filter is closed (msec)
+EQ LowFreq *32~2.0k(250) 112 I:EQLowFreq Frequency at which the EQ will boost/cut the low range (Hz)
+EQ Low Gain *-12~+12(+ 2) 114 I:EQLowGain Amount of gain by which the EQ will boost/cut the low range (dB)
+EQ HiFreq *500~16.0k(4.0k) 116 I:EQ HiFreq Frequency at which the EQ will boost/cut the high range (Hz)
+EQ Hi Gain *-12~+12(+ 0) 118 I:EQ HiGain Amount of gain by which the EQ will boost/cut the high range (dB)
+Drive *0~127(15) 11C I:Drive (Distortion) Degree of distortion
+DS Low Gain *-12~+12(+ 4) 11E I:DSLowGain Gain with which the distortion will boost/cut the low range (dB)
+DS Mid Gain *-12~+12(+ 8) 120 I:DSMidGain Gain with which the distortion will boost/cut the middle range (dB)
+LPFCutoff *1.0k~18.0k,thru(5.6k) 122 I:LPFCutoff Frequency at which the low pass filter will cut the high range (Hz)
+OutputLevel *0~127(72) 124 I:Out Level OutputLevel
+Dry/Wet *D63>W,D=W,D<W63(D<W63) 11A I:Dry/Wet Balance between the dry sound and effect sound
+Ins Pan L63~ C ~R63 130 Insertion Pan
+SendIns-Rev 0~127 131 Insertion-to-Reverb Send Level
+SendIns-Var 0~127 132 Insertion-to-Variation Send Level
+InsDryLevel 0~127 133 Insertion Dry Level
+Wah+DS+Dly
+Range(Default) Param# Ctrl Dest Description
+Sensitivty *0~127(102) 11C I:Sens Sensitivty
+Cutoff Freq *0~127(20) 11E I:CutofFreq Cutoff Frequency (Hz)
+Resonance *1.0~12.0(2.3) 120 I:Resonance Resonance
+Release *10~680(75) 122 I:Release Time until the wah filter is closed (msec)
+Drive *0~127(60) 10E I:Drive Degree of distortion
+OutputLevel *0~127(53) 110 I:Out Level OutputLevel
+DS Low Gain *-12~+12(+ 4) 112 I:DSLowGain Gain with which the distortion will boost/cut the low range (dB)
+DS Mid Gain *-12~+12(+ 8) 114 I:DSMidGain Gain with which the distortion will boost/cut the middle range (dB)
+Delay 0.1~1365.0(190.0) 108 Delay time (msec)
+FB Level *-63~+63(+20) 10A I:FB Level Feedback Level
+Delay Mix *0~127(30) 10C I:Delay Mix Depth of delay effect
+Dry/Wet *D63>W,D=W,D<W63(D<W63) 11A I:Dry/Wet Balance between the dry sound and effect sound
+Ins Pan L63~ C ~R63 130 Insertion Pan
+SendIns-Rev 0~127 131 Insertion-to-Reverb Send Level
+SendIns-Var 0~127 132 Insertion-to-Variation Send Level
+InsDryLevel 0~127 133 Insertion Dry Level
+Datalist/E  10/21/98  8:32 PM  Page 28
+
+===== PAGE 29 =====
+29
+Wah+OD+Dly Same parameters for Wah+DS+Dly
+Range(Default) Param# Ctrl Dest Description
+Sensitivty *0~127(80) 11C I:Sens Sensitivty
+Cutoff Freq *0~127(35) 11E I:CutofFreq Cutoff Frequency (Hz)
+Resonance *1.0~12.0(3.0) 120 I:Resonance Resonance
+Release *10~680(170) 122 I:Release Time until the wah filter is closed (msec)
+Drive *0~127(16) 10E I:Drive Degree of distortion
+OutputLevel *0~127(87) 110 I:Out Level OutputLevel
+DS Low Gain *-12~+12(+ 0) 112 I:DSLowGain Gain with which the distortion will boost/cut the low range (dB)
+DS Mid Gain *-12~+12(+ 0) 114 I:DSMidGain Gain with which the distortion will boost/cut the middle range (dB)
+Delay 0.1~1365.0(160.0) 108 Delay time (msec)
+FB Level *-63~+63(+20) 10A I:FB Level Feedback Level
+Delay Mix *0~127(50) 10C I:Delay Mix Depth of delay effect
+Dry/Wet *D63>W,D=W,D<W63(D<W63) 11A I:Dry/Wet Balance between the dry sound and effect sound
+Ins Pan L63~ C ~R63 130 Insertion Pan
+SendIns-Rev 0~127 131 Insertion-to-Reverb Send Level
+SendIns-Var 0~127 132 Insertion-to-Variation Send Level
+InsDryLevel 0~127 133 Insertion Dry Level
+Lo-Fi
+Range(Default) Param# Ctrl Dest Description
+Smpl Freq *48k~375(16.0k) 108 I:Smpl Freq Sampling Frequency (Hz)
+Word Length *1~127(1) 10A I:Word Leng Differential bit length of DPCM
+Output Gain *-6~+36(- 3) 10C I:Out Gain Output Gain
+LPFCutoff *63~18.0k,thru(thru) 10E I:LPFCutoff Frequency at which the low pass filter will cut the high range (Hz)
+LPF Reso *1.0~12.0(2.9) 112 I:LPF Reso Resonance of low pass filter
+Filter thru,pbass,radio,tel,clean,low(clean) 110 Characteristics (quality) of low pass filter
+Bit Assign 0~6(1) 114 Input signal depth of DPCM
+Emphasis off,on(off) 116 Adjustment of high frequency response
+Dry/Wet *D63>W,D=W,D<W63(D<W63) 11A I:Dry/Wet Balance between the dry sound and effect sound
+Ins Pan L63~ C ~R63 130 Insertion Pan
+SendIns-Rev 0~127 131 Insertion-to-Reverb Send Level
+SendIns-Var 0~127 132 Insertion-to-Variation Send Level
+InsDryLevel 0~127 133 Insertion Dry Level
+3-Band EQ
+Range(Default) Param# Ctrl Dest Description
+Low Freq *50~2.0k(180) 112 I:Low Freq Frequency at which the EQ will boost/cut the low range (Hz)
+Low Gain *-12~+12(+ 0) 108 I:Low Gain Amount of gain by which the EQ will boost/cut the low range (dB)
+Mid Freq *100~10.0k(1.0k) 10A I:Mid Freq Frequency at which the EQ will boost/cut the mid range (Hz)
+Mid Gain *-12~+12(+ 0) 10C I:Mid Gain Amount of gain by which the EQ will boost/cut the mid range (dB)
+Mid Q *1.0~12.0(5.0) 10E I:Mid Q Mid Q
+High Freq *500~16.0k(8.0k) 114 I:High Freq Frequency at which the EQ will boost/cut the high range (Hz)
+High Gain *-12~+12(+ 0) 110 I:High Gain Amount of gain by which the EQ will boost/cut the high range (dB)
+Mode mono,stereo(mono) 124 Mono/stereo input mode selection
+Ins Pan L63~ C ~R63 130 Insertion Pan
+SendIns-Rev 0~127 131 Insertion-to-Reverb Send Level
+SendIns-Var 0~127 132 Insertion-to-Variation Send Level
+InsDryLevel 0~127 133 Insertion Dry Level
+HM Enhncer
+Range(Default) Param# Ctrl Dest Description
+HPFCutoff *500~16.0k(5.6k) 108 I:HPFCutoff Frequency at which the high pass filter will cut the low range 
+of the effect sound (Hz)
+Drive *0~127(20) 10A I:Drive Degree with which the exciter effect will be applied
+Mix Level *0~127(30) 10C I:Mix Level Level at which the effect sound will be mixed into the dry sound
+Ins Pan L63~ C ~R63 130 Insertion Pan
+SendIns-Rev 0~127 131 Insertion-to-Reverb Send Level
+SendIns-Var 0~127 132 Insertion-to-Variation Send Level
+InsDryLevel 0~127 133 Insertion Dry Level
+Datalist/E  10/21/98  8:32 PM  Page 29
+
+===== PAGE 30 =====
+30
+Noise Gate
+Range(Default) Param# Ctrl Dest Description
+Attack *1~40(1) 108 I:Attack Time until when the gate begins to open (msec)
+Release *10~680(140) 10A I:Release Time until the gate closes (msec)
+Threshold *-72~-30(-45) 10C I:Threshold Input level at which the gate begins to open (dB)
+OutputLevel *0~127(50) 10E I:Out Level Output level
+Ins Pan L63~ C ~R63 130 Insertion Pan
+SendIns-Rev 0~127 131 Insertion-to-Reverb Send Level
+SendIns-Var 0~127 132 Insertion-to-Variation Send Level
+InsDryLevel 0~127 133 Insertion Dry Level
+Comp+Dist
+Range(Default) Param# Ctrl Dest Description
+Attack *1~40(7) 11E I:Attack Time until the compression takes effect (msec)
+Release *10~680(25) 120 I:Release Time until the compression finishes (msec)
+Threshold *-48~-6(-27) 122 I:Threshold Input level at which the compression takes effect (dB)
+Ratio *1.0~20.0(7.0) 124 I:Ratio Ratio of compressed level to input level
+Drive *0~127(60) 108 I:Drive Degree of distortion
+EQ LowFreq *32~2.0k(250) 10A I:EQLowFreq EQ low frequency (Hz)
+EQ Low Gain *-12~+12(+ 5) 10C I:EQLowGain EQ low gain (dB)
+EQMidFreq *100~10.0k(4.0k) 114 I:EQMidFreq EQ middle frequency (Hz)
+EQ Mid Gain *-12~+12(+ 8) 116 I:EQMidGain EQ middle gain (dB)
+EQ Mid Q *1.0~12.0(1.0) 118 I:EQ Mid Q EQ middle Q
+LPFCutoff *1.0k~18.0k,thru(9.0k) 10E I:LPFCutoff Frequency at which the low pass filter will cut the high range (Hz)
+Edge *0~127(120) 11C I:Edge Sharpness of distorted sound
+OutputLevel *0~127(70) 110 I:Out Level OutputLevel
+Dry/Wet *D63>W,D=W,D<W63(D<W63) 11A I:Dry/Wet Balance between the dry sound and effect sound
+Ins Pan L63~ C ~R63 130 Insertion Pan
+SendIns-Rev 0~127 131 Insertion-to-Reverb Send Level
+SendIns-Var 0~127 132 Insertion-to-Variation Send Level
+InsDryLevel 0~127 133 Insertion Dry Level
+Cmp+DS+Dly
+Range(Default) Param# Ctrl Dest Description
+Attack *1~40(7) 11C I:Attack Time until the compression takes effect (msec)
+Release *10~680(140) 11E I:Release Time until the compression finishes (msec)
+Threshold *-48~-6(-32) 120 I:Threshold Input level at which the compression takes effect (dB)
+Ratio *1.0~20.0(7.0) 122 I:Ratio Ratio of compressed level to input level
+Drive *0~127(60) 10E I:Drive Degree of distortion
+OutputLevel *0~127(51) 110 I:Out Level OutputLevel
+DS Low Gain *-12~+12(+ 4) 112 I:DSLowGain Gain with which the distortion will boost/cut the low range (dB)
+DS Mid Gain *-12~+12(+ 8) 114 I:DSMidGain Gain with which the distortion will boost/cut the middle range (dB)
+Delay 0.1~1365.0(190.0) 108 Delay time (msec)
+FB Level *-63~+63(+ 8) 10A I:FB Level Feedback level
+Delay Mix *0~127(38) 10C I:Delay Mix Depth of delay effect
+Dry/Wet *D63>W,D=W,D<W63(D<W63) 11A I:Dry/Wet Balance between the dry sound and effect sound
+Ins Pan L63~ C ~R63 130 Insertion Pan
+SendIns-Rev 0~127 131 Insertion-to-Reverb Send Level
+SendIns-Var 0~127 132 Insertion-to-Variation Send Level
+InsDryLevel 0~127 133 Insertion Dry Level
+Compressor
+Range(Default) Param# Ctrl Dest Description
+Attack *1~40(12) 108 I:Attack Time until when the compressor begins to take effect (msec)
+Release *10~680(25) 10A I:Release Time until the compressor effect disappears (msec)
+Threshold *-48~-6(-28) 10C I:Threshold Input level at which compression begins to be applied (dB)
+Ratio *1.0~20.0(5.0) 10E I:Ratio Compression ratio of the compressor
+OutputLevel *0~127(80) 110 I:Out Level Output level
+Ins Pan L63~ C ~R63 130 Insertion Pan
+SendIns-Rev 0~127 131 Insertion-to-Reverb Send Level
+SendIns-Var 0~127 132 Insertion-to-Variation Send Level
+InsDryLevel 0~127 133 Insertion Dry Level
+Datalist/E  10/21/98  8:32 PM  Page 30
+
+===== PAGE 31 =====
+31
+Cmp+OD+Dly Same parameters for Cmp+DS+Dly
+Range(Default) Param# Ctrl Dest Description
+Attack *1~40(7) 11C I:Attack Time until the compression takes effect (msec)
+Release *10~680(25) 11E I:Release Time until the compression finishes (msec)
+Threshold *-48~-6(-32) 120 I:Threshold Input level at which the compression takes effect (dB)
+Ratio *1.0~20.0(5.0) 122 I:Ratio Ratio of compressed level to input level
+Drive *0~127(18) 10E I:Drive Degree of distortion
+OutputLevel *0~127(65) 110 I:Out Level OutputLevel
+DS Low Gain *-12~+12(+ 4) 112 I:DSLowGain Gain with which the distortion will boost/cut the low range (dB)
+DS Mid Gain *-12~+12(+ 5) 114 I:DSMidGain Gain with which the distortion will boost/cut the middle range (dB)
+Delay 0.1~1365.0(190.0) 108 Delay time (msec)
+FB Level *-63~+63(+10) 10A I:FB Level Feedback level
+Delay Mix *0~127(50) 10C I:Delay Mix Depth of delay effect
+Dry/Wet *D63>W,D=W,D<W63(D<W63) 11A I:Dry/Wet Balance between the dry sound and effect sound
+Ins Pan L63~ C ~R63 130 Insertion Pan
+SendIns-Rev 0~127 131 Insertion-to-Reverb Send Level
+SendIns-Var 0~127 132 Insertion-to-Variation Send Level
+InsDryLevel 0~127 133 Insertion Dry Level
+Distortion
+Range(Default) Param# Ctrl Dest Description
+Drive *0~127(60) 108 I:Drive Degree of distortion
+EQ LowFreq *32~2.0k(180) 10A I:EQLowFreq Frequency at which the EQ will boost/cut the low range (Hz)
+EQ Low Gain *-12~+12(+ 8) 10C I:EQLowGain Gain with which the EQ will boost/cut the low range (dB)
+EQMidFreq *100~10.0k(1.1k) 114 I:EQMidFreq Frequency at which the EQ will boost/cut the mid range (Hz)
+EQ Mid Gain *-12~+12(+10) 116 I:EQMidGain Gain with which the EQ will boost/cut the mid range (dB)
+EQ Mid Q *1.0~12.0(1.0) 118 I:EQ Mid Q EQ Mid Q
+LPFCutoff *1.0k~18.0k,thru(9.0k) 10E I:LPFCutoff Frequency at which the filter will cut the high range (Hz)
+Edge *0~127(80) 11C I:Edge Curve of distortion characteristics (sharp (127):
+distortion begins suddenly;mild (0): distortion begins gradually)
+OutputLevel *0~127(65) 110 I:Out Level Output level
+Dry/Wet *D63>W,D=W,D<W63(D<W63) 11A I:Dry/Wet Balance between the dry sound and the effect sound
+Ins Pan L63~ C ~R63 130 Insertion Pan
+SendIns-Rev 0~127 131 Insertion-to-Reverb Send Level
+SendIns-Var 0~127 132 Insertion-to-Variation Send Level
+InsDryLevel 0~127 133 Insertion Dry Level
+Dist+Delay
+Range(Default) Param# Ctrl Dest Description
+Drive *0~127(60) 112 I:Drive Degree of distortion
+DS Low Gain *-12~+12(+ 8) 116 I:DSLowGain Gain with which the distortion will boost/cut the low range (dB)
+DS Mid Gain *-12~+12(+10) 118 I:DSMidGain Gain with which the distortion will boost/cut the middle range (dB)
+LchDelay 0.1~1365.0(50.0) 108 Left channel delay (msec)
+RchDelay 0.1~1365.0(100.0) 10A Right channel delay (msec)
+FB Delay 0.1~1365.0(200.0) 10C Feedback delay (msec)
+FB Level *-63~+63(+20) 10E I:FB Level Feedback Level
+Delay Mix *0~127(80) 110 I:Delay Mix Depth of delay effect
+OutputLevel *0~127(42) 114 I:Out Level OutputLevel
+Dry/Wet *D63>W,D=W,D<W63(D<W63) 11A I:Dry/Wet Balance between the dry sound and effect sound
+Ins Pan L63~ C ~R63 130 Insertion Pan
+SendIns-Rev 0~127 131 Insertion-to-Reverb Send Level
+SendIns-Var 0~127 132 Insertion-to-Variation Send Level
+InsDryLevel 0~127 133 Insertion Dry Level
+Overdrive Same parameters for Distortion
+Range(Default) Param# Ctrl Dest Description
+Drive *0~127(29) 108 I:Drive Degree of distortion
+EQ LowFreq *32~2.0k(315) 10A I:EQLowFreq Frequency at which the EQ will boost/cut the low range (Hz)
+EQ Low Gain *-12~+12(+ 4) 10C I:EQLowGain Gain with which the EQ will boost/cut the low range (dB)
+EQMidFreq *100~10.0k(1.2k) 114 I:EQMidFreq Frequency at which the EQ will boost/cut the mid range (Hz)
+EQ Mid Gain *-12~+12(+ 8) 116 I:EQMidGain Gain with which the EQ will boost/cut the mid range (dB)
+EQ Mid Q *1.0~12.0(1.0) 118 I:EQ Mid Q EQ Mid Q
+LPFCutoff *1.0k~18.0k,thru(4.0k) 10E I:LPFCutoff Frequency at which the filter will cut the high range (Hz)
+Edge *0~127(104) 11C I:Edge Curve of distortion characteristics (sharp (127):
+distortion begins suddenly;mild (0): distortion begins gradually)
+OutputLevel *0~127(80) 110 I:Out Level Output level
+Dry/Wet *D63>W,D=W,D<W63(D<W63) 11A I:Dry/Wet Balance between the dry sound and the effect sound
+Ins Pan L63~ C ~R63 130 Insertion Pan
+SendIns-Rev 0~127 131 Insertion-to-Reverb Send Level
+SendIns-Var 0~127 132 Insertion-to-Variation Send Level
+InsDryLevel 0~127 133 Insertion Dry Level
+Datalist/E  10/21/98  8:32 PM  Page 31
+
+===== PAGE 32 =====
+32
+Odrv+Delay Same parameters for Dist+Delay
+Range(Default) Param# Ctrl Dest Description
+Drive *0~127(25) 112 I:Drive Degree of distortion
+DS Low Gain *-12~+12(+ 4) 116 I:DSLowGain Gain with which the distortion will boost/cut the low range (dB)
+DS Mid Gain *-12~+12(+ 8) 118 I:DSMidGain Gain with which the distortion will boost/cut the middle range (dB)
+LchDelay 0.1~1365.0(50.0) 108 Left channel delay (msec)
+RchDelay 0.1~1365.0(100.0) 10A Right channel delay (msec)
+FB Delay 0.1~1365.0(200.0) 10C Feedback Delay (msec)
+FB Level *-63~+63(+20) 10E I:FB Level Feedback Level
+Delay Mix *0~127(64) 110 I:Delay Mix Depth of delay effect
+OutputLevel *0~127(55) 114 I:Out Level OutputLevel
+Dry/Wet *D63>W,D=W,D<W63(D<W63) 11A I:Dry/Wet Balance between the dry sound and effect sound
+Ins Pan L63~ C ~R63 130 Insertion Pan
+SendIns-Rev 0~127 131 Insertion-to-Reverb Send Level
+SendIns-Var 0~127 132 Insertion-to-Variation Send Level
+InsDryLevel 0~127 133 Insertion Dry Level
+Amp Sim
+Range(Default) Param# Ctrl Dest Description
+Drive *0~127(76) 108 I:Drive Degree of distortion
+Amp Type off,stack,combo,tube(tube) 10A Select the type of amp to be simulated
+LPFCutoff *1.0k~18.0k,thru(2.5k) 10C I:LPFCutoff Select the type of amp to be simulated (Hz)
+Edge *0~127(102) 11C I:Edge Curve of distortion characteristics (sharp (127):
+distortion begins suddenly;mild (0): distortion begins gradually)
+OutputLevel *0~127(80) 10E I:Out Level Output level
+Dry/Wet *D63>W,D=W,D<W63(D<W63) 11A I:Dry/Wet Balance between dry sound and effect sound
+Ins Pan L63~ C ~R63 130 Insertion Pan
+SendIns-Rev 0~127 131 Insertion-to-Reverb Send Level
+SendIns-Var 0~127 132 Insertion-to-Variation Send Level
+InsDryLevel 0~127 133 Insertion Dry Level
+Delay L,R
+Range(Default) Param# Ctrl Dest Description
+LchDelay 0.1~1365.0(250.0) 108 Length of left channel delay (msec)
+RchDelay 0.1~1365.0(375.0) 10A Length of right channel delay (msec)
+FBDelay1 0.1~1365.0(375.2) 10C Length of feedback delay 1 (msec)
+FBDelay2 0.1~1365.0(375.0) 10E Length of feedback delay 2 (msec)
+FB Level *-63~+63(+23) 110 I:FB Level Amount of feedback
+High Damp 0.1~1.0(0.3) 112 High range attenuation
+(lower values cause the high range to decay faster)
+EQ LowFreq *32~2.0k(400) 120 I:EQLowFreq Frequency at which the EQ will boost/cut the low range (Hz)
+EQ Low Gain *-12~+12(+ 0) 122 I:EQLowGain Gain with which the EQ will boost/cut the low range (dB)
+EQ HiFreq *500~16.0k(4.0k) 124 I:EQ HiFreq Frequency at which the EQ will boost/cut the high range (Hz)
+EQ Hi Gain *-12~+12(+ 0) 126 I:EQ HiGain Gain with which the EQ will boost/cut the high range (dB)
+Dry/Wet *D63>W,D=W,D<W63(D32>W) 11A I:Dry/Wet Balance of the dry sound and effect sound
+Ins Pan L63~ C ~R63 130 Insertion Pan
+SendIns-Rev 0~127 131 Insertion-to-Reverb Send Level
+SendIns-Var 0~127 132 Insertion-to-Variation Send Level
+InsDryLevel 0~127 133 Insertion Dry Level
+Delay LCR
+Range(Default) Param# Ctrl Dest Description
+LchDelay 0.1~1365.0(333.3) 108 Length of left channel delay (msec)
+RchDelay 0.1~1365.0(166.7) 10A Length of right channel delay (msec)
+CchDelay 0.1~1365.0(500.0) 10C Length of center channel delay (msec)
+FB Delay 0.1~1365.0(500.0) 10E Length of feedback delay (msec)
+FB Level *-63~+63(+10) 110 I:FB Level Feedback amount
+Cch Level *0~127(100) 112 I:Cch Level Volume of center channel
+High Damp 0.1~1.0(0.3) 114 High range attenuation
+(lower values cause the high range to decay faster)
+EQ LowFreq *32~2.0k(400) 120 I:EQLowFreq Frequency at which the EQ will boost/cut the low range (Hz)
+EQ Low Gain *-12~+12(+ 0) 122 I:EQLowGain Gain with which the EQ will boost/cut the low range (dB)
+EQ HiFreq *500~16.0k(4.0k) 124 I:EQ HiFreq Frequency at which the EQ will boost/cut the high range (Hz)
+EQ Hi Gain *-12~+12(+ 0) 126 I:EQ HiGain Gain with which the EQ will boost/cut the high range (dB)
+Dry/Wet *D63>W,D=W,D<W63(D32>W) 11A I:Dry/Wet Balance of the dry sound and effect sound
+Ins Pan L63~ C ~R63 130 Insertion Pan
+SendIns-Rev 0~127 131 Insertion-to-Reverb Send Level
+SendIns-Var 0~127 132 Insertion-to-Variation Send Level
+InsDryLevel 0~127 133 Insertion Dry Level
+Datalist/E  10/21/98  8:32 PM  Page 32
+
+===== PAGE 33 =====
+33
+Echo
+Range(Default) Param# Ctrl Dest Description
+LchDelay1 0.1~682.0(220.0) 108 Length of first delay of left channel (msec)
+Lch FB Lvl *-63~+63(+22) 10A I:Lch FBLvl Amount of feedback for left channel
+RchDelay1 0.1~682.0(210.0) 10C Length of first delay of right channel (msec)
+Rch FB Lvl *-63~+63(+21) 10E I:Rch FBLvl Amount of feedback for right channel
+High Damp 0.1~1.0(0.5) 110 High range attenuation
+(lower values cause the high range to decay faster)
+LchDelay2 0.1~682.0(230.0) 112 Length of second delay of left channel (msec)
+RchDelay2 0.1~682.0(235.0) 114 Length of second delay of right channel (msec)
+Delay2 Lvl *0~127(62) 116 I:Delay2Lvl Volume of second delay
+EQ LowFreq *32~2.0k(280) 120 I:EQLowFreq Frequency at which the EQ will boost/cut the low range (Hz)
+EQ Low Gain *-12~+12(- 6) 122 I:EQLowGain Gain with which the EQ will boost/cut the low range (dB)
+EQ HiFreq *500~16.0k(6.3k) 124 I:EQ HiFreq Frequency at which the EQ will boost/cut the high range (Hz)
+EQ Hi Gain *-12~+12(- 1) 126 I:EQ HiGain Gain with which the EQ will boost/cut the high range (dB)
+Dry/Wet *D63>W,D=W,D<W63(D32>W) 11A I:Dry/Wet Balance of the dry sound and effect sound
+Ins Pan L63~ C ~R63 130 Insertion Pan
+SendIns-Rev 0~127 131 Insertion-to-Reverb Send Level
+SendIns-Var 0~127 132 Insertion-to-Variation Send Level
+InsDryLevel 0~127 133 Insertion Dry Level
+ER 1
+Range(Default) Param# Ctrl Dest Description
+Early Type S-H,L-H,rdm,rvs,plt,spr(S-H) 108 Type of early reflections
+(small hall, large hall, random, reverse, plate, spring)
+Room Size 0.1~20.0(4.0) 10A Room Size
+Diffusion 0~10(5) 10C Diffusion
+InitDelay 0.1~200.0(9.5) 10E Delay time until early reflections start (msec)
+FB Level *-63~+63(+10) 110 I:FB Level Feedback Level
+HPF Cutoff *thru,22~8.0k(thru) 112 I:HPFCutoff Frequency at which the high pass filter will cut the low range (Hz)
+LPFCutoff *1.0k~18.0k,thru(4.0k) 114 I:LPFCutoff Frequency at which the low pass filter will cut the high range (Hz)
+Liveness 0~10(7) 11C Emphasis in high frequencies
+Density 0~3(1) 11E Density of early reflections
+High Damp 0.1~1.0(1.0) 120 High range attenuation
+(lower values cause the high range to decay faster)
+Dry/Wet *D63>W,D=W,D<W63(D35>W) 11A I:Dry/Wet Balance between the dry sound and effect sound
+Ins Pan L63~ C ~R63 130 Insertion Pan
+SendIns-Rev 0~127 131 Insertion-to-Reverb Send Level
+SendIns-Var 0~127 132 Insertion-to-Variation Send Level
+InsDryLevel 0~127 133 Insertion Dry Level
+CrossDelay
+Range(Default) Param# Ctrl Dest Description
+L>R Delay 0.1~682.0(365.0) 108 Delay time from left (input) to right (output)  (msec)
+R>L Delay 0.1~682.0(365.0) 10A Delay time from right (input) to left (output)  (msec)
+FB Level *-63~+63(+24) 10C I:FB Level Amount of feedback
+InputSelect L,R,L&R(R) 10E Input select
+High Damp 0.1~1.0(0.5) 110 High range attenuation
+(lower values cause the high range to decay faster))
+EQ LowFreq *32~2.0k(355) 120 I:EQLowFreq Frequency at which the EQ will boost/cut the low range (Hz)
+EQ Low Gain *-12~+12(+ 0) 122 I:EQLowGain Gain with which the EQ will boost/cut the low range (dB)
+EQ HiFreq *500~16.0k(6.3k) 124 I:EQ HiFreq Frequency at which the EQ will boost/cut the high range (Hz)
+EQ Hi Gain *-12~+12(- 2) 126 I:EQ HiGain Gain with which the EQ will boost/cut the high range (dB)
+Dry/Wet *D63>W,D=W,D<W63(D32>W) 11A I:Dry/Wet Balance of the dry sound and effect sound
+Ins Pan L63~ C ~R63 130 Insertion Pan
+SendIns-Rev 0~127 131 Insertion-to-Reverb Send Level
+SendIns-Var 0~127 132 Insertion-to-Variation Send Level
+InsDryLevel 0~127 133 Insertion Dry Level
+Datalist/E  10/21/98  8:32 PM  Page 33
+
+===== PAGE 34 =====
+34
+ER 2 Same parameters for ER 1
+Range(Default) Param# Ctrl Dest Description
+Early Type S-H,L-H,rdm,rvs,plt,spr(rdm) 108 Type of early reflections
+(Small Hall, Large Hall, random, reverse, plate, spring)
+Room Size 0.1~20.0(2.0) 10A Room Size
+Diffusion 0~10(8) 10C Diffusion
+InitDelay 0.1~200.0(6.4) 10E Delay time until early reflections start (msec)
+FB Level *-63~+63(+ 3) 110 I:FB Level Feedback Level
+HPF Cutoff *thru,22~8.0k(thru) 112 I:HPFCutoff Frequency at which the high pass filter will cut the low range (Hz)
+LPFCutoff *1.0k~18.0k,thru(12.0k) 114 I:LPFCutoff Frequency at which the low pass filter will cut the high range (Hz)
+Liveness 0~10(5) 11C Emphasis in high frequencies
+Density 0~3(3) 11E Density of early reflections
+High Damp 0.1~1.0(1.0) 120 High range attenuation
+(lower values cause the high range to decay faster)
+Dry/Wet *D63>W,D=W,D<W63(D35>W) 11A I:Dry/Wet Balance between the dry sound and effect sound
+Ins Pan L63~ C ~R63 130 Insertion Pan
+SendIns-Rev 0~127 131 Insertion-to-Reverb Send Level
+SendIns-Var 0~127 132 Insertion-to-Variation Send Level
+InsDryLevel 0~127 133 Insertion Dry Level
+Gate Rev
+Range(Default) Param# Ctrl Dest Description
+Gate Type typeA,typeB(typeA) 108 Gate Reverb Type
+Room Size 0.1~20.0(1.0) 10A Room Size
+Diffusion 0~10(10) 10C Diffusion
+InitDelay 0.1~200.0(0.1) 10E Delay time until early reflections start (msec)
+FB Level *-63~+63(+ 0) 110 I:FB Level Feedback Level
+HPF Cutoff *thru,22~8.0k(thru) 112 I:HPFCutoff Frequency at which the high pass filter will cut the low range (Hz)
+LPFCutoff *1.0k~18.0k,thru(8.0k) 114 I:LPFCutoff Frequency at which the low pass filter will cut the high range (Hz)
+Liveness 0~10(5) 11C Emphasis in high frequencies
+Density 0~3(3) 11E Density of early reflections
+High Damp 0.1~1.0(0.5) 120 High range attenuation
+(lower values cause the high range to decay faster)
+Dry/Wet *D63>W,D=W,D<W63(D12>W) 11A I:Dry/Wet Balance between the dry sound and effect sound
+Ins Pan L63~ C ~R63 130 Insertion Pan
+SendIns-Rev 0~127 131 Insertion-to-Reverb Send Level
+SendIns-Var 0~127 132 Insertion-to-Variation Send Level
+InsDryLevel 0~127 133 Insertion Dry Level
+Revrs Gate Same parameters for Gate Rev
+Range(Default) Param# Ctrl Dest Description
+Gate Type typeA,typeB(typeB) 108 Gate Reverb Type
+Room Size 0.1~20.0(2.5) 10A Room Size
+Diffusion 0~10(8) 10C Diffusion
+InitDelay 0.1~200.0(4.8) 10E Delay time until the early reflections (msec)
+FB Level *-63~+63(+ 0) 110 I:FB Level Feedback Level
+HPF Cutoff *thru,22~8.0k(thru) 112 I:HPFCutoff Frequency at which the high pass filter will cut the low range (Hz)
+LPFCutoff *1.0k~18.0k,thru(4.5k) 114 I:LPFCutoff Frequency at which the low pass filter will cut the high range (Hz)
+Liveness 0~10(6) 11C Emphasis in high frequencies
+Density 0~3(3) 11E Density of early reflections
+High Damp 0.1~1.0(1.0) 120 High range attenuation
+(lower values cause the high range to decay faster)
+Dry/Wet *D63>W,D=W,D<W63(D<W63) 11A I:Dry/Wet Balance between the dry sound and effect sound
+Ins Pan L63~ C ~R63 130 Insertion Pan
+SendIns-Rev 0~127 131 Insertion-to-Reverb Send Level
+SendIns-Var 0~127 132 Insertion-to-Variation Send Level
+InsDryLevel 0~127 133 Insertion Dry Level
+Datalist/E  10/21/98  8:32 PM  Page 34
+
+===== PAGE 35 =====
+35
+1.MIDI Reception/Transmission Block Diagrams
+< MIDI Reception Conditions > 1/2
+Note: sw1: Selected from among all, odd, and even in a MIDI setting (Receive Note).
+sw2: Switched on with a MIDI setting (Receive Pr ogram Change = on).
+sw3: Switched on with a MIDI setting (Receive Bank Select = on).
+< MIDI Reception Conditions > 2/2
+Note: sw4: Switched on with a MIDI setting (Receive System Exclusive = on).
+sw5: Switched on with a MIDI setting (Receive Bulk Dump = on).
+< MIDI Transmission Conditions >
+KNOB 1-4          $Bn 
+PERFORMANCE BULK
+VOICE BULK
+FSEQ BULK
+SYSTEM BULK
+PARAMETER CHANGE
+Transmit Knob
+on
+<Tch>
+transmit
+ch
+MIDI
+<Dev No>
+≠off
+$F0,$43,$0n,$5E PERFORMANCE BULK
+$F0,$43,$0n,$5E VOICE BULK
+$F0,$43,$0n,$5E FSEQ BULK
+$F0,$43,$0n,$5E SYSTEM BULK
+$F0,$43,$0n,$00 DX VCED BULK
+$F0,$43,$0n,$05 DX ACED BULK
+$F0,$43,$1n,$5E PERFORMANCE  
+PARAMETER CHANGE
+$F0,$43,$1n,$5E VOICE
+PARAMETER CHANGE
+$F0,$43,$1n,$5E FSEQ HEADER
+PARAMETER CHANGE
+$F0,$43,$1n,$5E SYSTEM
+PARAMETER CHANGE
+$F0,$43,$2n,$5E PERFORMANCE BULK
+DUMP REQUEST
+$F0,$43,$2n,$5E VOICE BULK
+DUMP REQUEST
+$F0,$43,$2n,$5E FSEQ BULK
+DUMP REQUEST
+$F0,$43,$2n,$5E SYSTEM BULK
+DUMP REQUEST
+$F0,$43,$3n,$5E PERFORMANCE  
+PARAMETER REQUEST
+$F0,$43,$3n,$5E VOICE
+PARAMETER REQUEST
+$F0,$43,$3n,$5E FSEQ HEADER
+PARAMETER REQUEST
+$F0,$43,$3n,$5E SYSTEM
+PARAMETER REQUEST
+MIDI
+sw4 sw5
+<Dev No>
+    ≠off
+$8n NOTE OFF
+$9n NOTE ON/OFF
+$An AFTER TOUCH
+(Note numbers are ignored.)
+$Bn,$xx each controller
+$Bn,$xx
+$Bn,$20
+$Bn,$00 BANK SELECT
+$Cn PROGRAM CHANGE
+$Dn AFTER TOUCH
+$En PITCH BENDER
+$F8 TIMING CLOCK
+$FE ACTIVE SENSING
+MIDI
+<each channel>
+<each channel>
+<each channel>
+<each channel>
+<each channel>
+<each channel>
+<each channel>
+sw1
+sw3
+sw2
+MIDI Data Format
+Many MIDI messages listed in the MIDI Data For mat section are expressed in hexadecimal or
+binary numbers. Hexadecimal numbers may include the letter “H” as a suffix. The letter “n”
+indicates a certain whole number.
+The chart below lists the corresponding decimal number for each hexadecimal/binar y number.
+Additional Notes
+* For example, 144 - 159(Decimal)/9nH/1001 0000 - 1001 1111(Binar y) indicate the note-on
+messages for the channels 1 through 16 respectively. 176 - 191/BnH/1011 0000 - 1011 1111
+indicate the control change messages for the channels 1 thr ough 16 respectively. 192 -
+207/CnH/1100 0000 - 1100 1111 indicate the pr ogram change messages for the channels 1
+through 16 respectively.  240/F0H/1111 0000 is positioned at the beginning of data to indicate a
+system exclusive message. 247/F7H/1111 0111 is positioned at the end of the system exclusive
+message. 
+* aaH(Hexadecimal)/0aaaaaaa(Binary) indicates the data addresses. The data address consists
+of High, Mid and Low.
+* bbH/0bbbbbbb indicates byte counts.
+* ccH/0ccccccc indicates tcheck sums.
+* ddH/0ddddddd indicates data/value.
+Decimal Hexadecimal Binary Decimal Hexadecimal Binary
+0
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+43
+44
+45
+46
+47
+48
+49
+50
+51
+52
+53
+54
+55
+56
+57
+58
+59
+60
+61
+62
+63
+00
+01
+02
+03
+04
+05
+06
+07
+08
+09
+0A
+0B
+0C
+0D
+0E
+0F
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+1A
+1B
+1C
+1D
+1E
+1F
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+2A
+2B
+2C
+2D
+2E
+2F
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+3A
+3B
+3C
+3D
+3E
+3F
+0000 0000
+0000 0001
+0000 0010
+0000 0011
+0000 0100
+0000 0101
+0000 0110
+0000 0111
+0000 1000
+0000 1001
+0000 1010
+0000 1011
+0000 1100
+0000 1101
+0000 1110
+0000 1111
+0001 0000
+0001 0001
+0001 0010
+0001 0011
+0001 0100
+0001 0101
+0001 0110
+0001 0111
+0001 1000
+0001 1001
+0001 1010
+0001 1011
+0001 1100
+0001 1101
+0001 1110
+0001 1111
+0010 0000
+0010 0001
+0010 0010
+0010 0011
+0010 0100
+0010 0101
+0010 0110
+0010 0111
+0010 1000
+0010 1001
+0010 1010
+0010 1011
+0010 1100
+0010 1101
+0010 1110
+0010 1111
+0011 0000
+0011 0001
+0011 0010
+0011 0011
+0011 0100
+0011 0101
+0011 0110
+0011 0111
+0011 1000
+0011 1001
+0011 1010
+0011 1011
+0011 1100
+0011 1101
+0011 1110
+0011 1111
+64
+65
+66
+67
+68
+69
+70
+71
+72
+73
+74
+75
+76
+77
+78
+79
+80
+81
+82
+83
+84
+85
+86
+87
+88
+89
+90
+91
+92
+93
+94
+95
+96
+97
+98
+99
+100
+101
+102
+103
+104
+105
+106
+107
+108
+109
+110
+111
+112
+113
+114
+115
+116
+117
+118
+119
+120
+121
+122
+123
+124
+125
+126
+127
+40
+41
+42
+43
+44
+45
+46
+47
+48
+49
+4A
+4B
+4C
+4D
+4E
+4F
+50
+51
+52
+53
+54
+55
+56
+57
+58
+59
+5A
+5B
+5C
+5D
+5E
+5F
+60
+61
+62
+63
+64
+65
+66
+67
+68
+69
+6A
+6B
+6C
+6D
+6E
+6F
+70
+71
+72
+73
+74
+75
+76
+77
+78
+79
+7A
+7B
+7C
+7D
+7E
+7F
+0100 0000
+0100 0001
+0100 0010
+0100 0011
+0100 0100
+0100 0101
+0100 0110
+0100 0111
+0100 1000
+0100 1001
+0100 1010
+0100 1011
+0100 1100
+0100 1101
+0100 1110
+0100 1111
+0101 0000
+0101 0001
+0101 0010
+0101 0011
+0101 0100
+0101 0101
+0101 0110
+0101 0111
+0101 1000
+0101 1001
+0101 1010
+0101 1011
+0101 1100
+0101 1101
+0101 1110
+0101 1111
+0110 0000
+0110 0001
+0110 0010
+0110 0011
+0110 0100
+0110 0101
+0110 0110
+0110 0111
+0110 1000
+0110 1001
+0110 1010
+0110 1011
+0110 1100
+0110 1101
+0110 1110
+0110 1111
+0111 0000
+0111 0001
+0111 0010
+0111 0011
+0111 0100
+0111 0101
+0111 0110
+0111 0111
+0111 1000
+0111 1001
+0111 1010
+0111 1011
+0111 1100
+0111 1101
+0111 1110
+0111 1111
+Datalist/E  10/21/98  8:32 PM  Page 35
+
+===== PAGE 36 =====
+36
+2.Channel Messages
+2.1 Transmission
+2.1.1 Control Change
+Assigned controller numbers are output when built-in knobs are turned.
+Cntrl# Parameter Data Range
+73 Attack Time 0~127
+72 Release Time 0~127
+1~31, 33~95 Formant Control 0~127
+1~31, 33~95 FM Control 0~127
+1~31, 33~95 Knob 1 0~127
+1~31, 33~95 Knob 2 0~127
+1~31, 33~95 Knob 3 0~127
+1~31, 33~95 Knob 4 0~127
+Note: Attack Time to FM Control are assigned to knobs with the upper LED lit.  Knob 1 to 4 
+are assigned with the lower LED lit.
+2.2 Reception
+2.2.1 Note On/Off
+2.2.1.1 Note Off
+key range = C-2~G8
+velocity range = not received
+2.2.1.2 Note On / Off
+key range = C-2~G8
+velocity range = 0~127 (0 = Note off) 
+2.2.2 Control Change
+Parameters in the following table are controllable using MIDI. A part that can receives multiple
+channels operates by those channels in the r eceived order.
+Cntrl# Parameter Data Range
+0 Bank Select MSB 0~127 *1
+32 Bank Select LSB 0~127 *1
+1 Modulation wheel 0~127
+5 Portamento Time 0~127 *2
+6 Data Entry 0~127 *2, *3
+7 Volume 0~127 *2, *4
+10 Pan 0~127 *2, *4
+11 Expression 0~127
+64 Sustain (Hold1) 0, 127
+65 Portamento Switch 0, 127 *2
+71 Harmonic Content 0~127 *2
+72 Release Time 0~127 *2
+73 Attack Time 0~127 *2
+74 Brightness 0~127 *2
+91 Reverb Send 0~127 *2
+93 Variation Send 0~127 *2
+1~31, 33~95 BC (default: 2) 0~127
+1~31, 33~95 FC (default: 4) 0~127
+1~31, 33~95 Formant Control 0~127 *2
+1~31, 33~95 FM Control 0~127 *2
+1~31, 33~95 Knob 1~4 0~127
+1~31, 33~95 MIDI Control 1~4 0~127
+98 NRPN LSB 8~102 *3
+99 NRPN MSB 1 *3
+100 RPN LSB 0~2 *3
+101 RPN MSB 0 *3
+*1: Refer to "2.2.3 Program Change."
+*2: Corresponding parameter values directly change with control changes, without using the
+control matrix.  Those values become r eference points for control changes routed by the control
+matrix, which are not reset by Reset All Controllers.
+*3: Parameters that follow are controllable using NRPN or RPN massages.
+NRPN Data Entry Part Parameter Data Range
+MSB LSB MSB
+----------------------------------------------------------
+01H 08H 00H~40H~7FH LFO1 Speed -64~+0~+63
+01H 09H 00H~40H~7FH LFO1 Pmod -64~+0~+63
+01H 0AH 00H~40H~7FH LFO1 Delay -64~+0~+63
+01H 0BH 00H~40H~7FH LFO2 Speed -64~+0~+63
+01H 0CH 00H~40H~7FH LFO2 FltMod -64~+0~+63
+01H 20H 00H~40H~7FH Filter Freq -64~+0~+63
+01H 21H 00H~40H~7FH Filter Reso -64~+0~+63
+01H 63H 00H~40H~7FH Attack Time -64~+0~+63
+01H 64H 00H~40H~7FH Decay Time -64~+0~+63
+01H 66H 00H~40H~7FH ReleaseTime -64~+0~+63
+RPN Data Entry Part Parameter Data Range
+MSB LSB MSB
+----------------------------------------------------------
+00H 00H 00H~18H PB Range +0, +1~+24
+PB Range Lo- 1~-24
+00H 01H 0FH~40H~70H Detune -64~+0~+63
+00H 02H 28H~40H~58H Note Shift -24~+0~+24
+On reception of Pitch Bend Range, PB Range Lo is set to a minus value of r eceived value.
+*4: With "Program Change Mode = perform," Performance Volume and Pan are controllable using
+Performance Channel.  With "Program Change Mode = multi," Per formance Volume and Pan
+are controllable using Performance Channel while Part Volume and Pan are controllable using
+Part Receivee Channel.
+2.2.3 Program Change
+On reception of Program Change, FS1R operates as follows.
+Receives Program Change is received only in PLAY MODE.
+In case "Receive Program Change = off" is selected in system setup, Bank Select and Pr ogram
+Change are not received.  With "Receive Program Change = on" and "Receive Bank Select = of f,
+"Bank Select is not received.  On reception of Program Change, a voice or per formance program
+(1~128) , depending on the Program Change Mode setting, from the current bank is selected.
+With "Program Change Mode = perform," a performance program is selected using Performance
+Channel.  With "Program Change Mode = multi," a per formance program is selected using
+Performance Channel and a voice program is selected using Part Receive Channel.
+Bank Select and Program Change data bytes are as follow.
+BANK SELECT $Bn, $00, $3F (MSB) 
+$Bn, $20, $00~$0B or $40~$43 (LSB) 
+PROGRAM CHANGE $Cn, $00~$7F
+Bank Select other than found in the above table is ignored. Thus, any bank selection does not take place and a
+following Program Change selects from the current bank that is not changed.
+2.2.3.1 Performance Program Change
+Bank Select or Program Change for a performance is received using Performance Channel, as
+follows.
+1-16 : Received only specified channel.
+all : Received all channels (OMNI ON) .
+off : Not received.
+2.2.3.2 Voice Program Change
+Bank Select or Program Change for a voice is r eceived using Part Receive Channel (Part
+Receive Channel to Part Receive Channel Max) .  W ith "Part Receive Channel = pfm," Par t
+Receive Channel matches Performance Channel.
+2.2.4 Pitch Bend Change
+FS1R receives only Pitch Bend Change MSB.  A par t assigned with multiple channels can sound
+separately according to Pitch Bend Change on dif ferent channels.
+2.2.5 After Touch
+After Touch is received on Receive Channel (s) specified.  A par t assigned with multiple channels
+equivalently receives After Touch on different channels, giving proiority to last reception of this
+message.  The 3rd byte of Polyphonic After Touch is ignored and processed as Channel After
+Touch.
+2.2.6 Channel Mode Message
+Cntrl# Parameter Data Range
+120 All Sound Off 0
+121 Reset All Controller 0 *1
+123 ll Notes Off 0
+126 Mono 0 *2
+127 Pol 0
+*1 A default value for each message reception is as follows.
+$00 for Control Change other than Bank Select and After Touch. Control Changes set to route in
+the control matrix to affect part parameters have their corresponding part parameter values
+(last edited). Control Changes that can directly change parameters without the control matrix
+are not reset by Reset All Controllers, since their values are referred to by other Control
+Changes for the same parameters via the matrix.
+Sustain = $00 (off) 
+Expression = $7F
+RPN, NRPN = $7F (Null) 
+Pitch Bend = $00, $40 (Center) 
+*2 The 3rd byte is ignored.
+Bank No.MSB / LSB PGM CNG No.
+Voice        INTERNAL 63($3F) /  0($00) 1~128($00~$7F)
+             PRESET A 63($3F) /  1($01)
+                : :
+             PRESET K 63($3F) / 11($0B)
+Performance  INTERNAL 63($3F) / 64($40) 1~128($00~$7F)
+             PRESET A 63($3F) / 65($41)
+             PRESET B 63($3F) / 66($42)
+             PRESET C 63($3F) / 67($43)
+Datalist/E  10/21/98  8:32 PM  Page 36
+
+===== PAGE 37 =====
+37
+3. System Exclusive Message
+3.1 Parameter Change and Parameter Request
+FS1R transmits and receives its native parameter changes.  FS1R also r eceives requests for
+parameter changes for corresponding parameters, when "Receive System Exclusive = on" is set
+and Device Number contained in System Exclusive massages matches the FS1R Device Number
+setting.  On reception of a request, FS1R transmits out the requested parameter.
+FS1R receives a parameter constructed of 2 bytes (i.e. Fseq Speed Ratio) via an Addr ess High.
+Parameter Change
+11110000 F0 Exclusive Status
+01000011 43 YAMAHA ID
+0001nnnn 1n Device Number
+01011110 5E Model ID
+0gggpppp gggpppp *Parameter Address High (H) 
+0mmmmmmm mmmmmmm *Parameter Address Middle (M) 
+0lllllll lllllll *Parameter Address Low (L) 
+0vvvvvvv vvvvvvv Data Value MS 7bit
+0vvvvvvv vvvvvvv Data Value LS 7bit
+11110111 F7 End of Exclusive
+Parameter Request
+11110000 F0 Exclusive Status
+01000011 43 YAMAHA ID
+0011nnnn 3n Device Number
+01011110 5E Model ID
+0gggpppp gggpppp *Parameter Address High (H) 
+0mmmmmmm mmmmmmm *Parameter Address Middle (M) 
+0lllllll lllllll *Parameter Address Low (L) 
+11110111 F7 End of Exclusive
+*Parameter Address (H) (M) (L) Description
+SYSTEM 00 00 ll
+PERFORM 10 mm ll Performance Common
+/VOICE 30 00 ll Performance Part 1
+31 00 ll Performance Part 2
+32 00 ll Performance Part 3
+33 00 ll Performance Part 4
+40 00 ll Part 1 Voice Common
+60 00 ll Part 1 Voice Operator 1
+: :
+07 ll Part 1 Voice Operator 8
+: : :
+43 00 ll Part 4 Voice Common
+63 00 ll Part 4 Voice Operator 1
+: :
+07 ll Part 4 Voice Operator 8
+FSEQ 70 00 ll Fseq Header
+mm = Parameter Number MSB
+ll = Parameter Number LSB
+See MIDI data tables <Table 1> to <table 4> for details.
+3.2 Bulk Data
+FS1R transmits and receives 4 kinds of bulk data (1~4, FS1R native) in addition to r eception of
+Yamaha DX series' bulk data (5~6, VCED and ACED), with "Receive Bulk Dump = on" and Device
+Number contained in System Exclusive massages matches the FS1R Device Number setting.  On
+reception of a request, FS1R transmits out the requested parameter change.
+1. Performance bulk dump
+2. Voice bulk dump
+3. Fseq bulk dump
+4. System bulk dump
+5. DX Series VCED bulk dump 
+6. DX Series ACED bulk dump
+3.2.1 FS1R Native Bulk Dump and Dump Request (1, 2, 3, 4)
+FS1R Native Bulk Dump
+11110000 F0 Exclusive Status
+01000011 43 YAMAHA ID
+0000nnnn 0n Device Number
+01011110 5E Model ID
+0bbbbbbb bbbbbbb Byte Count High
+0bbbbbbb bbbbbbb Byte Count Low
+0hhhhhhh hhhhhhh *Address High (H) 
+0mmmmmmm mmmmmmm *Address Middle (M) 
+0lllllll lllllll *Address Low (L) 
+0ddddddd ddddddd Data
+| | Byte Count
+0ddddddd ddddddd Data
+0ccccccc ccccccc Check-sum
+11110111 F7 End of Exclusive
+The Data section matches "vv" in the MIDI data tables <T able 1> to <Table 4>.
+Check-sum is a value that makes "0" (zer o) in lower 7 bits of an added value of Byte Count,
+Address, Data, and Check-sum itself.
+Dump Request
+11110000 F0 Exclusive Status
+01000011 43 YAMAHA ID
+0010nnnn 2n Device Number
+01011110 5E Model ID
+0hhhhhhh hhhhhhh *Address High (H) 
+0mmmmmmm mmmmmmm *Address Middle (M) 
+0lllllll lllllll *Address Low (L) 
+11110111 F7 End of Exclusive
+*Address (H) (M) (L) Description
+SYSTEM 00 00 00
+PERFORM 10 00 00 Current Performance Bulk
+/VOICE 11 00 nn 1 Internal Performance Bulk
+40 00 00 Part 1 Current Voice Bulk
+: : : :
+43 00 00 Part 4 Current Voice Bulk
+51 00 nn 1 Internal Voice Bulk
+6b 00 nn FSeq Bulk
+b = Bank 0:Current, 1:Internal
+nn = Memory No. 
+See the MIDI data tables <Table 1> to <Table 4> for more information of Address and Byte Count.
+FSeq Bulk does not interpret Byte Count.
+3.2.2 DX Series VCED and ACED Bulk Dump (5, 6) 
+11110000 F0
+01000011 43
+0000nnnn nnnn = Device Number
+0ttttttt ttttttt = Format Number
+0bbbbbbb bbbbbbb = Byte Count High
+0bbbbbbb bbbbbbb = Byte Count Low
+0ddddddd ddddddd = Data
+| | Byte Count
+0ddddddd ddddddd = Data
+0ccccccc ccccccc = Check-sum
+11110111 F7
+See the MIDI data table <Table 5> for more information of Format Number and Byte Count.
+VCED and ACED bulk data is r eceived using the Part 1 Voice edit buffer.  VCED data
+represents Voice data for Yamaha DX7 while ACED data represents additions to DX7's Voice
+data, which is available with DX7II, DX7S, and TX802.
+4. Real Time Message
+4.1 Active Sensing
+a) Transmission
+Not transmitted.
+b) Reception
+If an "FE" (Active Sensing status message) is received, FS1R starts to wait for next "FE."  If the next
+message does not arrive in approximately 500 msec., FS1R mutes the notes currently sounding.
+4.2 Timing Clock
+a) Transmission
+Not transmitted.
+b) Reception
+Received and used as sync clock when "Fseq Speed = midi (1/4,1/2,1/1,2/1,4/1)" is selected.
+Datalist/E  10/21/98  8:32 PM  Page 37
+
+===== PAGE 38 =====
+38
+MIDI Data Tables
+<Table 1> Performance Parameter
+Byte Count
+common 80
+effect data 112
+part data 52 x 4 = 208
+-------------------------------------
+total 400
+Performance Common Parameter (Byte Count: 80 bytes) 
+F0 43 1n 5E 10 00 ll vv vv F7
+ll vv vv Description
+00 20-7F NAME 0
+01 20-7F NAME 1 
+02 20-7F NAME 2
+03 20-7F NAME 3
+04 20-7F NAME 4
+05 20-7F NAME 5
+06 20-7F NAME 6
+07 20-7F NAME 7
+08 20-7F NAME 8
+09 20-7F NAME 9
+0A 20-7F NAME 10
+0B 20-7F NAME 11
+0C reserved
+0D reserved
+0E 00-16 CATEGORY
+0F reserved
+10 00-7F performance volume
+11 01-7F performance pan (L63~0~R63)
+12 00-30 performance note shift (-24~0~+24)
+13 reserved
+14 00-02 individual out (0: off, 1: pre ins, 2: post ins)
+15 00-04 FSEQ PART (0: off, 1~4: part)
+16 00-01 FSEQ bank 0: int, 1: pre
+17 00-59 FSEQ number int (0-5) , pre (0-89)
+18 00-7F FSEQ Speed Ratio (10.0~500.0) / MIDI Clock (0-4)
+MIDI Clock:  0: 1/4, 1: 1/2, 2: 1/1, 3: 2/1, 4: 4/1 
+1A 00-7F FSEQ start step offset (hi byte)
+00-7F FSEQ start step offset (lo byte)
+1C 00-7F FSEQ start step of loop point (hi byte)
+00-7F FSEQ start step of loop point (lo byte)
+1E 00-7F FSEQ end step of loop point (hi byte)
+00-7F FSEQ end step of loop point (lo byte)
+20 00-01 FSEQ loop mode (0: one way, 1: round)
+21 01-02 FSEQ play mode (1: scratch, 2: fseq)
+22 00-07 FSEQ velocity sensitivity for tempo
+23 00-01 FSEQ formant pitch mode
+24 00-01 FSEQ key on trigger (0: first, 1: all)
+25 reserved
+26 00-63 FSEQ formant seqence delay
+27 00-7F FSEQ level velocity sensitivity (-64~+63)
+28 00-0F controller 1 part switch [----pppp]
+ﬂ ﬂ ﬂ
+2F 00-0F controller 8 part switch [----pppp]
+30 00-7F controller 1 source switch (bitmap-high)
+31 00-7F controller 1 source switch (bitmap-low)
+ﬂ ﬂ ﬂ
+32 00-7F controller 8 source switch (bitmap-high)
+3F 00-7F controller 8 source switch (bitmap-low) 
+40 00-2F controller 1 destination
+ﬂ ﬂ ﬂ
+47 00-2F controller 8 destination 
+48 00-7F controller 1 depth (-64~+63)
+ﬂ ﬂ ﬂ
+4F 00-7F controller 8 depth (-64~+63)
+Performance Effect Parameter (Byte Count: 112 bytes)
+F0 43 1n 5E 10 mm ll vv vv F7
+mm ll vv vv Description
+00 50 00-7F Reverb parameter (See "Effect Parameter List.")
+00-7F Same as above. Same as above.
+00 52 00-7F Same as above. Same as above.
+00-7F Same as above. Same as above.
+00 54 00-7F Same as above. Same as above.
+00-7F Same as above. Same as above.
+00 56 00-7F Same as above. Same as above.
+00-7F Same as above. Same as above.
+00 58 00-7F Same as above. Same as above.
+00-7F Same as above. Same as above.
+00 5A 00-7F Same as above. Same as above.
+00-7F Same as above. Same as above.
+00 5C 00-7F Same as above. Same as above.
+00-7F Same as above. Same as above.
+00 5E 00-7F Same as above. Same as above.
+00-7F Same as above. Same as above.
+00 60 00-7F Same as above. Same as above.
+00 61 00-7F Reverb parameter (See "Effect Parameter List.")
+00 62 00-7F Same as above. Same as above.
+00 63 00-7F Same as above. Same as above.
+00 64 00-7F Same as above. Same as above.
+00 65 00-7F Same as above. Same as above.
+00 66 00-7F Same as above. Same as above.
+00 67 00-7F Same as above. Same as above.
+00 68 00-7F Variation parameter (See "Effect Parameter List.")
+00-7F Same as above. Same as above.
+00 6A 00-7F Same as above. Same as above.
+00-7F Same as above. Same as above.
+00 6C 00-7F Same as above. Same as above.
+00-7F Same as above. Same as above.
+00 6E 00-7F Same as above. Same as above.
+00-7F Same as above. Same as above.
+00 70 00-7F Same as above. Same as above.
+00-7F Same as above. Same as above.
+00 72 00-7F Same as above. Same as above.
+00-7F Same as above. Same as above.
+00 74 00-7F Same as above. Same as above.
+00-7F Same as above. Same as above.
+00 76 00-7F Same as above. Same as above.
+00-7F Same as above. Same as above.
+00 78 00-7F Same as above. Same as above.
+00-7F Same as above. Same as above.
+00 7A 00-7F Same as above. Same as above.
+00-7F Same as above. Same as above.
+00 7C 00-7F Same as above. Same as above.
+00-7F Same as above. Same as above.
+00 7E 00-7F Same as above. Same as above.
+00-7F Same as above. Same as above.
+01 00 00-7F Same as above. Same as above.
+00-7F Same as above. Same as above.
+01 02 00-7F Same as above. Same as above.
+00-7F Same as above. Same as above.
+01 04 00-7F Same as above. Same as above.
+00-7F Same as above. Same as above.
+01 06 00-7F Same as above. Same as above.
+00-7F Same as above. Same as above.
+01 08 00-7F Insertion parameter (See "Effect Parameter List.")
+00-7F Same as above. Same as above.
+01 0A 00-7F Same as above. Same as above.
+00-7F Same as above. Same as above.
+01 0C 00-7F Same as above. Same as above.
+00-7F Same as above. Same as above.
+01 0E 00-7F Same as above. Same as above.
+00-7F Same as above. Same as above.
+01 10 00-7F Same as above. Same as above.
+00-7F Same as above. Same as above.
+01 12 00-7F Same as above. Same as above.
+00-7F Same as above. Same as above.
+01 14 00-7F Same as above. Same as above.
+00-7F Same as above. Same as above.
+01 16 00-7F Same as above. Same as above.
+00-7F Same as above. Same as above.
+01 18 00-7F Same as above. Same as above.
+00-7F Same as above. Same as above.
+01 1A 00-7F Same as above. Same as above.
+00-7F Same as above. Same as above.
+01 1C 00-7F Same as above. Same as above.
+00-7F Same as above. Same as above.
+01 1E 00-7F Same as above. Same as above.
+00-7F Same as above. Same as above.
+01 20 00-7F Same as above. Same as above.
+00-7F Same as above. Same as above.
+01 22 00-7F Same as above. Same as above.
+00-7F Same as above. Same as above.
+01 24 00-7F Same as above. Same as above.
+00-7F Same as above. Same as above.
+01 26 00-7F Same as above. Same as above.
+00-7F Same as above. Same as above.
+01 28 00-10 Reverb type (See "Effect Type List.")
+01 29 01-7F Reverb pan L63...C...R63 (1..64..127)
+01 2A 00-7F Reverb return
+01 2B 00-1C Variation type (See "Effect Type List.")
+01 2C 01-7F Variation pan L63...C...R63 (1..64..127)
+01 2D 00-7F Variation return
+01 2E 00-7F Send Variation to Reverb
+01 2F 00-28 Insertion type (See "Effect Type List.")
+01 30 01-7F Insertion pan L63...C...R63 (1..64..127)
+01 31 00-7F Send insertion to Reverb
+01 32 00-7F Send insertion to Variation
+01 33 00-7F Insertion level
+01 34 34-4C EQ low gain -12~+12 [dB]
+01 35 04-28 EQ low frequency 32~2000 [Hz]
+01 36 01-78 EQ low Q 0.1~12.0
+01 37 00-01 EQ low shape 00: shelving, 01: peaking
+01 38 34-4C EQ mid gain -12~+12 [dB]
+01 39 0E-36 EQ mid frequency 100~10.0 [kHz]
+01 3A 01-78 EQ mid Q 0.1~12.0
+Datalist/E  10/21/98  8:32 PM  Page 38
+
+===== PAGE 39 =====
+39
+01 3B 34-4C EQ high gain -12~+12 [dB]
+01 3C 1C-3A EQ high frequency 0.5~16.0 [kHz]
+01 3D 01-78 EQ high Q 0.1-12.0
+01 3E 00-01 EQ high shape 00: shelving, 01: peaking
+01 3F reserved
+Performance Part Parameter (Byte Count : 52 x 4 = 208 bytes ) 
+F0 43 1n 5E 3p 00 ll vv vv F7 p = 0..3 (Part1..3) 
+ll vv vv Description
+00 00-20 NOTE RESERVE 0~32
+01 00-0C BANK NUMBER off, Int, PrA~PrK
+02 00-7F PROGRAM NUMBER 0~127 
+03 00-0F, 7F Rcv CHANNEL MAX A1~A16, off
+04 00-0F, 10, 7F Rcv CHANNEL A1~A16, pfm, off
+05 00-01 MONO/POLY  MODE 0:MONO,1:POLY
+06 00-03 MONO PRIORITY 0: last, 1: top, 2: bottom, 3: first
+07 00-01 FilterSw 0: off, 1: on
+08 00-30 NOTE SHIFT -24~+24 [semitones]
+09 00-7F DETUNE -64~+63
+0A 00-7F VOICED/UNVOICED BALANCE -64~+63
+0B 00-7F VOLUME 0~127 
+0C 00-7F VELOCITY  SENSE  DEPTH 0~127 
+0D 00-7F VELOCITY  SENSE  OFFSET 0~127 
+0E 00-7F PAN Rnd, L63...C...R63 (0: random, 1~64 -127)
+0F 00-7F NOTE  LIMIT  LOW C-2~G8
+10 00-7F NOTE  LIMIT  HIGH C-2~G8
+11 00-7F DRY  LEVEL 0~127 
+12 00-7F VARIATION SEND 0~127 
+13 00-7F REVERB  SEND 0~127 
+14 00-01 INSERTION SW off/on
+15 00-7F LFO1 RATE -64~+63
+16 00-7F LFO1 PITCH MOD DEPTH -64~+63
+17 00-7F LFO1 DELAY -64~+63
+18 00-7F FILTER  CUTOFF  FREQ -64~+63
+19 00-7F FILTER  RESONANCE -64~+63
+1A 00-7F EG  ATTACK TIME -64~+63
+1B 00-7F EG  DECAY TIME -64~+63
+1C 00-7F EG  RELEASE TIME -64~+63
+1D 00-7F FORMANT -64~+63
+1E 00-7F FM -64~+63
+1F 00-7F FILTER EG DEPTH -64~+63
+20 00-7F PITCH EG INITIAL LEVEL -64~+63
+21 00-7F PITCH EG ATTACK TIME -64~+63
+22 00-7F PITCH EG RELEASE LEVEL -64~+63
+23 00-7F PITCH EG RELEASE TIME -64~+63
+24 00-01/00-01 PORTAMENTO SWITCH/MODE
+bit0:  off/on
+bit1:  0: fingerd, 1: fulltime
+25 00-7F PORTAMENTO TIME 0~127 
+26 10-58 PITCH BEND RANGE HIGH -48~+24
+27 10-58 PITCH BEND RANGE LOW -48~+24
+28 00-64 PAN SCALING 0~100 
+29 00-63 PAN LFO DEPTH 0~99 
+2A 01-7F VELOCITY LIMIT LOW 1~127 
+2B 01-7F VELOCITY LIMIT HIGH 1~127 
+2C 00-7F EXPRESSION LOW LIMIT 0~127
+2D 00-01 SUSTAIN Rcv SW off/on  
+2E 00-7F LFO2 RATE -64~+63
+2F 00-7F LFO2 MOD DEPTH -64~+63
+30 Reserved
+31 Reserved
+32 Reserved
+33 Reserved
+<Table 2> Voice Parameter
+Byte Count
+Common 112
+OP data 62 x 8 = 496
+--------------------------------------
+total 608
+Voice Common Parameter (Byte Count: 112 bytes)    
+F0 43 1n 5E 4p 00 ll vv vv F7 p = 0..3 (Part1..3) 
+ll vv vv Description
+00 20-7F NAME 0
+01 20-7F NAME 1
+02 20-7F NAME 2
+03 20-7F NAME 3
+04 20-7F NAME 4
+05 20-7F NAME 5
+06 20-7F NAME 6
+07 20-7F NAME 7
+08 20-7F NAME 8
+09 20-7F NAME 9
+0A reserved
+0B reserved
+0C reserved
+0D reserved
+0E 00-16 CATEGORY
+0F reserved
+10 00-05 COMMON LFO1 - waveform
+11 00-63 COMMON LFO1 - speed
+12 00-63 COMMON LFO1 - delay
+13 00-01 COMMON LFO1 - key sync
+14 reserved
+15 00-63 COMMON LFO1 - pitch modulation depth
+16 00-63 COMMON LFO1 - amplitude modulation depth
+17 00-63 COMMON LFO1 - frequency modulation depth
+18 00-05 COMMON LFO2 - waveform
+19 00-7F COMMON LFO2 - speed
+1A reserved
+1B reserved
+1C 00-03 COMMON LFO2 - phase (0: 0, 1: 90, 2: 180, 3: 270)
+1D 00-01 COMMON LFO2 - key sync
+1E 00-30 COMMON Note shift         (-24-0-+24)
+1F 00-64 COMMON Pitch EG - level 0
+20 00-64 COMMON Pitch EG - level 1
+21 00-64 COMMON Pitch EG - level 2
+22 00-64 COMMON Pitch EG - level 4
+23 00-63 COMMON Pitch EG - time 1
+24 00-63 COMMON Pitch EG - time 2
+25 00-63 COMMON Pitch EG - time 3
+26 00-63 COMMON Pitch EG - time 4
+27 00-07 COMMON Pitch EG - velocity sensitivity
+28 00-01 COMMON Fseq voiced op (8) switch -high
+29 00-7F COMMON Fseq voiced op (1-7) switch -low
+2A 00-01 COMMON Fseq unvoiced op (8) switch -high 
+2B 00-7F COMMON Fseq unvoiced op (1-7) switch -low
+2C 00-57 COMMON Algorithm preset number
+2D 00-0F COMMON Voiced op1 carrier level correction
+2E 00-0F COMMON Voiced op2 carrier level correction
+2F 00-0F COMMON Voiced op3 carrier level correction
+30 00-0F COMMON Voiced op4 carrier level correction
+31 00-0F COMMON Voiced op5 carrier level correction
+32 00-0F COMMON Voiced op6 carrier level correction
+33 00-0F COMMON Voiced op7 carrier level correction
+34 00-0F COMMON Voiced op8 carrier level correction
+35 reserved
+ﬂ ﬂ
+3A reserved
+3B 00-03 COMMON Pitch EG - range (8va, 2va, 1va, 1/2va)
+3C 00-07 COMMON Pitch EG - time scaling depth
+3D 00-07 COMMON Voiced feedback level
+3E 00-64 COMMON Pitch EG - level 3
+3F reserved 
+40 00-03/00-01/00-07 COMMON Formant Control Destination 1
+ﬂ ﬂ dest (off,out,freq,width) /V/N/OP (1~8) 
+[--ddvooo]
+44 ﬂ COMMON Formant Control Destination 5
+45 00-7F COMMON Formant Control Depth 1 (-64~+63)
+ﬂ ﬂ ﬂ
+49 00-7F COMMON Formant Control Depth 5 (-64~+63) 
+4A 00-03/00-01/00-07 COMMON FM Control Destination 1
+ﬂ ﬂ dest (off,out,freq,width) /V/N/OP (1~8) 
+[--ddvooo]
+4E ﬂ COMMON FM Control Destination 5
+4F 00-7F COMMON FM Control Depth 1 (-64~+63) 
+ﬂ ﬂ ﬂ
+53 00-7F COMMON FM Control Depth 5 (-64~+63) 
+54 00-05 COMMON Filter Type (LPF24, LPF18, LPF12, HPF, BPF, BEF) 
+55 00-74 COMMON Filter Resonance (-16~+100) 
+56 00-0E COMMON Filter Resonance Vel Sens (-7~+7) 
+57 00-7F COMMON Filter Cutoff Frequency
+58 00-0E COMMON Filter EG Depth Vel Sens (-7~+7) 
+59 00-63 COMMON Filter Cutoff Frequency LFO1 Depth
+5A 00-63 COMMON Filter Cutoff Frequency LFO2 Depth
+5B 00-7F COMMON Flt Cutoff Frq. Key Scale Dpt (-64~+63) 
+5C 00-7F COMMON Filter Cutoff Frequency Key Scale Point
+5D 00-18 COMMON Filter Input Gain (-12~+12) 
+5E reserved
+ﬂ ﬂ
+63 reserved
+64 00-7F COMMON Filter EG - depth  (-64~+63) 
+65 00-64 COMMON Filter EG - level4
+66 00-64 COMMON Filter EG - level1
+67 00-64 COMMON Filter EG - level2
+68 00-64 COMMON Filter EG - level3
+69 00-63 COMMON Filter EG - time1
+6A 00-63 COMMON Filter EG - time2
+6B 00-63 COMMON Filter EG - time3
+6C 00-63 COMMON Filter EG - time4
+6D reserved
+6E 00-07/00-07 COMMON Filter EG - attack time vel/time scale
+6F reserved
+Datalist/E  10/21/98  8:32 PM  Page 39
+
+===== PAGE 40 =====
+40
+Voice Voiced Parameter (Byte Count : 35 bytes / op )
+F0 43 1n 5E 6p mm ll vv vv F7 p = 0..3 (Part1..3), m = 0..7 (OP1..8) 
+ll vv Description
+00 00-01/00-30 VOICED oscillator key sync/transpose
+[-stttttt]
+01 00-1F VOICED oscillator frequency - coarse
+02 00-7F VOICED oscillator frequency - fine
+03 00-63 VOICED oscillator frequency - note scaling
+04 00-0E/00-07 VOICED oscillator
+bw bias sense (-7~7) /spectral form [-llllfff]
+05 00-01/00-07/00-07 VOICED oscillator mode/spectral skirt/
+Operator fseq track number [-msssnnn]
+06 00-63 VOICED oscillator freq. ratio of band spectrum
+07 00-1E VOICED oscillator detune
+08 00-64 VOICED oscillator frequency EG - initial value
+09 00-64 VOICED oscillator frequency EG - attack value 
+0A 00-63 VOICED oscillator frequency EG - attack time  
+0B 00-63 VOICED oscillator frequency EG - decay time   
+0C 00-63 VOICED EG - level1
+0D 00-63 VOICED EG - level2
+0E 00-63 VOICED EG - level3
+0F 00-63 VOICED EG - level4
+10 00-63 VOICED EG - time1
+11 00-63 VOICED EG - time2
+12 00-63 VOICED EG - time3
+13 00-63 VOICED EG - time4
+14 00-63 VOICED EG - hold time 
+15 00-07 VOICED EG - time scaling
+16 00-63 VOICED level scaling - total level
+17 00-63 VOICED level scaling - break point (A-1~C8) 
+18 00-63 VOICED level scaling - left depth
+19 00-63 VOICED level scaling - right depth
+1A 00-03 VOICED level scaling - left curve 
+(0:-lin, 1:-exp, 2:+exp, 3:+lin ) 
+1B 00-03 VOICED level scaling - right curve
+(0:-lin, 1:-exp, 2:+exp, 3:+lin )
+1C reserved
+1D reserved
+1E reserved
+1F 00-0E/00-07 VOICED - freq bias sense/pitch mod sense
+fbs : (-7~7) [-bbbbmmm]
+20 00-07/00-0E VOICED - freq mod sense/freq velocity sense
+fvs : (-7~7) [-fffvvvv]
+21 00-07/00-0E VOICED - amp mod sense/amp velocity sense
+vs  : (-7~7) [-aaavvvv]
+22 00-0E VOICED - EG bias sense (-7~7)
+Voice Unvoiced Parameter (Byte Count : 27 bytes / op ) 
+F0 43 1n 5E 6p mm ll vv vv F7 p = 0..3 (Part1..3) , m = 0..7 (OP1..8)
+ll vv Description
+23 00-30 UNVOICED formant pitch - transpose
+24 00-02/00-15 UNVOICED formant pitch - mode /coarse
+[-mmccccc]
+25 00-7F UNVOICED formant pitch - fine
+26 00-63 UNVOICED formant pitch - note scaling
+27 00-63 UNVOICED formant shape - band width
+28 00-0E UNVOICED formant shape - bw bias sense (-7~7)
+29 00-07/00-07 UNVOICED formant resonance / formant skirt /nskt
+[--rrrsss]
+2A 00-64 UNVOICED frequency EG - initial value
+2B 00-64 UNVOICED frequency EG - attack value
+2C 00-63 UNVOICED frequency EG - attack time
+2D 00-63 UNVOICED frequency EG - decay time
+2E 00-63 UNVOICED level
+2F 00-0E UNVOICED level - key scaling
+30 00-63 UNVOICED EG - level1
+31 00-63 UNVOICED EG - level2
+32 00-63 UNVOICED EG - level3
+33 00-63 UNVOICED EG - level4
+34 00-63 UNVOICED EG - time1
+35 00-63 UNVOICED EG - time2
+36 00-63 UNVOICED EG - time3
+37 00-63 UNVOICED EG - time4
+38 00-63 UNVOICED EG - hold time
+39 00-07 UNVOICED EG - time scaling
+3A 00-0E UNVOICED - freq bias sense
+nfbs : (-7~7) [----bbbb]
+3B 00-07/00-0E UNVOICED - freq mod sense/freq velocity sense
+nfvs : (-7~7) [-fffvvvv]
+3C 00-07/00-0E UNVOICED - amp mod sense/amp velocity sense
+nvs  : (-7~7) [-aaavvvv]
+3D 00-0E UNVOICED - EG bias sense (-7~7)
+<Table 3> Fseq Parameter
+F0 43 1n 5E 70 00 ll vv vv F7
+Header Parameter
+ll vv vv Description
+00 20-7F NAME 0
+01 20-7F NAME 1
+02 20-7F NAME 2
+03 20-7F NAME 3
+04 20-7F NAME 4
+05 20-7F NAME 5
+06 20-7F NAME 6
+07 20-7F NAME 7
+08 reserved
+09 reserved
+0A reserved
+0B reserved
+0C reserved
+0D reserved
+0E reserved
+0F reserved
+10 00-7F Fseq - start step of loop point (hi byte)
+Fseq - start step of loop point (lo byte)
+12 00-7F Fseq - end step of loop point (hi byte)
+Fseq - end step of loop point (lo byte)
+14 00-01 Fseq - loop mode ( 0: one way, 1: round )
+15 00-7F Fseq - speed adjust
+16 00-07 Fseq - velocity sensitivity for tempo
+17 00-01 Fseq - formant pitch mode
+0: pitch, 1: non-pitch 
+18 00-7F Fseq - formant note assign
+19 00-7E Fseq - formant pitch tuning (-63~63)
+1A 00-63 Fseq - formant seqence delay
+1B 00-03 Fseq - frame data format *1 
+1C reserved
+1D reserved
+1E 00-7F RMTC - end step of valid data (hi byte) 
+RMTC - end step of valid data (lo byte) 
+*1 frame data format
+0: total of frames 128
+1: total of frames 256
+2: total of frames 384
+3: total of frames 512
+Frame Parameter
+ll vv Description
+10 00-7F Fseq - fundamental pitch (hi byte)
+11 00-7F Fseq - fundamental pitch (lo byte)
+12 00-7F Fseq - voiced formant frequency (hi byte)
+ﬂ ﬂ ﬂ
+19 00-7F Fseq - voiced formant frequency (hi byte)
+20 00-7F Fseq - voiced formant frequency (lo byte)
+ﬂ ﬂ ﬂ
+21 00-7F Fseq - voiced formant frequency (lo byte)
+22 00-7F Fseq - voiced formant level
+ﬂ ﬂ ﬂ
+29 00-7F Fseq - voiced formant level
+2A 00-7F Fseq - unvoiced formant frequency (hi byte)
+ﬂ ﬂ ﬂ
+31 00-7F Fseq - unvoiced formant frequency (hi byte)
+32 00-7F Fseq - unvoiced formant frequency (lo byte)
+ﬂ ﬂ ﬂ
+39 00-7F Fseq - unvoiced formant frequency (lo byte)
+3A 00-7F Fseq - unvoiced formant level 
+ﬂ ﬂ ﬂ
+41 00-7F Fseq - unvoiced formant level
+Datalist/E  10/21/98  8:32 PM  Page 40
+
+===== PAGE 41 =====
+41
+<Table 4> System Parameter (Byte Count: 76 bytes ) 
+F0 43 1n 5E 00 00 ll vv vv F7
+ll vv Description
+00 00-7F master tuning (-64~+63)
+01 reserved
+02 ﬂ
+03 reserved
+04 reserved
+05 reserved
+06 00-7F master note shift (-64~+63)
+07 00-04 dump interval (50 msec ... 300 msec)
+08 00-01 program change mode (0: pfm, 1: multi)
+09 00-10,7F performance channel
+(00-0F: 1-16, 10: all, 7F: off)
+0A reserved
+0B 00-01 knob control mode (0:abs, 1:rel)
+0C reserved
+0D 00-03 BC curve (0:thru, 1~3)
+0E 00-04 velocity curve (thru, sft1, sft2, wid, hrd)
+(default:thru)
+0F reserved
+10 00-01 Rx Excl. (Not changed with Parameter Change.)
+11 00-02 note event receive sw (0~2: all/odd/even)
+12 00-01 bank select receive sw
+13 00-01 program change receive sw
+14 00-01 knob receive sw (0~1: off/on)
+15 00-01 knob transmit sw (0~1: off/on)
+16 01-1F, 21-5F KN1 control number (default: 16)
+17 01-1F, 21-5F KN2 control number (default: 17)
+18 01-1F, 21-5F KN3 control number (default: 18)
+19 01-1F, 21-5F KN4 control number (default: 19)
+1A 01-1F, 21-5F MC1 control number (default: 20)
+1B 01-1F, 21-5F MC2 control number (default: 21)
+1C 01-1F, 21-5F MC3 control number (default: 22)
+1D 01-1F, 21-5F MC4 control number (default: 13)
+1E 01-1F, 21-5F FC  control number (default: 4)
+1F 01-1F, 21-5F BC  control number (default: 2)
+20 01-1F, 21-5F Formant control number (default: 80)
+21 01-1F, 21-5F FM   control number (default: 81)
+22 00-7F play sound 1 note 
+23 00-7F play sound 1 velocity (0: off)
+24 00-7F play sound 2 note
+25 00-7F play sound 2 velocity (0: off)
+26 00-7F play sound 3 note
+27 00-7F play sound 3 velocity (0: off)
+28 00-7F play sound 4 note
+29 00-7F play sound 4 velocity (0: off)
+2A not used
+2B not used
+2C not used
+2D not used
+2E not used
+2F not used
+30 not used
+31 not used
+32 not used
+33 not used
+34 not used
+35 not used
+36 not used
+37 not used
+38 not used
+39 not used
+3A not used
+3B not used
+3C not used
+3D not used
+3E not used
+3F not used
+40 not used
+41 not used
+42 not used
+43 not used
+44 not used
+45 not used
+Bulk Dump does not change the following.
+46 0 fseq init command
+Bulk Dump and Parameter Change do not change the following, ignoring Parameter Request.
+47 00-01 memory allocation (0:128Voice/0FSeq, 1:64Voice/6FSeq)
+48 00-07 LCD contrast
+49 00-10, 7F system exclusive device number
+(0-0F: 1-16, 10: all, 7F: off)
+4A 00-01 bulk dump protect on/off switch(0~1:off/on)
+4B not used
+<Table 5> DX Bulk Data
+FS1R can partly receive VCED or ACED bulk data for Yamaha DX series.
+Since not all parameters and their value ranges for DX series ar e compatible to FS1R, it
+automatically converts received DX bulk data into FS1R native data for original DX sound
+reproduction to be available.  ACED bulk data is not interpr eted until its following VCED bulk data is
+received.
+DX Bulk Data
+11110000 F0
+01000011 43
+0000nnnn nnnn = Device Number
+0ttttttt ttttttt = Format No.
+0bbbbbbb bbbbbbb = Byte Count High
+0bbbbbbb bbbbbbb = Byte Count Low
+0ddddddd ddddddd = Data
+| | Byte Count
+0ddddddd ddddddd = Data
+0ccccccc ccccccc = Check-sum
+11110111 F7
+Format No. 00 VCED (Voice Edit Buffer)
+05 ACED (Additional Edit Buffer) 
+Byte Count1 55 bytes VCED (Voice Edit Buffer)
+49 bytes ACED (Additional Edit Buffer)
+VCED and ACED parameters (data structures) are as follow.
+Parameter (Data) is described in the order of Parameter Group # to Parameter#.
+Parameter
+Group # g h
+00 00 VCED (Voice Edit Buffer) 0~127
+00 01 VCED (Voice Edit Buffer) 0~26
+06 00 ACED (Additional Edit Buffer) 0~73
+DX Voice Parameter (Data) - VCED format (Byte Count : 155 bytes) 
+Parameter
+Group# Parameter# Data Range Description
+g h OP6 OP5 OP4 OP3 OP2 OP1
+00 00 00 15 2A 3F 54 69 00-63 EG rate1
+00 00 01 16 2B 40 55 6A 00-63 EG rate2
+00 00 02 17 2C 41 56 6B 00-63 EG rate3
+00 00 03 18 2D 42 57 6C 00-63 EG rate4
+00 00 04 19 2E 43 58 6D 00-63 EG lelel1
+00 00 05 1A 2F 44 59 6E 00-63 EG lelel2
+00 00 06 1B 30 45 5A 6F 00-63 EG lelel3
+00 00 07 1C 31 46 5B 70 00-63 EG lelel4
+00 00 08 1D 32 47 5C 71 00-63 Break Point
+00 00 09 1E 33 48 5D 72 00-63 Left Depth
+00 00 0A 1F 34 49 5E 73 00-63 Right Depth
+00 00 0B 20 35 4A 5F 74 00-03 Left Curve
+00 00 0C 21 36 4B 60 75 00-03 Right Curve
+00 00 0D 22 37 4C 61 76 00-07 Rate Scaling
+00 00 0E 23 38 4D 62 77 00-03 AMS
+00 00 0F 24 39 4E 63 78 00-07 Touch Sens
+00 00 10 25 3A 4F 64 79 00-63 Total Level
+00 00 11 26 3B 50 65 7A 00-01 Freq Mode
+00 00 12 27 3C 51 66 7B 00-1F Freq Course
+00 00 13 28 3D 52 67 7C 00-63 Freq Fine
+00 00 14 29 3E 53 68 7D 00-0E Detune
+00 00 7E 00-63 PEG Rate1
+00 00 7F 00-63 PEG Rate2
+00 01 00 00-63 PEG Rate3
+00 01 01 00-63 PEG Rate4
+00 01 02 00-63 PEG Level1
+00 01 03 00-63 PEG Level2
+00 01 04 00-63 PEG Level3
+00 01 05 00-63 PEG Level4
+00 01 06 00-1F Algorithm  1~36
+00 01 07 00-07 Feedback
+00 01 08 00-01 OSC Sync
+00 01 09 00-63 LFO Speed
+00 01 0A 00-63 LFO Delay
+00 01 0B 00-63 PMD
+00 01 0C 00-63 AMD
+00 01 0D 00-01 LFO Key Sync
+00 01 0E 00-05 LFO Wave
+00 01 0F 00-07 PMS
+00 01 10 00-2F Transpose
+00 01 11 25-58 Voice Name
+00 01 12 25-58 Voice Name
+00 01 13 25-58 Voice Name
+00 01 14 25-58 Voice Name
+00 01 15 25-58 Voice Name
+00 01 16 25-58 Voice Name
+00 01 17 25-58 Voice Name
+00 01 18 25-58 Voice Name
+00 01 19 25-58 Voice Name
+00 01 1A 25-58 Voice Name
+Datalist/E  10/21/98  8:32 PM  Page 41
+
+===== PAGE 42 =====
+42
+DX Voice Additional Parameter - ACED format(Byte Count : 49 bytes) 
+Param
+Group# Parameter# Data Description
+g h
+06 00 00 not used
+06 00 01 not used
+06 00 02 not used
+06 00 03 not used
+06 00 04 not used
+06 00 05 not used
+06 00 06 00-07 OP6 AMS 
+06 00 07 00-07 OP5 AMS 
+06 00 08 00-07 OP4 AMS 
+06 00 09 00-07 OP3 AMS 
+06 00 0A 00-07 OP2 AMS 
+06 00 0B 00-07 OP1 AMS 
+06 00 0C 00-03 PEG Range
+06 00 0D not used
+06 00 0E 00-01 PEG Vel Switch
+06 00 0F not used
+06 00 10 not used
+06 00 11 not used
+06 00 12 not used
+06 00 13 not used
+06 00 14 not used
+06 00 15 not used
+06 00 16 not used
+06 00 17 not used
+06 00 18 not used
+06 00 19 not used
+06 00 1A not used
+06 00 1B not used
+06 00 1C not used
+06 00 1D not used
+06 00 1E not used
+06 00 1F not used
+06 00 20 not used
+06 00 21 not used
+06 00 22 not used
+06 00 23 not used
+06 00 24 not used
+06 00 25 not used
+06 00 26 00-07 PEG Rate Scaling
+06 00 40 not used
+06 00 41 not used
+06 00 42 not used
+06 00 43 not used
+06 00 44 not used
+06 00 45 not used
+06 00 46 not used
+06 00 47 not used
+06 00 48 not used
+06 00 49 not used
+Datalist/E  10/21/98  8:32 PM  Page 42
+
+===== PAGE 43 =====
+43
+0,32
+1
+7, 10, 11, 64
+5, 65
+71, 74
+72, 73
+91, 93
+16-19
+2, 4,1 3, 20-22
+80, 81
+6, 98-101
+120
+121
+True Voice
+þ/CR
+þ/CR
+þ/CR
+þ/CR
+þ/CR
+þ 
+þ/CR
+þ/CR
+þ/CR
+þ/CR
+þ/CR
+þ/CR
+þ/CR
+ﬂ  *3/CR
+þ/CR
+ﬂ  *3/CR
+þ/CR
+þ/CR
+þ/CR
+þ/CR
+***************
+þ/CR
+þ/CR
+þ/CR
+þ/CR
+þ/CR
+þ/CR
+þ/CR
+þ/CR
+þ/CR
+*1
+*2
+*3
+*4
+Ignore Note number.
+Receive if switch is on.
+Assignable to 1-31,33-95.
+Receive if Fseq Speed is set to midi.
+þ/CR
+þ/CR
+***************
+þ/CR
+***************
+ﬂ /CR
+Mode 1 : OMNI ON , POLY
+Mode 3 : OMNI OFF, POLY
+þ/CR
+1-16
+1-16
+Memorized
+ﬂ  9nH, v=1-127
+ﬂ  9nH, v=0
+ﬂ  *1
+ﬂ /CR
+ﬂ  *2
+ﬂ /CR
+ﬂ /CR
+ﬂ /CR
+ﬂ /CR
+ﬂ /CR
+ﬂ /CR
+ﬂ  *3
+ﬂ  *3
+ﬂ  *3
+ﬂ /CR
+ﬂ /CR
+ﬂ /CR
+ﬂ  0-127 *2
+ﬂ  0-127
+þ/CR
+þ/CR
+þ/CR
+ﬂ  *4
+þ/CR
+þ/CR
+ﬂ /CR
+ﬂ /CR
+þ/CR
+3, 4
+3, 4
+þ/CR
+Memorized
+0-127
+ﬂ  *2
+ﬂ  *2
+Bank Select
+Modulation Wheel
+Vol, Pan, Exp, Sus
+Portamento Ctrl
+Sound Control
+Release, Attack
+Rev, Var Send
+Knob1-4 Control
+BC, FC, MC4, MC1-3
+Formant, FM Ctrl
+Data Entry
+All Sound Off
+Reset All Ctrls
+ﬂ : YES
+þ : NO
+Date :16-JUL-1998
+Version : 1.0
+YAMAHA [ Tone Generator ] / 
+Model: FS1R MIDI Implementation Chart
+Mode 2 : OMNI ON , MONO
+Mode 4 : OMNI OFF, MONO
+TransmittedFunction Recognized Remarks
+Basic
+Channel
+Note Number
+Velocity
+After Touch
+Pitch Bend
+Control
+Change
+Program Change
+System Exclusive
+System
+Common
+System 
+Real Time
+Aux 
+Messages
+Notes
+Mode
+Note ON
+Note OFF
+Key's
+Ch's
+Clock
+Commands
+Local ON/OFF
+All Notes OFF
+Active Sense
+Reset
+Song Pos.
+Song Sel.
+Tune
+True #
+Default
+Messages
+Altered
+Default
+Changed
+Datalist/E  10/21/98  8:32 PM  Page 43
+
+===== PAGE 44 =====
+811MWIT 11.2-02B0
