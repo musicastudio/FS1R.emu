@@ -2,6 +2,8 @@
 
 A Windows emulation of the Yamaha FS1R: four parts, 32 channels, MIDI in, performances and Fseq playback, no effects or filter yet.
 
+Download the latest build: **https://github.com/musicastudio/FS1R.emu/releases/latest** (`fs1r_emu.exe`, no installer, no dependencies).
+
 ## Thanks
 
 This project would not exist without **[rgwan/fs1r_firmware_RE](https://github.com/rgwan/fs1r_firmware_RE)** and its author, Zhiyuan Wan. That project dumped the SH7044's 256 KB internal flash through a hooked UART, dumped the 2 MB external EPROM, dumped the PLG150-DX ROM, captured the board's UART traffic, and published a Ghidra project with the boot, loader, flash and LCD code already named. Every byte of firmware and every preset this emulator reads comes from those dumps. The goal there is a MAME driver for the real hardware; this is a different target, a synth engine that runs the firmware's logic directly, but it stands entirely on that groundwork.
