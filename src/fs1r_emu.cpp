@@ -38,8 +38,36 @@ static const int NCHAN = 32;
 static const double PI = 3.14159265358979323846;
 static const double CPU_HZ = 28000000.0;         // SCI BRR 27 gives exactly 31250 baud at 28 MHz
 static const double TICK_HZ = CPU_HZ / 16.0 / 9099.0;   // MTU2 TGRA compare every 0x238B counts at clock/16 -> 192.3 Hz LFO/PEG/portamento tick
-static const double FM_INDEX = 1.0;              // INFERRED: cycles of phase deviation for a full-level modulator (DX7)
-static const double LEVEL_DB = 0.375;            // INFERRED: dB per step of the 8-bit level registers (LEVTAB is the DX7 0.75 dB curve, chip gets 2x)
+
+// ------------------------------------------------------------------------------------------ INFERRED calibration
+// Everything the two custom chips do that no file documents. Each number is a model from the DX7 lineage,
+// the formant patent (docs/US5610354...) or the Data List, never a measurement: nothing has been recorded
+// off a real FS1R yet (TODO tier 4). They all live here so calibrating against a recording is one table
+// edit rather than a hunt through the engine. Names match the TODO's "confirm the INFERRED constants".
+namespace cal {
+static const double FM_INDEX     = 1.0;     // cycles of phase deviation at full modulator level
+static const double LEVEL_DB     = 0.375;   // dB per step of the 8-bit level registers (LEVTAB doubled)
+static const double EG_LEVEL_DB  = 1.5;     // dB per step of the 6-bit EG level registers (LEVTAB >> 1)
+static const double CARRIER_DB   = 1.5;     // dB per step of the carrier level correction (voice 0x2D-0x34)
+static const double DETUNE_CENTS = 2.0;     // cents per detune step on non-formant operators
+static const double FEEDBACK     = 0.5;     // feedback gain = FEEDBACK * 2^(fb - 7)
+static const double EG_ATTACK_K  = 0.25;    // rising EG time constant as a fraction of rate_secs
+static const double EG_OVERSHOOT = 6.0;     // dB the rising EG aims past its target
+static const double FEG_SEMIS    = 48.0;    // frequency EG range for the +-50 sysex value (four octaves)
+static const double FEG_TIME_K   = 0.3;     // frequency EG time as a fraction of rate_secs
+static const double WIN_SKIRT    = 2.0;     // formant window is sin^(WIN_SKIRT * (skirt + 1))
+static const double FRMT_BW_DB   = 20.0;    // formant window length = 2 * 2^(-bw / FRMT_BW_DB)
+static const double NOISE_OCT    = 9.0;     // unvoiced bandwidth 0..127 spans this many octaves from 20 Hz
+static const double CUT_BASE_HZ  = 20.0;    // filter cutoff byte 0 lands here ...
+static const double CUT_PER_OCT  = 12.7;    // ... and rises one octave every CUT_PER_OCT counts
+static const double RESO_Q0      = 0.7;     // filter Q at resonance 0 ...
+static const double RESO_PER_OCT = 25.0;    // ... doubling every RESO_PER_OCT resonance steps
+static const double FSEQ_DELAY_S = 1.0;     // performance Fseq start delay at its maximum of 99
+static const double VCTRL_FREQ   = 8.0;     // voice Formant/FM control: pitch word units per depth step
+static const double PMS_FRAC[8]  = {0, 0.0264, 0.0534, 0.0889, 0.1612, 0.2769, 0.4967, 1.0};  // per-op pitch mod sensitivity, DX7 curve
+}
+using cal::FM_INDEX;
+using cal::LEVEL_DB;
 
 // ------------------------------------------------------------------------------------------ firmware helpers
 static inline int clampi(int v, int lo, int hi) { return v < lo ? lo : v > hi ? hi : v; }
@@ -71,7 +99,7 @@ static float g_win[8][1025];
 static void init_tables() {
     for (int i = 0; i <= 4096; i++) g_sin[i] = (float)sin(2 * PI * i / 4096.0);
     for (int s = 0; s < 8; s++) {                                     // INFERRED window shape: sin^(2(skirt+1)), patent
-        double p = 2.0 * (s + 1);
+        double p = cal::WIN_SKIRT * (s + 1);
         for (int i = 0; i <= 1024; i++) g_win[s][i] = (float)pow(sin(PI * i / 1024.0), p);
     }
 }
@@ -81,14 +109,12 @@ static inline float fwin(int s, double x) { double y = x * 1024.0; int i = (int)
 // exact inverse of the DX7's (R*41)>>6, and its DX7 converter uses T = 99 - R, so the chip is assumed to time its EG like the
 // DX7 EGS: increment (4 + (q & 3)) << (q >> 2) per 64 samples on a 2^28 = 96 dB scale (Dexed). 6.6 ms at 63, 380 s at 0.
 static inline double rate_secs(int q) { q = clampi(q, 0, 63); return pow(2.0, 26 - (q >> 2)) / (4 + (q & 3)) / SR; }
-// INFERRED: per-op pitch mod sensitivity 0..7 -> fraction of the channel LFO pitch word (DX7 PMS curve)
-static const double PMS_FRAC[8] = {0, 0.0264, 0.0534, 0.0889, 0.1612, 0.2769, 0.4967, 1.0};
 #include "fs1r_effects.h"
 
 // INFERRED: filter cutoff byte 0..127 (extended by modulation) -> Hz, ten octaves from 20 Hz.
-static inline double cut_hz(double c) { return 20.0 * pow(2.0, clampi((int)c, -40, 180) / 12.7); }
+static inline double cut_hz(double c) { return cal::CUT_BASE_HZ * pow(2.0, clampi((int)c, -40, 180) / cal::CUT_PER_OCT); }
 // INFERRED: filter resonance -16..+100 -> Q
-static inline double reso_q(int r) { return 0.7 * pow(2.0, clampi(r, -16, 100) / 25.0); }
+static inline double reso_q(int r) { return cal::RESO_Q0 * pow(2.0, clampi(r, -16, 100) / cal::RESO_PER_OCT); }
 
 struct SVF {                     // topology-preserving 2-pole state variable filter (Zavalishin)
     double g = 0, k = 1, a1 = 1, a2 = 0, a3 = 0, ic1 = 0, ic2 = 0;
@@ -270,6 +296,18 @@ struct Fseq {
         memcpy(frame, f, (size_t)nframes * 50); valid = true;
     }
 };
+struct Rom;                                  // defined with the loaders below
+static void rom_voice(const Rom& R, int idx, Voice& V);
+static int bank_voice_index(int bank, int prog);
+static bool rom_ready(const Rom* R);
+// Performance banks in the EPROM table of 360. Two boundaries are verifiable from the Data List's
+// performance list: "Sweepy Voice" (Internal 1) is entry 104 and "UprightPiano" (Preset A 1) is entry
+// 232, so those two banks are exact; the remaining 104 entries at the front are the third block.
+static int bank_perf_index(int lsb, int prog) {
+    int base = lsb == 0x40 ? 104 : lsb == 0x41 ? 232 : 0;
+    return clampi(base + (prog & 0x7F), 0, 359);
+}
+
 struct Part {
     uint8_t p[52]; Voice voice;
     // controller state (MIDI)
@@ -277,6 +315,7 @@ struct Part {
     int expr = 254;          // DAT_010297fa
     int src[14] = {};        // controller sources KN1-4 MC1-4 FC BC MW CAT PAT PB, 0..127
     int held[32]; int nheld = 0; int lastPitch = -1;   // mono handling and portamento start
+    int rpnM = 127, rpnL = 127; bool nrpnSel = false;   // RPN / NRPN selection state
     bool sustain = false;
     int rcv() const { return p[4]; }
 };
@@ -304,7 +343,7 @@ static void init_perf(Perf& P) {
 struct EG {                      // amplitude EG on the chip: hold, 4 segments. INFERRED shape/timing, DX7 style
     int stage = 5; double cur = -200, target = -200, rate = 0, holdLeft = 0; bool rising = false;
     int L[4] = {}, R[4] = {}; int hold = 0; int rs = 0;
-    static double lvl_db(int a) { return a >= 63 ? -200.0 : -1.5 * a; }   // 6-bit attenuation (LEVTAB >> 1), 1.5 dB per step INFERRED
+    static double lvl_db(int a) { return a >= 63 ? -200.0 : -cal::EG_LEVEL_DB * a; }   // 6-bit attenuation (LEVTAB >> 1), 1.5 dB per step INFERRED
     void start(const int* lv, const int* rt, int h, int rateScale) {
         for (int i = 0; i < 4; i++) { L[i] = lv[i]; R[i] = rt[i]; } hold = h; rs = rateScale; cur = lvl_db(L[3]); stage = 0;
         holdLeft = h ? rate_secs(std::min(63, std::min(egrate(h) + 4, 0x3E) + rs)) * SR : 0;   // firmware: hold rate + 4 capped 0x3E
@@ -315,13 +354,13 @@ struct EG {                      // amplitude EG on the chip: hold, 4 segments. 
         target = lvl_db(L[s - 1]);
         double secs = rate_secs(std::min(63, R[s - 1] + rs));
         rising = target > cur;
-        rate = rising ? 1.0 - exp(-1.0 / (secs * 0.25 * SR + 1)) : 96.0 / (secs * SR + 1);
+        rate = rising ? 1.0 - exp(-1.0 / (secs * cal::EG_ATTACK_K * SR + 1)) : 96.0 / (secs * SR + 1);
     }
     void release() { if (stage < 4) next(4); }
     inline double tick() {
         if (stage == 0) { if (--holdLeft <= 0) next(1); return cur; }
         if (stage > 4) return cur;
-        if (rising) { cur += (target + 6 - cur) * rate; if (cur >= target) { cur = target; if (stage < 3) next(stage + 1); else if (stage == 4) stage = 5; } }
+        if (rising) { cur += (target + cal::EG_OVERSHOOT - cur) * rate; if (cur >= target) { cur = target; if (stage < 3) next(stage + 1); else if (stage == 4) stage = 5; } }
         else { cur -= rate; if (cur <= target) { cur = target; if (stage < 3) next(stage + 1); else if (stage == 4) stage = 5; } }
         return cur;
     }
@@ -330,8 +369,8 @@ struct EG {                      // amplitude EG on the chip: hold, 4 segments. 
 struct FreqEG {                  // INFERRED: init -> attack level -> 0, +-50 = +-4 octaves, EG time curve as the amplitude EG
     double cur = 0, target = 0, k = 0, kdec = 0; int stage = 2;
     void start(int init, int att, int attT, int decT) {
-        cur = init * 48.0 / 50.0; target = att * 48.0 / 50.0; stage = (init == 0 && att == 0) ? 2 : 0;
-        k = 1.0 - exp(-1.0 / (rate_secs(egrate(attT)) * 0.3 * SR + 1)); kdec = 1.0 - exp(-1.0 / (rate_secs(egrate(decT)) * 0.3 * SR + 1));
+        cur = init * cal::FEG_SEMIS / 50.0; target = att * cal::FEG_SEMIS / 50.0; stage = (init == 0 && att == 0) ? 2 : 0;
+        k = 1.0 - exp(-1.0 / (rate_secs(egrate(attT)) * cal::FEG_TIME_K * SR + 1)); kdec = 1.0 - exp(-1.0 / (rate_secs(egrate(decT)) * cal::FEG_TIME_K * SR + 1));
     }
     inline double tick() {
         if (stage == 0) { cur += (target - cur) * k; if (fabs(target - cur) < 0.01) stage = 1; }
@@ -365,6 +404,7 @@ struct Chan {
     uint32_t lfo2Phase = 0; int lfo2Val = 0, lfo2SH = 0;
     int panBase = 63; double panL = 1, panR = 1;
     StepEG feg; VFilter flt; int fltType = 0; bool fltOn = false; double fltGain = 1;
+    int vcLvl[8][2] = {}, vcFreq[8][2] = {}, vcBw[8][2] = {};   // voice Formant/FM control offsets, [op][voiced=0]
     // registers refreshed each tick
     int regPitch = 0, regPM = 0, regFM = 0, regAM = 0, regLevel[8], regULevel[8], regC0 = 73;
     int fqWord[8] = {}, fquWord[8] = {}; double partV = 1, partU = 1;
@@ -375,13 +415,29 @@ struct Chan {
 struct Synth {
     Perf perf; Chan ch[NCHAN]; uint32_t clock = 0; double gain = 0.25;
     FxSection fx;
-    int sysTune = 64, sysNoteShift = 64, velCurve = 0;
+    const Rom* rom = nullptr;
+    uint8_t sys[76] = {};                      // system parameters, sysex table 4
+    int sysTune() const { return sys[0]; }
+    int sysNoteShift() const { return sys[6]; }
+    int velCurve() const { return sys[0x0E]; }
+    int perfChannel() const { return sys[9]; }             // 0-15, 0x10 = all, 0x7F = off
+    int devNumber() const { return sys[0x49]; }
+    std::vector<std::vector<uint8_t>> outQ;                // sysex the engine sends back (dump / parameter replies)
     std::mutex mtx;
     // Fseq playback
     Fseq fseq; bool fseqRun = false; double fseqAcc = 0, fseqPeriod = 0.01; int fseqStep = 0, fseqDir = 1; int fseqVel = 100; int fseqPart = -1;
+    bool fseqHeld = false, fseqClock = false; double fseqDelay = 0, fseqClockAcc = 0;
     double tickAcc = 0;
 
-    Synth() { init_perf(perf); fx.init(SR); }
+    Synth() { init_perf(perf); fx.init(SR); init_system(); }
+    void init_system() {
+        memset(sys, 0, sizeof sys);
+        sys[0] = 64; sys[6] = 64; sys[8] = 0; sys[9] = 0; sys[0x0E] = 0;
+        sys[0x10] = sys[0x12] = sys[0x13] = sys[0x14] = sys[0x15] = 1;
+        static const uint8_t cc[12] = {16, 17, 18, 19, 20, 21, 22, 13, 4, 2, 80, 81};   // KN1-4 MC1-4 FC BC Formant FM
+        memcpy(sys + 0x16, cc, 12);
+        sys[0x47] = 0; sys[0x48] = 4; sys[0x49] = 0; sys[0x4A] = 0;
+    }
     static inline double sendlvl(int v) { return db2lin(-LEVEL_DB * SENDTAB[clampi(v, 0, 127)]); }
 
     // ---------------------------------------------------------------- per-part derived values
@@ -420,7 +476,7 @@ struct Synth {
         if (hi < lo ? (note > hi && note < lo) : (note > hi || note < lo)) return;
         lo = pt.p[0x2A]; hi = pt.p[0x2B];
         if (hi < lo ? (vel > hi && vel < lo) : (vel > hi || vel < lo)) return;
-        vel = clampi(((pt.p[0x0C] * VELCURVES[clampi(velCurve, 0, 4) * 128 + vel]) >> 6) + (pt.p[0x0D] - 0x40) * 2, 1, 127);
+        vel = clampi(((pt.p[0x0C] * VELCURVES[clampi(velCurve(), 0, 4) * 128 + vel]) >> 6) + (pt.p[0x0D] - 0x40) * 2, 1, 127);
         bool mono = pt.p[5] == 0;
         // mono: remember held notes, choose the sounding note by priority
         if (mono) {
@@ -490,7 +546,7 @@ struct Synth {
 
     // FUN_00010dc4: note shifts, note table, part detune, master tune
     void compute_pitch(Chan& C, const Part& pt, int note) {
-        int n = clampi(note + (sysNoteShift & 0x7F) - 0x40, 0, 127);
+        int n = clampi(note + (sysNoteShift() & 0x7F) - 0x40, 0, 127);
         n = clampi(n + (perf.c[0x12] & 0x3F) - 24, 0, 127);
         n = clampi(n + (pt.p[8] & 0x3F) - 24, 0, 127);
         n = clampi(n + (pt.voice.raw[0x1E] & 0x3F) - 24, 0, 127);
@@ -498,7 +554,7 @@ struct Synth {
         int pitch = NOTETAB[n];
         int d = pt.p[9] - 0x40;
         if (d) { int band = (n >> 3) & 0xF; int prod = std::abs(d) * (15 - band); if (!prod) prod = 1; pitch += (d < 0 ? -prod : prod) / 15; }
-        pitch += (sysTune & 0x7F) - 0x40;
+        pitch += (sysTune() & 0x7F) - 0x40;
         C.pitchNote = pitch;
     }
     void retune(Chan& C, int note) {                    // mono legato (FUN_000119d0): new pitch, glide from the current one, EGs keep running
@@ -603,39 +659,81 @@ struct Synth {
             release(c);
         }
     }
+    void fseq_keys() {                           // oneway plays out the rest once every key of the Fseq part is up
+        if (fseqPart < 0) { fseqHeld = false; return; }
+        for (auto& c : ch) if (c.active && c.part == fseqPart && (c.held || c.sustained)) { fseqHeld = true; return; }
+        fseqHeld = false;
+    }
     void release(Chan& C) {                      // FUN_000236e8: key off -> EG release, PEG stage 4 toward L4 at T4
         for (auto& s : C.op) { s.eg.release(); s.ueg.release(); }
         C.feg.release();
         C.pegStage = 4; C.pegTarget = C.pegLvl[4]; C.pegRate = C.pegRt[4];
+        fseq_keys();
     }
     void set_sustain(int part, bool on) { Part& pt = perf.part[part]; pt.sustain = on; if (!on) for (auto& c : ch) if (c.active && c.part == part && c.sustained) { c.sustained = false; release(c); } }
-    void all_off() { for (auto& c : ch) c.active = false; for (auto& p : perf.part) { p.nheld = 0; } fseqRun = false; }
+    void all_off() { for (auto& c : ch) c.active = false; for (auto& p : perf.part) { p.nheld = 0; } fseqRun = false; fseqHeld = false; }
     void all_release() { for (auto& c : ch) if (c.active && (c.held || c.sustained)) { c.held = c.sustained = false; release(c); } for (auto& p : perf.part) p.nheld = 0; }
 
     // ---------------------------------------------------------------- Fseq (FUN_0000fffa / FUN_0001a59e)
+    void fseq_loop(int& lo, int& hi, int& dir) const {     // loop points, and the direction they imply
+        int ls = perf.c[0x1C] << 7 | perf.c[0x1D], le = perf.c[0x1E] << 7 | perf.c[0x1F];
+        if (ls == le) { ls = fseq.loopStart; le = fseq.loopEnd; }
+        dir = le >= ls ? 1 : -1;
+        lo = clampi(std::min(ls, le), 0, fseq.endStep); hi = clampi(std::max(ls, le), 0, fseq.endStep);
+    }
     void fseq_start(int vel) {
-        int ratio = clampi(perf.c[0x18] << 7 | perf.c[0x19], 100, 5000);
-        int sens = perf.c[0x22] & 7;
-        if (sens && ratio > 100) { int x = ((ratio - 100) * sens * (127 - vel)) / 7 / 127; ratio = clampi(ratio - x, 100, 5000); }
-        ratio = clampi(ratio + ctrl_offset(fseqPart, 46) * 8, 100, 5000);
-        double counts = (double)VELW[clampi(fseq.speedAdj, 0, 127)] * 84.0 * 1000.0 / ratio + 2884.0;
-        fseqPeriod = counts * 32.0 / CPU_HZ;
-        int start = clampi(perf.c[0x1A] << 7 | perf.c[0x1B], 0, fseq.nframes - 1);
-        fseqStep = start; fseqDir = 1; fseqAcc = 0; fseqRun = true; fseqVel = vel;
+        int ratio = perf.c[0x18] << 7 | perf.c[0x19];
+        fseqClock = ratio < 100;                           // below 10.0 % the word is a MIDI clock division 0..4
+        if (!fseqClock) {
+            int sens = perf.c[0x22] & 7;
+            ratio = clampi(ratio, 100, 5000);
+            if (sens && ratio > 100) { int x = ((ratio - 100) * sens * (127 - vel)) / 7 / 127; ratio = clampi(ratio - x, 100, 5000); }
+            ratio = clampi(ratio + ctrl_offset(fseqPart, 46) * 8, 100, 5000);
+            double counts = (double)VELW[clampi(fseq.speedAdj, 0, 127)] * 84.0 * 1000.0 / ratio + 2884.0;
+            fseqPeriod = counts * 32.0 / CPU_HZ;           // CMT1 at clock/32
+        }
+        int lo, hi, dir; fseq_loop(lo, hi, dir);
+        int off = clampi(perf.c[0x1A] << 7 | perf.c[0x1B], 0, fseq.endStep);
+        fseqDir = dir;
+        fseqStep = dir > 0 ? off : clampi(fseq.endStep - off, 0, fseq.endStep);
+        fseqAcc = 0; fseqClockAcc = 0; fseqRun = true; fseqHeld = true; fseqVel = vel;
+        fseqDelay = clampi(perf.c[0x26], 0, 99) / 99.0 * cal::FSEQ_DELAY_S;
+    }
+    // One frame forward. oneway loops the section between the loop points while a key is held and then
+    // plays out the rest; round ping-pongs between them (owner's manual page 34).
+    void fseq_step() {
+        int lo, hi, dir; fseq_loop(lo, hi, dir); (void)dir;
+        fseqStep += fseqDir;
+        if ((perf.c[0x20] & 1) != 0) {
+            if (fseqStep >= hi) { fseqStep = hi; fseqDir = -1; }
+            else if (fseqStep <= lo) { fseqStep = lo; fseqDir = 1; }
+        } else if (fseqHeld) {
+            if (fseqDir > 0 && fseqStep > hi) fseqStep = lo;
+            else if (fseqDir < 0 && fseqStep < lo) fseqStep = hi;
+        } else {
+            if (fseqStep >= fseq.endStep) { fseqStep = fseq.endStep; fseqRun = false; }
+            else if (fseqStep <= 0) { fseqStep = 0; fseqRun = false; }
+        }
     }
     void fseq_tick(double dt) {
-        if (!fseqRun) return;
+        if (!fseqRun || !fseq.valid) return;
+        if (fseqDelay > 0) { fseqDelay -= dt; if (fseqDelay > 0) return; }
+        if ((perf.c[0x21] & 3) == 1) {                     // scratch: the controller is the transport
+            int v = clampi(ctrl_offset(fseqPart, 47), 0, 127);
+            fseqStep = clampi(v * fseq.endStep / 127, 0, fseq.endStep);
+            return;
+        }
+        if (fseqClock) return;                             // MIDI clock drives it from midi_clock()
         fseqAcc += dt; if (fseqAcc < fseqPeriod) return;
         fseqAcc -= fseqPeriod;
-        int ls = perf.c[0x1C] << 7 | perf.c[0x1D], le = perf.c[0x1E] << 7 | perf.c[0x1F];
-        if (le <= ls) { ls = fseq.loopStart; le = fseq.loopEnd; }
-        le = std::min(le, fseq.endStep); ls = std::min(ls, le);
-        int mode = perf.c[0x20] & 1;
-        if (mode == 0) { if (fseqStep < le) fseqStep++; }
-        else {
-            fseqStep += fseqDir;
-            if (fseqStep >= le) { fseqStep = le; fseqDir = -1; } else if (fseqStep <= ls) { fseqStep = ls; fseqDir = 1; }
-        }
+        fseq_step();
+    }
+    // 24 ppqn in; the speed word 0..4 selects 1/4, 1/2, 1/1, 2/1, 4/1 frames per clock (INFERRED rate).
+    void midi_clock() {
+        if (!fseqRun || !fseqClock || !fseq.valid || fseqDelay > 0 || (perf.c[0x21] & 3) == 1) return;
+        static const double rate[5] = {0.25, 0.5, 1.0, 2.0, 4.0};
+        fseqClockAcc += rate[clampi(perf.c[0x18] << 7 | perf.c[0x19], 0, 4)];
+        while (fseqClockAcc >= 1.0) { fseqClockAcc -= 1.0; fseq_step(); }
     }
 
     // ---------------------------------------------------------------- tick: LFO, PEG, portamento, register refresh
@@ -696,6 +794,7 @@ struct Synth {
     }
     void refresh_regs(Chan& C, const Part& pt) {  // FUN_0002c798 / FUN_0002c214 / FUN_0002ad72 / FUN_0002b458
         const Voice& V = pt.voice; int part = C.part;
+        voice_ctrl(C, pt);
         int fseqPitch = 0;
         if (fseqRun && fseqPart == part && !(perf.c[0x23] & 1) && fseq.valid) {
             const uint8_t* f = fseq.frame[fseqStep];
@@ -725,12 +824,31 @@ struct Synth {
                 if (C.fseqOp[o]) { l = f[0x12 + t] << 1; if (lvVel != 0x80) l = (~(((~l) & 0xFF) * lvVel >> 8)) & 0xFF; C.fqWord[o] = f[2 + t] * 256 + f[0xA + t] * 2 + trackOff; }
                 if (C.fseqUOp[o]) { ul = f[0x2A + t] << 1; if (lvVel != 0x80) ul = (~(((~ul) & 0xFF) * lvVel >> 8)) & 0xFF; C.fquWord[o] = f[0x1A + t] * 256 + f[0x22 + t] * 2 + trackOff; }
             }
-            C.regLevel[o] = clampi(l + C.egbias[o], 0, 255);
-            C.regULevel[o] = clampi(ul + C.uegbias[o], 0, 255);
+            C.regLevel[o] = clampi(l + C.egbias[o] + C.vcLvl[o][0], 0, 255);
+            C.regULevel[o] = clampi(ul + C.uegbias[o] + C.vcLvl[o][1], 0, 255);
         }
         int vAtt, uAtt; part_levels(part, vAtt, uAtt);
         C.partV = db2lin(-LEVEL_DB * vAtt); C.partU = db2lin(-LEVEL_DB * uAtt);
         refresh_pan(C, pt); refresh_filter(C, pt);
+    }
+    // Voice common 0x40-0x53: five Formant control destinations and five FM control destinations, each
+    // [--ddvooo] where dd = off/out/freq/width, v picks the voiced or unvoiced operator and ooo the
+    // operator. The paired depth byte scales the part's FORMANT (0x1D) or FM (0x1E) value.
+    // INFERRED scaling: a full-depth knob moves the centre frequency about six semitones.
+    void voice_ctrl(Chan& C, const Part& pt) {
+        memset(C.vcLvl, 0, sizeof C.vcLvl); memset(C.vcFreq, 0, sizeof C.vcFreq); memset(C.vcBw, 0, sizeof C.vcBw);
+        const uint8_t* b = pt.voice.raw;
+        int src[2] = {(pt.p[0x1D] - 64) + ctrl_offset(C.part, 32), (pt.p[0x1E] - 64) + ctrl_offset(C.part, 33)};
+        for (int k = 0; k < 10; k++) {
+            int d = b[k < 5 ? 0x40 + k : 0x4A + (k - 5)];
+            int dep = (int)b[k < 5 ? 0x45 + k : 0x4F + (k - 5)] - 64;
+            int dd = (d >> 4) & 3, v = (d >> 3) & 1, o = d & 7;
+            if (!dd || !dep) continue;
+            int amt = (src[k < 5 ? 0 : 1] * dep) >> 6;
+            if (dd == 1) C.vcLvl[o][v] -= amt;            // "out": more control means less attenuation
+            else if (dd == 2) C.vcFreq[o][v] += (int)(amt * cal::VCTRL_FREQ);
+            else C.vcBw[o][v] += amt / 2;
+        }
     }
     // registers 0x22A-0x22F: the pan index (part pan, pan scaling, pan LFO, performance pan, the Panpot
     // controller) read through the firmware's own pan tables as a 0.375 dB attenuation per side.
@@ -766,11 +884,164 @@ struct Synth {
         }
     }
 
+    // ---------------------------------------------------------------- MIDI in (Data List sections 2 to 4)
+    // One entry point for channel messages so the plugin layer can feed the engine the same way the
+    // console does. Sysex goes through midi_sysex(); replies land in outQ.
+    int forceChannel = -1;                       // console -c: every part listens on this channel
+    double senseTimer = 0;                       // active sensing: mute if 0xFE stops arriving
+    int bankMsb = 0x3F, perfBank = -1;
+    int ccSource(int cc) const {                 // system 0x16-0x1F map CC numbers to KN1-4 MC1-4 FC BC
+        for (int i = 0; i < 10; i++) if (sys[0x16 + i] == cc) return i;
+        return cc == 1 ? 10 : -1;                // MW is always CC1; CAT/PAT/PB are not control changes
+    }
+    bool part_listens(int p, int chn) const {
+        int rc = perf.part[p].rcv();
+        if (rc == 0x7F) return false;
+        if (forceChannel >= 0) return chn == forceChannel;
+        int pc = perfChannel();
+        if (rc == 0x10) return pc == 0x10 || (pc != 0x7F && chn == pc);
+        return rc == chn;
+    }
+    void load_perf_bank(int lsb, int prog);      // defined with the ROM loaders
+    void midi_in(int st, int d1, int d2) {
+        int chn = st & 0x0F; st &= 0xF0;
+        if (st == 0xF0) {                        // system real time
+            if (chn == 0x08) midi_clock();
+            else if (chn == 0x0E) senseTimer = 0.5;
+            else if (chn == 0x0A || chn == 0x0B) { fseqAcc = 0; fseqClockAcc = 0; }
+            return;
+        }
+        int pc = perfChannel();
+        bool onPerfCh = pc == 0x10 || (pc != 0x7F && chn == pc);
+        if (st == 0xC0 && onPerfCh && sys[0x13] && perfBank >= 0x40) { load_perf_bank(perfBank, d1); return; }
+        for (int p = 0; p < 4; p++) {
+            if (!part_listens(p, chn)) continue;
+            Part& pt = perf.part[p];
+            switch (st) {
+            case 0x90: if (d2) { note_on(p, d1, d2); fseq_keys(); break; }   // velocity 0 falls through
+            case 0x80: note_off(p, d1); fseq_keys(); break;
+            case 0xA0: pt.src[12] = d2; break;
+            case 0xD0: pt.src[11] = d1; break;
+            case 0xE0: pt.bend = (d2 - 64) * 16; pt.src[13] = d2; break;
+            case 0xC0: if (rom_ready(rom) && sys[0x13] && pt.p[1] && sys[8]) { pt.p[2] = (uint8_t)d1; rom_voice(*rom, bank_voice_index(pt.p[1], d1), pt.voice); } break;
+            case 0xB0: control_change(p, d1, d2); break;
+            }
+        }
+    }
+    void control_change(int p, int cc, int v) {
+        Part& pt = perf.part[p];
+        int src = ccSource(cc);
+        if (src >= 0) { pt.src[src] = v; return; }
+        if (cc == sys[0x20]) { pt.p[0x1D] = (uint8_t)v; return; }    // Formant knob control number
+        if (cc == sys[0x21]) { pt.p[0x1E] = (uint8_t)v; return; }    // FM knob control number
+        switch (cc) {
+        case 0: if (sys[0x12]) bankMsb = v; break;
+        case 32: if (sys[0x12] && bankMsb == 0x3F) { if (v <= 0x0B) pt.p[1] = (uint8_t)(v + 1); else if (v >= 0x40 && v <= 0x43) perfBank = v; } break;
+        case 6: data_entry(p, v); break;
+        case 7: pt.p[0x0B] = (uint8_t)v; break;
+        case 11: pt.expr = std::max((int)pt.p[0x2C], std::min(254, v * 2)); break;
+        case 64: set_sustain(p, v >= 64); break;
+        case 65: pt.p[0x24] = (uint8_t)((pt.p[0x24] & 2) | (v >= 64)); break;
+        case 5: pt.p[0x25] = (uint8_t)v; break;
+        case 10: pt.p[0x0E] = (uint8_t)std::max(1, v); break;
+        case 91: pt.p[0x13] = (uint8_t)v; break;
+        case 94: pt.p[0x12] = (uint8_t)v; break;
+        case 98: pt.rpnL = v; pt.nrpnSel = true; break;
+        case 99: pt.rpnM = v; pt.nrpnSel = true; break;
+        case 100: pt.rpnL = v; pt.nrpnSel = false; break;
+        case 101: pt.rpnM = v; pt.nrpnSel = false; break;
+        case 120: all_off(); break;
+        case 121: pt.bend = 0; pt.expr = 254; memset(pt.src, 0, sizeof pt.src); pt.sustain = false; pt.rpnM = pt.rpnL = 127; break;
+        case 123: all_release(); break;
+        case 126: pt.p[5] = 0; break;
+        case 127: pt.p[5] = 1; break;
+        default: break;
+        }
+    }
+    void data_entry(int p, int v) {
+        Part& pt = perf.part[p];
+        if (pt.nrpnSel) {
+            if (pt.rpnM != 1) return;
+            switch (pt.rpnL) {                   // NRPN 01 xx, Data List section 2.2.2
+            case 0x08: pt.p[0x15] = (uint8_t)v; break;   // LFO1 speed
+            case 0x09: pt.p[0x16] = (uint8_t)v; break;   // LFO1 pitch mod
+            case 0x0A: pt.p[0x17] = (uint8_t)v; break;   // LFO1 delay
+            case 0x0B: pt.p[0x2E] = (uint8_t)v; break;   // LFO2 speed
+            case 0x0C: pt.p[0x2F] = (uint8_t)v; break;   // LFO2 filter mod
+            case 0x20: pt.p[0x18] = (uint8_t)v; break;   // filter cutoff
+            case 0x21: pt.p[0x19] = (uint8_t)v; break;   // filter resonance
+            case 0x63: pt.p[0x1A] = (uint8_t)v; break;   // EG attack
+            case 0x64: pt.p[0x1B] = (uint8_t)v; break;   // EG decay
+            case 0x66: pt.p[0x1C] = (uint8_t)v; break;   // EG release
+            }
+            return;
+        }
+        if (pt.rpnM != 0) return;
+        switch (pt.rpnL) {                       // RPN 00 00-02
+        case 0: { int r = clampi(v, 0, 24); pt.p[0x26] = (uint8_t)(0x40 + r); pt.p[0x27] = (uint8_t)(0x40 - r); break; }
+        case 1: pt.p[9] = (uint8_t)clampi(v, 0x0F, 0x70); break;
+        case 2: pt.p[8] = (uint8_t)clampi(v - 0x28, 0, 0x30); break;
+        }
+    }
+    void sense_tick(double dt) { if (senseTimer > 0 && (senseTimer -= dt) <= 0) { senseTimer = 0; all_off(); } }
+
+    // ---------------------------------------------------------------- sysex out (dump and parameter replies)
+    void push_sysex(std::vector<uint8_t>& m) { if (outQ.size() < 64) outQ.push_back(m); }
+    void push_bulk(int ah, int am, int al, const uint8_t* d, int n) {
+        std::vector<uint8_t> m{0xF0, 0x43, (uint8_t)(devNumber() & 0x0F), 0x5E,
+                               (uint8_t)(n >> 7 & 0x7F), (uint8_t)(n & 0x7F),
+                               (uint8_t)ah, (uint8_t)am, (uint8_t)al};
+        int sum = (n >> 7 & 0x7F) + (n & 0x7F) + ah + am + al;
+        for (int i = 0; i < n; i++) { uint8_t b = d[i] & 0x7F; m.push_back(b); sum += b; }
+        m.push_back((uint8_t)((-sum) & 0x7F)); m.push_back(0xF7);
+        push_sysex(m);
+    }
+    void push_param(int ah, int am, int al, int val) {
+        std::vector<uint8_t> m{0xF0, 0x43, (uint8_t)(0x10 | (devNumber() & 0x0F)), 0x5E,
+                               (uint8_t)ah, (uint8_t)am, (uint8_t)al,
+                               (uint8_t)(val >> 7 & 0x7F), (uint8_t)(val & 0x7F), 0xF7};
+        push_sysex(m);
+    }
+    int read_param(int ah, int am, int al) const {
+        if (ah == 0x00 && am == 0 && al < 76) return sys[al];
+        if (ah == 0x10 && am == 0 && al < 80) return perf.c[al];
+        if (ah == 0x10 && ((am == 0 && al >= 0x50) || am == 1)) { int i = am ? 48 + al : al - 0x50; return i < 112 ? perf.fx[i] : -1; }
+        if (ah >= 0x30 && ah <= 0x33 && am == 0 && al < 52) return perf.part[ah - 0x30].p[al];
+        if (ah >= 0x40 && ah <= 0x43 && am == 0 && al < 112) return perf.part[ah - 0x40].voice.raw[al];
+        if (ah >= 0x60 && ah <= 0x63 && am < 8 && al < 62) return perf.part[ah - 0x60].voice.raw[112 + am * 62 + al];
+        return -1;
+    }
+    void current_perf_bytes(uint8_t* out) const {          // 400 bytes, sysex layout
+        memcpy(out, perf.c, 80); memcpy(out + 80, perf.fx, 112);
+        for (int i = 0; i < 4; i++) memcpy(out + 192 + 52 * i, perf.part[i].p, 52);
+    }
+    void fseq_bytes(std::vector<uint8_t>& d) const {
+        d.assign(32 + (size_t)fseq.nframes * 50, 0);
+        memcpy(d.data(), fseq.name, 8);
+        d[0x10] = (uint8_t)(fseq.loopStart >> 7); d[0x11] = (uint8_t)(fseq.loopStart & 0x7F);
+        d[0x12] = (uint8_t)(fseq.loopEnd >> 7); d[0x13] = (uint8_t)(fseq.loopEnd & 0x7F);
+        d[0x14] = (uint8_t)fseq.loopMode; d[0x15] = (uint8_t)fseq.speedAdj; d[0x16] = (uint8_t)fseq.velTempo;
+        d[0x17] = (uint8_t)fseq.pitchMode; d[0x18] = (uint8_t)fseq.noteAssign; d[0x19] = (uint8_t)fseq.tuning;
+        d[0x1A] = (uint8_t)fseq.delay; d[0x1B] = (uint8_t)clampi(fseq.nframes / 128 - 1, 0, 3);
+        d[0x1E] = (uint8_t)(fseq.endStep >> 7); d[0x1F] = (uint8_t)(fseq.endStep & 0x7F);
+        memcpy(d.data() + 32, fseq.frame, (size_t)fseq.nframes * 50);
+    }
+    void dump_request(int ah, int am, int al) {
+        if (ah == 0x00) { push_bulk(0x00, 0, 0, sys, 76); return; }
+        if (ah == 0x10 || ah == 0x11) { uint8_t d[400]; current_perf_bytes(d); push_bulk(ah, am, al, d, 400); return; }
+        if (ah >= 0x40 && ah <= 0x43) { push_bulk(ah, 0, 0, perf.part[ah - 0x40].voice.raw, 608); return; }
+        if (ah == 0x51) { push_bulk(0x51, am, al, perf.part[0].voice.raw, 608); return; }
+        if ((ah & 0xF0) == 0x60 && (ah & 0x0F) <= 1 && fseq.valid) {   // 6b 00 nn, b = bank
+            std::vector<uint8_t> d; fseq_bytes(d);
+            push_bulk(ah, am, al, d.data(), (int)d.size());
+        }
+    }
+
     // ---------------------------------------------------------------- chip model (INFERRED beyond the register values)
     inline double op_sample(OpState& s, const OpV& v, double f0, double fop, int bw, double pm) {
         if (v.form == 0) { s.phase += fop / SR; if (s.phase >= 1) s.phase -= 1; return fsin(s.phase + pm); }
         double fw, fc, wl; bool dc = false;
-        if (v.form == 7) { fw = f0; fc = fop; wl = 2.0 * pow(2.0, -bw / 20.0); }                       // formant: window at the fundamental (INFERRED bw curve)
+        if (v.form == 7) { fw = f0; fc = fop; wl = 2.0 * pow(2.0, -bw / cal::FRMT_BW_DB); }                       // formant: window at the fundamental (INFERRED bw curve)
         else if (v.form == 5 || v.form == 6) { fw = fop; fc = fop * (1 + bw * 31.0 / 99.0); wl = v.form == 5 ? 0.5 : 2.0; }
         else { fw = (v.form >= 3 ? 2 * fop : fop); fc = 0; dc = true; wl = (v.form & 1) ? 0.25 : 1.0; }
         wl = std::min(wl, 2.0);
@@ -791,7 +1062,7 @@ struct Synth {
         bool fs = fseqRun && fseqPart == C.part && fseq.valid;
         double f0 = word_hz(C.regPitch + 0x1243 + C.regPM);          // channel fundamental incl. LFO pitch mod (pms 7)
         double Cb = 0, H = 0, S = 0, fbNew = 0, mix = 0;
-        double fbGain = V.fb ? 0.5 * pow(2.0, V.fb - 7) : 0.0;        // INFERRED feedback scale
+        double fbGain = V.fb ? cal::FEEDBACK * pow(2.0, V.fb - 7) : 0.0;        // INFERRED feedback scale
         for (int o = 0; o < 8; o++) {
             OpState& s = C.op[o]; const OpV& v = V.v[o];
             unsigned char t0 = alg[2 * o], t1 = alg[2 * o + 1]; int F = (t0 >> 3) & 7;
@@ -799,20 +1070,21 @@ struct Synth {
             if (F == 6) S = 0;
             double egdb = s.eg.tick();
             double att = C.regLevel[o] * LEVEL_DB + C.regAM * LEVEL_DB * v.ams / 7.0;   // INFERRED: ams scales the channel AM attenuation linearly
-            if (t1 & 1) att += 1.5 * V.corr[o];                                            // carrier level correction (bits in the 0x200 word), 1.5 dB steps INFERRED
+            if (t1 & 1) att += cal::CARRIER_DB * V.corr[o];                                            // carrier level correction (bits in the 0x200 word), 1.5 dB steps INFERRED
             double y = 0;
             if (egdb - att > -100) {
                 double amp = db2lin(egdb - att);
                 double fegSemi = s.feg.tick();
-                int pmw = (int)(C.regPM * PMS_FRAC[v.pms]);
+                int pmw = (int)(C.regPM * cal::PMS_FRAC[v.pms]);
                 double fop;
+                pmw += C.vcFreq[o][0];
                 if (fs && C.fseqOp[o]) fop = word_hz(C.fqWord[o] + pmw);
                 else if (v.form == 7) fop = word_hz(C.freqWord[o] + (C.frmtWord[o] - 0x1243) + pmw + (C.regFM * v.fms) / 7);
                 else if (!v.fixed) fop = word_hz(C.freqWord[o] + C.regPitch + pmw);
                 else fop = word_hz(C.freqWord[o] + pmw + (C.regFM * v.fms) / 7);
-                if (v.form != 7) fop *= pow(2.0, ((v.detune - 15) * 2.0) / 1200.0);       // INFERRED: detune 2 cents per step on non-formant ops
+                if (v.form != 7) fop *= pow(2.0, ((v.detune - 15) * cal::DETUNE_CENTS) / 1200.0);       // INFERRED: detune 2 cents per step on non-formant ops
                 fop *= pow(2.0, fegSemi / 12.0);
-                y = op_sample(s, v, f0, fop, C.bwReg[o], in * FM_INDEX) * amp;
+                y = op_sample(s, v, f0, fop, clampi(C.bwReg[o] + C.vcBw[o][0], 0, 99), in * FM_INDEX) * amp;
             }
             Cb = y; if (t0 & 2) H = y; if (t1 & 4) S += y; if (t0 & 4) fbNew = y;
             if (t1 & 1) mix += y * partV;
@@ -826,11 +1098,11 @@ struct Synth {
                 if (fs && C.fseqUOp[o]) nf = word_hz(C.fquWord[o]);
                 else if (u.mode == 1) nf = f0;
                 else if (u.mode == 2 && v.form == 7) nf = word_hz(C.freqWord[o] + (C.frmtWord[o] - 0x1243));
-                else nf = word_hz(C.ufreqWord[o] + (C.regFM * u.fms) / 7);
+                else nf = word_hz(C.ufreqWord[o] + (C.regFM * u.fms) / 7 + C.vcFreq[o][1]);
                 nf *= pow(2.0, u.transpose / 12.0 + s.ufeg.tick() / 12.0);
                 s.rng ^= s.rng << 13; s.rng ^= s.rng >> 17; s.rng ^= s.rng << 5;
                 double nz = ((int32_t)s.rng) * (1.0 / 2147483648.0);
-                double fcut = 20.0 * pow(2.0, C.ubwReg[o] / 127.0 * 9.0);    // INFERRED noise formant model, see docs
+                double fcut = cal::CUT_BASE_HZ * pow(2.0, clampi(C.ubwReg[o] + C.vcBw[o][1], 0, 127) / 127.0 * cal::NOISE_OCT);    // INFERRED noise formant model, see docs
                 double a = 1.0 - exp(-2 * PI * fcut / SR);
                 int stages = 1 + u.skirt;
                 for (int k = 0; k < stages; k++) { s.lp[k] += (nz - s.lp[k]) * a; nz = s.lp[k]; }
@@ -864,6 +1136,7 @@ struct Synth {
             insSw[p] = (q[0x14] & 1) != 0;
             dry[p] = sendlvl(q[0x11]); varS[p] = sendlvl(q[0x12]); revS[p] = sendlvl(q[0x13]);
         }
+        sense_tick(frames / (double)SR);
         for (int i = 0; i < frames; i++) {
             tickAcc += TICK_HZ / SR; while (tickAcc >= 1) { tickAcc -= 1; tick(); }
             double pl[4] = {}, pr[4] = {};
@@ -936,6 +1209,11 @@ static bool rom_perf(Synth& S, const Rom& R, int idx) {
     idx = clampi(idx, 0, 359); size_t off = 0xC580 + (size_t)idx * 400;
     std::lock_guard<std::mutex> lk(S.mtx); perf_from_bytes(S, &R, R.d.data() + off); return true;
 }
+static bool rom_ready(const Rom* R) { return R && R->ok; }
+void Synth::load_perf_bank(int lsb, int prog) {          // called with mtx already held
+    if (!rom_ready(rom)) return;
+    perf_from_bytes(*this, rom, rom->d.data() + 0xC580 + (size_t)bank_perf_index(lsb, prog) * 400);
+}
 static bool rom_fseq(Synth& S, const Rom& R, int n) {   // preset Fseq 1..90
     n = clampi(n, 1, 90); size_t off = n <= 10 ? 0x100A00 + (size_t)(n - 1) * 25632 : 0x83000 + (size_t)(n - 11) * 6432;
     std::lock_guard<std::mutex> lk(S.mtx); S.fseq.from_bytes(R.d.data() + off, R.d.data() + off + 32, n <= 10 ? 512 : 128);
@@ -972,18 +1250,48 @@ static bool load_sysex(Synth& S, const Rom* R, const uint8_t* d, size_t len, int
     }
     return false;
 }
+// Every address in the parameter tables reaches the engine as a single parameter change, not just
+// through a bulk dump: system (table 4), performance common and the 112 effect bytes (table 1),
+// part (table 1), voice common and the 62 bytes per operator (table 2).
+static bool write_param(Synth& S, int ah, int am, int al, int val) {
+    uint8_t v = (uint8_t)(val & 0x7F);
+    if (ah == 0x00 && am == 0 && al < 76) { if (al != 0x46) S.sys[al] = v; return true; }
+    if (ah == 0x10 && am == 0 && al < 80) {
+        S.perf.c[al] = v;
+        if (al == 0x15 || al == 0x16 || al == 0x17) {
+            S.fseqPart = (S.perf.c[0x15] & 7) ? (S.perf.c[0x15] & 7) - 1 : -1;
+            if (rom_ready(S.rom) && (S.perf.c[0x16] & 1)) {
+                int n = S.perf.c[0x17];
+                size_t off = n < 10 ? 0x100A00 + (size_t)n * 25632 : 0x83000 + (size_t)(n - 10) * 6432;
+                S.fseq.from_bytes(S.rom->d.data() + off, S.rom->d.data() + off + 32, n < 10 ? 512 : 128);
+            }
+        }
+        return true;
+    }
+    if (ah == 0x10 && ((am == 0 && al >= 0x50) || am == 1)) { int i = am ? 48 + al : al - 0x50; if (i >= 112) return false; S.perf.fx[i] = v; return true; }
+    if (ah >= 0x30 && ah <= 0x33 && am == 0 && al < 52) { S.perf.part[ah - 0x30].p[al] = v; return true; }
+    if (ah >= 0x40 && ah <= 0x43 && am == 0 && al < 112) { Voice& V = S.perf.part[ah - 0x40].voice; V.raw[al] = v; decode_voice(V); return true; }
+    if (ah >= 0x60 && ah <= 0x63 && am < 8 && al < 62) { Voice& V = S.perf.part[ah - 0x60].voice; V.raw[112 + am * 62 + al] = v; decode_voice(V); return true; }
+    if (ah == 0x70 && am == 0 && al < 32) {                       // Fseq header
+        uint8_t h[32] = {}; std::vector<uint8_t> cur; S.fseq_bytes(cur);
+        if (cur.size() >= 32) memcpy(h, cur.data(), 32);
+        h[al] = v;
+        if (S.fseq.valid) S.fseq.from_bytes(h, (const uint8_t*)S.fseq.frame, S.fseq.nframes);
+        return true;
+    }
+    return false;
+}
 static bool apply_param_change(Synth& S, const uint8_t* d, size_t len) {
-    // F0 43 1n 5E ah am al vh vl F7 : 10 perf common, 3p part, 4p voice common, 6p op, 00 system
-    if (len < 10 || d[1] != 0x43 || (d[2] & 0xF0) != 0x10 || d[3] != 0x5E) return false;
-    int ah = d[4], am = d[5], al = d[6], val = d[7] << 7 | d[8];
+    // F0 43 1n 5E ah am al vh vl F7 change, F0 43 3n 5E ah am al F7 request, F0 43 2n 5E ah am al F7 dump request
+    if (len < 8 || d[0] != 0xF0 || d[1] != 0x43 || d[3] != 0x5E) return false;
+    int kind = d[2] & 0xF0, dev = d[2] & 0x0F;
     std::lock_guard<std::mutex> lk(S.mtx);
-    if (ah == 0x10 && am == 0 && al < 80) S.perf.c[al] = (uint8_t)(val & 0x7F);
-    else if (ah >= 0x30 && ah <= 0x33 && al < 52) S.perf.part[ah - 0x30].p[al] = (uint8_t)(val & 0x7F);
-    else if (ah >= 0x40 && ah <= 0x43 && al < 112) { S.perf.part[ah - 0x40].voice.raw[al] = (uint8_t)(val & 0x7F); decode_voice(S.perf.part[ah - 0x40].voice); }
-    else if (ah >= 0x60 && ah <= 0x63 && am < 8 && al < 62) { S.perf.part[ah - 0x60].voice.raw[112 + am * 62 + al] = (uint8_t)(val & 0x7F); decode_voice(S.perf.part[ah - 0x60].voice); }
-    else if (ah == 0x00 && am == 0) { if (al == 0) S.sysTune = val & 0x7F; else if (al == 6) S.sysNoteShift = val & 0x7F; else if (al == 0x0E) S.velCurve = val & 7; }
-    else return false;
-    return true;
+    if (S.devNumber() != 0x10 && S.devNumber() != dev) return false;
+    int ah = d[4], am = d[5], al = d[6];
+    if (kind == 0x30) { int v = S.read_param(ah, am, al); if (v >= 0) S.push_param(ah, am, al, v); return v >= 0; }
+    if (kind == 0x20) { S.dump_request(ah, am, al); return true; }
+    if (kind != 0x10 || len < 10) return false;
+    return write_param(S, ah, am, al, d[7] << 7 | d[8]);
 }
 
 // ------------------------------------------------------------------------------------------ MIDI in
@@ -1005,36 +1313,22 @@ static void CALLBACK midi_cb(HMIDIIN h, UINT msg, DWORD_PTR, DWORD_PTR p1, DWORD
     }
 }
 static int g_channel = -1;   // -1 = parts use their own receive channels, else every part listens here
-static int g_perfCh = 0;     // system "performance channel" (part rcv 0x10)
 static const Rom* g_rom = nullptr;
+static HMIDIOUT g_hmo = nullptr;
 
+static void send_sysex(const std::vector<uint8_t>& m) {
+    if (!g_hmo) return;
+    MIDIHDR h{}; h.lpData = (LPSTR)m.data(); h.dwBufferLength = (DWORD)m.size();
+    if (midiOutPrepareHeader(g_hmo, &h, sizeof h) != MMSYSERR_NOERROR) return;
+    midiOutLongMsg(g_hmo, &h, sizeof h);
+    while (!(h.dwFlags & MHDR_DONE)) Sleep(0);
+    midiOutUnprepareHeader(g_hmo, &h, sizeof h);
+}
 static void handle_midi(Synth& S) {
     uint32_t m;
     while (g_q.pop(m)) {
-        int st = m & 0xF0, chn = m & 0x0F, d1 = m >> 8 & 0x7F, d2 = m >> 16 & 0x7F;
         std::lock_guard<std::mutex> lk(S.mtx);
-        for (int p = 0; p < 4; p++) {
-            Part& pt = S.perf.part[p]; int rc = pt.rcv();
-            bool on = rc != 0x7F && (g_channel >= 0 ? chn == g_channel : (rc == 0x10 ? chn == g_perfCh : rc == chn));
-            if (!on) continue;
-            switch (st) {
-            case 0x90: if (d2) { S.note_on(p, d1, d2); break; } // fallthrough
-            case 0x80: S.note_off(p, d1); break;
-            case 0xA0: pt.src[12] = d2; break;
-            case 0xD0: pt.src[11] = d1; break;
-            case 0xE0: pt.bend = (d2 - 64) * 16; pt.src[13] = d2; break;
-            case 0xB0:
-                if (d1 == 1) pt.src[10] = d2; else if (d1 == 2) pt.src[9] = d2; else if (d1 == 4) pt.src[8] = d2;
-                else if (d1 >= 16 && d1 <= 19) pt.src[d1 - 16] = d2; else if (d1 >= 20 && d1 <= 22) pt.src[4 + d1 - 20] = d2; else if (d1 == 13) pt.src[7] = d2;
-                else if (d1 == 7) pt.p[0x0B] = (uint8_t)d2; else if (d1 == 11) pt.expr = std::min(254, d2 * 2);
-                else if (d1 == 64) S.set_sustain(p, d2 >= 64);
-                else if (d1 == 65) pt.p[0x24] = (uint8_t)((pt.p[0x24] & 2) | (d2 >= 64)); else if (d1 == 5) pt.p[0x25] = (uint8_t)d2;
-                else if (d1 == 120) S.all_off(); else if (d1 == 123) S.all_release();
-                else if (d1 == 121) { pt.bend = 0; pt.expr = 254; memset(pt.src, 0, sizeof pt.src); pt.sustain = false; }
-                break;
-            case 0xC0: if (g_rom && g_rom->ok && pt.p[1]) { pt.p[2] = (uint8_t)d1; rom_voice(*g_rom, bank_voice_index(pt.p[1], d1), pt.voice); } break;
-            }
-        }
+        S.midi_in(m & 0xFF, m >> 8 & 0x7F, m >> 16 & 0x7F);
     }
     std::vector<std::vector<uint8_t>> sx;
     { std::lock_guard<std::mutex> lk(g_sxmtx); sx.swap(g_sysex); }
@@ -1042,6 +1336,9 @@ static void handle_midi(Synth& S) {
         if (load_sysex(S, g_rom, v.data(), v.size(), 0, 0)) printf("bulk received: %s / %s\n", S.perf.name, S.perf.part[0].voice.name);
         else apply_param_change(S, v.data(), v.size());
     }
+    std::vector<std::vector<uint8_t>> out;
+    { std::lock_guard<std::mutex> lk(S.mtx); out.swap(S.outQ); }
+    for (auto& v : out) send_sysex(v);
 }
 
 // ------------------------------------------------------------------------------------------ offline check
@@ -1067,20 +1364,107 @@ static int render_wav(Synth& S, const char* path, int note, double secs) {
     return 0;
 }
 
+// ------------------------------------------------------------------------------------------ self test
+// fs1r_emu -selftest: every sysex path the plugin will use. Parameter change in, parameter request out,
+// bulk dump out and straight back in, and the whole 400/608 byte state surviving the round trip.
+static int g_fails = 0;
+static void ck(const char* what, bool ok) { if (!ok) { printf("  FAIL %s\n", what); g_fails++; } }
+static int selftest(Synth& S) {
+    // 1. a parameter change reaches the engine at every address class
+    struct { int ah, am, al, v; const char* name; } pc[] = {
+        {0x00, 0, 0x0E, 3, "system velocity curve"},
+        {0x10, 0, 0x11, 100, "performance pan"},
+        {0x10, 0, 0x58, 5, "reverb type"},
+        {0x10, 1, 0x2F, 9, "insertion type"},
+        {0x31, 0, 0x0E, 20, "part 2 pan"},
+        {0x42, 0, 0x54, 2, "part 3 voice filter type"},
+        {0x63, 5, 0x16, 77, "part 4 op 6 level"},
+    };
+    for (auto& t : pc) {
+        uint8_t m[10] = {0xF0, 0x43, 0x10, 0x5E, (uint8_t)t.ah, (uint8_t)t.am, (uint8_t)t.al, 0, (uint8_t)t.v, 0xF7};
+        ck(t.name, apply_param_change(S, m, 10));
+        ck(t.name, S.read_param(t.ah, t.am, t.al) == t.v);
+    }
+    ck("voice decode followed the change", S.perf.part[2].voice.fltType == 2);
+    ck("op level decode followed the change", S.perf.part[3].voice.v[5].level == 77);
+
+    // 2. a parameter request comes back as a parameter change with the same value
+    { uint8_t m[8] = {0xF0, 0x43, 0x30, 0x5E, 0x10, 0, 0x11, 0xF7};
+      S.outQ.clear(); apply_param_change(S, m, 8);
+      ck("parameter request replied", S.outQ.size() == 1);
+      if (S.outQ.size() == 1) { auto& r = S.outQ[0];
+          ck("reply is a parameter change", r.size() == 10 && r[2] == 0x10 && r[4] == 0x10 && r[6] == 0x11);
+          ck("reply carries the value", (r[7] << 7 | r[8]) == 100); } }
+
+    // 3. bulk dumps: request, check the checksum, feed it back, state unchanged
+    uint8_t before[400]; S.current_perf_bytes(before);
+    { uint8_t m[8] = {0xF0, 0x43, 0x20, 0x5E, 0x10, 0, 0, 0xF7};
+      S.outQ.clear(); apply_param_change(S, m, 8);
+      ck("performance dump replied", S.outQ.size() == 1);
+      if (S.outQ.size() == 1) {
+          auto r = S.outQ[0];
+          int n = r[4] << 7 | r[5];
+          ck("byte count 400", n == 400);
+          int sum = 0; for (size_t i = 4; i + 1 < r.size(); i++) sum += r[i];
+          ck("checksum", (sum & 0x7F) == 0);
+          for (int i = 0; i < 4; i++) S.perf.part[i].p[0x0E] = 1;          // scribble, then reload
+          ck("bulk reloaded", load_sysex(S, nullptr, r.data(), r.size(), 0, 0));
+          uint8_t after[400]; S.current_perf_bytes(after);
+          ck("performance survived the round trip", memcmp(before, after, 400) == 0);
+      } }
+    { uint8_t m[8] = {0xF0, 0x43, 0x20, 0x5E, 0x40, 0, 0, 0xF7};
+      S.outQ.clear(); apply_param_change(S, m, 8);
+      ck("voice dump replied", S.outQ.size() == 1 && (S.outQ[0][4] << 7 | S.outQ[0][5]) == 608); }
+    { uint8_t m[8] = {0xF0, 0x43, 0x20, 0x5E, 0x00, 0, 0, 0xF7};
+      S.outQ.clear(); apply_param_change(S, m, 8);
+      ck("system dump replied", S.outQ.size() == 1 && (S.outQ[0][4] << 7 | S.outQ[0][5]) == 76); }
+
+    // 4. RPN / NRPN and bank select
+    S.perf.part[0].p[4] = 0; S.forceChannel = 0;
+    S.midi_in(0xB0, 101, 0); S.midi_in(0xB0, 100, 0); S.midi_in(0xB0, 6, 12);
+    ck("RPN bend range", S.perf.part[0].p[0x26] == 0x4C && S.perf.part[0].p[0x27] == 0x34);
+    S.midi_in(0xB0, 100, 2); S.midi_in(0xB0, 6, 0x28 + 12);
+    ck("RPN note shift", S.perf.part[0].p[8] == 12);
+    S.midi_in(0xB0, 99, 1); S.midi_in(0xB0, 98, 0x20); S.midi_in(0xB0, 6, 90);
+    ck("NRPN filter cutoff", S.perf.part[0].p[0x18] == 90);
+    S.midi_in(0xB0, 0, 0x3F); S.midi_in(0xB0, 32, 3);
+    ck("bank select", S.perf.part[0].p[1] == 4);
+    S.midi_in(0xB0, 126, 0); ck("mono mode", S.perf.part[0].p[5] == 0);
+    S.midi_in(0xB0, 127, 0); ck("poly mode", S.perf.part[0].p[5] == 1);
+
+    // 5. notes still sound and stop
+    S.midi_in(0x90, 60, 100);
+    int live = 0; for (auto& c : S.ch) if (c.active) live++;
+    ck("note on allocated a channel", live > 0);
+    std::vector<int16_t> buf(2 * 4096);
+    S.render(buf.data(), 4096);
+    double pk = 0; for (auto v : buf) pk = std::max(pk, fabs(v / 32768.0));
+    ck("note produced audio", pk > 0.0001);
+    S.midi_in(0x80, 60, 0); S.midi_in(0xB0, 120, 0);
+    live = 0; for (auto& c : S.ch) if (c.active) live++;
+    ck("all sound off", live == 0);
+
+    printf(g_fails ? "selftest: %d FAILURES\n" : "selftest: ok\n", g_fails);
+    return g_fails ? 1 : 0;
+}
+
 // ------------------------------------------------------------------------------------------ main
 static std::string ini_path() { char p[MAX_PATH]; GetModuleFileNameA(nullptr, p, MAX_PATH); std::string s(p); size_t k = s.find_last_of("\\/"); return s.substr(0, k + 1) + "fs1r_emu.ini"; }
+static int list_midi_out() { int n = midiOutGetNumDevs(); for (int i = 0; i < n; i++) { MIDIOUTCAPSA c; midiOutGetDevCapsA(i, &c, sizeof c); printf("  %d: %s\n", i, c.szPname); } return n; }
 static int list_midi() { int n = midiInGetNumDevs(); for (int i = 0; i < n; i++) { MIDIINCAPSA c; midiInGetDevCapsA(i, &c, sizeof c); printf("  %d: %s\n", i, c.szPname); } return n; }
 
 int main(int argc, char** argv) {
     init_tables();
     Synth* S = new Synth(); static Rom rom;
-    int midiPort = -1, pick = -1, perfIdx = -1, fseqIdx = -1; const char* syx = nullptr; const char* romPath = nullptr;
+    int midiPort = -1, midiOutPort = -1, pick = -1, perfIdx = -1, fseqIdx = -1; const char* syx = nullptr; const char* romPath = nullptr;
     const char* wav = nullptr; int testNote = 60; double testSecs = 3.0;
     for (int i = 1; i < argc; i++) {
         std::string a = argv[i];
-        if (a == "-l") { printf("MIDI inputs:\n"); list_midi(); return 0; }
+        if (a == "-selftest") return selftest(*S);
+        else if (a == "-l") { printf("MIDI inputs:\n"); list_midi(); return 0; }
         else if (a == "-m" && i + 1 < argc) midiPort = atoi(argv[++i]);
-        else if (a == "-c" && i + 1 < argc) g_channel = atoi(argv[++i]) - 1;
+        else if (a == "-o" && i + 1 < argc) midiOutPort = atoi(argv[++i]);
+        else if (a == "-c" && i + 1 < argc) { g_channel = atoi(argv[++i]) - 1; S->forceChannel = g_channel; }
         else if (a == "-v" && i + 1 < argc) syx = argv[++i];
         else if (a == "-p" && i + 1 < argc) pick = atoi(argv[++i]);
         else if (a == "-P" && i + 1 < argc) perfIdx = atoi(argv[++i]);
@@ -1092,7 +1476,7 @@ int main(int argc, char** argv) {
         else if (a == "-n2" && i + 1 < argc) g_note2 = atoi(argv[++i]);
         else if (a == "-mono" && i + 1 < argc) { Part& pt = S->perf.part[0]; pt.p[5] = 0; pt.p[6] = 0; pt.p[0x24] = 3; pt.p[0x25] = (uint8_t)atoi(argv[++i]); }   // part 1 mono, full-time portamento with this time
         else if (a == "-d" && i + 1 < argc) testSecs = atof(argv[++i]);
-        else { printf("usage: fs1r_emu [-l] [-m midiport] [-c channel] [-v file.syx [-p index]] [-r eprom.bin [-p voice] [-P performance] [-f fseq]] [-g gain] [-w test.wav [-n note] [-d seconds]]\n"); return 1; }
+        else { printf("usage: fs1r_emu [-l] [-m midiport] [-o midiout] [-c channel] [-v file.syx [-p index]] [-r eprom.bin [-p voice] [-P performance] [-f fseq]] [-g gain] [-w test.wav [-n note] [-d seconds]]\n"); return 1; }
     }
     if (romPath) { if (!load_rom(rom, romPath)) { printf("cannot read 2 MB EPROM image %s\n", romPath); return 1; } g_rom = &rom; }
     if (perfIdx >= 0) { if (!rom.ok) { printf("-P needs -r\n"); return 1; } rom_perf(*S, rom, perfIdx); }
@@ -1121,6 +1505,10 @@ int main(int argc, char** argv) {
         if (midiInOpen(&g_hmi, midiPort, (DWORD_PTR)midi_cb, 0, CALLBACK_FUNCTION) != MMSYSERR_NOERROR) { printf("cannot open MIDI input %d\n", midiPort); return 1; }
         for (int i = 0; i < 2; i++) { g_hdr[i] = {}; g_hdr[i].lpData = (LPSTR)g_sxbuf[i]; g_hdr[i].dwBufferLength = sizeof g_sxbuf[i]; midiInPrepareHeader(g_hmi, &g_hdr[i], sizeof(MIDIHDR)); midiInAddBuffer(g_hmi, &g_hdr[i], sizeof(MIDIHDR)); }
         midiInStart(g_hmi);
+        if (midiOutPort >= 0 && midiOutPort < (int)midiOutGetNumDevs()) {
+            if (midiOutOpen(&g_hmo, midiOutPort, 0, 0, CALLBACK_NULL) == MMSYSERR_NOERROR) printf("MIDI out: %d (dump and parameter replies)\n", midiOutPort);
+            else g_hmo = nullptr;
+        }
         printf("MIDI in: %d (%s), %s\n", midiPort, c.szPname, g_channel < 0 ? "parts on their receive channels (part 1 = performance channel 1)" : ("all parts on channel " + std::to_string(g_channel + 1)).c_str());
     }
     WAVEFORMATEX wf{}; wf.wFormatTag = WAVE_FORMAT_PCM; wf.nChannels = 2; wf.nSamplesPerSec = SR; wf.wBitsPerSample = 16; wf.nBlockAlign = 4; wf.nAvgBytesPerSec = SR * 4;
