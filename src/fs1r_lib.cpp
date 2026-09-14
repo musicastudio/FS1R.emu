@@ -1,26 +1,17 @@
-// fs1r_emu.cpp - Yamaha FS1R behavioural softsynth.
+// fs1r_lib.cpp - the FS1R engine: everything the firmware does between MIDI and the tone generator
+// registers, plus a model of what the two custom chips do with those registers.
 //
-//   fs1r_emu.exe -l                                   list MIDI inputs
-//   fs1r_emu.exe [-m N] [-c ch] [-v voice.syx] [-r eprom.bin [-p voice] [-P perf] [-f fseq]] [-g gain]
-//                [-w test.wav [-n note] [-d secs]]
+// Reproduced from the v1.20 firmware with its own ROM tables (src/fs1r_rom_tables.h): velocity curves
+// and attenuation, level key scaling, pitch (note table, detune, tune, bend, portamento), the software
+// pitch EG and LFO1 on their 192.3 Hz tick, part levels, mono/poly note handling, performances, Fseq
+// playback, the whole sysex parameter map. What the YMP706 tone generator and the YSS236 effect DSP do
+// with those register values is in no file, so the conversions marked INFERRED follow the DX7 (same
+// design lineage), the formant synthesis patent and the Data List; they are gathered in namespace cal.
 //
-// Four parts, 32 channels, MIDI in (notes, bend, CC1/2/4/7/11/16-22/64/120/123, aftertouch, FS1R bulk
-// dumps and parameter changes), WinMM waveOut 44.1 kHz. DX7 VCED voices are converted the way the
-// firmware does it.
-//
-// Everything the FS1R's CPU does between MIDI and the tone generator registers is reproduced from the
-// v1.20 firmware with its own ROM tables (src/fs1r_rom_tables.h): velocity curves and attenuation, level
-// key scaling, pitch (note table, detune, tune, bend, portamento), the software pitch EG and LFO1 with
-// their 854.5 Hz tick, part levels, mono/poly note handling, performances, Fseq playback. What the
-// YMP706 chip does with those register values is not in any file; the conversions below marked
-// INFERRED follow the DX7 (same design lineage) and the formant synthesis patent, see docs/.
+// No Windows, no host, no GUI. src/fs1r_console.cpp is the test console on top of this.
 #define _CRT_SECURE_NO_WARNINGS
-#define WIN32_LEAN_AND_MEAN
-#define NOMINMAX
-#include <windows.h>
-#include <mmsystem.h>
+#include "fs1r_lib.h"
 #include <algorithm>
-#include <atomic>
 #include <cmath>
 #include <cstdint>
 #include <cstdio>
@@ -31,9 +22,7 @@
 #include "fs1r_algorithms.h"
 #include "fs1r_rom_tables.h"
 
-static const int SR = 44100;
-static const int BLOCK = 128;                    // frames per waveOut buffer (~2.9 ms)
-static const int NBUF = 8;
+static const int SR = 48000;   // the hardware rate; fs1r::Device resamples to the host
 static const int NCHAN = 32;
 static const double PI = 3.14159265358979323846;
 static const double CPU_HZ = 28000000.0;         // SCI BRR 27 gives exactly 31250 baud at 28 MHz
@@ -423,7 +412,7 @@ struct Synth {
     int perfChannel() const { return sys[9]; }             // 0-15, 0x10 = all, 0x7F = off
     int devNumber() const { return sys[0x49]; }
     std::vector<std::vector<uint8_t>> outQ;                // sysex the engine sends back (dump / parameter replies)
-    std::mutex mtx;
+    mutable std::mutex mtx;
     // Fseq playback
     Fseq fseq; bool fseqRun = false; double fseqAcc = 0, fseqPeriod = 0.01; int fseqStep = 0, fseqDir = 1; int fseqVel = 100; int fseqPart = -1;
     bool fseqHeld = false, fseqClock = false; double fseqDelay = 0, fseqClockAcc = 0;
@@ -1121,7 +1110,7 @@ struct Synth {
     // Part buses -> insertion / variation / reverb -> master EQ, the XG topology the FS1R uses.
     // ponytail: the performance's individual out (common 0x14) is folded into the main pair; the plugin
     // has one stereo output, so a second pair would be four channels nobody listens to yet.
-    void render(int16_t* buf, int frames) {
+    void render(float* outL, float* outR, int frames) {
         std::lock_guard<std::mutex> lk(mtx);
         fx.configure(perf.fx);
         double insLvl = sendlvl(perf.fx[0x63]), insRev = sendlvl(perf.fx[0x61]), insVar = sendlvl(perf.fx[0x62]);
@@ -1161,8 +1150,7 @@ struct Synth {
             fx.master(l, r);
             l *= gain * pvol; r *= gain * pvol;
             l = l / (1.0 + fabs(l) * 0.5); r = r / (1.0 + fabs(r) * 0.5);
-            buf[2 * i] = (int16_t)clampi((int)(l * 32767.0), -32767, 32767);
-            buf[2 * i + 1] = (int16_t)clampi((int)(r * 32767.0), -32767, 32767);
+            outL[i] = (float)l; outR[i] = (float)r;
         }
     }
 };
@@ -1207,7 +1195,9 @@ static void perf_from_bytes(Synth& S, const Rom* R, const uint8_t* d) {
 }
 static bool rom_perf(Synth& S, const Rom& R, int idx) {
     idx = clampi(idx, 0, 359); size_t off = 0xC580 + (size_t)idx * 400;
-    std::lock_guard<std::mutex> lk(S.mtx); perf_from_bytes(S, &R, R.d.data() + off); return true;
+    std::lock_guard<std::mutex> lk(S.mtx);
+    perf_from_bytes(S, &R, R.d.data() + off);
+    return true;
 }
 static bool rom_ready(const Rom* R) { return R && R->ok; }
 void Synth::load_perf_bank(int lsb, int prog) {          // called with mtx already held
@@ -1220,6 +1210,7 @@ static bool rom_fseq(Synth& S, const Rom& R, int n) {   // preset Fseq 1..90
     if (S.fseqPart < 0) S.fseqPart = 0;
     return true;
 }
+// FS1R and DX7 bulk dumps. The caller holds S.mtx.
 static bool load_sysex(Synth& S, const Rom* R, const uint8_t* d, size_t len, int pick, int part) {
     // FS1R bulk: F0 43 0n 5E bc bc ah am al <data> cs F7. Voice 608 bytes (ah 40-43/51), performance 400 (ah 10/11), Fseq (ah 70)
     // DX7 VCED:  F0 43 0n 00 01 1B <155 bytes> cs F7
@@ -1231,21 +1222,21 @@ static bool load_sysex(Synth& S, const Rom* R, const uint8_t* d, size_t len, int
             if (i + 9 + bc + 2 > len) break;
             if (bc == 608 && ((ah >= 0x40 && ah <= 0x43) || ah == 0x51)) {
                 if (found++ != pick) continue;
-                std::lock_guard<std::mutex> lk(S.mtx); int pi = ah <= 0x43 ? ah - 0x40 : part;
+                int pi = ah <= 0x43 ? ah - 0x40 : part;
                 memcpy(S.perf.part[pi].voice.raw, p, 608); decode_voice(S.perf.part[pi].voice); return true;
             }
             if (bc == 400 && (ah == 0x10 || ah == 0x11)) {
                 if (found++ != pick) continue;
-                std::lock_guard<std::mutex> lk(S.mtx); perf_from_bytes(S, R, p); return true;
+                perf_from_bytes(S, R, p); return true;
             }
             if (ah == 0x70 && bc >= 32 + 50) {
                 if (found++ != pick) continue;
-                std::lock_guard<std::mutex> lk(S.mtx); S.fseq.from_bytes(p, p + 32, std::min(512, (bc - 32) / 50)); if (S.fseqPart < 0) S.fseqPart = 0; return true;
+                S.fseq.from_bytes(p, p + 32, std::min(512, (bc - 32) / 50)); if (S.fseqPart < 0) S.fseqPart = 0; return true;
             }
         } else if (d[i + 3] == 0x00 && d[i + 4] == 0x01 && d[i + 5] == 0x1B) {
             if (i + 6 + 155 + 2 > len) break;
             if (found++ != pick) continue;
-            std::lock_guard<std::mutex> lk(S.mtx); convert_dx7(d + i + 6, S.perf.part[part].voice.raw); decode_voice(S.perf.part[part].voice); return true;
+            convert_dx7(d + i + 6, S.perf.part[part].voice.raw); decode_voice(S.perf.part[part].voice); return true;
         }
     }
     return false;
@@ -1281,11 +1272,11 @@ static bool write_param(Synth& S, int ah, int am, int al, int val) {
     }
     return false;
 }
-static bool apply_param_change(Synth& S, const uint8_t* d, size_t len) {
-    // F0 43 1n 5E ah am al vh vl F7 change, F0 43 3n 5E ah am al F7 request, F0 43 2n 5E ah am al F7 dump request
+// F0 43 1n 5E ah am al vh vl F7 change, F0 43 3n 5E ah am al F7 parameter request,
+// F0 43 2n 5E ah am al F7 dump request. The caller holds S.mtx.
+static bool apply_param_change_locked(Synth& S, const uint8_t* d, size_t len) {
     if (len < 8 || d[0] != 0xF0 || d[1] != 0x43 || d[3] != 0x5E) return false;
     int kind = d[2] & 0xF0, dev = d[2] & 0x0F;
-    std::lock_guard<std::mutex> lk(S.mtx);
     if (S.devNumber() != 0x10 && S.devNumber() != dev) return false;
     int ah = d[4], am = d[5], al = d[6];
     if (kind == 0x30) { int v = S.read_param(ah, am, al); if (v >= 0) S.push_param(ah, am, al, v); return v >= 0; }
@@ -1293,75 +1284,9 @@ static bool apply_param_change(Synth& S, const uint8_t* d, size_t len) {
     if (kind != 0x10 || len < 10) return false;
     return write_param(S, ah, am, al, d[7] << 7 | d[8]);
 }
-
-// ------------------------------------------------------------------------------------------ MIDI in
-struct MidiQueue {
-    std::atomic<uint32_t> head{0}, tail{0}; uint32_t buf[1024];
-    void push(uint32_t m) { uint32_t h = head.load(); if (((h + 1) & 1023) != (tail.load() & 1023)) { buf[h & 1023] = m; head.store(h + 1); } }
-    bool pop(uint32_t& m) { uint32_t t = tail.load(); if (t == head.load()) return false; m = buf[t & 1023]; tail.store(t + 1); return true; }
-};
-static MidiQueue g_q;
-static std::mutex g_sxmtx; static std::vector<std::vector<uint8_t>> g_sysex;
-static MIDIHDR g_hdr[2]; static uint8_t g_sxbuf[2][65536];
-static HMIDIIN g_hmi = nullptr;
-static void CALLBACK midi_cb(HMIDIIN h, UINT msg, DWORD_PTR, DWORD_PTR p1, DWORD_PTR) {
-    if (msg == MIM_DATA) g_q.push((uint32_t)p1);
-    else if (msg == MIM_LONGDATA) {
-        MIDIHDR* hdr = (MIDIHDR*)p1;
-        if (hdr->dwBytesRecorded) { std::lock_guard<std::mutex> lk(g_sxmtx); g_sysex.emplace_back(hdr->lpData, hdr->lpData + hdr->dwBytesRecorded); }
-        midiInAddBuffer(h, hdr, sizeof(MIDIHDR));
-    }
-}
-static int g_channel = -1;   // -1 = parts use their own receive channels, else every part listens here
-static const Rom* g_rom = nullptr;
-static HMIDIOUT g_hmo = nullptr;
-
-static void send_sysex(const std::vector<uint8_t>& m) {
-    if (!g_hmo) return;
-    MIDIHDR h{}; h.lpData = (LPSTR)m.data(); h.dwBufferLength = (DWORD)m.size();
-    if (midiOutPrepareHeader(g_hmo, &h, sizeof h) != MMSYSERR_NOERROR) return;
-    midiOutLongMsg(g_hmo, &h, sizeof h);
-    while (!(h.dwFlags & MHDR_DONE)) Sleep(0);
-    midiOutUnprepareHeader(g_hmo, &h, sizeof h);
-}
-static void handle_midi(Synth& S) {
-    uint32_t m;
-    while (g_q.pop(m)) {
-        std::lock_guard<std::mutex> lk(S.mtx);
-        S.midi_in(m & 0xFF, m >> 8 & 0x7F, m >> 16 & 0x7F);
-    }
-    std::vector<std::vector<uint8_t>> sx;
-    { std::lock_guard<std::mutex> lk(g_sxmtx); sx.swap(g_sysex); }
-    for (auto& v : sx) {
-        if (load_sysex(S, g_rom, v.data(), v.size(), 0, 0)) printf("bulk received: %s / %s\n", S.perf.name, S.perf.part[0].voice.name);
-        else apply_param_change(S, v.data(), v.size());
-    }
-    std::vector<std::vector<uint8_t>> out;
-    { std::lock_guard<std::mutex> lk(S.mtx); out.swap(S.outQ); }
-    for (auto& v : out) send_sysex(v);
-}
-
-// ------------------------------------------------------------------------------------------ offline check
-static int g_note2 = -1;   // -n2: second note played at 1/3 while the first is held (mono legato / portamento check)
-static int render_wav(Synth& S, const char* path, int note, double secs) {
-    int frames = (int)(secs * SR); std::vector<int16_t> pcm((size_t)frames * 2);
-    int half = frames / 2, third = frames / 3;
-    { std::lock_guard<std::mutex> lk(S.mtx); for (int p = 0; p < 4; p++) if (S.perf.part[p].rcv() != 0x7F) S.note_on(p, note, 100); }
-    if (g_note2 >= 0) {
-        S.render(pcm.data(), third);
-        { std::lock_guard<std::mutex> lk(S.mtx); for (int p = 0; p < 4; p++) if (S.perf.part[p].rcv() != 0x7F) S.note_on(p, g_note2, 100); }
-        S.render(pcm.data() + (size_t)third * 2, half - third);
-    } else S.render(pcm.data(), half);
-    { std::lock_guard<std::mutex> lk(S.mtx); for (int p = 0; p < 4; p++) { S.note_off(p, note); if (g_note2 >= 0) S.note_off(p, g_note2); } }
-    S.render(pcm.data() + (size_t)half * 2, frames - half);
-    FILE* f = fopen(path, "wb"); if (!f) { printf("cannot write %s\n", path); return 1; }
-    uint32_t dataBytes = (uint32_t)pcm.size() * 2, fmtLen = 16, riffLen = 36 + dataBytes; uint16_t one = 1, chn = 2, bits = 16, align = 4; uint32_t rate = SR, bps = SR * 4;
-    fwrite("RIFF", 1, 4, f); fwrite(&riffLen, 4, 1, f); fwrite("WAVEfmt ", 1, 8, f); fwrite(&fmtLen, 4, 1, f);
-    fwrite(&one, 2, 1, f); fwrite(&chn, 2, 1, f); fwrite(&rate, 4, 1, f); fwrite(&bps, 4, 1, f); fwrite(&align, 2, 1, f); fwrite(&bits, 2, 1, f);
-    fwrite("data", 1, 4, f); fwrite(&dataBytes, 4, 1, f); fwrite(pcm.data(), 2, pcm.size(), f); fclose(f);
-    double peak = 0, rms = 0; for (int i = 0; i < frames; i++) { double x = pcm[2 * i] / 32768.0; peak = std::max(peak, fabs(x)); rms += x * x; }
-    printf("wrote %s: %d frames, peak %.3f, rms %.3f\n", path, frames, peak, sqrt(rms / frames));
-    return 0;
+static bool apply_param_change(Synth& S, const uint8_t* d, size_t len) {
+    std::lock_guard<std::mutex> lk(S.mtx);
+    return apply_param_change_locked(S, d, len);
 }
 
 // ------------------------------------------------------------------------------------------ self test
@@ -1382,7 +1307,7 @@ static int selftest(Synth& S) {
     };
     for (auto& t : pc) {
         uint8_t m[10] = {0xF0, 0x43, 0x10, 0x5E, (uint8_t)t.ah, (uint8_t)t.am, (uint8_t)t.al, 0, (uint8_t)t.v, 0xF7};
-        ck(t.name, apply_param_change(S, m, 10));
+        ck(t.name, apply_param_change_locked(S, m, 10));
         ck(t.name, S.read_param(t.ah, t.am, t.al) == t.v);
     }
     ck("voice decode followed the change", S.perf.part[2].voice.fltType == 2);
@@ -1390,7 +1315,7 @@ static int selftest(Synth& S) {
 
     // 2. a parameter request comes back as a parameter change with the same value
     { uint8_t m[8] = {0xF0, 0x43, 0x30, 0x5E, 0x10, 0, 0x11, 0xF7};
-      S.outQ.clear(); apply_param_change(S, m, 8);
+      S.outQ.clear(); apply_param_change_locked(S, m, 8);
       ck("parameter request replied", S.outQ.size() == 1);
       if (S.outQ.size() == 1) { auto& r = S.outQ[0];
           ck("reply is a parameter change", r.size() == 10 && r[2] == 0x10 && r[4] == 0x10 && r[6] == 0x11);
@@ -1399,7 +1324,7 @@ static int selftest(Synth& S) {
     // 3. bulk dumps: request, check the checksum, feed it back, state unchanged
     uint8_t before[400]; S.current_perf_bytes(before);
     { uint8_t m[8] = {0xF0, 0x43, 0x20, 0x5E, 0x10, 0, 0, 0xF7};
-      S.outQ.clear(); apply_param_change(S, m, 8);
+      S.outQ.clear(); apply_param_change_locked(S, m, 8);
       ck("performance dump replied", S.outQ.size() == 1);
       if (S.outQ.size() == 1) {
           auto r = S.outQ[0];
@@ -1413,10 +1338,10 @@ static int selftest(Synth& S) {
           ck("performance survived the round trip", memcmp(before, after, 400) == 0);
       } }
     { uint8_t m[8] = {0xF0, 0x43, 0x20, 0x5E, 0x40, 0, 0, 0xF7};
-      S.outQ.clear(); apply_param_change(S, m, 8);
+      S.outQ.clear(); apply_param_change_locked(S, m, 8);
       ck("voice dump replied", S.outQ.size() == 1 && (S.outQ[0][4] << 7 | S.outQ[0][5]) == 608); }
     { uint8_t m[8] = {0xF0, 0x43, 0x20, 0x5E, 0x00, 0, 0, 0xF7};
-      S.outQ.clear(); apply_param_change(S, m, 8);
+      S.outQ.clear(); apply_param_change_locked(S, m, 8);
       ck("system dump replied", S.outQ.size() == 1 && (S.outQ[0][4] << 7 | S.outQ[0][5]) == 76); }
 
     // 4. RPN / NRPN and bank select
@@ -1436,9 +1361,9 @@ static int selftest(Synth& S) {
     S.midi_in(0x90, 60, 100);
     int live = 0; for (auto& c : S.ch) if (c.active) live++;
     ck("note on allocated a channel", live > 0);
-    std::vector<int16_t> buf(2 * 4096);
-    S.render(buf.data(), 4096);
-    double pk = 0; for (auto v : buf) pk = std::max(pk, fabs(v / 32768.0));
+    std::vector<float> bl(4096), br(4096);
+    S.render(bl.data(), br.data(), 4096);
+    double pk = 0; for (auto v : bl) pk = std::max(pk, (double)fabs(v));
     ck("note produced audio", pk > 0.0001);
     S.midi_in(0x80, 60, 0); S.midi_in(0xB0, 120, 0);
     live = 0; for (auto& c : S.ch) if (c.active) live++;
@@ -1448,86 +1373,136 @@ static int selftest(Synth& S) {
     return g_fails ? 1 : 0;
 }
 
-// ------------------------------------------------------------------------------------------ main
-static std::string ini_path() { char p[MAX_PATH]; GetModuleFileNameA(nullptr, p, MAX_PATH); std::string s(p); size_t k = s.find_last_of("\\/"); return s.substr(0, k + 1) + "fs1r_emu.ini"; }
-static int list_midi_out() { int n = midiOutGetNumDevs(); for (int i = 0; i < n; i++) { MIDIOUTCAPSA c; midiOutGetDevCapsA(i, &c, sizeof c); printf("  %d: %s\n", i, c.szPname); } return n; }
-static int list_midi() { int n = midiInGetNumDevs(); for (int i = 0; i < n; i++) { MIDIINCAPSA c; midiInGetDevCapsA(i, &c, sizeof c); printf("  %d: %s\n", i, c.szPname); } return n; }
+// ------------------------------------------------------------------------------------------ fs1r::Device
+namespace fs1r {
 
-int main(int argc, char** argv) {
-    init_tables();
-    Synth* S = new Synth(); static Rom rom;
-    int midiPort = -1, midiOutPort = -1, pick = -1, perfIdx = -1, fseqIdx = -1; const char* syx = nullptr; const char* romPath = nullptr;
-    const char* wav = nullptr; int testNote = 60; double testSecs = 3.0;
-    for (int i = 1; i < argc; i++) {
-        std::string a = argv[i];
-        if (a == "-selftest") return selftest(*S);
-        else if (a == "-l") { printf("MIDI inputs:\n"); list_midi(); return 0; }
-        else if (a == "-m" && i + 1 < argc) midiPort = atoi(argv[++i]);
-        else if (a == "-o" && i + 1 < argc) midiOutPort = atoi(argv[++i]);
-        else if (a == "-c" && i + 1 < argc) { g_channel = atoi(argv[++i]) - 1; S->forceChannel = g_channel; }
-        else if (a == "-v" && i + 1 < argc) syx = argv[++i];
-        else if (a == "-p" && i + 1 < argc) pick = atoi(argv[++i]);
-        else if (a == "-P" && i + 1 < argc) perfIdx = atoi(argv[++i]);
-        else if (a == "-f" && i + 1 < argc) fseqIdx = atoi(argv[++i]);
-        else if (a == "-r" && i + 1 < argc) romPath = argv[++i];
-        else if (a == "-g" && i + 1 < argc) S->gain = atof(argv[++i]);
-        else if (a == "-w" && i + 1 < argc) wav = argv[++i];
-        else if (a == "-n" && i + 1 < argc) testNote = atoi(argv[++i]);
-        else if (a == "-n2" && i + 1 < argc) g_note2 = atoi(argv[++i]);
-        else if (a == "-mono" && i + 1 < argc) { Part& pt = S->perf.part[0]; pt.p[5] = 0; pt.p[6] = 0; pt.p[0x24] = 3; pt.p[0x25] = (uint8_t)atoi(argv[++i]); }   // part 1 mono, full-time portamento with this time
-        else if (a == "-d" && i + 1 < argc) testSecs = atof(argv[++i]);
-        else { printf("usage: fs1r_emu [-l] [-m midiport] [-o midiout] [-c channel] [-v file.syx [-p index]] [-r eprom.bin [-p voice] [-P performance] [-f fseq]] [-g gain] [-w test.wav [-n note] [-d seconds]]\n"); return 1; }
-    }
-    if (romPath) { if (!load_rom(rom, romPath)) { printf("cannot read 2 MB EPROM image %s\n", romPath); return 1; } g_rom = &rom; }
-    if (perfIdx >= 0) { if (!rom.ok) { printf("-P needs -r\n"); return 1; } rom_perf(*S, rom, perfIdx); }
-    if (syx) {
-        FILE* f = fopen(syx, "rb"); if (!f) { printf("cannot open %s\n", syx); return 1; }
-        std::vector<uint8_t> d; uint8_t tmp[65536]; size_t n; while ((n = fread(tmp, 1, sizeof tmp, f)) > 0) d.insert(d.end(), tmp, tmp + n); fclose(f);
-        if (!load_sysex(*S, rom.ok ? &rom : nullptr, d.data(), d.size(), std::max(0, pick), 0)) { printf("no FS1R voice/performance/Fseq or DX7 voice dump #%d found in %s\n", std::max(0, pick), syx); return 1; }
-    } else if (rom.ok && pick >= 0) { std::lock_guard<std::mutex> lk(S->mtx); rom_voice(rom, pick, S->perf.part[0].voice); }
-    if (fseqIdx >= 0) { if (!rom.ok) { printf("-f needs -r\n"); return 1; } rom_fseq(*S, rom, fseqIdx); }
-    printf("performance \"%s\"", S->perf.name);
-    for (int p = 0; p < 4; p++) if (S->perf.part[p].rcv() != 0x7F) printf("  part%d \"%s\" alg %d", p + 1, S->perf.part[p].voice.name, S->perf.part[p].voice.alg + 1);
-    if (S->fseq.valid) printf("  fseq \"%s\" (%d frames)", S->fseq.name, S->fseq.nframes);
-    printf("\n");
-    if (wav) return render_wav(*S, wav, testNote, testSecs);
-    std::string ini = ini_path();
-    if (midiPort < 0) { FILE* f = fopen(ini.c_str(), "r"); if (f) { if (fscanf(f, "midi_in=%d", &midiPort) != 1) midiPort = -1; fclose(f); } }
-    int ndev = midiInGetNumDevs();
-    if (ndev == 0) printf("no MIDI inputs found; running without MIDI (Ctrl-C to quit)\n");
-    else if (midiPort < 0 || midiPort >= ndev) {
-        printf("MIDI inputs:\n"); list_midi(); printf("choose [0-%d]: ", ndev - 1); fflush(stdout);
-        if (scanf("%d", &midiPort) != 1 || midiPort < 0 || midiPort >= ndev) midiPort = 0;
-        FILE* f = fopen(ini.c_str(), "w"); if (f) { fprintf(f, "midi_in=%d\n", midiPort); fclose(f); }
-    }
-    if (ndev) {
-        MIDIINCAPSA c; midiInGetDevCapsA(midiPort, &c, sizeof c);
-        if (midiInOpen(&g_hmi, midiPort, (DWORD_PTR)midi_cb, 0, CALLBACK_FUNCTION) != MMSYSERR_NOERROR) { printf("cannot open MIDI input %d\n", midiPort); return 1; }
-        for (int i = 0; i < 2; i++) { g_hdr[i] = {}; g_hdr[i].lpData = (LPSTR)g_sxbuf[i]; g_hdr[i].dwBufferLength = sizeof g_sxbuf[i]; midiInPrepareHeader(g_hmi, &g_hdr[i], sizeof(MIDIHDR)); midiInAddBuffer(g_hmi, &g_hdr[i], sizeof(MIDIHDR)); }
-        midiInStart(g_hmi);
-        if (midiOutPort >= 0 && midiOutPort < (int)midiOutGetNumDevs()) {
-            if (midiOutOpen(&g_hmo, midiOutPort, 0, 0, CALLBACK_NULL) == MMSYSERR_NOERROR) printf("MIDI out: %d (dump and parameter replies)\n", midiOutPort);
-            else g_hmo = nullptr;
+struct Device::Impl {
+    Synth s;
+    Rom rom;
+    double hostRate = ENGINE_RATE;
+    double pos = 0;                          // fractional read position between engine samples
+    float h[2][4] = {};                      // four-point history per channel for the interpolator
+    float eng[2][256]; int engFill = 0, engRead = 0;
+    bool echo = false;
+    // ponytail: cubic interpolation between engine samples. Audible aliasing above ~15 kHz when the host
+    // runs at 44.1; swap in a polyphase FIR if a spectrum measurement ever shows it matters.
+    inline void pull() {
+        if (engRead >= engFill) {
+            engFill = 256; engRead = 0;
+            s.render(eng[0], eng[1], engFill);
         }
-        printf("MIDI in: %d (%s), %s\n", midiPort, c.szPname, g_channel < 0 ? "parts on their receive channels (part 1 = performance channel 1)" : ("all parts on channel " + std::to_string(g_channel + 1)).c_str());
+        for (int c = 0; c < 2; c++) { h[c][0] = h[c][1]; h[c][1] = h[c][2]; h[c][2] = h[c][3]; h[c][3] = eng[c][engRead]; }
+        engRead++;
     }
-    WAVEFORMATEX wf{}; wf.wFormatTag = WAVE_FORMAT_PCM; wf.nChannels = 2; wf.nSamplesPerSec = SR; wf.wBitsPerSample = 16; wf.nBlockAlign = 4; wf.nAvgBytesPerSec = SR * 4;
-    HANDLE ev = CreateEvent(nullptr, FALSE, FALSE, nullptr);
-    HWAVEOUT hwo;
-    if (waveOutOpen(&hwo, WAVE_MAPPER, &wf, (DWORD_PTR)ev, 0, CALLBACK_EVENT) != MMSYSERR_NOERROR) { printf("waveOutOpen failed\n"); return 1; }
-    static int16_t pcm[NBUF][BLOCK * 2]; static WAVEHDR wh[NBUF];
-    for (int i = 0; i < NBUF; i++) { wh[i] = {}; wh[i].lpData = (LPSTR)pcm[i]; wh[i].dwBufferLength = BLOCK * 4; waveOutPrepareHeader(hwo, &wh[i], sizeof(WAVEHDR)); wh[i].dwFlags |= WHDR_DONE; }
-    SetPriorityClass(GetCurrentProcess(), HIGH_PRIORITY_CLASS);
-    SetThreadPriority(GetCurrentThread(), THREAD_PRIORITY_TIME_CRITICAL);
-    printf("running, Ctrl-C to quit\n");
-    int cur = 0;
-    for (;;) {
-        WAVEHDR& h = wh[cur];
-        while (!(h.dwFlags & WHDR_DONE)) WaitForSingleObject(ev, 10);
-        handle_midi(*S);
-        S->render(pcm[cur], BLOCK);
-        h.dwFlags &= ~WHDR_DONE;
-        waveOutWrite(hwo, &h, sizeof(WAVEHDR));
-        cur = (cur + 1) % NBUF;
+    static inline float cubic(const float* v, double t) {
+        double a = v[3] - v[2] - v[0] + v[1], b = v[0] - v[1] - a, c = v[2] - v[0];
+        return (float)(((a * t + b) * t + c) * t + v[1]);
+    }
+};
+
+Device::Device() : p(new Impl) { init_tables(); }
+Device::~Device() = default;
+
+void Device::setSampleRate(double hostRate) { if (hostRate > 1000) p->hostRate = hostRate; }
+double Device::sampleRate() const { return p->hostRate; }
+void Device::setGain(double g) { p->s.gain = g; }
+void Device::setEchoParameters(bool on) { p->echo = on; }
+void Device::forceChannel(int channel) { p->s.forceChannel = channel; }
+
+void Device::process(float* outL, float* outR, int n) {
+    if (p->hostRate == ENGINE_RATE) {        // the common case: no resampling at all
+        p->s.render(outL, outR, n);
+        return;
+    }
+    const double step = ENGINE_RATE / p->hostRate;
+    for (int i = 0; i < n; i++) {
+        p->pos += step;
+        while (p->pos >= 1.0) { p->pos -= 1.0; p->pull(); }
+        outL[i] = Impl::cubic(p->h[0], p->pos);
+        outR[i] = Impl::cubic(p->h[1], p->pos);
     }
 }
+
+void Device::sendMidi(const uint8_t* b, size_t len) {
+    if (!len) return;
+    if (b[0] == 0xF0) {
+        std::lock_guard<std::mutex> lk(p->s.mtx);
+        if (load_sysex(p->s, p->rom.ok ? &p->rom : nullptr, b, len, 0, 0)) return;
+        if (apply_param_change_locked(p->s, b, len) && p->echo && len >= 10 && (b[2] & 0xF0) == 0x10)
+            p->s.push_param(b[4], b[5], b[6], b[7] << 7 | b[8]);
+        return;
+    }
+    std::lock_guard<std::mutex> lk(p->s.mtx);
+    p->s.midi_in(b[0], len > 1 ? b[1] & 0x7F : 0, len > 2 ? b[2] & 0x7F : 0);
+}
+
+bool Device::nextMidiOut(std::vector<uint8_t>& out) {
+    std::lock_guard<std::mutex> lk(p->s.mtx);
+    if (p->s.outQ.empty()) return false;
+    out.swap(p->s.outQ.front());
+    p->s.outQ.erase(p->s.outQ.begin());
+    return true;
+}
+
+void Device::allNotesOff() { std::lock_guard<std::mutex> lk(p->s.mtx); p->s.all_off(); }
+
+void Device::getState(std::vector<uint8_t>& sysex) const {
+    std::lock_guard<std::mutex> lk(p->s.mtx);
+    Synth& S = p->s;
+    S.outQ.clear();
+    S.push_bulk(0x00, 0, 0, S.sys, 76);
+    uint8_t perfBytes[400]; S.current_perf_bytes(perfBytes);
+    S.push_bulk(0x10, 0, 0, perfBytes, 400);
+    for (int i = 0; i < 4; i++) S.push_bulk(0x40 + i, 0, 0, S.perf.part[i].voice.raw, 608);
+    if (S.fseq.valid) { std::vector<uint8_t> f; S.fseq_bytes(f); S.push_bulk(0x70, 0, 0, f.data(), (int)f.size()); }
+    sysex.clear();
+    for (auto& m : S.outQ) sysex.insert(sysex.end(), m.begin(), m.end());
+    S.outQ.clear();
+}
+
+bool Device::setState(const uint8_t* d, size_t len) {
+    bool any = false;
+    for (size_t i = 0; i < len; ) {
+        if (d[i] != 0xF0) { i++; continue; }
+        size_t j = i + 1;
+        while (j < len && d[j] != 0xF7) j++;
+        if (j >= len) break;
+        size_t n = j - i + 1;
+        {
+            std::lock_guard<std::mutex> lk(p->s.mtx);
+            if (load_sysex(p->s, p->rom.ok ? &p->rom : nullptr, d + i, n, 0, 0)) any = true;
+            else if (apply_param_change_locked(p->s, d + i, n)) any = true;
+        }
+        i = j + 1;
+    }
+    return any;
+}
+
+bool Device::loadRom(const char* path) {
+    if (!load_rom(p->rom, path)) return false;
+    p->s.rom = &p->rom;
+    return true;
+}
+bool Device::romLoaded() const { return p->rom.ok; }
+bool Device::loadRomPerformance(int idx) { if (!p->rom.ok) return false; return rom_perf(p->s, p->rom, idx); }
+bool Device::loadRomVoice(int part, int idx) {
+    if (!p->rom.ok || part < 0 || part > 3) return false;
+    std::lock_guard<std::mutex> lk(p->s.mtx);
+    rom_voice(p->rom, idx, p->s.perf.part[part].voice);
+    return true;
+}
+bool Device::loadRomFseq(int n) { if (!p->rom.ok) return false; return rom_fseq(p->s, p->rom, n); }
+bool Device::loadSyx(const uint8_t* d, size_t len, int pick, int part) {
+    return load_sysex(p->s, p->rom.ok ? &p->rom : nullptr, d, len, pick, part);
+}
+
+const char* Device::performanceName() const { return p->s.perf.name; }
+const char* Device::voiceName(int part) const { return p->s.perf.part[clampi(part, 0, 3)].voice.name; }
+int Device::algorithm(int part) const { return p->s.perf.part[clampi(part, 0, 3)].voice.alg; }
+bool Device::partActive(int part) const { return p->s.perf.part[clampi(part, 0, 3)].rcv() != 0x7F; }
+const char* Device::fseqName() const { return p->s.fseq.valid ? p->s.fseq.name : ""; }
+int Device::fseqFrames() const { return p->s.fseq.valid ? p->s.fseq.nframes : 0; }
+
+int Device::selfTest() { init_tables(); Synth s; return selftest(s); }
+
+}  // namespace fs1r
