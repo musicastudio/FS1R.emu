@@ -29,7 +29,7 @@ Conclusion: the reverse engineering that exists covers booting, flashing and rep
 - Address map (SH7040 series): flash 0x0-0x3FFFF; EPROM 0x200000-0x3FFFFF; CS1 0x400000, CS2 0x800000, CS3 0xC00000 (4 MB each, board peripherals: YMP706, effect DSP, SRAM/NVRAM, LCD, panel); peripheral registers 0xFFFF8000+ (SCI0 0xFFFF81A0, SCI1 0xFFFF81B0, MTU 0xFFFF8200+, flash control FLMCR at 0xFFFF8580).
 - Vector table at 0x0 and a second copy at 0x8000 (the loader hands over to it).
 - Version tag string at flash 0x3FC00: `#A0281 ver1.20 1998.09.10-01`.
-- Tone generator YMP706 ("FS"), effects DSP (YSS233 on the PLG150-DX; the FS1R has its own, TBD), 18-bit right-justified serial DAC.
+- Two YMP706-F tone generators ("FS"), two YSS236-F effect DSPs (Yamaha "VOP3": also the synthesis engine of the AN1x/AN200/PLG150-AN and the vocal harmony processor of the PSR-9000; the PLG150-DX uses the smaller YSS233 instead), two Sanyo LC78834M 18-bit stereo DACs. Chip identification from the studiorepair.com FS1R gallery; rgwan's digital-out board reports the DAC word clock at 48 kHz.
 
 ### 2.0 YMP706 pinout (PLG150-DX service manual p.13, "FS1-AB AWM Tone Generator & Digital Filter")
 
@@ -47,7 +47,9 @@ BSC init (0x44C): BCR1=0x2005, BCR2=0xC00C, WCR1=0x5222, WCR2=0xC534, DCR=0, RTC
 |---|---|---|
 | 0x00000000-0x0003FFFF | SH7044 flash | vectors, ISRs (SCI RX at 0x2F6E8, TX 0x2F930) |
 | 0x00200000-0x003FFFFF | EPROM | main code 0x200000-0x22FFFF and 0x390000-0x3C7FFF, data in between |
-| 0x00C00000-0x00C007FF | register block on CS3: the flash driver code addresses 0xC00000+0x0C8/0x1C8/0x22C/0x260/0x270/0x490/0x62C/0x3FF/0x7FF | literal pools of the flash code. Best candidate for the YMP706 |
+| 0x00800100 | panel/LED latch on CS2 (16-bit, bit 9 set with every write; also pulsed by the flash-upgrade code) | FUN_003C04B8, FUN_003B0588 |
+| 0x00800200-0x0080024F | YSS236 effect DSP host interface on CS2: 16-bit registers at 0x800200 + 2n, status at 0x800242 (bit 4 ready, bits 0-3 index) | FUN_0000B5E2 and its wrappers, see section 8 |
+| 0x00C00000-0x00C007FF | the two YMP706s on CS3 (0xC00000 and 0xC00400) | `docs/ymp706_registers.md` |
 | 0x01000000-0x0107FFFF | 512 KB DRAM work RAM | literal pools (0x0100xxxx-0x0106xxxx) and the entry code |
 | 0x0140xxxx | second external device or SRAM/NVRAM (583 pointer words in the EPROM code) | to be identified |
 
@@ -101,6 +103,8 @@ Two roads, and the plan uses both:
 ## 6. Sources
 
 - https://github.com/rgwan/fs1r_firmware_RE
+- http://studiorepair.com/gallery/Yamaha/FS1R/ (board photos with every chip identified)
+- https://github.com/mamedev/mame/blob/master/src/mame/yamaha/yman1x.cpp (AN1x skeleton: names the YSS236-F as VOP3, no emulation)
 - https://github.com/rgwan/completed-fs1r (18-bit I2S digital out board)
 - https://yamahamusicians.com/forum/threads/im-trying-to-emulating-an-fs1r.23211/
 - https://sites.google.com/site/undocumentedsoundchips/yamaha/ymp706
@@ -126,3 +130,22 @@ Two roads, and the plan uses both:
   are extracted into `src/fs1r_rom_tables.h`. CPU clock 28 MHz (SCI divisor 27 = 31250 baud).
 - Chip-side only: EG timing and shapes, dB per level step, per-op modulation sensitivity scaling, the formant window
   and noise formant, the filter, effects. Those are modelled with DX7 and patent priors and marked INFERRED.
+
+## 8. Effect DSP (2026-09-14)
+
+The effects run on two YSS236-F chips. The firmware drives them through one 16-bit register block at 0x800200 (`FUN_0000B5E2(reg, value)` writes `0x800200 + 2*reg`; `FUN_0000BC56/BC68` read the status word at 0x800242). Register 0 is an address latch (bit 15 selects a second address space), the other registers are data ports into the DSP's internal memories:
+
+| register | written by | contents |
+|---|---|---|
+| 1 | init | reset/run (1 at the start of init, 0 at the end) |
+| 5 | init | mode word 0x1004 |
+| 6-10 | FUN_0000B600, init | five 16-bit words per program step, 512 steps: the VOP3 program. Boot image at EPROM 0x375E1A (alternate 0x37721A), 5 x 1024 bytes, copied to DRAM 0x01069978 and patched per effect type |
+| 0xB | FUN_0000B6A4 | one word per step from 0x37541A (alternate 0x37581A), DRAM copy 0x01068F78 |
+| 0xC | FUN_0000B788/B7EE | one byte per step from 0x375C1A, DRAM copy 0x01069628; 0x0E is the mute value used while a type changes |
+| 0x16 | FUN_0000B85E | 15 per-bus words from 0x37861A (address = bus + 1) |
+| 0x17 | init | 0x23 during the upload, 0 after |
+| 0x24-0x2A | FUN_0000B8EC..BA84 | 15 per-bus values each (levels, sends, pans; defaults 0x15, 0, 0x1000) |
+
+The step addresses written before each data word come from the list at 0x37501A. `FUN_0000BC8C(variant)` does the whole upload at boot; `FUN_0020315C` returns the variant (0-3) that picks between the table sets and is not yet understood. An effect type change (`FUN_0000D050(block, part)`, types listed at 0x374F2E) writes 0x0E to the block's steps, waits, patches the program words through `FUN_0000B600` with the per-type table (0x378629/0x37862F/0x378635/0x37863B, 0x378642), then restores. Parameter edits go through `FUN_0000C36C..C6C0` into the 0xB/0xC ports.
+
+Consequences: the effect algorithms are about 6 KB of VOP3 microcode in the EPROM, not fixed functions in the chip. MAME has no VOP3 core (`yman1x.cpp` is a skeleton that maps the chip onto an unemulated stub) and no instruction set description exists in public, so exact effects would need the ISA reverse engineered from this microcode plus recordings. The plan models the effects from the Data List and keeps the firmware's parameter-to-coefficient conversions and the extracted microcode as reference (TODO.md, Tier 0 and Tier 4).

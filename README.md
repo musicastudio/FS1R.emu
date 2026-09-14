@@ -1,6 +1,6 @@
 # FS1R.emu
 
-A Windows emulation of the Yamaha FS1R: four parts, 32 channels, MIDI in, performances and Fseq playback, no effects or filter yet.
+The Yamaha FS1R as a Windows softsynth: its firmware logic rewritten in C++ from the decompiled ROM, four parts, 32 channels, MIDI in, performances and Fseq playback, no effects or filter yet.
 
 Download the latest build: **https://github.com/musicastudio/FS1R.emu/releases/latest** (`fs1r_emu.exe`, no installer, no dependencies).
 
@@ -16,7 +16,9 @@ The FS1R (1998) is Yamaha's formant-shaping FM synth: 8 operators per voice, 32 
 
 So the engine here is reconstructed from the firmware rather than from the chip. `tools/build_fs1r_ghidra.py` imports the EPROM into Ghidra as SH-2 and decompiles it; the note-on path, the tick pipeline, the parameter conversion tables and the 88-algorithm routing table are read straight out of that code and ported to C++. Where the firmware only writes a register value and the chip's response is unknown, the behaviour is inferred from the DX7 lineage and from Yamaha's formant synthesis patent (US5610354), and those places are marked INFERRED in the source.
 
-The practical result: patches, performances and Fseqs load and play with the same parameter interpretation the hardware uses, because the same code computes them. The parts that live inside the YMP706 (filter, effects, the exact EG shape) are approximations or missing.
+To be clear about what this is: a rewrite of the FS1R's logic, not an emulation of the processors on the board. The SH7044 is not emulated and its firmware does not run here; the note-on path, tick pipeline and conversion tables were read out of the decompiled code and rewritten in C++. The YMP706 tone generator is a model built from those register values, since no one has its register semantics. Running the real firmware on an SH-2 core (gearmulator has one with the SH7040 peripherals) is on the roadmap as a way to verify the rewrite, not to replace it. The effects run on two YSS236-F DSPs (Yamaha's VOP3, also the synthesis engine of the AN1x) whose program the CPU uploads from the EPROM at boot; nobody has decoded that instruction set, so the effects are modelled from the Data List too. `TODO.md` opens with the full KNOWN / INFERRED / UNKNOWN lists.
+
+The practical result: patches, performances and Fseqs load and play with the same parameter interpretation the hardware uses, because the same logic computes them. The parts that live inside the YMP706 (filter, effects, the exact EG shape) are approximations or missing.
 
 See `docs/research.md` for what is known about the hardware and `docs/ymp706_registers.md` for the tone generator interface and the CPU-side engine lifted from the firmware.
 
@@ -57,3 +59,14 @@ From the firmware and its tables: all 88 algorithms, the DX7 conversion, frequen
 Inferred from the DX7 lineage and the patent, marked INFERRED in the source and listed in `docs/ymp706_registers.md`: EG timing and shape, dB per level step, per-op modulation sensitivity scaling, feedback and modulation index, the formant window and noise formant models.
 
 Not implemented: the per-voice filter, effects, pan, Fseq scratch mode, LFO2 (filter only).
+
+## Roadmap
+
+The end goal is a plugin (VST3/CLAP plus standalone) with a GUI that looks like the FS1R front panel: an engine library behind a device interface, a console test harness, and a JUCE layer that only moves parameters in and out of the engine as MIDI and draws a skin. `TODO.md` has the full list; the tiers are:
+
+- **Tier 0: finish the engine.** Per-voice filter, LFO2, pan, effects, Fseq gaps, remaining MIDI, voice edit coverage, confirm the INFERRED constants.
+- **Tier 1: engine library and test console.** Split the source, device interface, MIDI out, CMake build, render regression.
+- **Tier 2: plugin (JUCE).** JUCE submodule with VST3/CLAP/standalone, parameter descriptions, parameter binding, patch manager, multi-part, MIDI learn.
+- **Tier 3: GUI, the FS1R panel.** Assets, skin files, LCD, editor pages, knobs and controller sets.
+- **Tier 4: fidelity and verification.** Hardware recordings, run the real firmware on an SH-2 core, extract the VOP3 microcode, VOP3 emulation (stretch), YMP706.
+- **Tier 5: release.** Licence file, CI, docs.
