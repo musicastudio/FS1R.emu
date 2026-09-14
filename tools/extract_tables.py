@@ -28,6 +28,8 @@ tables = [  # name, ctype, values, comment
  ("FRMDET", "signed char", B(0x35BE06, 512, True), "formant detune: [detune band 0..15][pitch band 0..31]"),
  ("VNBAL", "unsigned char", [x & 0xFF for x in B(0x35BB1E, 128, True)], "part level index -> attenuation for the voiced/unvoiced level bytes"),
  ("PEGVEL", "unsigned char", B(0x35C870, 8), "pitch EG velocity sensitivity 0..7 -> multiplier (computed then overridden by the firmware)"),
+ ("PANL", "unsigned char", B(0x35C0EB, 128), "pan index 0..127 (pan byte >> 1) -> left attenuation, 0.375 dB units (register 0x22C/0x22E)"),
+ ("PANR", "unsigned char", B(0x35C16B, 128), "pan index -> right attenuation (register 0x22D/0x22F); PANR[i] == PANL[127-i]"),
  ("SENDTAB", "unsigned char", B(0x35C006, 128), "send level 0..127 -> attenuation"),
  ("VELCURVES", "unsigned char", B(0x35B71E, 5 * 128), "system velocity curves [curve][velocity]"),
 ]

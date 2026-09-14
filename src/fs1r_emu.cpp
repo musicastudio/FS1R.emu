@@ -83,6 +83,62 @@ static inline float fwin(int s, double x) { double y = x * 1024.0; int i = (int)
 static inline double rate_secs(int q) { q = clampi(q, 0, 63); return pow(2.0, 26 - (q >> 2)) / (4 + (q & 3)) / SR; }
 // INFERRED: per-op pitch mod sensitivity 0..7 -> fraction of the channel LFO pitch word (DX7 PMS curve)
 static const double PMS_FRAC[8] = {0, 0.0264, 0.0534, 0.0889, 0.1612, 0.2769, 0.4967, 1.0};
+#include "fs1r_effects.h"
+
+// INFERRED: filter cutoff byte 0..127 (extended by modulation) -> Hz, ten octaves from 20 Hz.
+static inline double cut_hz(double c) { return 20.0 * pow(2.0, clampi((int)c, -40, 180) / 12.7); }
+// INFERRED: filter resonance -16..+100 -> Q
+static inline double reso_q(int r) { return 0.7 * pow(2.0, clampi(r, -16, 100) / 25.0); }
+
+struct SVF {                     // topology-preserving 2-pole state variable filter (Zavalishin)
+    double g = 0, k = 1, a1 = 1, a2 = 0, a3 = 0, ic1 = 0, ic2 = 0;
+    void set(double fHz, double q) {
+        g = tan(PI * std::min(fHz, SR * 0.45) / SR); k = 1.0 / std::max(0.5, q);
+        a1 = 1.0 / (1.0 + g * (g + k)); a2 = g * a1; a3 = g * a2;
+    }
+    inline void run(double x, double& lp, double& bp, double& hp) {
+        double v3 = x - ic2, v1 = a1 * ic1 + a2 * v3, v2 = ic2 + a2 * ic1 + a3 * v3;
+        ic1 = 2 * v1 - ic1; ic2 = 2 * v2 - ic2;
+        lp = v2; bp = v1; hp = x - k * v1 - v2;
+    }
+    void clear() { ic1 = ic2 = 0; }
+};
+// Per-voice filter, register 0x270 = 11 when any part turns it on. Chip side, so INFERRED: a 2-pole SVF,
+// cascaded for LPF24 and with one extra pole for LPF18. Coefficients are refreshed on the 192.3 Hz tick,
+// which is when the CPU would write them.
+struct VFilter {
+    SVF a, b; double p1 = 0, gp = 0;
+    void setup(int type, double fHz, double q) {
+        a.set(fHz, q); if (type == 0) b.set(fHz, q);
+        gp = 1.0 - exp(-2 * PI * std::min(fHz, SR * 0.45) / SR);
+    }
+    void clear() { a.clear(); b.clear(); p1 = 0; }
+    inline double run(int type, double x) {
+        double lp, bp, hp; a.run(x, lp, bp, hp);
+        switch (type) {
+        case 0: { double l2, b2, h2; b.run(lp, l2, b2, h2); return l2; }            // LPF24
+        case 1: p1 += (lp - p1) * gp; return p1;                                    // LPF18
+        case 2: return lp;                                                          // LPF12
+        case 3: return hp;                                                          // HPF
+        case 4: return bp;                                                          // BPF
+        default: return lp + hp;                                                    // BEF
+        }
+    }
+};
+// 4-segment EG on a linear scale in the FS1R's own order: start at L4, run L1 -> L2 -> L3 and hold, key
+// off runs to L4. Stepped on the 192.3 Hz tick like the filter registers.
+struct StepEG {
+    double cur = 0, target = 0, k = 1; int stage = 9; double L[4] = {}; int R[4] = {};
+    void start(const double* lv, const int* rt) { for (int i = 0; i < 4; i++) { L[i] = lv[i]; R[i] = rt[i]; } cur = L[3]; go(0); }
+    void go(int s) { stage = s; target = L[s]; k = 1.0 - exp(-1.0 / (rate_secs(clampi(R[s], 0, 63)) * 0.25 * TICK_HZ + 1)); }
+    void release() { go(3); }
+    inline double tick() {
+        if (stage > 3) return cur;
+        cur += (target - cur) * k;
+        if (fabs(target - cur) < 1e-4) { cur = target; if (stage < 2) go(stage + 1); else stage = 9; }
+        return cur;
+    }
+};
 
 // ------------------------------------------------------------------------------------------ voice data
 struct OpV {
@@ -101,6 +157,9 @@ struct Voice {
     uint8_t raw[608];
     char name[11]; int cat;
     int lfo1wave, lfo1speed, lfo1delay, lfo1sync, pmd, amd, fmd;
+    int lfo2wave, lfo2speed, lfo2phase, lfo2sync;
+    int fltType, fltReso, fltResoVel, fltCut, fltEgVel, fltLfo1, fltLfo2, fltKsDepth, fltKsPoint, fltInGain, fegDepth;
+    int fltL[4], fltT[4], fltAtkVel, fltTscale;
     int noteshift, pegL[5], pegT[4], pegVel, pegRange, pegTscale;
     int fseqV, fseqU, alg, corr[8], fb;
     OpV v[8]; OpU u[8];
@@ -110,6 +169,13 @@ static void decode_voice(Voice& V) {
     memcpy(V.name, b, 10); V.name[10] = 0; V.cat = b[0x0E];
     V.lfo1wave = std::min<int>(b[0x10], 5); V.lfo1speed = b[0x11]; V.lfo1delay = b[0x12]; V.lfo1sync = b[0x13] & 1;
     V.pmd = b[0x15]; V.amd = b[0x16]; V.fmd = b[0x17];
+    V.lfo2wave = std::min<int>(b[0x18], 5); V.lfo2speed = b[0x19]; V.lfo2phase = b[0x1C] & 3; V.lfo2sync = b[0x1D] & 1;
+    V.fltType = std::min<int>(b[0x54], 5); V.fltReso = (b[0x55] & 0x7F) - 16; V.fltResoVel = (b[0x56] & 0xF) - 7;
+    V.fltCut = b[0x57]; V.fltEgVel = (b[0x58] & 0xF) - 7; V.fltLfo1 = b[0x59]; V.fltLfo2 = b[0x5A];
+    V.fltKsDepth = b[0x5B] - 64; V.fltKsPoint = b[0x5C]; V.fltInGain = (b[0x5D] & 0x1F) - 12; V.fegDepth = b[0x64] - 64;
+    V.fltL[0] = b[0x66]; V.fltL[1] = b[0x67]; V.fltL[2] = b[0x68]; V.fltL[3] = b[0x65];   // L1 L2 L3, L4 is the start level
+    for (int i = 0; i < 4; i++) V.fltT[i] = b[0x69 + i];
+    V.fltAtkVel = b[0x6E] >> 3 & 7; V.fltTscale = b[0x6E] & 7;
     V.noteshift = (b[0x1E] & 0x3F) - 24;
     V.pegL[0] = b[0x1F]; V.pegL[1] = b[0x20]; V.pegL[2] = b[0x21]; V.pegL[4] = b[0x22]; V.pegL[3] = b[0x3E];
     for (int i = 0; i < 4; i++) V.pegT[i] = b[0x23 + i];
@@ -143,6 +209,8 @@ static void decode_voice(Voice& V) {
 static void init_blank_voice(uint8_t* b) {
     memset(b, 0, 608); memcpy(b, "Init      ", 10);
     b[0x1E] = 24; b[0x1F] = b[0x20] = b[0x21] = b[0x22] = b[0x3E] = 50; b[0x2C] = 0; b[0x3D] = 0;
+    b[0x55] = 16; b[0x56] = b[0x58] = 7; b[0x57] = 127; b[0x5B] = b[0x5C] = 64; b[0x5D] = 12; b[0x64] = 64;
+    b[0x65] = b[0x66] = b[0x67] = b[0x68] = 50;
     for (int o = 0; o < 8; o++) {
         uint8_t* p = b + 112 + o * 62;
         p[0] = 24; p[1] = 1; p[4] = 7 << 3; p[5] = (uint8_t)o; p[7] = 15; p[8] = p[9] = 50;
@@ -225,6 +293,7 @@ static void init_perf(Perf& P) {
         pt.p[0] = 8; pt.p[1] = 1; pt.p[3] = 0x7F; pt.p[4] = i ? 0x7F : 0x10; pt.p[5] = 1; pt.p[8] = 24; pt.p[9] = 64; pt.p[10] = 64; pt.p[11] = 127; pt.p[12] = 64; pt.p[13] = 64;
         pt.p[14] = 64; pt.p[15] = 0; pt.p[16] = 127; pt.p[17] = 127; pt.p[0x15] = pt.p[0x16] = pt.p[0x17] = 64;
         for (int k = 0x18; k <= 0x23; k++) pt.p[k] = 64;
+        pt.p[0x28] = 50; pt.p[0x2E] = pt.p[0x2F] = 64;   // pan scaling +0, LFO2 rate / filter mod offsets 0
         pt.p[0x25] = 0; pt.p[0x26] = 0x40 + 2; pt.p[0x27] = 0x40 - 2; pt.p[0x2A] = 1; pt.p[0x2B] = 127; pt.p[0x2D] = 1; pt.p[0x2E] = pt.p[0x2F] = 64;
         init_default_voice(pt.voice);
     }
@@ -292,6 +361,10 @@ struct Chan {
     int portaCur = 0, portaTarget = 0, portaRate = 0; bool portaOn = false;
     // LFO1 (FUN_00028828)
     uint32_t lfoPhase = 0, lfoDelay = 0, lfoFade = 0; int lfoVal = 0; int lfoSH = 0;
+    // LFO2 (filter only) and the pan / filter registers (0x22A-0x22F, 0x270)
+    uint32_t lfo2Phase = 0; int lfo2Val = 0, lfo2SH = 0;
+    int panBase = 63; double panL = 1, panR = 1;
+    StepEG feg; VFilter flt; int fltType = 0; bool fltOn = false; double fltGain = 1;
     // registers refreshed each tick
     int regPitch = 0, regPM = 0, regFM = 0, regAM = 0, regLevel[8], regULevel[8], regC0 = 73;
     int fqWord[8] = {}, fquWord[8] = {}; double partV = 1, partU = 1;
@@ -301,13 +374,15 @@ struct Chan {
 
 struct Synth {
     Perf perf; Chan ch[NCHAN]; uint32_t clock = 0; double gain = 0.25;
+    FxSection fx;
     int sysTune = 64, sysNoteShift = 64, velCurve = 0;
     std::mutex mtx;
     // Fseq playback
     Fseq fseq; bool fseqRun = false; double fseqAcc = 0, fseqPeriod = 0.01; int fseqStep = 0, fseqDir = 1; int fseqVel = 100; int fseqPart = -1;
     double tickAcc = 0;
 
-    Synth() { init_perf(perf); }
+    Synth() { init_perf(perf); fx.init(SR); }
+    static inline double sendlvl(int v) { return db2lin(-LEVEL_DB * SENDTAB[clampi(v, 0, 127)]); }
 
     // ---------------------------------------------------------------- per-part derived values
     int ctrl_offset(int part, int dest) const {          // controller sets -> offset on the 0..255 scale (INFERRED scaling: value*depth/64)
@@ -367,6 +442,8 @@ struct Synth {
         Chan& C = *c; bool sync = V.lfo1sync != 0; uint32_t keepPhase = C.lfoPhase;
         C = Chan(); C.active = true; C.part = part; C.note = note; C.vel = vel; C.held = true; C.age = ++clock;
         C.lfoPhase = sync ? 0 : keepPhase;
+        C.lfo2Phase = V.lfo2sync ? (uint32_t)(V.lfo2phase * 0x4000) : (uint32_t)(rand() & 0xFFFF);
+        C.panBase = pt.p[0x0E] ? pt.p[0x0E] - 1 : (rand() % 127);   // part pan 0 = random per note
         compute_pitch(C, pt, note);
         // portamento start (FUN_000124fe)
         int porta = pt.p[0x24]; C.portaTarget = C.pitchNote; C.portaCur = C.pitchNote;
@@ -396,6 +473,18 @@ struct Synth {
             s.ufeg.start(u.fegInit, u.fegAtt, u.fegAttT, u.fegDecT);
             s.rng = 0x9E3779B9u * (o + 1) ^ clock; if (!s.rng) s.rng = 1;
         }
+        start_filter(C, pt, vel);
+    }
+    // per-voice filter (voice common 0x54-0x6E, part 0x07/0x18/0x19/0x1F). Chip side, so INFERRED.
+    void start_filter(Chan& C, const Part& pt, int vel) {
+        const Voice& V = pt.voice;
+        C.fltOn = (pt.p[7] & 1) != 0; C.fltType = V.fltType; C.flt.clear();
+        C.fltGain = db2lin(V.fltInGain);
+        double lv[4]; int rt[4];
+        int ts = (V.fltTscale * C.keyfact) >> 5;
+        for (int i = 0; i < 4; i++) { lv[i] = V.fltL[i] - 50; rt[i] = clampi(egrate(V.fltT[i]) + ts, 0, 63); }
+        rt[0] = clampi(rt[0] + ((V.fltAtkVel * (vel - 64)) >> 5), 0, 63);   // attack time velocity
+        C.feg.start(lv, rt);
     }
     bool anyOther(const Chan& C) const { for (auto& x : ch) if (&x != &C && x.active && x.held) return true; return false; }
 
@@ -516,6 +605,7 @@ struct Synth {
     }
     void release(Chan& C) {                      // FUN_000236e8: key off -> EG release, PEG stage 4 toward L4 at T4
         for (auto& s : C.op) { s.eg.release(); s.ueg.release(); }
+        C.feg.release();
         C.pegStage = 4; C.pegTarget = C.pegLvl[4]; C.pegRate = C.pegRt[4];
     }
     void set_sustain(int part, bool on) { Part& pt = perf.part[part]; pt.sustain = on; if (!on) for (auto& c : ch) if (c.active && c.part == part && c.sustained) { c.sustained = false; release(c); } }
@@ -570,6 +660,23 @@ struct Synth {
         }
         C.lfoVal = val;
     }
+    // LFO2: the same stepper as LFO1, but the speed byte is 0..127 straight from the voice and the
+    // output only reaches the filter cutoff.
+    void lfo2_tick(Chan& C, const Part& pt) {
+        const Voice& V = pt.voice;
+        int sp = clampi(V.lfo2speed + pt.p[0x2E] - 64 + clampi(ctrl_offset(C.part, 45) * 2, -255, 255), 0, 255);
+        uint32_t inc = sp == 0 ? 0xB : sp * (sp < 0xA0 ? 0xB : 0xB + ((sp - 0xA0) >> 2)); inc = (inc & 0xFFFF) << 1;
+        uint32_t ph = C.lfo2Phase + inc; bool wrapped = ph > 0xFFFF; C.lfo2Phase = ph & 0xFFFF;
+        int hi = C.lfo2Phase >> 8;
+        switch (V.lfo2wave) {
+        case 1: C.lfo2Val = (int8_t)(~hi); break;
+        case 2: C.lfo2Val = (int8_t)hi; break;
+        case 3: C.lfo2Val = (hi & 0x80) ? -128 : 127; break;
+        case 4: { int idx = hi & 0x3F; if (hi & 0x40) idx ^= 0x3F; int v = SINE64[idx]; C.lfo2Val = (hi & 0x80) ? (int8_t)(~v) : v; break; }
+        case 5: if (wrapped) C.lfo2SH = SHTAB[((C.lfo2SH & 0xFF) * 0xB3 + (rand() & 0xFF)) & 0x7FF]; C.lfo2Val = C.lfo2SH; break;
+        default: { uint32_t t = (C.lfo2Phase << 1); if (t > 0xFFFF) t = ~t & 0xFFFF; C.lfo2Val = (int)((t >> 8) & 0xFF) - 0x80; }
+        }
+    }
     void peg_tick(Chan& C) {                     // FUN_00028c8e: linear moves of PEGTIME units per tick, stages 3 and 5 hold
         int s = C.pegStage; if (s == 3 || s == 5) return;
         if (s > 5) { C.pegStage = 3; return; }
@@ -623,6 +730,31 @@ struct Synth {
         }
         int vAtt, uAtt; part_levels(part, vAtt, uAtt);
         C.partV = db2lin(-LEVEL_DB * vAtt); C.partU = db2lin(-LEVEL_DB * uAtt);
+        refresh_pan(C, pt); refresh_filter(C, pt);
+    }
+    // registers 0x22A-0x22F: the pan index (part pan, pan scaling, pan LFO, performance pan, the Panpot
+    // controller) read through the firmware's own pan tables as a 0.375 dB attenuation per side.
+    void refresh_pan(Chan& C, const Part& pt) {
+        int idx = C.panBase + ((clampi(pt.p[0x28], 0, 100) - 50) * (C.noteP - 60)) / 48;   // pan scaling: -50..+50, pan by key around C3
+        idx += (C.lfoVal * clampi(pt.p[0x29], 0, 99) * (int)(C.lfoFade >> 8)) >> 16;       // pan LFO depth, faded in, LFO1
+        idx += ctrl_offset(C.part, 18) / 4;                                            // Panpot controller
+        if (perf.c[0x11]) idx += perf.c[0x11] - 64;                                    // performance pan
+        idx = clampi(idx, 0, 127);
+        C.panL = db2lin(-LEVEL_DB * PANL[idx]); C.panR = db2lin(-LEVEL_DB * PANR[idx]);
+    }
+    void refresh_filter(Chan& C, const Part& pt) {
+        if (!C.fltOn) return;
+        const Voice& V = pt.voice; int part = C.part;
+        double cut = V.fltCut + (pt.p[0x18] - 64) + ctrl_offset(part, 21) / 2.0;
+        cut += (V.fltKsDepth * (C.noteP - clampi(V.fltKsPoint, 0, 127))) / 64.0;       // cutoff key scaling
+        int egd = V.fegDepth + (pt.p[0x1F] - 64) + ctrl_offset(part, 23) / 2 + ((V.fltEgVel * (C.vel - 64)) >> 4);
+        cut += C.feg.cur * egd / 50.0;                                                 // filter EG, levels 0..100 around 50
+        int fade = C.lfoFade >> 8;
+        cut += C.lfoVal * eb86(clampi(V.fltLfo1, 0, 99)) * fade / 4194304.0 * 64.0;    // LFO1 filter mod
+        cut += C.lfo2Val * eb86(clampi(V.fltLfo2 + pt.p[0x2F] - 64, 0, 99)) / 16384.0 * 64.0;   // LFO2 filter mod
+        cut += (ctrl_offset(part, 42) + ctrl_offset(part, 44)) / 4.0;
+        int reso = V.fltReso + (pt.p[0x19] - 64) + ctrl_offset(part, 22) / 2 + ((V.fltResoVel * (C.vel - 64)) >> 4);
+        C.flt.setup(C.fltType, cut_hz(cut), reso_q(reso));
     }
     void tick() {
         double dt = 1.0 / TICK_HZ;
@@ -630,7 +762,7 @@ struct Synth {
         for (auto& C : ch) {
             if (!C.active) continue;
             const Part& pt = perf.part[C.part];
-            lfo_tick(C, pt); peg_tick(C); porta_tick(C); refresh_regs(C, pt);
+            lfo_tick(C, pt); lfo2_tick(C, pt); peg_tick(C); porta_tick(C); C.feg.tick(); refresh_regs(C, pt);
         }
     }
 
@@ -653,7 +785,7 @@ struct Synth {
         }
         return y;
     }
-    inline double render_chan(Chan& C) {
+    inline void render_chan(Chan& C, double& outL, double& outR) {
         const Part& pt = perf.part[C.part]; const Voice& V = pt.voice; const unsigned char* alg = FS1R_ALG[V.alg];
         double partV = C.partV, partU = C.partU;
         bool fs = fseqRun && fseqPart == C.part && fseq.valid;
@@ -711,17 +843,53 @@ struct Synth {
         bool alive = false;
         for (auto& s : C.op) if (!s.eg.done() || !s.ueg.done()) { alive = true; break; }
         if (!alive) C.active = false;
-        return mix;
+        if (C.fltOn) mix = C.flt.run(C.fltType, mix * C.fltGain);
+        outL = mix * C.panL; outR = mix * C.panR;
     }
+    // Part buses -> insertion / variation / reverb -> master EQ, the XG topology the FS1R uses.
+    // ponytail: the performance's individual out (common 0x14) is folded into the main pair; the plugin
+    // has one stereo output, so a second pair would be four channels nobody listens to yet.
     void render(int16_t* buf, int frames) {
         std::lock_guard<std::mutex> lk(mtx);
+        fx.configure(perf.fx);
+        double insLvl = sendlvl(perf.fx[0x63]), insRev = sendlvl(perf.fx[0x61]), insVar = sendlvl(perf.fx[0x62]);
+        double varRev = sendlvl(perf.fx[0x5E]), varRet = sendlvl(perf.fx[0x5D]), revRet = sendlvl(perf.fx[0x5A]);
+        int vp = clampi(perf.fx[0x5C] - 1, 0, 126), rp = clampi(perf.fx[0x59] - 1, 0, 126);
+        double vpl = db2lin(-LEVEL_DB * PANL[vp]), vpr = db2lin(-LEVEL_DB * PANR[vp]);
+        double rpl = db2lin(-LEVEL_DB * PANL[rp]), rpr = db2lin(-LEVEL_DB * PANR[rp]);
+        double pvol = perf.c[0x10] / 127.0;
+        double dry[4], varS[4], revS[4]; bool insSw[4];
+        for (int p = 0; p < 4; p++) {
+            const uint8_t* q = perf.part[p].p;
+            insSw[p] = (q[0x14] & 1) != 0;
+            dry[p] = sendlvl(q[0x11]); varS[p] = sendlvl(q[0x12]); revS[p] = sendlvl(q[0x13]);
+        }
         for (int i = 0; i < frames; i++) {
             tickAcc += TICK_HZ / SR; while (tickAcc >= 1) { tickAcc -= 1; tick(); }
-            double l = 0;
-            for (auto& c : ch) if (c.active) l += render_chan(c);
-            l *= gain; l = l / (1.0 + fabs(l) * 0.5);
-            int16_t s = (int16_t)clampi((int)(l * 32767.0), -32767, 32767);
-            buf[2 * i] = s; buf[2 * i + 1] = s;
+            double pl[4] = {}, pr[4] = {};
+            for (auto& c : ch) if (c.active) { double a, b; render_chan(c, a, b); pl[c.part] += a; pr[c.part] += b; }
+            double dL = 0, dR = 0, iL = 0, iR = 0, vL = 0, vR = 0, rL = 0, rR = 0;
+            for (int p = 0; p < 4; p++) {
+                if (insSw[p]) { iL += pl[p]; iR += pr[p]; continue; }
+                dL += pl[p] * dry[p]; dR += pr[p] * dry[p];
+                vL += pl[p] * varS[p]; vR += pr[p] * varS[p];
+                rL += pl[p] * revS[p]; rR += pr[p] * revS[p];
+            }
+            double oL, oR;
+            fx.ins.process(iL, iR, oL, oR);
+            dL += oL * insLvl; dR += oR * insLvl;
+            vL += oL * insVar; vR += oR * insVar;
+            rL += oL * insRev; rR += oR * insRev;
+            fx.var.process(vL, vR, oL, oR);
+            rL += oL * varRev; rR += oR * varRev;
+            double l = dL + oL * varRet * vpl, r = dR + oR * varRet * vpr;
+            fx.rev.process(rL, rR, oL, oR);
+            l += oL * revRet * rpl; r += oR * revRet * rpr;
+            fx.master(l, r);
+            l *= gain * pvol; r *= gain * pvol;
+            l = l / (1.0 + fabs(l) * 0.5); r = r / (1.0 + fabs(r) * 0.5);
+            buf[2 * i] = (int16_t)clampi((int)(l * 32767.0), -32767, 32767);
+            buf[2 * i + 1] = (int16_t)clampi((int)(r * 32767.0), -32767, 32767);
         }
     }
 };
