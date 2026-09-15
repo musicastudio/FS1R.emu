@@ -1244,6 +1244,17 @@ static bool load_sysex(Synth& S, const Rom* R, const uint8_t* d, size_t len, int
 // Every address in the parameter tables reaches the engine as a single parameter change, not just
 // through a bulk dump: system (table 4), performance common and the 112 effect bytes (table 1),
 // part (table 1), voice common and the 62 bytes per operator (table 2).
+// Addresses that hold a 14-bit value across this byte and the next. The Data List's "FS1R receives a
+// parameter constructed of 2 bytes (i.e. Fseq Speed Ratio) via an Address High" covers these; every
+// other address is a single 7-bit byte and the high half of the value is ignored.
+static bool param_is_wide(int ah, int am, int al) {
+    if (ah == 0x10 && am == 0) return al == 0x18 || al == 0x1A || al == 0x1C || al == 0x1E ||
+                                      (al >= 0x30 && al <= 0x3E && !(al & 1));
+    if (ah == 0x10 && am == 0 && al >= 0x50) return !((al - 0x50) & 1) && al <= 0x5F;
+    if (ah == 0x10 && am == 1) return al <= 0x27 && !(al & 1);
+    if (ah == 0x70 && am == 0) return al == 0x10 || al == 0x12 || al == 0x1E;
+    return false;
+}
 static bool write_param(Synth& S, int ah, int am, int al, int val) {
     uint8_t v = (uint8_t)(val & 0x7F);
     if (ah == 0x00 && am == 0 && al < 76) { if (al != 0x46) S.sys[al] = v; return true; }
@@ -1282,7 +1293,9 @@ static bool apply_param_change_locked(Synth& S, const uint8_t* d, size_t len) {
     if (kind == 0x30) { int v = S.read_param(ah, am, al); if (v >= 0) S.push_param(ah, am, al, v); return v >= 0; }
     if (kind == 0x20) { S.dump_request(ah, am, al); return true; }
     if (kind != 0x10 || len < 10) return false;
-    return write_param(S, ah, am, al, d[7] << 7 | d[8]);
+    int val = d[7] << 7 | d[8];
+    if (param_is_wide(ah, am, al)) return write_param(S, ah, am, al, val >> 7) & write_param(S, ah, am, al + 1, val);
+    return write_param(S, ah, am, al, val);
 }
 static bool apply_param_change(Synth& S, const uint8_t* d, size_t len) {
     std::lock_guard<std::mutex> lk(S.mtx);

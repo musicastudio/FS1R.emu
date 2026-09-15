@@ -5,7 +5,7 @@
 # build.bat is the quick MSVC path; this file is for clang, CI, and the JUCE plugin layer later.
 #   cmake -B build/cmake -S . && cmake --build build/cmake --config Release && ctest --test-dir build/cmake
 cmake_minimum_required(VERSION 3.16)
-project(fs1r_emu LANGUAGES CXX)
+project(fs1r_emu VERSION 0.1.0 LANGUAGES C CXX)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -26,6 +26,18 @@ target_include_directories(test_effects PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src)
 
 enable_testing()
 add_test(NAME effects COMMAND test_effects)
+
+option(FS1R_BUILD_PLUGIN "Build the JUCE plugin (needs the extern/ submodules)" OFF)
+if(FS1R_BUILD_PLUGIN)
+  if(NOT EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/extern/JUCE/CMakeLists.txt)
+    message(FATAL_ERROR "extern/JUCE is empty; run: git submodule update --init --recursive")
+  endif()
+  add_subdirectory(extern/JUCE)
+  if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/extern/clap-juce-extensions/CMakeLists.txt)
+    add_subdirectory(extern/clap-juce-extensions EXCLUDE_FROM_ALL)
+  endif()
+  add_subdirectory(plugin)
+endif()
 
 if(WIN32)
   add_executable(fs1r_emu src/fs1r_console.cpp)

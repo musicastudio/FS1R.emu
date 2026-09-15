@@ -1,0 +1,9 @@
+[submodule "extern/JUCE"]
+	path = extern/JUCE
+	url = https://github.com/juce-framework/JUCE.git
+	branch = master
+	shallow = true
+[submodule "extern/clap-juce-extensions"]
+	path = extern/clap-juce-extensions
+	url = https://github.com/free-audio/clap-juce-extensions.git
+	shallow = true
