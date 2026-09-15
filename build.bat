@@ -13,7 +13,7 @@ if "%~1"=="" (
   cl /nologo /O2 /EHsc /W3 /std:c++17 src\fs1r_lib.cpp src\fs1r_console.cpp winmm.lib /Fe:fs1r_emu.exe /Fobuild\ || goto :done
   cl /nologo /O2 /EHsc /W3 /std:c++17 tools\test_effects.cpp /Fe:build\test_effects.exe /Fobuild\ || goto :done
   build\test_effects.exe || goto :done
-  fs1r_emu.exe -selftest
+  "%~dp0fs1r_emu.exe" -selftest
 ) else (
   cl /nologo /O2 /EHsc /W3 /std:c++17 %* /Fobuild\
 )

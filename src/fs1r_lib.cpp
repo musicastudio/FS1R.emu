@@ -244,6 +244,23 @@ static void init_default_voice(Voice& V) {
     op(5)[22] = 95;
     decode_voice(V);
 }
+// DX7 ACED (49 bytes, DX7II/DX7S/TX802 additions). The Data List: "ACED bulk data is not interpreted
+// until its following VCED bulk data is received", so it is held here and applied after the conversion.
+// Only nine of the 49 bytes carry anything: six per-operator amplitude mod senses, the pitch EG range,
+// its velocity switch and its rate scaling.
+static uint8_t g_aced[49];
+static bool g_acedValid = false;
+static void apply_aced(uint8_t* out) {
+    if (!g_acedValid) return;
+    for (int j = 0; j < 6; j++) {                 // ACED 6..11 are OP6..OP1, the same order as the VCED
+        uint8_t* p = out + 112 + (2 + j) * 62;
+        p[33] = (uint8_t)(((g_aced[6 + j] & 7) << 4) | (p[33] & 0x0F));
+    }
+    out[0x3B] = g_aced[0x0C] & 3;                 // pitch EG range
+    out[0x27] = g_aced[0x0E] ? 7 : 0;             // pitch EG velocity switch
+    out[0x3C] = g_aced[0x26] & 7;                 // pitch EG rate scaling
+    g_acedValid = false;
+}
 // DX7 VCED (155 bytes) -> native voice: algorithm k -> k+8, DX op 6..1 -> FS op 3..8
 static void convert_dx7(const uint8_t* v, uint8_t* out) {
     init_blank_voice(out); memcpy(out, v + 145, 10);
@@ -270,6 +287,7 @@ static void convert_dx7(const uint8_t* v, uint8_t* out) {
         p[0] = (uint8_t)((v[136] & 1) << 6 | 24);
         p[31] = (uint8_t)(7 << 3 | (v[143] & 7));
     }
+    apply_aced(out);
 }
 
 // ------------------------------------------------------------------------------------------ performance / part / Fseq
@@ -1233,6 +1251,10 @@ static bool load_sysex(Synth& S, const Rom* R, const uint8_t* d, size_t len, int
                 if (found++ != pick) continue;
                 S.fseq.from_bytes(p, p + 32, std::min(512, (bc - 32) / 50)); if (S.fseqPart < 0) S.fseqPart = 0; return true;
             }
+        } else if (d[i + 3] == 0x05 && d[i + 4] == 0x00 && d[i + 5] == 0x31) {
+            if (i + 6 + 49 + 2 > len) break;
+            memcpy(g_aced, d + i + 6, 49); g_acedValid = true;       // held for the next VCED
+            i += 6 + 49 + 1;
         } else if (d[i + 3] == 0x00 && d[i + 4] == 0x01 && d[i + 5] == 0x1B) {
             if (i + 6 + 155 + 2 > len) break;
             if (found++ != pick) continue;
