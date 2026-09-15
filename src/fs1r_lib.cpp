@@ -1537,6 +1537,13 @@ int Device::algorithm(int part) const { return p->s.perf.part[clampi(part, 0, 3)
 bool Device::partActive(int part) const { return p->s.perf.part[clampi(part, 0, 3)].rcv() != 0x7F; }
 const char* Device::fseqName() const { return p->s.fseq.valid ? p->s.fseq.name : ""; }
 int Device::fseqFrames() const { return p->s.fseq.valid ? p->s.fseq.nframes : 0; }
+bool Device::fseqFrame(int step, uint8_t out[50]) const {
+    if (!p->s.fseq.valid || step < 0 || step >= p->s.fseq.nframes) return false;
+    memcpy(out, p->s.fseq.frame[step], 50);
+    return true;
+}
+int Device::fseqPosition() const { return p->s.fseq.valid ? p->s.fseqStep : 0; }
+int Device::fseqPart() const { return p->s.fseqPart; }
 
 int Device::selfTest() { init_tables(); Synth s; return selftest(s); }
 

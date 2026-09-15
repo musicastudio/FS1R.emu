@@ -2,80 +2,14 @@
 
 namespace fs1rplug {
 
-// One parameter: name, slider, value text, and a right-click menu for MIDI learn.
-class Editor::Row : public juce::Component, private juce::Slider::Listener {
-public:
-    Row(Processor& p, int index) : proc(p), idx(index) {
-        const auto& d = p.descriptions()[(size_t)index];
-        name.setText(d.name, juce::dontSendNotification);
-        name.setTooltip(d.description.isNotEmpty() ? d.description : d.group + " " + d.name);
-        addAndMakeVisible(name);
-        slider.setSliderStyle(juce::Slider::LinearHorizontal);
-        slider.setTextBoxStyle(juce::Slider::NoTextBox, true, 0, 0);
-        slider.setRange(d.min, d.max, 1.0);
-        slider.addListener(this);
-        addAndMakeVisible(slider);
-        value.setJustificationType(juce::Justification::centredRight);
-        addAndMakeVisible(value);
-        refresh();
-    }
-    void refresh() {
-        auto* p = proc.parameterFor(idx);
-        const auto& d = proc.descriptions()[(size_t)idx];
-        int v = (int)std::lround(p->convertFrom0to1(p->getValue()));
-        if (v != last) {
-            last = v;
-            slider.setValue(v, juce::dontSendNotification);
-        }
-        auto t = d.textFor(v);
-        int cc = proc.mappedCcFor(idx);
-        if (cc >= 0) t += "  [CC" + juce::String(cc) + "]";
-        if (t != valueText) { valueText = t; value.setText(t, juce::dontSendNotification); }
-    }
-    void resized() override {
-        auto r = getLocalBounds();
-        name.setBounds(r.removeFromLeft(240));
-        value.setBounds(r.removeFromRight(130));
-        slider.setBounds(r.reduced(4, 2));
-    }
-    void mouseDown(const juce::MouseEvent& e) override {
-        if (!e.mods.isPopupMenu()) return;
-        juce::PopupMenu m;
-        m.addItem(1, "MIDI learn");
-        m.addItem(2, "Clear MIDI mapping", proc.mappedCcFor(idx) >= 0);
-        m.addItem(3, "Reset to default");
-        m.showMenuAsync(juce::PopupMenu::Options(), [this](int r) {
-            if (r == 1) proc.startMidiLearn(idx);
-            else if (r == 2) proc.clearMidiMapping(idx);
-            else if (r == 3) {
-                auto* p = proc.parameterFor(idx);
-                p->setValueNotifyingHost(p->getDefaultValue());
-            }
-        });
-    }
+static bool startsWith(const juce::String& s, const char* p) { return s.startsWith(p); }
 
-private:
-    void sliderValueChanged(juce::Slider* s) override {
-        auto* p = proc.parameterFor(idx);
-        p->setValueNotifyingHost(p->convertTo0to1((float)s->getValue()));
-    }
-    Processor& proc;
-    const int idx;
-    juce::Label name, value;
-    juce::Slider slider;
-    int last = -99999;
-    juce::String valueText;
-};
-
-Editor::Editor(Processor& p) : juce::AudioProcessorEditor(&p), proc(p) {
-    for (int i = 0; i < 4; ++i) {
-        partButtons[i].setButtonText("Part " + juce::String(i + 1));
-        partButtons[i].setClickingTogglesState(true);
-        partButtons[i].setRadioGroupId(1);
-        partButtons[i].onClick = [this, i] { proc.selectPart(i); rebuildRows(); };
-        addAndMakeVisible(partButtons[i]);
-    }
-    partButtons[proc.selectedPart()].setToggleState(true, juce::dontSendNotification);
+Editor::Editor(Processor& p) : juce::AudioProcessorEditor(&p), proc(p), panel(p) {
+    addAndMakeVisible(panel);
+    panel.onModeButton = [this](const juce::String& page) {
+        if (page == "__search") { searchBox.grabKeyboardFocus(); return; }
+        showPage(page);
+    };
 
     romButton.setButtonText("EPROM...");
     loadButton.setButtonText("Load .syx");
@@ -87,19 +21,13 @@ Editor::Editor(Processor& p) : juce::AudioProcessorEditor(&p), proc(p) {
     addAndMakeVisible(loadButton);
     addAndMakeVisible(saveButton);
 
-    juce::StringArray groups;
-    for (auto& d : proc.descriptions()) groups.addIfNotAlreadyThere(d.group);
-    groupBox.addItem("All parameters", 1);
-    for (int i = 0; i < groups.size(); ++i) groupBox.addItem(groups[i], i + 2);
-    groupBox.setSelectedId(1, juce::dontSendNotification);
-    groupBox.onChange = [this] { rebuildRows(); };
-    addAndMakeVisible(groupBox);
-
-    searchBox.setTextToShowWhenEmpty("search", juce::Colours::grey);
-    searchBox.onTextChange = [this] { rebuildRows(); };
+    searchBox.setTextToShowWhenEmpty("search this page", juce::Colours::grey);
+    searchBox.onTextChange = [this] {
+        for (auto* pg : pages) pg->setSearch(searchBox.getText());
+    };
     addAndMakeVisible(searchBox);
 
-    voiceBox.setTextWhenNothingSelected("voice bank");
+    voiceBox.setTextWhenNothingSelected("voice");
     voiceBox.onChange = [this] {
         int i = voiceBox.getSelectedId() - 1;
         if (i >= 0 && proc.patches().loadVoice(i, proc.selectedPart())) proc.requestFullRefresh();
@@ -112,65 +40,97 @@ Editor::Editor(Processor& p) : juce::AudioProcessorEditor(&p), proc(p) {
     };
     addAndMakeVisible(perfBox);
 
-    header.setJustificationType(juce::Justification::centredLeft);
-    addAndMakeVisible(header);
-    viewport.setViewedComponent(&rows, false);
-    viewport.setScrollBarsShown(true, false);
-    addAndMakeVisible(viewport);
+    algView = std::make_unique<AlgorithmView>(proc);
+    spectrumView = std::make_unique<SpectrumView>(proc);
+    ampEg = std::make_unique<EnvelopeView>(proc, EnvelopeView::Amplitude);
+    pitchEg = std::make_unique<EnvelopeView>(proc, EnvelopeView::Pitch);
+    filterEg = std::make_unique<EnvelopeView>(proc, EnvelopeView::Filter);
+    fseqView = std::make_unique<FseqView>(proc);
 
-    rebuildRows();
-    refreshHeader();
+    // The pages follow the hardware's edit structure rather than the sysex layout.
+    addPage("Operators", new ParameterPage(proc, [](const juce::String& g, const juce::String&) {
+        return startsWith(g, "Op ") && !g.endsWith("Unvoiced");
+    }, ampEg.get(), 130, 4));
+    addPage("Unvoiced", new ParameterPage(proc, [](const juce::String& g, const juce::String&) {
+        return g.endsWith("Unvoiced");
+    }, spectrumView.get(), 130, 4));
+    addPage("Algorithm", new ParameterPage(proc, [](const juce::String& g, const juce::String& n) {
+        return g == "Voice" && (n.contains("Algorithm") || n.contains("carrier level") ||
+                                n.contains("feedback"));
+    }, algView.get(), 150, 2));
+    addPage("Formant", new ParameterPage(proc, [](const juce::String& g, const juce::String& n) {
+        return (startsWith(g, "Op ") && (n.contains("Spectral") || n.contains("band spectrum") ||
+                                         n.contains("Bandwidth") || n.contains("Formant") ||
+                                         n.contains("formant"))) ||
+               (g == "Voice" && n.contains("Formant Control"));
+    }, spectrumView.get(), 130, 3));
+    addPage("LFO / PEG", new ParameterPage(proc, [](const juce::String& g, const juce::String& n) {
+        return g == "Voice" && (n.contains("LFO") || n.contains("Pitch EG") || n.contains("Note shift"));
+    }, pitchEg.get(), 130, 2));
+    addPage("Filter", new ParameterPage(proc, [](const juce::String& g, const juce::String& n) {
+        return (g == "Voice" && n.contains("Filter")) || (g == "Part" && n.contains("FILTER"));
+    }, filterEg.get(), 130, 2));
+    addPage("Performance", new ParameterPage(proc, [](const juce::String& g, const juce::String& n) {
+        return g == "Performance" && !n.startsWith("FSEQ") && !n.startsWith("Fseq");
+    }, nullptr, 0, 3));
+    addPage("Part", new ParameterPage(proc, [](const juce::String& g, const juce::String&) {
+        return g == "Part";
+    }, nullptr, 0, 3));
+    addPage("Effects", new ParameterPage(proc, [](const juce::String& g, const juce::String&) {
+        return g == "Effects";
+    }, nullptr, 0, 3));
+    addPage("Fseq", new ParameterPage(proc, [](const juce::String& g, const juce::String& n) {
+        return (g == "Performance" && (n.startsWith("FSEQ") || n.startsWith("Fseq"))) ||
+               (startsWith(g, "Op ") && n.contains("Fseq")) || (g == "Voice" && n.contains("Fseq"));
+    }, fseqView.get(), 150, 2));
+    addPage("System", new ParameterPage(proc, [](const juce::String& g, const juce::String&) {
+        return g == "System";
+    }, nullptr, 0, 3));
+    addPage("All parameters", new ParameterPage(proc, [](const juce::String&, const juce::String&) {
+        return true;
+    }, nullptr, 0, 3));
+
+    for (auto* pg : pages)
+        pg->onParameterTouched = [this](const juce::String& n, const juce::String& v) {
+            panel.showParameterOnLcd(n, v);
+        };
+    addAndMakeVisible(tabs);
+
     setResizable(true, true);
-    setSize(880, 620);
-    startTimerHz(20);
+    setResizeLimits(900, 560, 2400, 1600);
+    setSize(1060, 720);
+    startTimerHz(10);
 }
 
 Editor::~Editor() { stopTimer(); }
 
-void Editor::rebuildRows() {
-    rowList.clear();
-    auto group = groupBox.getSelectedId() <= 1 ? juce::String() : groupBox.getText();
-    auto needle = searchBox.getText().trim().toLowerCase();
-    const auto& d = proc.descriptions();
-    int y = 0;
-    for (size_t i = 0; i < d.size(); ++i) {
-        if (group.isNotEmpty() && d[i].group != group) continue;
-        if (needle.isNotEmpty() && !d[i].name.toLowerCase().contains(needle) &&
-            !d[i].group.toLowerCase().contains(needle)) continue;
-        auto* r = new Row(proc, (int)i);
-        rows.addAndMakeVisible(r);
-        r->setBounds(0, y, juce::jmax(600, viewport.getWidth() - 16), 22);
-        rowList.add(r);
-        y += 22;
-    }
-    rows.setSize(juce::jmax(600, viewport.getWidth() - 16), juce::jmax(y, 1));
-
-    if (proc.patches().hasRom() && voiceBox.getNumItems() == 0) {
-        int n = 0;
-        for (auto& e : proc.patches().voices()) {
-            voiceBox.addItem(juce::String(e.index) + " " + e.bank + " " + e.name, e.index + 1);
-            if (++n >= 1408) break;
-        }
-        for (auto& e : proc.patches().performances())
-            perfBox.addItem(juce::String(e.index) + " " + e.bank + " " + e.name, e.index + 1);
-    }
+void Editor::addPage(const juce::String& name, ParameterPage* page) {
+    pages.add(page);
+    pageNames.add(name);
+    tabs.addTab(name, juce::Colour(0xff26292c), page, false);
 }
 
-void Editor::refreshHeader() {
-    auto& dv = proc.device();
-    juce::String t;
-    t << "\"" << juce::String(dv.performanceName()).trim() << "\"   part "
-      << (proc.selectedPart() + 1) << ": \"" << juce::String(dv.voiceName(proc.selectedPart())).trim()
-      << "\"  algorithm " << (dv.algorithm(proc.selectedPart()) + 1);
-    if (dv.fseqFrames()) t << "   fseq \"" << juce::String(dv.fseqName()).trim() << "\" ("
-                           << dv.fseqFrames() << " frames)";
-    if (proc.isLearning()) t << "   -- move a control to learn";
-    if (t != lastHeader) { lastHeader = t; header.setText(t, juce::dontSendNotification); }
+void Editor::showPage(const juce::String& name) {
+    int i = pageNames.indexOf(name);
+    if (i >= 0) tabs.setCurrentTabIndex(i);
 }
 
 void Editor::timerCallback() {
-    for (auto* r : rowList) r->refresh();
-    refreshHeader();
+    int part = proc.selectedPart();
+    int alg = proc.device().algorithm(part);
+    if (part != lastPart || alg != lastAlg) {
+        lastPart = part;
+        lastAlg = alg;
+        algView->setAlgorithm(alg);
+    }
+    if (proc.patches().hasRom() && voiceBox.getNumItems() == 0) {
+        for (auto& e : proc.patches().voices())
+            voiceBox.addItem(juce::String(e.index) + " " + e.bank + " " + e.name +
+                                 (e.category.isEmpty() ? "" : " (" + e.category + ")"),
+                             e.index + 1);
+        for (auto& e : proc.patches().performances())
+            perfBox.addItem(juce::String(e.index) + " " + e.bank + " " + e.name, e.index + 1);
+    }
 }
 
 void Editor::openRom() {
@@ -181,7 +141,6 @@ void Editor::openRom() {
                              proc.patches().setRomFile(fc.getResult());
                              voiceBox.clear();
                              perfBox.clear();
-                             rebuildRows();
                          });
 }
 
@@ -205,29 +164,21 @@ void Editor::saveSyx() {
                          });
 }
 
-void Editor::paint(juce::Graphics& g) { g.fillAll(getLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId)); }
+void Editor::paint(juce::Graphics& g) { g.fillAll(juce::Colour(0xff1b1e21)); }
 
 void Editor::resized() {
     auto r = getLocalBounds().reduced(8);
-    auto top = r.removeFromTop(28);
-    for (auto& b : partButtons) b.setBounds(top.removeFromLeft(72).reduced(2));
-    top.removeFromLeft(12);
-    romButton.setBounds(top.removeFromLeft(90).reduced(2));
-    loadButton.setBounds(top.removeFromLeft(90).reduced(2));
-    saveButton.setBounds(top.removeFromLeft(90).reduced(2));
+    panel.setBounds(r.removeFromTop(150));
+    r.removeFromTop(6);
+    auto bar = r.removeFromTop(26);
+    romButton.setBounds(bar.removeFromLeft(90).reduced(2));
+    loadButton.setBounds(bar.removeFromLeft(90).reduced(2));
+    saveButton.setBounds(bar.removeFromLeft(90).reduced(2));
+    searchBox.setBounds(bar.removeFromRight(190).reduced(2));
+    voiceBox.setBounds(bar.removeFromLeft(juce::jmax(180, bar.getWidth() / 2)).reduced(2));
+    perfBox.setBounds(bar.reduced(2));
     r.removeFromTop(4);
-    auto row2 = r.removeFromTop(26);
-    groupBox.setBounds(row2.removeFromLeft(200).reduced(2));
-    searchBox.setBounds(row2.removeFromLeft(180).reduced(2));
-    voiceBox.setBounds(row2.removeFromLeft(240).reduced(2));
-    perfBox.setBounds(row2.reduced(2));
-    r.removeFromTop(4);
-    header.setBounds(r.removeFromTop(22));
-    r.removeFromTop(4);
-    viewport.setBounds(r);
-    int w = juce::jmax(600, viewport.getWidth() - 16);
-    rows.setSize(w, rows.getHeight());
-    for (auto* x : rowList) x->setSize(w, 22);
+    tabs.setBounds(r);
 }
 
 }  // namespace fs1rplug

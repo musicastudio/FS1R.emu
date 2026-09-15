@@ -23,6 +23,8 @@ set_target_properties(fs1r_plugin_data PROPERTIES POSITION_INDEPENDENT_CODE TRUE
 target_sources(fs1r_plugin PRIVATE
     PluginProcessor.cpp
     PluginEditor.cpp
+    PanelView.cpp
+    EditorPages.cpp
     ParameterDescriptions.cpp
     PatchManager.cpp)
 

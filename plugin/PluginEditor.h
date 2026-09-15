@@ -1,12 +1,15 @@
-// PluginEditor - a working editor until tier 3 replaces it with the FS1R front panel.
+// PluginEditor - the FS1R panel reproduced across the top, expanded editor pages under it.
 //
-// Part buttons, a patch browser over the EPROM banks and .syx files, and every parameter of the
-// selected part in a searchable list with MIDI learn on the right-click menu. Deliberately plain: the
-// skinned panel is a separate job and this one only has to be usable while the engine is the subject.
+// The panel alone cannot reach 900 parameters comfortably, so the hardware sits above and the pages
+// carry the rest, switched with tabs, exactly as tier 3 of the TODO describes. The panel's own mode
+// buttons select the page, the way pressing EDIT [VOICE] takes you to the operator pages on a real
+// unit.
 #pragma once
 #include <juce_audio_processors/juce_audio_processors.h>
 #include <juce_gui_basics/juce_gui_basics.h>
 #include "PluginProcessor.h"
+#include "PanelView.h"
+#include "EditorPages.h"
 
 namespace fs1rplug {
 
@@ -19,25 +22,27 @@ public:
 
 private:
     void timerCallback() override;
-    void rebuildRows();
-    void refreshHeader();
+    void addPage(const juce::String& name, ParameterPage* page);
+    void showPage(const juce::String& name);
     void openRom();
     void loadSyx();
     void saveSyx();
 
-    class Row;
-
     Processor& proc;
-    juce::TextButton partButtons[4];
+    PanelView panel;
+    juce::TabbedComponent tabs{juce::TabbedButtonBar::TabsAtTop};
     juce::TextButton romButton, loadButton, saveButton;
-    juce::ComboBox groupBox, voiceBox, perfBox;
+    juce::ComboBox voiceBox, perfBox;
     juce::TextEditor searchBox;
-    juce::Label header;
-    juce::Viewport viewport;
-    juce::Component rows;
-    juce::OwnedArray<Row> rowList;
+    juce::OwnedArray<ParameterPage> pages;
+    juce::StringArray pageNames;
+    std::unique_ptr<AlgorithmView> algView;
+    std::unique_ptr<SpectrumView> spectrumView;
+    std::unique_ptr<EnvelopeView> ampEg, pitchEg, filterEg;
+    std::unique_ptr<FseqView> fseqView;
     std::unique_ptr<juce::FileChooser> chooser;
-    juce::String lastHeader;
+    juce::TooltipWindow tooltips{this, 600};
+    int lastPart = -1, lastAlg = -1;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(Editor)
 };

@@ -59,6 +59,10 @@ public:
     bool partActive(int part) const;
     const char* fseqName() const;
     int fseqFrames() const;                    // 0 when no Fseq is loaded
+    // One Fseq frame as its 50 raw bytes, and where playback currently is. For a display only.
+    bool fseqFrame(int step, uint8_t out[50]) const;
+    int fseqPosition() const;
+    int fseqPart() const;                      // -1 when no part is assigned
     void forceChannel(int channel);            // -1 = parts use their own receive channels
 
     // Engine self check: every sysex path, RPN/NRPN, bank select, a note. Prints failures, returns the
