@@ -106,6 +106,93 @@ static int render_wav(fs1r::Device& dev, const char* path, int note, double secs
     return 0;
 }
 
+// ------------------------------------------------------------------------------------------ MIDI file render
+// Plays a Standard MIDI File through the engine and writes the result, so the hardware capture requests
+// in captures/requests can be rendered by us and compared segment for segment with a recording of the
+// real unit. Types 0 and 1, all tracks merged, tempo changes followed.
+struct SmfEvent { double t; std::vector<uint8_t> bytes; };
+
+static bool read_smf(const char* path, std::vector<SmfEvent>& out) {
+    FILE* f = fopen(path, "rb"); if (!f) { printf("cannot open %s\n", path); return false; }
+    std::vector<uint8_t> d; uint8_t tmp[65536]; size_t n;
+    while ((n = fread(tmp, 1, sizeof tmp, f)) > 0) d.insert(d.end(), tmp, tmp + n);
+    fclose(f);
+    auto be32 = [&](size_t i) { return (uint32_t)d[i] << 24 | (uint32_t)d[i + 1] << 16 | (uint32_t)d[i + 2] << 8 | d[i + 3]; };
+    if (d.size() < 14 || memcmp(d.data(), "MThd", 4)) { printf("%s is not a MIDI file\n", path); return false; }
+    int division = d[12] << 8 | d[13];
+    if (division & 0x8000) { printf("SMPTE timing is not supported\n"); return false; }
+    // Each track is read into ticks first; tempo maps ticks to seconds afterwards, so a tempo change in
+    // one track applies to every track.
+    struct TickEvent { uint32_t tick; std::vector<uint8_t> bytes; };
+    std::vector<TickEvent> ev;
+    std::vector<std::pair<uint32_t, uint32_t>> tempo;   // tick, microseconds per quarter note
+    size_t i = 8 + be32(4);
+    while (i + 8 <= d.size()) {
+        uint32_t len = be32(i + 4);
+        size_t end = std::min(d.size(), i + 8 + (size_t)len), j = i + 8;
+        if (memcmp(&d[i], "MTrk", 4)) { i = end; continue; }
+        uint32_t tick = 0; uint8_t running = 0;
+        while (j < end) {
+            uint32_t delta = 0;
+            while (j < end) { delta = delta << 7 | (d[j] & 0x7F); if (!(d[j++] & 0x80)) break; }
+            tick += delta;
+            if (j >= end) break;
+            uint8_t st = d[j];
+            if (st == 0xFF) {                                  // meta
+                j++; uint8_t type = d[j++]; uint32_t n2 = 0;
+                while (j < end) { n2 = n2 << 7 | (d[j] & 0x7F); if (!(d[j++] & 0x80)) break; }
+                if (type == 0x51 && n2 == 3) tempo.push_back({tick, (uint32_t)d[j] << 16 | (uint32_t)d[j + 1] << 8 | d[j + 2]});
+                j += n2;
+            } else if (st == 0xF0 || st == 0xF7) {             // sysex, possibly in packets
+                j++; uint32_t n2 = 0;
+                while (j < end) { n2 = n2 << 7 | (d[j] & 0x7F); if (!(d[j++] & 0x80)) break; }
+                std::vector<uint8_t> m;
+                if (st == 0xF0) m.push_back(0xF0);
+                m.insert(m.end(), d.begin() + j, d.begin() + std::min(end, j + n2));
+                j += n2;
+                ev.push_back({tick, m});
+            } else {
+                if (st & 0x80) { running = st; j++; } else st = running;
+                int nd = ((st & 0xF0) == 0xC0 || (st & 0xF0) == 0xD0) ? 1 : 2;
+                std::vector<uint8_t> m{st};
+                for (int k = 0; k < nd && j < end; k++) m.push_back(d[j++]);
+                ev.push_back({tick, m});
+            }
+        }
+        i = end;
+    }
+    std::sort(tempo.begin(), tempo.end());
+    std::sort(ev.begin(), ev.end(), [](const TickEvent& a, const TickEvent& b) { return a.tick < b.tick; });
+    auto seconds = [&](uint32_t tick) {
+        double t = 0; uint32_t prev = 0, us = 500000;
+        for (auto& tc : tempo) {
+            if (tc.first >= tick) break;
+            t += (double)(tc.first - prev) * us / 1e6 / division;
+            prev = tc.first; us = tc.second;
+        }
+        return t + (double)(tick - prev) * us / 1e6 / division;
+    };
+    for (auto& e : ev) out.push_back({seconds(e.tick), e.bytes});
+    printf("%s: %d events, %.1f s\n", path, (int)out.size(), out.empty() ? 0.0 : out.back().t);
+    return !out.empty();
+}
+
+static int render_smf(fs1r::Device& dev, const char* smfPath, const char* wavPath, double tailSecs) {
+    std::vector<SmfEvent> ev;
+    if (!read_smf(smfPath, ev)) return 1;
+    int frames = (int)((ev.back().t + tailSecs) * SR) + 1;
+    std::vector<float> l(frames, 0.f), r(frames, 0.f);
+    int done = 0;
+    for (auto& e : ev) {
+        int at = std::min(frames, (int)(e.t * SR));
+        if (at > done) { dev.process(l.data() + done, r.data() + done, at - done); done = at; }
+        dev.sendMidi(e.bytes.data(), e.bytes.size());
+    }
+    if (done < frames) dev.process(l.data() + done, r.data() + done, frames - done);
+    write_wav(wavPath, l, r);
+    return 0;
+}
+
 // ------------------------------------------------------------------------------------------ main
 static std::string ini_path() { char p[MAX_PATH]; GetModuleFileNameA(nullptr, p, MAX_PATH); std::string s(p); size_t k = s.find_last_of("\\/"); return s.substr(0, k + 1) + "fs1r_emu.ini"; }
 static int list_midi_out() { int n = midiOutGetNumDevs(); for (int i = 0; i < n; i++) { MIDIOUTCAPSA c; midiOutGetDevCapsA(i, &c, sizeof c); printf("  %d: %s\n", i, c.szPname); } return n; }
@@ -115,7 +202,7 @@ int main(int argc, char** argv) {
     fs1r::Device dev;
     dev.setSampleRate(SR);
     int midiPort = -1, midiOutPort = -1, pick = -1, perfIdx = -1, fseqIdx = -1, channel = -1;
-    const char* syx = nullptr; const char* romPath = nullptr; const char* wav = nullptr;
+    const char* syx = nullptr; const char* romPath = nullptr; const char* wav = nullptr; const char* smf = nullptr;
     int testNote = 60, monoTime = -1; double testSecs = 3.0;
     for (int i = 1; i < argc; i++) {
         std::string a = argv[i];
@@ -139,9 +226,11 @@ int main(int argc, char** argv) {
         }
         else if (a == "-mono" && i + 1 < argc) monoTime = atoi(argv[++i]);
         else if (a == "-d" && i + 1 < argc) testSecs = atof(argv[++i]);
+        else if (a == "-smf" && i + 1 < argc) smf = argv[++i];
         else { printf("usage: fs1r_emu [-l] [-selftest] [-m midiport] [-o midiout] [-c channel] [-v file.syx [-p index]]\n"
                       "                [-r eprom.bin [-p voice] [-P performance] [-f fseq]] [-g gain]\n"
-                      "                [-w test.wav [-n note] [-n2 note] [-cc num=val] [-d seconds]] [-mono portatime]\n"); return 1; }
+                      "                [-w test.wav [-n note] [-n2 note] [-cc num=val] [-d seconds]] [-mono portatime]\n"
+                      "                [-smf file.mid -w out.wav [-d tail seconds]]\n"); return 1; }
     }
     if (romPath && !dev.loadRom(romPath)) { printf("cannot read 2 MB EPROM image %s\n", romPath); return 1; }
     if (perfIdx >= 0 && !dev.loadRomPerformance(perfIdx)) { printf("-P needs -r\n"); return 1; }
@@ -164,6 +253,7 @@ int main(int argc, char** argv) {
     for (int p = 0; p < 4; p++) if (dev.partActive(p)) printf("  part%d \"%s\" alg %d", p + 1, dev.voiceName(p), dev.algorithm(p) + 1);
     if (dev.fseqFrames()) printf("  fseq \"%s\" (%d frames)", dev.fseqName(), dev.fseqFrames());
     printf("\n");
+    if (smf) { if (!wav) { printf("-smf needs -w out.wav\n"); return 1; } return render_smf(dev, smf, wav, testSecs); }
     if (wav) return render_wav(dev, wav, testNote, testSecs);
 
     std::string ini = ini_path();

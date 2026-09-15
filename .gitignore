@@ -2,3 +2,9 @@ build/
 bin/
 *.wav
 *.obj
+
+# capture working files: the requests are tracked, recordings and analysis are not
+captures/engine/
+captures/hardware/
+captures/analysis/
+__pycache__/

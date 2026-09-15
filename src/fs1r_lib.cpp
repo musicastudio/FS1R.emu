@@ -1286,19 +1286,36 @@ struct Synth {
                 vL += pl[p] * varS[p]; vR += pr[p] * varS[p];
                 rL += pl[p] * revS[p]; rR += pr[p] * revS[p];
             }
+            // An effect block handed parameters no preset would use can run away. Left alone, one bad
+            // block poisons the master EQ and silences everything after it, so a block whose output
+            // leaves the sane range is emptied and muted for that sample instead.
+            auto sane = [](FxBlock& blk, double& a, double& b) {
+                if (!(a > -1e6 && a < 1e6) || !(b > -1e6 && b < 1e6)) { blk.clearState(); a = b = 0.0; }
+            };
             double oL, oR;
             fx.ins.process(iL, iR, oL, oR);
+            sane(fx.ins, oL, oR);
             dL += oL * insLvl; dR += oR * insLvl;
             vL += oL * insVar; vR += oR * insVar;
             rL += oL * insRev; rR += oR * insRev;
             fx.var.process(vL, vR, oL, oR);
+            sane(fx.var, oL, oR);
             rL += oL * varRev; rR += oR * varRev;
             double l = dL + oL * varRet * vpl, r = dR + oR * varRet * vpr;
             fx.rev.process(rL, rR, oL, oR);
+            sane(fx.rev, oL, oR);
             l += oL * revRet * rpl; r += oR * revRet * rpr;
+            if (!(l > -1e6 && l < 1e6) || !(r > -1e6 && r < 1e6)) {
+                for (auto& q : fx.eq) q.reset();
+                l = r = 0.0;
+            }
             fx.master(l, r);
             l *= gain * pvol; r *= gain * pvol;
             l = l / (1.0 + fabs(l) * 0.5); r = r / (1.0 + fabs(r) * 0.5);
+            // An effect block given parameters no preset would use can run away or go non-finite. The
+            // engine is a plugin: whatever happens upstream, it must not hand the host a NaN.
+            if (!(l > -2.0 && l < 2.0)) l = 0.0;
+            if (!(r > -2.0 && r < 2.0)) r = 0.0;
             outL[i] = (float)l; outR[i] = (float)r;
         }
     }
