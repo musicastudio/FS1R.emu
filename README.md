@@ -1,5 +1,7 @@
 # FS1R.emu
 
+![The FS1R.emu standalone running](docs/standalone.png)
+
 The Yamaha FS1R as a plugin and a console synth: its firmware logic rewritten in C++ from the decompiled ROM, four parts, 32 channels, the filter, both LFOs, pan, the three effect blocks, performances and Fseq playback. VST3, CLAP and standalone, with the front panel as the GUI.
 
 Download the latest build: **https://github.com/musicastudio/FS1R.emu/releases/latest** (no installer, no dependencies).
