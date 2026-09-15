@@ -320,7 +320,10 @@ struct Part {
     // controller state (MIDI)
     int bend = 0;            // (msb - 64) * 16, the firmware keeps the MSB only
     int expr = 254;          // DAT_010297fa
-    int src[14] = {};        // controller sources KN1-4 MC1-4 FC BC MW CAT PAT PB, 0..127
+    // Controller sources in the firmware's own bit order (FUN_000191C0): KN1-4, MC1, MC2, PB, CAT,
+    // PAT, FC, BC, MC3, MW, MC4. The knobs and MIDI controls are stored bipolar as (v - 64) * 2, the
+    // physical controllers as the raw value, so the range is -128..127 either way.
+    int src[14] = {};
     int held[32]; int nheld = 0; int lastPitch = -1;   // mono handling and portamento start
     int rpnM = 127, rpnL = 127; bool nrpnSel = false;   // RPN / NRPN selection state
     bool sustain = false;
@@ -353,7 +356,8 @@ struct EG {                      // amplitude EG on the chip: hold, 4 segments. 
     static double lvl_db(int a) { return a >= 63 ? -200.0 : -cal::EG_LEVEL_DB * a; }   // 6-bit attenuation (LEVTAB >> 1), 1.5 dB per step INFERRED
     void start(const int* lv, const int* rt, int h, int rateScale) {
         for (int i = 0; i < 4; i++) { L[i] = lv[i]; R[i] = rt[i]; } hold = h; rs = rateScale; cur = lvl_db(L[3]); stage = 0;
-        holdLeft = h ? rate_secs(std::min(63, std::min(egrate(h) + 4, 0x3E) + rs)) * SR : 0;   // firmware: hold rate + 4 capped 0x3E
+        int hr = egrate(h); if (hr < 0x3F) hr = std::min(hr + 4, 0x3E);   // FUN_00019414: +4 only below 0x3F
+        holdLeft = h ? rate_secs(std::min(63, hr + rs)) * SR : 0;
         if (holdLeft < 1) next(1);
     }
     void next(int s) {
@@ -448,30 +452,100 @@ struct Synth {
     static inline double sendlvl(int v) { return db2lin(-LEVEL_DB * SENDTAB[clampi(v, 0, 127)]); }
 
     // ---------------------------------------------------------------- per-part derived values
-    int ctrl_offset(int part, int dest) const {          // controller sets -> offset on the 0..255 scale (INFERRED scaling: value*depth/64)
-        int sum = 0;
-        for (int s = 0; s < 8; s++) {
-            if (!(perf.c[0x28 + s] & (1 << part))) continue;
-            if ((perf.c[0x40 + s] & 0x3F) != dest) continue;
-            int bits = perf.c[0x30 + 2 * s] << 7 | perf.c[0x31 + 2 * s]; int depth = perf.c[0x48 + s] - 64;
-            for (int b = 0; b < 14; b++) if (bits & (1 << b)) sum += (perf.part[part].src[b] * depth) >> 6;   // source bit order: KN1..MC4, FC, BC, MW, CAT, PAT, PB (assumed)
-        }
+    // ---------------------------------------------------------------- controller sets (FUN_00014DDC)
+    // Each of the eight sets sums the sources its 14-bit bitmap enables, then hands the sum and the
+    // set's depth to a per-destination handler out of the table at flash 0x3DC04. There are three
+    // scalers, and which one a destination uses is exactly the split the owner's manual describes:
+    // destinations that "overwrite the edit buffer" edit a part byte, destinations that "directly
+    // control the tone generator" return a signed offset.
+    //   FUN_00016F9C  clamp((v' * d' * 2) >> 6, -128, 127)             destinations 1-16 and 34-47
+    //   FUN_00016F58  clamp(base + ((v' * d' * 2) >> 7), 0, 127)       destinations 18 and 21-33
+    //   FUN_00017032  clamp(base + adj((v' * d' * 2) >> 6), 0, 127)    destinations 17, 19, 20
+    // with v' = v + (v > 0), d' = d + (d > 0), and adj taking one off a positive result.
+    // The part switch at performance common 0x28 + n gates destinations 17-45 only; 1-16 (the insertion
+    // parameters and its sends) and 46-47 (the Fseq) are performance-wide and ignore it.
+    static int ctrl_bias(int v) { return v + (v > 0 ? 1 : 0); }
+    static int scale_f9c(int v, int d) { return clampi((ctrl_bias(v) * ctrl_bias(d) * 2) >> 6, -128, 127); }
+    static int scale_f58(int v, int d, int base) { return clampi(base + ((ctrl_bias(v) * ctrl_bias(d) * 2) >> 7), 0, 127); }
+    static int scale_f032(int v, int d, int base) {
+        int r = clampi((ctrl_bias(v) * ctrl_bias(d) * 2) >> 6, -128, 32767);
+        if (r > 0) r = std::min(r - 1, 127);
+        return clampi(base + r, 0, 127);
+    }
+    // The sum for one set: walk the bitmap from bit 0 up, clamping to a signed byte after each source.
+    int ctrl_set_sum(int part, int set) const {
+        int bits = perf.c[0x30 + 2 * set] << 7 | perf.c[0x31 + 2 * set], sum = 0;
+        for (int b = 0; b < 14; b++) if (bits & (1 << b)) sum = clampi(sum + perf.part[part].src[b], -128, 127);
         return sum;
+    }
+    bool ctrl_set_active(int part, int set, int dest) const {
+        int d = perf.c[0x40 + set] & 0x3F;
+        if (!d || d >= 0x30 || d != dest) return false;
+        if (dest >= 17 && dest <= 45 && !(perf.c[0x28 + set] & (1 << part))) return false;
+        return true;
+    }
+    // A "direct" destination: the sets that select it contribute signed offsets, which compose.
+    int ctrl_offset(int part, int dest) const {
+        int sum = 0;
+        for (int s = 0; s < 8; s++)
+            if (ctrl_set_active(part, s, dest))
+                sum += scale_f9c(ctrl_set_sum(part, s), perf.c[0x48 + s] - 64);
+        return sum;
+    }
+    // A destination that edits a part byte: the firmware writes the byte, so the last set that selects
+    // it wins rather than the offsets adding up.
+    int ctrl_part(int part, int dest, int stored) const {
+        bool wide = dest == 17 || dest == 19 || dest == 20;     // volume and the two sends use FUN_00017032
+        for (int s = 7; s >= 0; s--)
+            if (ctrl_set_active(part, s, dest)) {
+                int v = ctrl_set_sum(part, s), d = perf.c[0x48 + s] - 64;
+                return wide ? scale_f032(v, d, stored) : scale_f58(v, d, stored);
+            }
+        return clampi(stored, 0, 127);
+    }
+    // Destination 34 is its own shape: the depth is the bend range in semitones, not a scaler
+    // (ctrlDest_34, and the manual: "if Vcn depth is set to +2 the maximum control value is +2
+    // semitones"). The summed source drives it like a bend wheel.
+    int ctrl_pitch_bias(int part) const {
+        int w = 0;
+        for (int s = 0; s < 8; s++) {
+            if (!ctrl_set_active(part, s, 34)) continue;
+            int v = ctrl_set_sum(part, s), d = clampi(perf.c[0x48 + s] - 64, -24, 24);
+            int b = BENDTAB[std::abs(d)];
+            if (d < 0) b = -b;
+            w += (b * (v == 0x7F ? 0x80 : v)) >> 7;
+        }
+        return w;
+    }
+    // Destination 35 writes one per-part value that event 0x205 then scales by each operator's own EG
+    // bias sense: ~((|scaled| + table[|depth|]) * 2), the table being flash 0x3DDC4 (ctrlDest_35).
+    int ctrl_eg_bias(int part) const {
+        static const short DEPTHTERM[32] = {127, 119, 115, 111, 107, 103, 99, 95, 91, 87, 83, 79, 75, 71, 67, 63,
+                                            59, 55, 51, 47, 43, 39, 35, 31, 27, 23, 19, 15, 11, 7, 3, 0};
+        int out = 255;
+        for (int s = 0; s < 8; s++) {
+            if (!ctrl_set_active(part, s, 35)) continue;
+            int d = perf.c[0x48 + s] - 64;
+            int r = (std::abs(scale_f9c(ctrl_set_sum(part, s), d)) + DEPTHTERM[std::min(31, std::abs(d))]) * 2;
+            if (r > 0xFD) r = 0xFF;
+            out = std::min(out, (~r) & 0xFF);
+        }
+        return out;
     }
     int bend_word(const Part& pt) const {                // FUN_00020194 + pitch bias controller (dest 34)
         int b = pt.bend; int r = (b < 0 ? pt.p[0x27] : pt.p[0x26]) - 0x40; int v;
         if (r < 0) { v = BENDTAB[std::min(48, -r)]; if (b >= 0) v = -v; } else { v = BENDTAB[std::min(48, r)]; if (b < 0) v = -v; }
         int k = b >> 3; if (k == 0x7F) k = 0x80;
         int w = (v * k) >> 7;
-        int bias = clampi(ctrl_offset((int)(&pt - perf.part), 34) / 4, -24, 24);
-        w += bias < 0 ? -BENDTAB[-bias] : BENDTAB[bias];
+        w += ctrl_pitch_bias((int)(&pt - perf.part));
         return w;
     }
     void part_levels(int part, int& vAtt, int& uAtt) const {   // FUN_00020044 -> registers 0x228/0x229 (+0x10 dropped here)
         const Part& pt = perf.part[part];
-        int expr = clampi(pt.expr + ctrl_offset(part, 17), 0, 254);
-        int u1 = ((pt.p[0x0B] + 1) * expr) >> 8; int iu = u1 + 1, iv = u1 + 1;
-        int bal = clampi(pt.p[0x0A] + ctrl_offset(part, 31) / 2, 0, 127);
+        int expr = clampi(pt.expr, 0, 254);
+        int vol = ctrl_part(part, 17, pt.p[0x0B]);
+        int u1 = ((vol + 1) * expr) >> 8; int iu = u1 + 1, iv = u1 + 1;
+        int bal = ctrl_part(part, 31, pt.p[0x0A]);
         if (bal < 0x40) iu = ((u1 + 2) * bal) >> 6; else if (bal > 0x40) iv = ((u1 + 2) * ((bal ^ 0x7F) + 1)) >> 6;
         vAtt = VNBAL[clampi(iv, 0, 127)]; uAtt = VNBAL[clampi(iu, 0, 127)];
     }
@@ -575,7 +649,8 @@ struct Synth {
     // formant transpose words (FUN_00013bc6), bandwidth registers (FUN_0001ba06), EG rates with part offsets
     void setup_ops(Chan& C, const Part& pt, int vel) {
         const Voice& V = pt.voice; int n = C.noteP; int pm = C.pitchNote - 0x53AA; int part = C.part;
-        int ctrlV = ctrl_offset(part, 37), ctrlU = ctrl_offset(part, 38), ctrlBias = clampi(ctrl_offset(part, 35), 0, 255);
+        int ctrlV = ctrl_offset(part, 37), ctrlU = ctrl_offset(part, 38), ctrlBias = ctrl_eg_bias(part);
+        int ctrlFreq = ctrl_offset(part, 36);                 // frequency bias, FUN_0001B334
         int band = (C.pitchNote >> 8) + 10; band = band < 0x50 ? 0 : band < 0x70 ? ((band ^ 0x10) & 0x1F) : 0x1F;
         int fv = (fseq.valid && fseqPart == part) ? V.fseqV : 0, fu = (fseq.valid && fseqPart == part) ? V.fseqU : 0;
         for (int o = 0; o < 8; o++) {
@@ -602,8 +677,11 @@ struct Synth {
             auto bias = [&](int s) { if (!s) return 0; int idx = s < 0 ? 255 - ctrlBias : ctrlBias; return std::min(255, (std::abs(s) * EGBIAS[idx]) >> 3); };
             C.egbias[o] = bias(v.egbias); C.uegbias[o] = bias(u.egbias);
             // frequency words
-            if (v.form == 7 || v.fixed) C.freqWord[o] = 8 * (v.coarse * 128 + v.fine) + 0x28ED + keytrack(v.notescale, pm) + fvs_term(v.fmsb, vel);
-            else C.freqWord[o] = 0x1243 + COARSE[v.coarse] + FINE[std::min(99, v.fine)];
+            // frequency bias: the per-op sense (voice op 0x1F bits 6-3, -7..+7) times the controller,
+            // as a 16-bit product shifted down by two (FUN_0001B334)
+            int fb = (v.fbias - 7) ? (int16_t)(ctrlFreq * (v.fbias - 7) * 0x10) >> 2 : 0;
+            if (v.form == 7 || v.fixed) C.freqWord[o] = 8 * (v.coarse * 128 + v.fine) + 0x28ED + keytrack(v.notescale, pm) + fvs_term(v.fmsb, vel) + fb;
+            else C.freqWord[o] = 0x1243 + COARSE[v.coarse] + FINE[std::min(99, v.fine)] + fb;
             C.ufreqWord[o] = std::min(0x7F00, ((u.coarse & 0x1F) * 256 + u.fine * 2) * 4 + 0x28ED + keytrack(u.notescale, pm) + fvs_term(u.fmsb, vel));
             // formant transpose word (register 0x230): 0x1243 + TRANS + note dependent detune for frmt ops, else the raw byte 6
             if (v.form == 7) {
@@ -616,7 +694,10 @@ struct Synth {
             int ubo = BWBIAS[u.bwbias & 0xF] ? clampi((ctrlU * BWBIAS[u.bwbias & 0xF]) >> 3, -128, 127) : 0;
             C.ubwReg[o] = clampi(eb70(u.bw) + ubo, 0, 127);
             // EG registers: levels LEVTAB >> 1, rates ((99-T)*0xA4)>>8, part EG offsets on attack/decay/release (assumed T1/T2/T4)
-            int offs[4] = {pt.p[0x1A] - 64, pt.p[0x1B] - 64, 0, pt.p[0x1C] - 64};
+            // FUN_00019414 walks the part's EG bytes 0x1A, 0x1B, 0x1B, 0x1C against voice times T1-T4,
+            // so the decay offset reaches both T2 and T3, not T2 alone.
+            int atk = ctrl_part(part, 24, pt.p[0x1A]), dec = ctrl_part(part, 25, pt.p[0x1B]), rel = ctrl_part(part, 26, pt.p[0x1C]);
+            int offs[4] = {atk - 64, dec - 64, dec - 64, rel - 64};
             for (int i = 0; i < 4; i++) {
                 C.egL[o][i] = LEVTAB[std::min(99, v.L[i])] >> 1; C.egR[o][i] = egrate(v.T[i] + offs[i]);
                 C.uegL[o][i] = LEVTAB[std::min(99, u.L[i])] >> 1; C.uegR[o][i] = egrate(u.T[i] + offs[i]);
@@ -630,9 +711,11 @@ struct Synth {
         C.velP = V.pegVel ? vel + 1 : 128;        // firmware overrides the graded PEGVEL table with this (see docs)
         int Lp[5], Tp[5];
         for (int i = 0; i < 5; i++) Lp[i] = V.pegL[i];
-        Lp[0] = clampi(Lp[0] + pt.p[0x20] - 64, 0, 100); Lp[4] = clampi(Lp[4] + pt.p[0x22] - 64, 0, 100);
+        Lp[0] = clampi(Lp[0] + ctrl_part(C.part, 27, pt.p[0x20]) - 64, 0, 100);
+        Lp[4] = clampi(Lp[4] + ctrl_part(C.part, 29, pt.p[0x22]) - 64, 0, 100);
         Tp[0] = 255; for (int i = 0; i < 4; i++) Tp[i + 1] = V.pegT[i];
-        Tp[1] = clampi(Tp[1] + pt.p[0x21] - 64, 0, 99); Tp[4] = clampi(Tp[4] + pt.p[0x23] - 64, 0, 99);
+        Tp[1] = clampi(Tp[1] + ctrl_part(C.part, 28, pt.p[0x21]) - 64, 0, 99);
+        Tp[4] = clampi(Tp[4] + ctrl_part(C.part, 30, pt.p[0x23]) - 64, 0, 99);
         for (int i = 0; i < 5; i++) {
             int w = ((int)PEGLVL[clampi(Lp[i], 0, 100)] - 128) << 7;
             w = (w * C.velP) >> 7; if (V.pegRange) w >>= V.pegRange + 1;
@@ -695,7 +778,7 @@ struct Synth {
             int sens = perf.c[0x22] & 7;
             ratio = clampi(ratio, 100, 5000);
             if (sens && ratio > 100) { int x = ((ratio - 100) * sens * (127 - vel)) / 7 / 127; ratio = clampi(ratio - x, 100, 5000); }
-            ratio = clampi(ratio + ctrl_offset(fseqPart, 46) * 8, 100, 5000);
+            ratio = clampi(ratio + ((ctrl_offset(fseqPart, 46) * 0x1324) >> 7), 100, 5000);   // ctrlDest_46
             double counts = (double)VELW[clampi(fseq.speedAdj, 0, 127)] * 84.0 * 1000.0 / ratio + 2884.0;
             fseqPeriod = counts * 32.0 / CPU_HZ;           // CMT1 at clock/32
         }
@@ -726,8 +809,8 @@ struct Synth {
         if (!fseqRun || !fseq.valid) return;
         if (fseqDelay > 0) { fseqDelay -= dt; if (fseqDelay > 0) return; }
         if ((perf.c[0x21] & 3) == 1) {                     // scratch: the controller is the transport
-            int v = clampi(ctrl_offset(fseqPart, 47), 0, 127);
-            fseqStep = clampi(v * fseq.endStep / 127, 0, fseq.endStep);
+            int v = clampi(ctrl_offset(fseqPart, 47), -128, 127);       // ctrlDest_47, a signed byte
+            fseqStep = clampi(((v + 128) * fseq.endStep) / 255, 0, fseq.endStep);
             return;
         }
         if (fseqClock) return;                             // MIDI clock drives it from midi_clock()
@@ -810,7 +893,7 @@ struct Synth {
         C.regPitch = C.portaCur + (C.pegCur >> 2) + bend_word(pt) + fseqPitch;
         C.regC0 = (C.pitchNote >> 8) + 10;
         int fade = C.lfoFade >> 8;
-        int pmd = clampi(eb86(clampi(V.pmd + pt.p[0x16] - 64, 0, 99)) + ctrl_offset(part, 39), 0, 255);
+        int pmd = clampi(eb86(clampi(V.pmd + pt.p[0x16] - 64, 0, 99)) + ctrl_offset(part, 39) * 2, 0, 255);   // ctrlDest_39 doubles it
         C.regPM = clampi((C.lfoVal * ((pmd * fade) >> 8 & 0xFF)) >> 4, -0x7FF, 0x7FF);
         int fmd = clampi(eb86(V.fmd) + ctrl_offset(part, 41), 0, 255);
         C.regFM = clampi((C.lfoVal * ((fmd * fade) >> 8 & 0xFF)) >> 4, -0x7FF, 0x7FF);
@@ -823,13 +906,15 @@ struct Synth {
             if (s & 0x40) mul = ((s & 0x3F) + 1) * VELW[VELCURVE[fseqVel] & 0x7F]; else mul = ((~s) & 0x3F) * VELW[127 - (VELCURVE[fseqVel] & 0x7F)];
             lvVel = (~(mul >> 6)) & 0xFF;
         }
-        int trackOff = fseq.pitchMode == 0 ? C.pitchNote - NOTETAB[fseq.noteAssign & 0x7F] : 0;   // formant tracking of the key (assumed from FUN_000127fc)
+        // No formant tracking term: FUN_000127FC applies the whole key-to-Fseq difference to the channel
+        // pitch (the fseqPitch above, whose constants it confirms exactly) and nothing shifts the frame's
+        // formant frequencies. Formants staying put while the fundamental moves is the point of the format.
         for (int o = 0; o < 8; o++) {
             int l = C.levelOff[o], ul = C.ulevelOff[o];
             if (fseqRun && fseqPart == part && fseq.valid) {
                 const uint8_t* f = fseq.frame[fseqStep]; int t = V.v[o].fseqtrk;
-                if (C.fseqOp[o]) { l = f[0x12 + t] << 1; if (lvVel != 0x80) l = (~(((~l) & 0xFF) * lvVel >> 8)) & 0xFF; C.fqWord[o] = f[2 + t] * 256 + f[0xA + t] * 2 + trackOff; }
-                if (C.fseqUOp[o]) { ul = f[0x2A + t] << 1; if (lvVel != 0x80) ul = (~(((~ul) & 0xFF) * lvVel >> 8)) & 0xFF; C.fquWord[o] = f[0x1A + t] * 256 + f[0x22 + t] * 2 + trackOff; }
+                if (C.fseqOp[o]) { l = f[0x12 + t] << 1; if (lvVel != 0x80) l = (~(((~l) & 0xFF) * lvVel >> 8)) & 0xFF; C.fqWord[o] = f[2 + t] * 256 + f[0xA + t] * 2; }
+                if (C.fseqUOp[o]) { ul = f[0x2A + t] << 1; if (lvVel != 0x80) ul = (~(((~ul) & 0xFF) * lvVel >> 8)) & 0xFF; C.fquWord[o] = f[0x1A + t] * 256 + f[0x22 + t] * 2; }
             }
             C.regLevel[o] = clampi(l + C.egbias[o] + C.vcLvl[o][0], 0, 255);
             C.regULevel[o] = clampi(ul + C.uegbias[o] + C.vcLvl[o][1], 0, 255);
@@ -845,7 +930,7 @@ struct Synth {
     void voice_ctrl(Chan& C, const Part& pt) {
         memset(C.vcLvl, 0, sizeof C.vcLvl); memset(C.vcFreq, 0, sizeof C.vcFreq); memset(C.vcBw, 0, sizeof C.vcBw);
         const uint8_t* b = pt.voice.raw;
-        int src[2] = {(pt.p[0x1D] - 64) + ctrl_offset(C.part, 32), (pt.p[0x1E] - 64) + ctrl_offset(C.part, 33)};
+        int src[2] = {ctrl_part(C.part, 32, pt.p[0x1D]) - 64, ctrl_part(C.part, 33, pt.p[0x1E]) - 64};
         for (int k = 0; k < 10; k++) {
             int d = b[k < 5 ? 0x40 + k : 0x4A + (k - 5)];
             int dep = (int)b[k < 5 ? 0x45 + k : 0x4F + (k - 5)] - 64;
@@ -860,9 +945,9 @@ struct Synth {
     // registers 0x22A-0x22F: the pan index (part pan, pan scaling, pan LFO, performance pan, the Panpot
     // controller) read through the firmware's own pan tables as a 0.375 dB attenuation per side.
     void refresh_pan(Chan& C, const Part& pt) {
-        int idx = C.panBase + ((clampi(pt.p[0x28], 0, 100) - 50) * (C.noteP - 60)) / 48;   // pan scaling: -50..+50, pan by key around C3
+        int base = pt.p[0x0E] ? ctrl_part(C.part, 18, pt.p[0x0E]) - 1 : C.panBase;         // Panpot edits the part byte
+        int idx = base + ((clampi(pt.p[0x28], 0, 100) - 50) * (C.noteP - 60)) / 48;        // pan scaling: -50..+50, pan by key around C3
         idx += (C.lfoVal * clampi(pt.p[0x29], 0, 99) * (int)(C.lfoFade >> 8)) >> 16;       // pan LFO depth, faded in, LFO1
-        idx += ctrl_offset(C.part, 18) / 4;                                            // Panpot controller
         if (perf.c[0x11]) idx += perf.c[0x11] - 64;                                    // performance pan
         idx = clampi(idx, 0, 127);
         C.panL = db2lin(-LEVEL_DB * PANL[idx]); C.panR = db2lin(-LEVEL_DB * PANR[idx]);
@@ -870,15 +955,15 @@ struct Synth {
     void refresh_filter(Chan& C, const Part& pt) {
         if (!C.fltOn) return;
         const Voice& V = pt.voice; int part = C.part;
-        double cut = V.fltCut + (pt.p[0x18] - 64) + ctrl_offset(part, 21) / 2.0;
+        double cut = V.fltCut + (ctrl_part(part, 21, pt.p[0x18]) - 64);
         cut += (V.fltKsDepth * (C.noteP - clampi(V.fltKsPoint, 0, 127))) / 64.0;       // cutoff key scaling
-        int egd = V.fegDepth + (pt.p[0x1F] - 64) + ctrl_offset(part, 23) / 2 + ((V.fltEgVel * (C.vel - 64)) >> 4);
+        int egd = V.fegDepth + (ctrl_part(part, 23, pt.p[0x1F]) - 64) + ((V.fltEgVel * (C.vel - 64)) >> 4);
         cut += C.feg.cur * egd / 50.0;                                                 // filter EG, levels 0..100 around 50
         int fade = C.lfoFade >> 8;
         cut += C.lfoVal * eb86(clampi(V.fltLfo1, 0, 99)) * fade / 4194304.0 * 64.0;    // LFO1 filter mod
         cut += C.lfo2Val * eb86(clampi(V.fltLfo2 + pt.p[0x2F] - 64, 0, 99)) / 16384.0 * 64.0;   // LFO2 filter mod
         cut += (ctrl_offset(part, 42) + ctrl_offset(part, 44)) / 4.0;
-        int reso = V.fltReso + (pt.p[0x19] - 64) + ctrl_offset(part, 22) / 2 + ((V.fltResoVel * (C.vel - 64)) >> 4);
+        int reso = V.fltReso + (ctrl_part(part, 22, pt.p[0x19]) - 64) + ((V.fltResoVel * (C.vel - 64)) >> 4);
         C.flt.setup(C.fltType, cut_hz(cut), reso_q(reso));
     }
     void tick() {
@@ -897,9 +982,25 @@ struct Synth {
     int forceChannel = -1;                       // console -c: every part listens on this channel
     double senseTimer = 0;                       // active sensing: mute if 0xFE stops arriving
     int bankMsb = 0x3F, perfBank = -1;
-    int ccSource(int cc) const {                 // system 0x16-0x1F map CC numbers to KN1-4 MC1-4 FC BC
-        for (int i = 0; i < 10; i++) if (sys[0x16 + i] == cc) return i;
-        return cc == 1 ? 10 : -1;                // MW is always CC1; CAT/PAT/PB are not control changes
+    // FUN_000191C0 fills the source table from the system control numbers, in this order. The four knob
+    // slots are disabled when the system's knob receive switch is off.
+    enum { SRC_KN1, SRC_KN2, SRC_KN3, SRC_KN4, SRC_MC1, SRC_MC2, SRC_PB, SRC_CAT,
+           SRC_PAT, SRC_FC, SRC_BC, SRC_MC3, SRC_MW, SRC_MC4 };
+    static const int SRC_RAW = 0x17C0;           // PB, CAT, PAT, FC, BC, MW keep the raw 0..127 value
+    int ccSource(int cc) const {
+        static const int sysOf[14] = {0x16, 0x17, 0x18, 0x19, 0x1A, 0x1B, -1, -1, -1, 0x1E, 0x1F, 0x1C, -2, 0x1D};
+        for (int i = 0; i < 14; i++) {
+            if (sysOf[i] == -2) { if (cc == 1) return i; continue; }
+            if (sysOf[i] < 0) continue;
+            if (i < 4 && !sys[0x14]) continue;   // knob receive switch off
+            if (sys[sysOf[i]] == cc) return i;
+        }
+        return -1;
+    }
+    // FUN_00014AD0: (v - 64) * 2 for the knobs and MIDI controls, raised so full scale reaches 127;
+    // the physical controllers are stored as they come.
+    void set_source(Part& pt, int slot, int v) {
+        pt.src[slot] = (SRC_RAW & (1 << slot)) ? v : ((v - 64) * 2 == 126 ? 127 : (v - 64) * 2);
     }
     bool part_listens(int p, int chn) const {
         int rc = perf.part[p].rcv();
@@ -927,9 +1028,9 @@ struct Synth {
             switch (st) {
             case 0x90: if (d2) { note_on(p, d1, d2); fseq_keys(); break; }   // velocity 0 falls through
             case 0x80: note_off(p, d1); fseq_keys(); break;
-            case 0xA0: pt.src[12] = d2; break;
-            case 0xD0: pt.src[11] = d1; break;
-            case 0xE0: pt.bend = (d2 - 64) * 16; pt.src[13] = d2; break;
+            case 0xA0: pt.src[SRC_PAT] = d2; break;
+            case 0xD0: pt.src[SRC_CAT] = d1; break;
+            case 0xE0: pt.bend = (d2 - 64) * 16; pt.src[SRC_PB] = d2 - 64; break;
             case 0xC0: if (rom_ready(rom) && sys[0x13] && pt.p[1] && sys[8]) { pt.p[2] = (uint8_t)d1; rom_voice(*rom, bank_voice_index(pt.p[1], d1), pt.voice); } break;
             case 0xB0: control_change(p, d1, d2); break;
             }
@@ -938,7 +1039,7 @@ struct Synth {
     void control_change(int p, int cc, int v) {
         Part& pt = perf.part[p];
         int src = ccSource(cc);
-        if (src >= 0) { pt.src[src] = v; return; }
+        if (src >= 0) { set_source(pt, src, v); return; }
         if (cc == sys[0x20]) { pt.p[0x1D] = (uint8_t)v; return; }    // Formant knob control number
         if (cc == sys[0x21]) { pt.p[0x1E] = (uint8_t)v; return; }    // FM knob control number
         switch (cc) {
@@ -1141,7 +1242,8 @@ struct Synth {
         for (int p = 0; p < 4; p++) {
             const uint8_t* q = perf.part[p].p;
             insSw[p] = (q[0x14] & 1) != 0;
-            dry[p] = sendlvl(q[0x11]); varS[p] = sendlvl(q[0x12]); revS[p] = sendlvl(q[0x13]);
+            dry[p] = sendlvl(q[0x11]);
+            varS[p] = sendlvl(ctrl_part(p, 20, q[0x12])); revS[p] = sendlvl(ctrl_part(p, 19, q[0x13]));
         }
         sense_tick(frames / (double)SR);
         for (int i = 0; i < frames; i++) {
@@ -1392,7 +1494,47 @@ static int selftest(Synth& S) {
     S.midi_in(0xB0, 126, 0); ck("mono mode", S.perf.part[0].p[5] == 0);
     S.midi_in(0xB0, 127, 0); ck("poly mode", S.perf.part[0].p[5] == 1);
 
-    // 5. notes still sound and stop
+    // 5. the controller matrix (FUN_00016F9C / F58 / 17032 and the source order in FUN_000191C0)
+    ck("scaler f9c centre", Synth::scale_f9c(0, 0) == 0);
+    ck("scaler f9c full", Synth::scale_f9c(127, 63) == 127);          // (128 * 64 * 2) >> 6 saturates
+    ck("scaler f9c half", Synth::scale_f9c(64, 16) == 34);            // (65 * 17 * 2) >> 6
+    ck("scaler f9c negative", Synth::scale_f9c(-128, 63) == -128);
+    ck("scaler f9c inverted", Synth::scale_f9c(64, -16) == -33);      // a negative depth takes no bias
+    ck("scaler f58 adds to the byte", Synth::scale_f58(64, 16, 64) == 64 + 17);
+    ck("scaler f58 clamps low", Synth::scale_f58(-128, 63, 10) == 0);
+    ck("scaler f58 clamps high", Synth::scale_f58(127, 63, 100) == 127);
+    ck("scaler 17032 is f58 doubled less one", Synth::scale_f032(64, 16, 0) == 33);
+    {
+        Synth& T = S;
+        memset(T.perf.c + 0x28, 0, 0x28);
+        T.perf.c[0x28] = 0x0F;                                        // set 1 on for every part
+        T.perf.c[0x30] = 0; T.perf.c[0x31] = 1 << Synth::SRC_KN1;     // source KN1
+        T.perf.c[0x40] = 37;                                          // destination: voiced band width
+        T.perf.c[0x48] = 64 + 32;                                     // depth +32
+        memset(T.perf.part[0].src, 0, sizeof T.perf.part[0].src);
+        ck("no source, no offset", T.ctrl_offset(0, 37) == 0);
+        T.set_source(T.perf.part[0], Synth::SRC_KN1, 127);
+        ck("KN1 is bipolar", T.perf.part[0].src[Synth::SRC_KN1] == 127);
+        T.set_source(T.perf.part[0], Synth::SRC_KN1, 64);
+        ck("KN1 centre is zero", T.perf.part[0].src[Synth::SRC_KN1] == 0);
+        T.set_source(T.perf.part[0], Synth::SRC_KN1, 0);
+        ck("KN1 bottom is -128", T.perf.part[0].src[Synth::SRC_KN1] == -128);
+        T.set_source(T.perf.part[0], Synth::SRC_MW, 100);
+        ck("the wheel keeps its raw value", T.perf.part[0].src[Synth::SRC_MW] == 100);
+        T.set_source(T.perf.part[0], Synth::SRC_KN1, 127);
+        ck("offset follows the source", T.ctrl_offset(0, 37) == Synth::scale_f9c(127, 32));
+        ck("another destination stays clear", T.ctrl_offset(0, 38) == 0);
+        T.perf.c[0x28] = 0x0E;                                        // part 1 switched out of the set
+        ck("the part switch gates it", T.ctrl_offset(0, 37) == 0);
+        T.perf.c[0x40] = 46;                                          // Fseq speed is performance-wide
+        ck("a global destination ignores the part switch", T.ctrl_offset(0, 46) != 0);
+        T.perf.c[0x28] = 0x0F; T.perf.c[0x40] = 21;                   // filter cutoff edits the part byte
+        ck("a part-byte destination lands on the byte",
+           T.ctrl_part(0, 21, 64) == Synth::scale_f58(127, 32, 64));
+        memset(T.perf.c + 0x28, 0, 0x28);
+    }
+
+    // 6. notes still sound and stop
     S.midi_in(0x90, 60, 100);
     int live = 0; for (auto& c : S.ch) if (c.active) live++;
     ck("note on allocated a channel", live > 0);

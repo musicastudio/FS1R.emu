@@ -101,6 +101,9 @@ is firmware behaviour.
      and `fvs = +-((v' - 64) * FVSTAB[sens]) >> 3`. Unvoiced: same as fixed, saturated at 0x7F00.
    - formant transpose word for frmt ops: `0x1243 + TRANS[transpose] + FRMDET[detune band][pitch band]`, pitch band
      from `(pitch >> 8) + 10` (0 below 0x50, `(x ^ 0x10) & 0x1F` up to 0x70, else 31), detune below 15 negated.
+6b. EG times (FUN_00019414): the part's EG bytes 0x1A, 0x1B, 0x1B, 0x1C are walked against the voice's
+   T1-T4, so the **decay offset reaches both T2 and T3**; each is `clamp((offset - 0x40) + T, 0, 99)`
+   before the rate conversion. The hold rate gets +4 capped at 0x3E only when it is below 0x3F.
 7. Pitch EG (FUN_00026C5A): levels `(PEGLVL[L] - 128) << 7`, times `PEGTIME[T]`; part PEG offsets apply to L0, L4,
    T1, T4. velP = 128 when the velocity sensitivity is 0, else `v' + 1` (the graded PEGVEL table is computed by event
    0x218 and then overwritten). Level = `(word * velP >> 7) >> (range ? range + 1 : 0)`, rate =
@@ -134,6 +137,60 @@ Registers refreshed from those (FUN_0002C798, FUN_0002C214, FUN_0002AD72, FUN_00
 - Bend word (FUN_00020194): `BENDTAB[|range|] * sign * (bend >> 3) >> 7`, range high for up, low for down, bend =
   (MSB - 64) * 16.
 
+## Controller sets (FUN_00014DDC, FUN_00014AD0, FUN_000191C0)
+
+The performance's eight controller sets live at common 0x28-0x4F: part switch (0x28 + n), a 14-bit
+source bitmap (0x30 + 2n high, 0x31 + 2n low), destination (0x40 + n) and depth (0x48 + n).
+
+**Sources.** FUN_000191C0 fills the source table in this bit order, bit 0 first:
+
+| bit | 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | 13 |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| source | KN1 | KN2 | KN3 | KN4 | MC1 | MC2 | PB | CAT | PAT | FC | BC | MC3 | MW | MC4 |
+| from | sys 0x16 | 0x17 | 0x18 | 0x19 | 0x1A | 0x1B | status E0 | D0 | A0 | 0x1E | 0x1F | 0x1C | CC1 | 0x1D |
+
+The four knob slots are disabled (control number 0xF7) when the system's knob receive switch (0x14) is
+off. FUN_00014AD0 stores each arriving value per receive channel, 14 signed 16-bit slots per channel:
+the knobs and MIDI controls bipolar as `(v - 64) * 2` with 126 raised to 127, the physical controllers
+(PB, CAT, PAT, FC, BC, MW, mask 0x17C0) as the raw value. Both end up in -128..127.
+
+**Sum.** For a set whose destination matches, walk the bitmap from bit 0 up, adding each enabled
+source and clamping to -128..127 after every addition.
+
+**Scaling.** The sum and `depth - 0x40` go to a per-destination handler from the pointer table at flash
+0x3DC04. Three scalers, with `v' = v + (v > 0)` and `d' = d + (d > 0)`:
+
+| helper | formula | destinations |
+|---|---|---|
+| FUN_00016F9C | `clamp((v' * d' * 2) >> 6, -128, 127)` | 1-16, 34-47: a signed offset straight to the tone generator |
+| FUN_00016F58 | `clamp(base + ((v' * d' * 2) >> 7), 0, 127)` | 18, 21-33: edits a part byte |
+| FUN_00017032 | `clamp(base + adj((v' * d' * 2) >> 6), 0, 127)`, adj taking one off a positive result | 17, 19, 20: volume and the two sends |
+
+`base` is the stored part byte, and the handler writes the result back as a parameter change. That is
+exactly the split the owner's manual describes: destinations 17-33 "overwrite the edit buffer" and show
+the edit mark, 1-16 and 34-47 "directly control the tone generator without affecting" it.
+
+**Part switch.** The table at EPROM 0x35C4C4 flags destinations 17-45 as per-part; only those consult
+the set's part switch. Destinations 1-16 (the insertion parameters and its two sends) and 46-47 (the
+Fseq) are performance-wide.
+
+**Destinations that are not a plain offset:**
+
+- **34 pitch bias** (ctrlDest_34): the depth is the range in semitones, not a scaler.
+  `word = sign(depth) * BENDTAB[min(|depth|, 24)] * sum >> 7`, matching the manual's "if Vcn depth is
+  set to +2 then the maximum control value is +two semitones".
+- **35 amplitude EG bias** (ctrlDest_35): one per-part value `~((|scaled| + T[min(|depth|, 31)]) * 2)`
+  capped at 0xFF, T being the table at flash 0x3DDC4 (127, 119, 115, ... 3, 0). Event 0x205 then scales
+  it by each operator's own EG bias sense.
+- **36 frequency bias** (FUN_0001B334): per operator, sense = `((op[0x1F] & 0x78) >> 3) - 7`, offset =
+  `(int16)(scaled * sense * 0x10) >> 2` added to the operator's frequency word.
+- **37/38 bandwidth** (ctrlDest_37, ctrlDest_38): `clamp((scaled * BWBIAS[bias nibble]) >> 3, -128, 127)`.
+- **39 LFO1 pitch mod** (ctrlDest_39): the offset is `2 * scaled`, 254 raised to 255.
+- **43 LFO1 speed** (ctrlDest_43): `clamp(eb86(voice speed + part offset) + 2 * scaled, 0, 255)`.
+- **46 Fseq speed** (ctrlDest_46): `clamp(ratio + ((scaled * 0x1324) >> 7), 100, 5000)`.
+- **47 formant scratch** (ctrlDest_47): the scaled signed byte is the transport position, and it only
+  applies when the performance's Fseq play mode is scratch.
+
 ## Part levels (FUN_00020044)
 
 `u = ((volume + 1) * expression) >> 8`; voiced index = unvoiced index = u + 1; balance below 64 scales the unvoiced
@@ -142,12 +199,18 @@ index by `(u + 2) * bal >> 6`, above 64 the voiced index by `(u + 2) * (128 - ba
 
 ## Fseq playback (FUN_0000FFFA, FUN_0001A59E, FUN_0001E838)
 
-Frame timer: CMT1, `CMCOR1 = VELW[speedAdjust] * 84 * 1000 / ratio + 2884` counts at clock/32 (ratio in 0.1 %,
+Frame timer: CMT1 (FUN_0001A59E), `CMCOR1 = VELW[speedAdjust] * 84 * 1000 / ratio + 2884` counts at
+clock/32, confirmed instruction for instruction. A ratio below 100 means MIDI clock instead: CMT1 is
+parked at a fixed 7000 counts and FUN_0001ACB6 advances the sequence from the clock count, weighting
+each tick by 25, 50, 100, 200 or 400 for speed words 0 to 4, so the five settings are 1/4, 1/2, 1/1,
+2/1 and 4/1 of the base rate. (ratio in 0.1 %,
 100..5000; 100 % with adjust 64 gives 7.9 ms per frame). Tempo velocity: `ratio -= (ratio - 100) * sens * (127 - v') /
 7 / 127`. Frames are 50 bytes: pitch hi/lo, 8 voiced formant frequency hi, 8 lo, 8 voiced levels, 8 unvoiced hi, 8 lo,
 8 unvoiced levels; words are `hi * 256 + lo * 2`. An operator with its Fseq switch on reads track `fseqtrk` of the
 frame instead of its own frequency and level. The fundamental follows `framePitch - (NOTETAB[noteAssign] + 0x1243) +
-(tuning - 63)` unless the performance's formant pitch mode is 1. Loop start/end and start offset come from the
+(tuning - 63)` unless the performance's formant pitch mode is 1; FUN_000127FC confirms that expression
+to the constant. Nothing shifts the frame's own formant frequencies, which is the point of the format:
+the formants stay where the sequence put them while the fundamental follows the key. Loop start/end and start offset come from the
 performance, the end of valid data from the Fseq header. Preset Fseqs live in the EPROM at 0x300A00 (1-10, 512 frames,
 25632 bytes each) and 0x283000 (11-90, 128 frames, 6432 bytes each), header 32 bytes then frames.
 

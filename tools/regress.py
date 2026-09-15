@@ -36,6 +36,19 @@ CASES = [
     ("perf-towarp",   ["-r", "{rom}", "-P", "18"],     60, 3.0),
     ("perf-manhattan",["-r", "{rom}", "-P", "76"],     60, 3.0),
     ("fseq-shoobydo", ["-r", "{rom}", "-f", "1", "-p", "0"], 60, 3.0),
+    # Away from the Fseq's assigned note, so the formant frequencies and the fundamental move apart.
+    ("fseq-high",     ["-r", "{rom}", "-f", "1", "-p", "0"], 72, 3.0),
+    ("fseq-low",      ["-r", "{rom}", "-f", "1", "-p", "0"], 48, 3.0),
+    # The controller matrix. Every preset performance routes something, so these drive real destinations:
+    # perf 0 sends the wheel to frequency bias and KN3 to volume, perf 4 sends it to bandwidth, amplitude
+    # EG bias, filter cutoff and resonance, perf 2 sends it to LFO1 pitch mod.
+    # Perf 15 is a single part and routes the wheel to frequency bias at depth +32; -p swaps in a native
+    # voice with a frequency bias sense on every operator, so the pair brackets destination 36.
+    ("ctrl-freqbias-off", ["-r", "{rom}", "-P", "15", "-p", "183"],             60, 3.0),
+    ("ctrl-freqbias", ["-r", "{rom}", "-P", "15", "-p", "183", "-cc", "1=127"], 60, 3.0),
+    ("ctrl-volume",   ["-r", "{rom}", "-P", "0", "-cc", "18=0"],   60, 3.0),
+    ("ctrl-multi",    ["-r", "{rom}", "-P", "4", "-cc", "1=127"],  60, 3.0),
+    ("ctrl-lfo1pmod", ["-r", "{rom}", "-P", "2", "-cc", "1=127"],  60, 3.0),
 ]
 
 

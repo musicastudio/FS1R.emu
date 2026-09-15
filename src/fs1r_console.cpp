@@ -3,7 +3,7 @@
 //   fs1r_emu.exe -l                                   list MIDI ports
 //   fs1r_emu.exe -selftest                            run the engine self check
 //   fs1r_emu.exe [-m N] [-o N] [-c ch] [-v voice.syx] [-r eprom.bin [-p voice] [-P perf] [-f fseq]]
-//                [-g gain] [-w test.wav [-n note] [-n2 note] [-d secs]]
+//                [-g gain] [-w test.wav [-n note] [-n2 note] [-cc num=val] [-d secs]]
 //
 // The console owns no synthesis. It feeds MIDI bytes to fs1r::Device and pulls audio back.
 #define _CRT_SECURE_NO_WARNINGS
@@ -69,6 +69,7 @@ static void pump_midi(fs1r::Device& dev) {
 
 // ------------------------------------------------------------------------------------------ offline render
 static int g_note2 = -1;   // -n2: second note played at 1/3 while the first is held (mono legato / portamento)
+static std::vector<std::pair<int, int>> g_cc;   // -cc num=val: control changes sent before the note
 static void write_wav(const char* path, const std::vector<float>& l, const std::vector<float>& r) {
     size_t frames = l.size();
     std::vector<int16_t> pcm(frames * 2);
@@ -92,6 +93,7 @@ static int render_wav(fs1r::Device& dev, const char* path, int note, double secs
     dev.forceChannel(0);                                   // offline: every part with a receive channel plays
     auto note_on = [&](int n, int v) { uint8_t m[3] = {0x90, (uint8_t)n, (uint8_t)v}; dev.sendMidi(m, 3); };
     auto note_off = [&](int n) { uint8_t m[3] = {0x80, (uint8_t)n, 0}; dev.sendMidi(m, 3); };
+    for (auto& c : g_cc) { uint8_t m[3] = {0xB0, (uint8_t)c.first, (uint8_t)c.second}; dev.sendMidi(m, 3); }
     note_on(note, 100);
     if (g_note2 >= 0) {
         dev.process(l.data(), r.data(), third);
@@ -131,11 +133,15 @@ int main(int argc, char** argv) {
         else if (a == "-w" && i + 1 < argc) wav = argv[++i];
         else if (a == "-n" && i + 1 < argc) testNote = atoi(argv[++i]);
         else if (a == "-n2" && i + 1 < argc) g_note2 = atoi(argv[++i]);
+        else if (a == "-cc" && i + 1 < argc) {
+            std::string t = argv[++i]; size_t e = t.find('=');
+            if (e != std::string::npos) g_cc.emplace_back(atoi(t.substr(0, e).c_str()), atoi(t.substr(e + 1).c_str()));
+        }
         else if (a == "-mono" && i + 1 < argc) monoTime = atoi(argv[++i]);
         else if (a == "-d" && i + 1 < argc) testSecs = atof(argv[++i]);
         else { printf("usage: fs1r_emu [-l] [-selftest] [-m midiport] [-o midiout] [-c channel] [-v file.syx [-p index]]\n"
                       "                [-r eprom.bin [-p voice] [-P performance] [-f fseq]] [-g gain]\n"
-                      "                [-w test.wav [-n note] [-n2 note] [-d seconds]] [-mono portatime]\n"); return 1; }
+                      "                [-w test.wav [-n note] [-n2 note] [-cc num=val] [-d seconds]] [-mono portatime]\n"); return 1; }
     }
     if (romPath && !dev.loadRom(romPath)) { printf("cannot read 2 MB EPROM image %s\n", romPath); return 1; }
     if (perfIdx >= 0 && !dev.loadRomPerformance(perfIdx)) { printf("-P needs -r\n"); return 1; }
