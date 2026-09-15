@@ -1,17 +1,19 @@
 # fs1rLib          the engine, no Windows, no host, no GUI. This is what a plugin links.
-# fs1r_emu         the test console (WinMM, Windows only).
+# fs1r_emu         the test console (WinMM, Windows only), built into bin/.
 # test_effects     the effect-block self check.
 #
 # build.bat is the quick MSVC path; this file is for clang, CI, and the JUCE plugin layer later.
 #   cmake -B build/cmake -S . && cmake --build build/cmake --config Release && ctest --test-dir build/cmake
 cmake_minimum_required(VERSION 3.16)
-project(fs1r_emu VERSION 0.1.0 LANGUAGES C CXX)
+project(fs1r_emu VERSION 0.2.0 LANGUAGES C CXX)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
   set(CMAKE_BUILD_TYPE Release)
 endif()
+# Everything meant to be run lands in bin/: the console here, the plugin formats under bin/<Format>/.
+set(FS1R_BIN ${CMAKE_CURRENT_SOURCE_DIR}/bin)
 
 add_library(fs1rLib STATIC src/fs1r_lib.cpp)
 target_include_directories(fs1rLib PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src)
@@ -42,6 +44,7 @@ endif()
 if(WIN32)
   add_executable(fs1r_emu src/fs1r_console.cpp)
   target_link_libraries(fs1r_emu PRIVATE fs1rLib winmm)
+  set_target_properties(fs1r_emu PROPERTIES RUNTIME_OUTPUT_DIRECTORY "$<1:${FS1R_BIN}>")
   add_test(NAME engine COMMAND fs1r_emu -selftest)
 else()
   message(STATUS "fs1r_emu console needs WinMM; building fs1rLib and test_effects only")

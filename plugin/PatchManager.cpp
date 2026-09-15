@@ -43,8 +43,13 @@ void PatchManager::buildRomLists() {
         e.name = "Performance " + juce::String(i);
         perfList.push_back(e);
     }
-    setPresetIndex(juce::File::getSpecialLocation(juce::File::currentApplicationFile)
-                       .getParentDirectory().getChildFile("presets/index.csv"));
+    // presets/index.csv next to the binary or in any folder above it (bin/Standalone/ inside a checkout)
+    for (auto dir = juce::File::getSpecialLocation(juce::File::currentApplicationFile).getParentDirectory();
+         dir.exists(); dir = dir.getParentDirectory()) {
+        auto csv = dir.getChildFile("presets/index.csv");
+        if (csv.existsAsFile()) { setPresetIndex(csv); break; }
+        if (dir.isRoot()) break;
+    }
 }
 
 void PatchManager::setPresetIndex(const juce::File& csv) {

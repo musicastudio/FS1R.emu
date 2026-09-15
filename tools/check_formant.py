@@ -21,7 +21,7 @@ from pathlib import Path
 import numpy as np
 
 ROOT = Path(__file__).resolve().parents[1]
-EXE = ROOT / "fs1r_emu.exe"
+EXE = ROOT / "bin/fs1r_emu.exe"
 OUT = ROOT / "build"
 TABLES = ROOT / "src/fs1r_rom_tables.h"
 
@@ -152,7 +152,7 @@ def measure(path, note):
 
 def main():
     if not EXE.exists():
-        raise SystemExit("build fs1r_emu.exe first")
+        raise SystemExit("build bin\\fs1r_emu.exe first (build.bat)")
     OUT.mkdir(exist_ok=True)
     fails = 0
     print("%-22s %8s %8s %9s %9s %7s %5s" % ("case", "want f0", "got f0", "want frmt", "got frmt", "error", "tol"))

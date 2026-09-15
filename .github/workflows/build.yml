@@ -29,7 +29,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: fs1r_emu-console-windows
-          path: build/cmake/Release/fs1r_emu.exe
+          path: bin/fs1r_emu.exe
           if-no-files-found: error
 
   plugin:
@@ -59,17 +59,10 @@ jobs:
         run: cmake -B build/plugin -S . -DFS1R_BUILD_PLUGIN=ON -DCMAKE_BUILD_TYPE=Release
       - name: Build
         run: cmake --build build/plugin --config Release
-      - name: Collect
-        shell: bash
-        run: |
-          mkdir -p out
-          cp -R build/plugin/plugin/fs1r_plugin_artefacts/Release/* out/ 2>/dev/null || \
-          cp -R build/plugin/plugin/fs1r_plugin_artefacts/* out/
-          ls -R out
       - uses: actions/upload-artifact@v4
         with:
           name: fs1r_emu-plugin-${{ matrix.name }}
-          path: out
+          path: bin
           if-no-files-found: error
 
   release:

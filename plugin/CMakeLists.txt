@@ -17,6 +17,12 @@ juce_add_plugin(fs1r_plugin
     COPY_PLUGIN_AFTER_BUILD FALSE
     VST3_CATEGORIES Instrument Synth)
 
+# The formats land in bin/Standalone, bin/VST3 and bin/CLAP (JUCE and the CLAP helper derive each
+# format's folder from these two); the import libraries stay in the build tree.
+set_target_properties(fs1r_plugin PROPERTIES
+    LIBRARY_OUTPUT_DIRECTORY ${FS1R_BIN}
+    RUNTIME_OUTPUT_DIRECTORY ${FS1R_BIN})
+
 juce_add_binary_data(fs1r_plugin_data SOURCES parameterDescriptions_fs1r.json)
 set_target_properties(fs1r_plugin_data PROPERTIES POSITION_INDEPENDENT_CODE TRUE)
 

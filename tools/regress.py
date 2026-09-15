@@ -17,7 +17,7 @@ from pathlib import Path
 import numpy as np
 
 ROOT = Path(__file__).resolve().parents[1]
-EXE = ROOT / "fs1r_emu.exe"
+EXE = ROOT / "bin/fs1r_emu.exe"
 OUT = ROOT / "build"
 REF = Path(__file__).resolve().parent / "regress_ref.json"
 DEFAULT_ROM = ROOT.parent / "FS1R_DISASM/roms/fs1r_v120_eprom_cpuview.bin"
@@ -102,9 +102,10 @@ def compare(name, ref, got, tol):
     if len(ref["peaks"]) != len(got["peaks"]):
         bad.append(f"peak count {len(ref['peaks'])} -> {len(got['peaks'])}")
     else:
-        for i, (a, b) in enumerate(zip(ref["peaks"], got["peaks"])):
-            if abs(a[0] - b[0]) > max(2.0, tol * a[0]) or abs(a[1] - b[1]) > 1.5:
-                bad.append(f"peak {i} {a} -> {b}")
+        # Matched by frequency, not by rank: peaks a fraction of a dB apart swap places on any change.
+        for a in ref["peaks"]:
+            if not any(abs(a[0] - b[0]) <= max(2.0, tol * a[0]) and abs(a[1] - b[1]) <= 1.5 for b in got["peaks"]):
+                bad.append(f"peak {a} not in {got['peaks']}")
     if len(ref["env"]) != len(got["env"]):
         bad.append(f"env length {len(ref['env'])} -> {len(got['env'])}")
     else:
@@ -121,7 +122,7 @@ def main():
     ap.add_argument("--tol", type=float, default=0.02)
     a = ap.parse_args()
     if not EXE.exists():
-        raise SystemExit("build fs1r_emu.exe first (build.bat)")
+        raise SystemExit("build bin\\fs1r_emu.exe first (build.bat)")
     rom = Path(a.rom)
     OUT.mkdir(exist_ok=True)
     ref = json.loads(REF.read_text()) if REF.exists() and not a.update else {}

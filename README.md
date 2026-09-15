@@ -27,16 +27,17 @@ See `docs/research.md` for what is known about the hardware and `docs/ymp706_reg
 ## Build and run
 
 ```bat
-build.bat                                        the console, fs1r_emu.exe
-build.bat test                                   build and run both self checks
-fs1r_emu.exe -l                                  list MIDI ports
-fs1r_emu.exe                                     asks for a MIDI input once, remembers it in fs1r_emu.ini
-fs1r_emu.exe -m 0 -o 0 -v presets\native\000_Ballad_EP.syx
-fs1r_emu.exe -v presets\dx7\004_Pianotone1.syx   DX7-format presets are converted like the firmware does
-fs1r_emu.exe -r ..\FS1R_DISASM\roms\fs1r_v120_eprom_cpuview.bin -p 128    ROM voice 0-255 native, 256-1407 DX7 banks
-fs1r_emu.exe -r ..\FS1R_DISASM\roms\fs1r_v120_eprom_cpuview.bin -P 0      ROM performance 0-359 with its voices and Fseq
-fs1r_emu.exe -r ... -P 0 -f 29                   override the Fseq with preset Fseq 1-90
-fs1r_emu.exe -v presets\native\128_BagPipe.syx -w test.wav -n 60 -d 3    offline render, no devices needed
+build.bat                                        the console, bin\fs1r_emu.exe
+build.bat test                                   build and run the self checks
+build.bat plugin                                 the standalone, VST3 and CLAP into bin\ (CMake, needs the submodules)
+bin\fs1r_emu.exe -l                                  list MIDI ports
+bin\fs1r_emu.exe                                     asks for a MIDI input once, remembers it in bin\fs1r_emu.ini
+bin\fs1r_emu.exe -m 0 -o 0 -v presets\native\000_Ballad_EP.syx
+bin\fs1r_emu.exe -v presets\dx7\004_Pianotone1.syx   DX7-format presets are converted like the firmware does
+bin\fs1r_emu.exe -r ..\FS1R_DISASM\roms\fs1r_v120_eprom_cpuview.bin -p 128    ROM voice 0-255 native, 256-1407 DX7 banks
+bin\fs1r_emu.exe -r ..\FS1R_DISASM\roms\fs1r_v120_eprom_cpuview.bin -P 0      ROM performance 0-359 with its voices and Fseq
+bin\fs1r_emu.exe -r ... -P 0 -f 29                   override the Fseq with preset Fseq 1-90
+bin\fs1r_emu.exe -v presets\native\128_BagPipe.syx -w test.wav -n 60 -d 3    offline render, no devices needed
 python tools\check_wav.py test.wav 60            pitch, harmonics and envelope of one render
 python tools\regress.py                          the whole fixed preset list against the stored reference
 ```
@@ -49,7 +50,7 @@ cmake -B build/plugin -S . -DFS1R_BUILD_PLUGIN=ON
 cmake --build build/plugin --config Release
 ```
 
-VST3, CLAP and a standalone land in `build/plugin/plugin/fs1r_plugin_artefacts/Release/`. Without that flag the same CMake build produces the engine library, the console and the self checks and needs no submodules. `docs/plugin_guide.md` is the user guide.
+VST3, CLAP and a standalone land in `bin/VST3`, `bin/CLAP` and `bin/Standalone` (`build.bat plugin` runs those two commands). Without that flag the same CMake build produces the engine library, the console and the self checks and needs no submodules. `docs/plugin_guide.md` is the user guide.
 
 Console options: `-m` MIDI input, `-o` MIDI output for dump and parameter replies, `-c` force all parts onto one MIDI channel (default: each part listens on its receive channel), `-v` sysex file with FS1R voice / performance / Fseq bulk dumps or a DX7 VCED dump (`-p` picks the n-th dump in the file), `-r` 2 MB EPROM image with `-p` voice, `-P` performance, `-f` Fseq, `-g` output gain, `-w` offline render with `-n` note, `-n2` a second note at a third of the way in, `-cc num=val` control changes sent before the note, `-d` seconds, `-mono` part 1 mono with full-time portamento, `-selftest` the engine self check. `FS1R_DEBUG=1` prints the computed register values at every note on.
 

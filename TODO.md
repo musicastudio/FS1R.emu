@@ -62,6 +62,7 @@ Every chip-side constant is now in one place, `namespace cal` in `src/fs1r_lib.c
 - [x] **MIDI out.** Dump and parameter requests answered, parameter changes echoed. The console's `-o` opens a MIDI out for them.
 - [x] **CMake build** next to `build.bat`, with ctest running both self checks.
 - [x] **Render regression.** `tools/regress.py` over twelve fixed cases against `tools/regress_ref.json`: pitch, harmonic peaks, envelope, stereo width, centroid.
+- [x] **Engine cost.** The per-operator frequency and level maths (a dozen `pow()` calls per operator per sample) now runs every 16 samples in `refresh_ctl`, the per-sample dB-to-linear path is a table, and an operator's own pitch EG stays per sample while it moves. One note on the four-part "Everybody" went from 30% of a core to 9%; 16 notes from 254% to 61%. The next step if 32-voice loads still glitch is the sine and window lookups (`floor()` in `fsin`), not the buffer.
 
 ## Tier 2: plugin (JUCE)
 
@@ -71,6 +72,7 @@ Every chip-side constant is now in one place, `namespace cal` in `src/fs1r_lib.c
 - [x] **Patch manager.** `.syx` voices, performances and Fseqs, the EPROM banks, DX7 VCED and ACED, save as one `.syx`. The browser reads `presets/index.csv` for names and categories when it is there.
 - [x] **Multi-part.** Four parts with receive channels, program change and bank select, one stereo out.
 - [x] **MIDI learn** for CC to parameter on the right-click menu, alongside the FS1R's own controller sets.
+- [ ] **Engine thread with a lookahead buffer**, if the host's buffer is ever the limit rather than the engine: JUCE's shared-mode WASAPI is fixed at the driver period (10 ms) and only exclusive mode and DirectSound offer other sizes (see the plugin guide). A ring buffer between an engine thread and `processBlock` with a user-set depth would make the size a plugin setting in every host, at the cost of that much latency. Not needed since the engine cost drop above.
 
 ## Tier 3: GUI, the FS1R panel
 

@@ -12,15 +12,24 @@ cmake -B build/plugin -S . -DFS1R_BUILD_PLUGIN=ON
 cmake --build build/plugin --config Release
 ```
 
-VST3, CLAP and a standalone land in `build/plugin/plugin/fs1r_plugin_artefacts/Release/`. Without
-`-DFS1R_BUILD_PLUGIN=ON` the same CMake build produces only the engine library, the console and the
-self checks, and needs no submodules.
+VST3, CLAP and a standalone land in `bin/VST3`, `bin/CLAP` and `bin/Standalone` (`build.bat plugin`
+runs those two commands). Without `-DFS1R_BUILD_PLUGIN=ON` the same CMake build produces only the
+engine library, the console and the self checks, and needs no submodules.
+
+## The standalone's audio device
+
+**Options > Audio/MIDI Settings**. With the default **Windows Audio** device type JUCE runs at the
+driver's own period, 10 ms on most machines, and that is the only entry in the buffer size list.
+**Windows Audio (Exclusive Mode)** and **DirectSound** let you choose the size: exclusive mode takes
+the device away from every other program while the standalone runs, DirectSound adds some latency of
+its own. The choice is remembered in `%APPDATA%\FS1R.emu\FS1R.settings`.
 
 ## The EPROM image
 
 Press **EPROM...** and point it at a 2 MB v1.20 dump. Until you do, the plugin runs the default
 performance and voice; the 1408 preset voices and 360 performances come out of that image and are not
-shipped. `presets/index.csv` next to the plugin names and categorises them when it is present.
+shipped. `presets/index.csv` next to the plugin, or in any folder above it (so a checkout's own `presets/`
+serves `bin/Standalone/`), names and categorises them when it is present.
 
 ## Parts
 
