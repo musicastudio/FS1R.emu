@@ -1,8 +1,10 @@
 # FS1R.emu
 
-The Yamaha FS1R as a Windows softsynth: its firmware logic rewritten in C++ from the decompiled ROM, four parts, 32 channels, MIDI in, performances and Fseq playback, no effects or filter yet.
+The Yamaha FS1R as a plugin and a console synth: its firmware logic rewritten in C++ from the decompiled ROM, four parts, 32 channels, the filter, both LFOs, pan, the three effect blocks, performances and Fseq playback. VST3, CLAP and standalone, with the front panel as the GUI.
 
-Download the latest build: **https://github.com/musicastudio/FS1R.emu/releases/latest** (`fs1r_emu.exe`, no installer, no dependencies).
+Download the latest build: **https://github.com/musicastudio/FS1R.emu/releases/latest** (no installer, no dependencies).
+
+Licensed GPL-3, see `LICENSE` and `NOTICE.md`.
 
 **Discord:** https://discord.gg/6sXu3GmkNm
 
@@ -18,55 +20,72 @@ So the engine here is reconstructed from the firmware rather than from the chip.
 
 To be clear about what this is: a rewrite of the FS1R's logic, not an emulation of the processors on the board. The SH7044 is not emulated and its firmware does not run here; the note-on path, tick pipeline and conversion tables were read out of the decompiled code and rewritten in C++. The YMP706 tone generator is a model built from those register values, since no one has its register semantics. Running the real firmware on an SH-2 core (gearmulator has one with the SH7040 peripherals) is on the roadmap as a way to verify the rewrite, not to replace it. The effects run on two YSS236-F DSPs (Yamaha's VOP3, also the synthesis engine of the AN1x) whose program the CPU uploads from the EPROM at boot; nobody has decoded that instruction set, so the effects are modelled from the Data List too. `TODO.md` opens with the full KNOWN / INFERRED / UNKNOWN lists.
 
-The practical result: patches, performances and Fseqs load and play with the same parameter interpretation the hardware uses, because the same logic computes them. The parts that live inside the YMP706 (filter, effects, the exact EG shape) are approximations or missing.
+The practical result: patches, performances and Fseqs load and play with the same parameter interpretation the hardware uses, because the same logic computes them. The parts that live inside the YMP706 and the YSS236 (the filter, the effect algorithms, the exact EG shape) are models, and every constant behind them sits in `namespace cal` in `src/fs1r_lib.cpp` so that calibrating against a recording of a real unit is one table edit.
 
 See `docs/research.md` for what is known about the hardware and `docs/ymp706_registers.md` for the tone generator interface and the CPU-side engine lifted from the firmware.
 
 ## Build and run
 
 ```bat
-build.bat
-fs1r_emu.exe -l                                  list MIDI inputs
+build.bat                                        the console, fs1r_emu.exe
+build.bat test                                   build and run both self checks
+fs1r_emu.exe -l                                  list MIDI ports
 fs1r_emu.exe                                     asks for a MIDI input once, remembers it in fs1r_emu.ini
-fs1r_emu.exe -m 0 -v presets\native\000_Ballad_EP.syx
+fs1r_emu.exe -m 0 -o 0 -v presets\native\000_Ballad_EP.syx
 fs1r_emu.exe -v presets\dx7\004_Pianotone1.syx   DX7-format presets are converted like the firmware does
 fs1r_emu.exe -r ..\FS1R_DISASM\roms\fs1r_v120_eprom_cpuview.bin -p 128    ROM voice 0-255 native, 256-1407 DX7 banks
 fs1r_emu.exe -r ..\FS1R_DISASM\roms\fs1r_v120_eprom_cpuview.bin -P 0      ROM performance 0-359 with its voices and Fseq
 fs1r_emu.exe -r ... -P 0 -f 29                   override the Fseq with preset Fseq 1-90
 fs1r_emu.exe -v presets\native\128_BagPipe.syx -w test.wav -n 60 -d 3    offline render, no devices needed
-python tools\check_wav.py test.wav 60            pitch, harmonics and envelope of a render
+python tools\check_wav.py test.wav 60            pitch, harmonics and envelope of one render
+python tools\regress.py                          the whole fixed preset list against the stored reference
 ```
 
-Options: `-m` MIDI input, `-c` force all parts onto one MIDI channel (default: each part listens on its receive channel, part 1 of a fresh unit on channel 1), `-v` sysex file with FS1R voice / performance / Fseq bulk dumps or a DX7 VCED dump (`-p` picks the n-th dump in the file), `-r` 2 MB EPROM image with `-p` voice, `-P` performance, `-f` Fseq, `-g` output gain. `FS1R_DEBUG=1` prints the computed register values at every note on.
+The plugin:
 
-MIDI: notes, bend, aftertouch, CC1 mod wheel, CC2 breath, CC4 foot, CC5/65 portamento, CC7 volume, CC11 expression, CC16-19 knobs, CC13/20-22 MIDI controls, CC64 sustain, CC120/121/123, program change (with `-r`), FS1R bulk dumps and parameter changes (performance common, part, voice, system). The performance's controller sets route the sources to the destinations that exist in the engine. Needs MSVC (build.bat uses the VS 2022 Professional vcvars64).
+```bat
+git submodule update --init --recursive
+cmake -B build/plugin -S . -DFS1R_BUILD_PLUGIN=ON
+cmake --build build/plugin --config Release
+```
+
+VST3, CLAP and a standalone land in `build/plugin/plugin/fs1r_plugin_artefacts/Release/`. Without that flag the same CMake build produces the engine library, the console and the self checks and needs no submodules. `docs/plugin_guide.md` is the user guide.
+
+Console options: `-m` MIDI input, `-o` MIDI output for dump and parameter replies, `-c` force all parts onto one MIDI channel (default: each part listens on its receive channel), `-v` sysex file with FS1R voice / performance / Fseq bulk dumps or a DX7 VCED dump (`-p` picks the n-th dump in the file), `-r` 2 MB EPROM image with `-p` voice, `-P` performance, `-f` Fseq, `-g` output gain, `-w` offline render with `-n` note, `-n2` a second note at a third of the way in, `-d` seconds, `-mono` part 1 mono with full-time portamento, `-selftest` the engine self check. `FS1R_DEBUG=1` prints the computed register values at every note on.
+
+MIDI: notes, bend, aftertouch, the control numbers the system table assigns to KN1-4, MC1-4, FC, BC, Formant and FM, CC5/65 portamento, CC7 volume, CC10 pan, CC11 expression, CC64 sustain, CC91/94 sends, CC120/121/123/126/127, RPN 0-2, the ten NRPN 01 xx part parameters, bank select and program change in both performance and multi modes, MIDI clock, active sensing, FS1R bulk dumps and parameter changes across the whole map, and dump and parameter requests answered. The performance's controller sets route the sources to the destinations. Needs MSVC for `build.bat` (VS 2022 Professional vcvars64); CMake works with anything.
 
 The ROM image the `-r` examples use is rgwan's EPROM dump with its 16-bit words byte-swapped into CPU order, kept outside this repo in `../FS1R_DISASM/roms/`. The emulator does not ship it.
 
 ## Layout
 
-- `src/fs1r_emu.cpp` the whole synth (MIDI in, waveOut, voice/performance/Fseq decoders, the firmware's note and tick pipeline, the operator engine)
+- `src/fs1r_lib.{h,cpp}` the engine behind `fs1r::Device`: no Windows, no host, no GUI. This is what the plugin links.
+- `src/fs1r_effects.h` the reverb, variation and insertion blocks and the master EQ
+- `src/fs1r_console.cpp` the test console: WinMM MIDI in and out, waveOut, offline render
 - `src/fs1r_rom_tables.h` conversion tables pulled from the EPROM by `tools/extract_tables.py`
 - `src/fs1r_algorithms.h` the 88-algorithm routing table from the EPROM
+- `plugin/` the JUCE layer: the panel, the editor pages, the patch manager, and `parameterDescriptions_fs1r.json` generated by `tools/gen_parameters.py`
 - `tools/build_fs1r_ghidra.py` imports and decompiles the firmware into `../FS1R_DISASM` with pyghidra (SH-2); `tools/decomp.py`, `tools/ghidra_disasm.py`, `tools/ghidra_switches.py`, `tools/ghidra_handlers.py` query it
-- `tools/extract_presets.py` pulls the 1408 preset voices out of the EPROM image into `presets/`
-- `docs/` research notes, register map and engine description, data list and manual text, the formant patent
+- `tools/extract_presets.py` pulls the 1408 preset voices out of the EPROM image into `presets/`; `tools/extract_vop3.py` pulls the effect DSP's microcode into `docs/vop3/`
+- `docs/` research notes, the register map and engine description, the plugin guide, the VOP3 reference, data list and manual text, the formant patent
 
 ## Status
 
-From the firmware and its tables: all 88 algorithms, the DX7 conversion, frequency words, EG rate and level conversion, velocity curves and attenuation, level key scaling, EG bias, note shifts, part detune, master tune, bend, the software pitch EG, LFO1 (speed, delay, fade, waveforms, pitch/amplitude/frequency depths), portamento, mono modes with priorities and legato, note and velocity limits, part volume/expression/balance, performances, controller sets, Fseq frame timing and playback.
+From the firmware and its tables: all 88 algorithms, the DX7 VCED and ACED conversion, frequency words, EG rate and level conversion, velocity curves and attenuation, level key scaling, EG bias, note shifts, part detune, master tune, bend, the software pitch EG, LFO1 and LFO2, portamento, mono modes with priorities and legato, note and velocity limits, part volume/expression/balance, pan, performances, controller sets, the voice Formant and FM control matrix, Fseq frame timing and playback with every loop mode, and the whole sysex parameter map in both directions.
 
-Inferred from the DX7 lineage and the patent, marked INFERRED in the source and listed in `docs/ymp706_registers.md`: EG timing and shape, dB per level step, per-op modulation sensitivity scaling, feedback and modulation index, the formant window and noise formant models.
+Modelled, because the chips are undocumented, and gathered in `namespace cal` in `src/fs1r_lib.cpp`: EG timing and shape, dB per level step, per-op modulation sensitivity scaling, feedback and modulation index, the formant window and noise formant, the per-voice filter, and the effect algorithms. The effect *parameter encoding* is not modelled: it was read back out of the 360 preset performances and matches every documented default.
 
-Not implemented: the per-voice filter, effects, pan, Fseq scratch mode, LFO2 (filter only).
+Not done: nothing has been measured against real hardware yet, so none of the modelled constants are calibrated. See Tier 4 of `TODO.md`.
 
 ## Roadmap
 
-The end goal is a plugin (VST3/CLAP plus standalone) with a GUI that looks like the FS1R front panel: an engine library behind a device interface, a console test harness, and a JUCE layer that only moves parameters in and out of the engine as MIDI and draws a skin. `TODO.md` has the full list; the tiers are:
+`TODO.md` has the full list with what is done and what is not. Tiers 0 to 3 and 5 are finished: the engine, the library and console split, the plugin in all three formats, the front panel GUI with its editor pages, the licence and CI.
 
-- **Tier 0: finish the engine.** Per-voice filter, LFO2, pan, effects, Fseq gaps, remaining MIDI, voice edit coverage, confirm the INFERRED constants.
-- **Tier 1: engine library and test console.** Split the source, device interface, MIDI out, CMake build, render regression.
-- **Tier 2: plugin (JUCE).** JUCE submodule with VST3/CLAP/standalone, parameter descriptions, parameter binding, patch manager, multi-part, MIDI learn.
-- **Tier 3: GUI, the FS1R panel.** Assets, skin files, LCD, editor pages, knobs and controller sets.
-- **Tier 4: fidelity and verification.** Hardware recordings, run the real firmware on an SH-2 core, extract the VOP3 microcode, VOP3 emulation (stretch), YMP706.
-- **Tier 5: release.** Licence file, CI, docs.
+What is left is Tier 4, and all of it waits on hardware or on research nobody has finished:
+
+- **Hardware recordings** of a real unit to calibrate the modelled constants against. Nobody here has one; rgwan does, and the [yamahamusicians thread](https://yamahamusicians.com/forum/threads/im-trying-to-emulating-an-fs1r.23211/) is the contact.
+- **Running the real firmware on an SH-2 core** (gearmulator has one with the SH7040 peripherals) to verify every register value the rewrite computes.
+- **Decoding the VOP3 instruction set.** The microcode is extracted into `docs/vop3/`; decoding it is the only route to bit-exact effects and is open research.
+- **The YMP706** stays a model. No register semantics, no die shot, no MAME driver.
+
+One line of Tier 3 is also open and is not code: a real panel photographed or measured, so the vector-drawn panel can be replaced by a skin.

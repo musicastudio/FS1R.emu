@@ -41,8 +41,9 @@ is firmware behaviour.
 | 0x218 | channel, op | voiced bandwidth `clamp(bw + ctrl * BWBIAS[bias], 0, 99)`, bit 7 passed through |
 | 0x220 | channel, op | pitch mod sense 0..7 |
 | 0x228 / 0x229 | channel | voiced / unvoiced part level: `VNBAL[index] + 0x10` (see Part levels) |
-| 0x22A / 0x22B | channel | pan L/R (not modelled) |
-| 0x22C-0x22F | channel | four level bytes from pan tables 0x35C0EB/0x35C16B (not modelled) |
+| 0x22A / 0x22B | channel | `~(((255 - pan) * s) >> 7)` and `(pan * s) >> 7`, s = image +0x3D (+1 when non-zero) |
+| 0x22C / 0x22D | channel | `min(255, image[+0x3E] + PANL[pan >> 1])` and the same with PANR: the main pair |
+| 0x22E / 0x22F | channel | the same with image[+0x3F] and a second pan source: the individual out pair |
 | 0x230/0x238 | channel, op | frmt ops: `0x1243 + TRANS[transpose] + FRMDET[detune][band]`; other forms: the raw byte 6 |
 | 0x240/0x248 | channel | 16-bit channel pitch word (see Pitch) |
 | 0x260 | channel | feedback level 0..7 |
@@ -164,14 +165,22 @@ part, sysex layout. Part bank 2..12 = PrA..PrK (PrA-PrI are the DX7-format banks
 - Frequency EG range +-4 octaves, timed like the amplitude EG.
 - The formant window (bandwidth and skirt), the harmonic forms, the noise formant: patent model, see research.md.
 
+## Pan (FUN_00025BC8, FUN_00025C12, FUN_00025C5C, events 0x211 and 0x222-0x225)
+
+`pan = clamp(image[+0x19] + panOffset, 0, 255)`, index `pan >> 1` into two 128-byte tables at 0x35C0EB and
+0x35C16B, which are one curve read forwards and backwards. Read as 0.375 dB attenuations they give a
+constant-power law: 0 dB at one end, silence at the other, -3 dB on both sides at the centre. Each output
+pair has its own scaler byte added to the attenuation and clamped at 255, and the individual-out pair takes
+its pan from a different source than the channel's own. Event 0x211 also folds in the part's random pan.
+
 ## Still unknown
 
-Which write starts a note (0xFC/FD is written before the registers are loaded), the 0x22A-0x22F pan path, the
-per-voice filter, effects, and everything the chip does with the register values listed above.
+Which write starts a note (0xFC/FD is written before the registers are loaded), the filter registers, the
+effect algorithms, and everything the chip does with the register values listed above.
 
 ## ROM tables (generated into src/fs1r_rom_tables.h by tools/extract_tables.py)
 
-LEVTAB 0x35B4A8, PEGLVL 0x35B50C, PEGTIME 0x35B5D6, VELW 0x35BA1E, VELCURVE 0x35B99E, VELCURVES 0x35B71E, EGBIAS
+PANL 0x35C0EB, PANR 0x35C16B, LEVTAB 0x35B4A8, PEGLVL 0x35B50C, PEGTIME 0x35B5D6, VELW 0x35BA1E, VELCURVE 0x35B99E, VELCURVES 0x35B71E, EGBIAS
 0x35CD24, KSEXP 0x35C3EB, KSLIN 0x35C413, KEYFACT 0x35C43B, NOTETAB 0x35B346, COARSE 0x35BC32, FINE 0x35BC72, TRANS
 0x35B446, BENDTAB 0x35BBD0, SINE64 0x35CC94, SHTAB 0x35CF24, FVSTAB 0x35C4BC, BWBIAS 0x35C533, FRMDET 0x35BE06, VNBAL
 0x35BB1E, PEGVEL 0x35C870, SENDTAB 0x35C006, algorithms 0x37C0DC.
