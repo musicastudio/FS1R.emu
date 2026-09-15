@@ -1,0 +1,93 @@
+name: build
+
+on:
+  push:
+    branches: [main]
+    tags: ['v*']
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  # The engine and its self checks build anywhere. No EPROM image is needed: the checks that want one
+  # skip themselves.
+  engine:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [windows-latest, ubuntu-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Configure
+        run: cmake -B build/cmake -S . -DCMAKE_BUILD_TYPE=Release
+      - name: Build
+        run: cmake --build build/cmake --config Release
+      - name: Test
+        run: ctest --test-dir build/cmake -C Release --output-on-failure
+      - name: Upload console
+        if: matrix.os == 'windows-latest'
+        uses: actions/upload-artifact@v4
+        with:
+          name: fs1r_emu-console-windows
+          path: build/cmake/Release/fs1r_emu.exe
+          if-no-files-found: error
+
+  plugin:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: windows-latest
+            name: windows
+          - os: ubuntu-latest
+            name: linux
+          - os: macos-latest
+            name: macos
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      - name: Linux dependencies
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libasound2-dev libjack-jackd2-dev libfreetype-dev libx11-dev \
+            libxcomposite-dev libxcursor-dev libxext-dev libxinerama-dev libxrandr-dev libxrender-dev \
+            libglu1-mesa-dev mesa-common-dev
+      - name: Configure
+        run: cmake -B build/plugin -S . -DFS1R_BUILD_PLUGIN=ON -DCMAKE_BUILD_TYPE=Release
+      - name: Build
+        run: cmake --build build/plugin --config Release
+      - name: Collect
+        shell: bash
+        run: |
+          mkdir -p out
+          cp -R build/plugin/plugin/fs1r_plugin_artefacts/Release/* out/ 2>/dev/null || \
+          cp -R build/plugin/plugin/fs1r_plugin_artefacts/* out/
+          ls -R out
+      - uses: actions/upload-artifact@v4
+        with:
+          name: fs1r_emu-plugin-${{ matrix.name }}
+          path: out
+          if-no-files-found: error
+
+  release:
+    needs: [engine, plugin]
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+      - name: Zip
+        run: |
+          cd artifacts
+          for d in */; do (cd "$d" && zip -r "../${d%/}.zip" .); done
+          ls -l
+      - uses: softprops/action-gh-release@v2
+        with:
+          files: artifacts/*.zip
+          generate_release_notes: true
