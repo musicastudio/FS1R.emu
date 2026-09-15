@@ -85,8 +85,10 @@ static inline double word_hz(int w) { return 440.0 * pow(2.0, (w - 26861) / 1024
 // ------------------------------------------------------------------------------------------ tables (chip side)
 static float g_sin[4097];
 static float g_win[8][1025];
+static float g_db2lin[2305];                                          // -128 .. +16 dB in 1/16 dB steps
 static void init_tables() {
     for (int i = 0; i <= 4096; i++) g_sin[i] = (float)sin(2 * PI * i / 4096.0);
+    for (int i = 0; i <= 2304; i++) g_db2lin[i] = (float)pow(10.0, (i / 16.0 - 128.0) / 20.0);
     for (int s = 0; s < 8; s++) {                                     // INFERRED window shape: sin^(2(skirt+1)), patent
         double p = cal::WIN_SKIRT * (s + 1);
         for (int i = 0; i <= 1024; i++) g_win[s][i] = (float)pow(sin(PI * i / 1024.0), p);
@@ -94,6 +96,14 @@ static void init_tables() {
 }
 static inline float fsin(double ph) { double x = (ph - floor(ph)) * 4096.0; int i = (int)x; float f = (float)(x - i); return g_sin[i] + (g_sin[i + 1] - g_sin[i]) * f; }
 static inline float fwin(int s, double x) { double y = x * 1024.0; int i = (int)y; if (i >= 1024) return 0.f; float f = (float)(y - i); return g_win[s][i] + (g_win[s][i + 1] - g_win[s][i]) * f; }
+// The per-sample level path: the table above with linear interpolation (error under 1e-5) instead of a
+// pow() per operator per sample. Anything above the table is rare enough to compute.
+static inline double db2lin_fast(double db) {
+    if (db <= -128) return 0.0;
+    if (db >= 16) return db2lin(db);
+    double x = (db + 128) * 16.0; int i = (int)x; float f = (float)(x - i);
+    return g_db2lin[i] + (g_db2lin[i + 1] - g_db2lin[i]) * f;
+}
 // INFERRED: chip EG rate 0..63 -> seconds for a full 96 dB traverse. The firmware maps time T to rate (99-T)*0xA4>>8, the
 // exact inverse of the DX7's (R*41)>>6, and its DX7 converter uses T = 99 - R, so the chip is assumed to time its EG like the
 // DX7 EGS: increment (4 + (q & 3)) << (q >> 2) per 64 samples on a 2^28 = 96 dB scale (Dexed). 6.6 ms at 63, 380 s at 0.
@@ -394,6 +404,7 @@ struct OpState {
     double phase = 0; WinGen g[2]; int nextGen = 0; double fphase = 0; int halfCount = 0;
     EG eg; FreqEG feg;
     EG ueg; FreqEG ufeg; double nphase = 0; double lp[8] = {}; uint32_t rng = 0x12345678;
+    double att = 0, fop = 0, wl7 = 1, uatt = 0, nf = 0, na = 1, nscale = 0; int bw = 0;   // refresh_ctl output
 };
 struct Chan {
     bool active = false; int part = 0, note = 0, vel = 0; bool held = false, sustained = false; uint32_t age = 0;
@@ -420,6 +431,7 @@ struct Chan {
     int regPitch = 0, regPM = 0, regFM = 0, regAM = 0, regLevel[8], regULevel[8], regC0 = 73;
     int fqWord[8] = {}, fquWord[8] = {}; double partV = 1, partU = 1;
     OpState op[8]; double fbBus = 0, fbPrev = 0;
+    double f0 = 0, fbGain = 0; int ctlLeft = 0;                    // control-rate cache, see refresh_ctl
     bool fseqOp[8] = {}, fseqUOp[8] = {};
 };
 
@@ -1149,7 +1161,7 @@ struct Synth {
     inline double op_sample(OpState& s, const OpV& v, double f0, double fop, int bw, double pm) {
         if (v.form == 0) { s.phase += fop / SR; if (s.phase >= 1) s.phase -= 1; return fsin(s.phase + pm); }
         double fw, fc, wl; bool dc = false;
-        if (v.form == 7) { fw = f0; fc = fop; wl = 2.0 * pow(2.0, -bw / cal::FRMT_BW_DB); }                       // formant: window at the fundamental (INFERRED bw curve)
+        if (v.form == 7) { fw = f0; fc = fop; wl = s.wl7; }                                                          // formant: window at the fundamental (INFERRED bw curve)
         else if (v.form == 5 || v.form == 6) { fw = fop; fc = fop * (1 + bw * 31.0 / 99.0); wl = v.form == 5 ? 0.5 : 2.0; }
         else { fw = (v.form >= 3 ? 2 * fop : fop); fc = 0; dc = true; wl = (v.form & 1) ? 0.25 : 1.0; }
         wl = std::min(wl, 2.0);
@@ -1164,59 +1176,76 @@ struct Synth {
         }
         return y;
     }
-    inline void render_chan(Chan& C, double& outL, double& outR) {
+    // Every CTL samples: the per-operator frequency and level maths. Its inputs only move on the 192 Hz
+    // register tick and the voice parameters, and doing it per sample (a dozen pow() calls per operator)
+    // was the whole CPU bill. The one input that moves every sample, an operator's own pitch EG, stays in
+    // the sample loop while it runs: its integral is the phase. ponytail: 16 samples is 0.33 ms, finer
+    // than the tick itself.
+    static const int CTL = 16;
+    void refresh_ctl(Chan& C) {
         const Part& pt = perf.part[C.part]; const Voice& V = pt.voice; const unsigned char* alg = FS1R_ALG[V.alg];
-        double partV = C.partV, partU = C.partU;
         bool fs = fseqRun && fseqPart == C.part && fseq.valid;
-        double f0 = word_hz(C.regPitch + 0x1243 + C.regPM);          // channel fundamental incl. LFO pitch mod (pms 7)
+        C.f0 = word_hz(C.regPitch + 0x1243 + C.regPM);                 // channel fundamental incl. LFO pitch mod (pms 7)
+        C.fbGain = V.fb ? cal::FEEDBACK * pow(2.0, V.fb - 7) : 0.0;    // INFERRED feedback scale
+        for (int o = 0; o < 8; o++) {
+            OpState& s = C.op[o]; const OpV& v = V.v[o]; const OpU& u = V.u[o];
+            s.att = C.regLevel[o] * LEVEL_DB + C.regAM * LEVEL_DB * v.ams / 7.0;   // INFERRED: ams scales the channel AM attenuation linearly
+            if (alg[2 * o + 1] & 1) s.att += cal::CARRIER_DB * V.corr[o];         // carrier level correction (bits in the 0x200 word), 1.5 dB steps INFERRED
+            int pmw = (int)(C.regPM * cal::PMS_FRAC[v.pms]) + C.vcFreq[o][0];
+            double fop;
+            if (fs && C.fseqOp[o]) fop = word_hz(C.fqWord[o] + pmw);
+            else if (v.form == 7) fop = word_hz(C.freqWord[o] + (C.frmtWord[o] - 0x1243) + pmw + (C.regFM * v.fms) / 7);
+            else if (!v.fixed) fop = word_hz(C.freqWord[o] + C.regPitch + pmw);
+            else fop = word_hz(C.freqWord[o] + pmw + (C.regFM * v.fms) / 7);
+            if (v.form != 7) fop *= pow(2.0, ((v.detune - 15) * cal::DETUNE_CENTS) / 1200.0);       // INFERRED: detune 2 cents per step on non-formant ops
+            s.fop = fop;
+            s.bw = clampi(C.bwReg[o] + C.vcBw[o][0], 0, 99);
+            s.wl7 = 2.0 * pow(2.0, -s.bw / cal::FRMT_BW_DB);
+            // unvoiced (noise formant) operator
+            s.uatt = C.regULevel[o] * LEVEL_DB + C.regAM * LEVEL_DB * u.ams / 7.0;
+            double nf;
+            if (fs && C.fseqUOp[o]) nf = word_hz(C.fquWord[o]);
+            else if (u.mode == 1) nf = C.f0;
+            else if (u.mode == 2 && v.form == 7) nf = word_hz(C.freqWord[o] + (C.frmtWord[o] - 0x1243));
+            else nf = word_hz(C.ufreqWord[o] + (C.regFM * u.fms) / 7 + C.vcFreq[o][1]);
+            s.nf = nf * pow(2.0, u.transpose / 12.0);
+            double fcut = cal::CUT_BASE_HZ * pow(2.0, clampi(C.ubwReg[o] + C.vcBw[o][1], 0, 127) / 127.0 * cal::NOISE_OCT);    // INFERRED noise formant model, see docs
+            s.na = 1.0 - exp(-2 * PI * fcut / SR);
+            s.nscale = sqrt((1 + u.skirt) * (2.0 / s.na)) * 0.5;
+        }
+    }
+    inline void render_chan(Chan& C, double& outL, double& outR) {
+        if (C.ctlLeft-- <= 0) { C.ctlLeft = CTL - 1; refresh_ctl(C); }
+        const Voice& V = perf.part[C.part].voice; const unsigned char* alg = FS1R_ALG[V.alg];
+        double partV = C.partV, partU = C.partU;
         double Cb = 0, H = 0, S = 0, fbNew = 0, mix = 0;
-        double fbGain = V.fb ? cal::FEEDBACK * pow(2.0, V.fb - 7) : 0.0;        // INFERRED feedback scale
         for (int o = 0; o < 8; o++) {
             OpState& s = C.op[o]; const OpV& v = V.v[o];
             unsigned char t0 = alg[2 * o], t1 = alg[2 * o + 1]; int F = (t0 >> 3) & 7;
-            double in = F == 3 ? C.fbBus * fbGain : F == 4 ? Cb : F == 5 ? H : F == 6 ? S : 0.0;
+            double in = F == 3 ? C.fbBus * C.fbGain : F == 4 ? Cb : F == 5 ? H : F == 6 ? S : 0.0;
             if (F == 6) S = 0;
             double egdb = s.eg.tick();
-            double att = C.regLevel[o] * LEVEL_DB + C.regAM * LEVEL_DB * v.ams / 7.0;   // INFERRED: ams scales the channel AM attenuation linearly
-            if (t1 & 1) att += cal::CARRIER_DB * V.corr[o];                                            // carrier level correction (bits in the 0x200 word), 1.5 dB steps INFERRED
             double y = 0;
-            if (egdb - att > -100) {
-                double amp = db2lin(egdb - att);
-                double fegSemi = s.feg.tick();
-                int pmw = (int)(C.regPM * cal::PMS_FRAC[v.pms]);
-                double fop;
-                pmw += C.vcFreq[o][0];
-                if (fs && C.fseqOp[o]) fop = word_hz(C.fqWord[o] + pmw);
-                else if (v.form == 7) fop = word_hz(C.freqWord[o] + (C.frmtWord[o] - 0x1243) + pmw + (C.regFM * v.fms) / 7);
-                else if (!v.fixed) fop = word_hz(C.freqWord[o] + C.regPitch + pmw);
-                else fop = word_hz(C.freqWord[o] + pmw + (C.regFM * v.fms) / 7);
-                if (v.form != 7) fop *= pow(2.0, ((v.detune - 15) * cal::DETUNE_CENTS) / 1200.0);       // INFERRED: detune 2 cents per step on non-formant ops
-                fop *= pow(2.0, fegSemi / 12.0);
-                y = op_sample(s, v, f0, fop, clampi(C.bwReg[o] + C.vcBw[o][0], 0, 99), in * FM_INDEX) * amp;
+            if (egdb - s.att > -100) {
+                double fop = s.fop;
+                if (s.feg.stage < 2) fop *= pow(2.0, s.feg.tick() / 12.0);
+                y = op_sample(s, v, C.f0, fop, s.bw, in * FM_INDEX) * db2lin_fast(egdb - s.att);
             }
             Cb = y; if (t0 & 2) H = y; if (t1 & 4) S += y; if (t0 & 4) fbNew = y;
             if (t1 & 1) mix += y * partV;
             // unvoiced (noise formant) operator
             const OpU& u = V.u[o];
             double uegdb = s.ueg.tick();
-            double uatt = C.regULevel[o] * LEVEL_DB + C.regAM * LEVEL_DB * u.ams / 7.0;
-            if (uegdb - uatt > -100) {
-                double uamp = db2lin(uegdb - uatt);
-                double nf;
-                if (fs && C.fseqUOp[o]) nf = word_hz(C.fquWord[o]);
-                else if (u.mode == 1) nf = f0;
-                else if (u.mode == 2 && v.form == 7) nf = word_hz(C.freqWord[o] + (C.frmtWord[o] - 0x1243));
-                else nf = word_hz(C.ufreqWord[o] + (C.regFM * u.fms) / 7 + C.vcFreq[o][1]);
-                nf *= pow(2.0, u.transpose / 12.0 + s.ufeg.tick() / 12.0);
+            if (uegdb - s.uatt > -100) {
+                double nf = s.nf;
+                if (s.ufeg.stage < 2) nf *= pow(2.0, s.ufeg.tick() / 12.0);
                 s.rng ^= s.rng << 13; s.rng ^= s.rng >> 17; s.rng ^= s.rng << 5;
                 double nz = ((int32_t)s.rng) * (1.0 / 2147483648.0);
-                double fcut = cal::CUT_BASE_HZ * pow(2.0, clampi(C.ubwReg[o] + C.vcBw[o][1], 0, 127) / 127.0 * cal::NOISE_OCT);    // INFERRED noise formant model, see docs
-                double a = 1.0 - exp(-2 * PI * fcut / SR);
                 int stages = 1 + u.skirt;
-                for (int k = 0; k < stages; k++) { s.lp[k] += (nz - s.lp[k]) * a; nz = s.lp[k]; }
-                nz = nz * sqrt(stages * (2.0 / a)) * 0.5 + u.res / 7.0;
+                for (int k = 0; k < stages; k++) { s.lp[k] += (nz - s.lp[k]) * s.na; nz = s.lp[k]; }
+                nz = nz * s.nscale + u.res / 7.0;
                 s.nphase += nf / SR; if (s.nphase >= 1) s.nphase -= 1;
-                mix += nz * fsin(s.nphase) * uamp * partU;
+                mix += nz * fsin(s.nphase) * db2lin_fast(uegdb - s.uatt) * partU;
             }
         }
         C.fbBus = (fbNew + C.fbPrev) * 0.5; C.fbPrev = fbNew;
