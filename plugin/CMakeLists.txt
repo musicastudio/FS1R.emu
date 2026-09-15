@@ -26,9 +26,16 @@ set_target_properties(fs1r_plugin PROPERTIES
 # fs1r_panel.svg is the front panel drawing, made from docs/FS1R-front-panel-p14-ny.svg by
 # tools/make_panel_svg.py. Edit the drawing in docs/ and run that script again; it is committed so the
 # build needs no Python.
+# The factory patches: 1408 voices with their name index, 384 performances and the 90 preset formant
+# sequences, packed out of presets/ by tools/make_presets_blob.py so the plugin browses and loads all
+# of them with no EPROM image. Committed, for the same reason as the panel.
 juce_add_binary_data(fs1r_plugin_data SOURCES
     parameterDescriptions_fs1r.json
-    fs1r_panel.svg)
+    fs1r_panel.svg
+    fs1r_presets.syx
+    fs1r_presets.csv
+    fs1r_performances.syx
+    fs1r_fseqs.syx)
 set_target_properties(fs1r_plugin_data PROPERTIES POSITION_INDEPENDENT_CODE TRUE)
 
 target_sources(fs1r_plugin PRIVATE

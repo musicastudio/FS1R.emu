@@ -33,6 +33,7 @@ public:
     void clear();
     void dot(int x, int y, bool on = true);
     void frame(int x, int y, int w, int h);               // one-dot outline
+    void invert(int x, int y, int w, int h);              // reverse video, how the hardware marks a field
     void fill(int x, int y, int w, int h, bool on = true);
     int text(int col, int row, const juce::String&);      // returns the column after the last glyph
     void textRight(int rightCol, int row, const juce::String& s);
@@ -50,6 +51,10 @@ private:
 class PanelKnob : public juce::Component {
 public:
     void setCap(const juce::Image& i, float restDegrees, float sweepDegrees);
+    // The white arc the drawing paints across the upper left of every cap. It is a highlight on a
+    // cylinder, not a mark on the cap, so it is painted over the cap instead of turning with it. The
+    // path is in the drawing's units; capArea is the square the cap itself was taken from.
+    void setGloss(const juce::Path&, juce::Colour, float strokeWidth, juce::Rectangle<float> capArea);
     void setValue(int v, bool notify);
     int value() const { return val; }
     std::function<void(int, int)> onMove;                 // (value, delta since the last callback)
@@ -61,6 +66,10 @@ public:
 
 private:
     juce::Image cap;
+    juce::Path gloss;
+    juce::Colour glossColour;
+    juce::Rectangle<float> glossArea;
+    float glossStroke = 0.0f;
     float rest = 0.0f, sweep = 300.0f;
     int val = 64, top = 127, dragStart = 0, lastNotified = 64;
     juce::Point<int> dragFrom;
@@ -102,7 +111,12 @@ private:
 
     void timerCallback() override;
     void buildArt();                                      // the cached panel bitmap and knob caps
+    void liftKnobGloss();                                 // the caps' highlights, out of the drawing
     void refreshLcd();
+    void refreshPlayScreen();                             // PART = ALL: the performance's own screen
+    void refreshPartScreen();                             // PART = 01..04
+    void refreshKnobs();                                  // the four knobs follow the part they edit
+    void setAllParts(bool all);
     void knobMoved(int knob, int value, int delta);
     void setMode(Mode m);
     void setKnobMode(KnobMode m);
@@ -124,8 +138,16 @@ private:
     std::unique_ptr<PanelButton> muteSolo, enterBtn, exitBtn;
     std::unique_ptr<PanelButton> partDown, partUp, cursorL, cursorR, valueDown, valueUp;
 
+    // PART = ALL, the PLAY screen (owner's manual page 22). The PART buttons step ALL, 01, 02, 03, 04
+    // and [EXIT] comes back to ALL; the strip and the cursor stops are the performance's, not a part's.
+    bool allParts = true;
     KnobMode knobMode = Tone;
-    int field = 0;                                        // which icon strip field the cursor is on
+    int toneParam[4] = {-1, -1, -1, -1};                  // ATTACK, RELEASE, FORMANT and FM, as parameters
+    int fieldParam[12] = {};                              // each cursor stop's parameter, resolved once
+    // Which stop the cursor is on. The play screen opens on the program number half of its bank and
+    // program pair - the solid pointer sits against it on an untouched unit - which is why VALUE steps
+    // performances one at a time before anything else has been pressed.
+    int field = 2;
     bool muted = false;
     double gain = 0.25;
     juce::String pendingName, pendingValue;

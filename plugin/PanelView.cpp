@@ -15,6 +15,20 @@ constexpr float volumeX = 120.44f, volumeY = 225.49f, volumeR = 6.14f;
 constexpr float knobY = 228.03f, knobR = 8.62f;
 constexpr float knobX[4] = {384.54f, 416.53f, 448.51f, 480.50f};
 
+// The hardware puts the volume knob hard against the left edge of the panel; here it is moved right
+// to sit midway between that edge and the display, which is easier on the eye than the spacing the
+// drawing has. buildArt() moves the drawn knob and its label by the same amount, so the drawing and
+// the live control stay together. This is the one place the panel is deliberately not the hardware.
+constexpr float volumeShiftX = 8.03f;
+constexpr float volumeRegion[4] = {111.5f, 215.5f, 19.5f, 23.5f};   // knob, tick marks and the label
+constexpr juce::uint32 faceColour = 0xff95b5b7;                     // the drawing's own panel colour
+
+// The single white arc each cap carries, by the id it has in docs/FS1R-front-panel-p14-ny.svg. It is
+// the drawing's way of saying the cap is a cylinder lit from the upper left, so it must not turn with
+// the cap; liftKnobGloss() takes each one out of the drawing and hands it to its knob to paint.
+constexpr const char* knobGloss[4] = {"path10126", "path10502", "path10878", "path11254"};
+constexpr const char* volumeGloss = "path9822";
+
 // The six lit buttons: PLAY / UTIL / SEARCH down the left column, EDIT PERFORM / EFFECT / VOICE down
 // the right one.
 constexpr float ledR = 2.70f;
@@ -84,6 +98,13 @@ void LcdView::fill(int x, int y, int w, int h, bool on) {
         for (int i = 0; i < w; ++i) dot(x + i, y + j, on);
 }
 
+void LcdView::invert(int x, int y, int w, int h) {
+    for (int j = 0; j < h; ++j)
+        for (int i = 0; i < w; ++i)
+            if ((unsigned)(x + i) < (unsigned)kCols && (unsigned)(y + j) < (unsigned)kRows)
+                fb[y + j][x + i] ^= 1;
+}
+
 void LcdView::frame(int x, int y, int w, int h) {
     fill(x, y, w, 1);
     fill(x, y + h - 1, w, 1);
@@ -138,6 +159,15 @@ void PanelKnob::setCap(const juce::Image& i, float restDegrees, float sweepDegre
     repaint();
 }
 
+void PanelKnob::setGloss(const juce::Path& p, juce::Colour c, float strokeWidth,
+                         juce::Rectangle<float> capArea) {
+    gloss = p;
+    glossColour = c;
+    glossStroke = strokeWidth;
+    glossArea = capArea;
+    repaint();
+}
+
 void PanelKnob::setValue(int v, bool notify) {
     v = juce::jlimit(0, top, v);
     if (v == val) return;
@@ -159,6 +189,15 @@ void PanelKnob::paint(juce::Graphics& g) {
                  .rotated(juce::degreesToRadians(deg), r.getCentreX(), r.getCentreY());
     g.setImageResamplingQuality(juce::Graphics::highResamplingQuality);
     g.drawImageTransformed(cap, t);
+
+    if (gloss.isEmpty() || glossArea.isEmpty()) return;
+    const float sx = r.getWidth() / glossArea.getWidth(), sy = r.getHeight() / glossArea.getHeight();
+    auto gt = juce::AffineTransform::translation(-glossArea.getX(), -glossArea.getY())
+                  .scaled(sx, sy)
+                  .translated(r.getX(), r.getY());
+    g.setColour(glossColour);
+    if (glossStroke > 0.0f) g.strokePath(gloss, juce::PathStrokeType(glossStroke * sx), gt);
+    else g.fillPath(gloss, gt);
 }
 
 void PanelKnob::mouseDown(const juce::MouseEvent& e) {
@@ -211,24 +250,75 @@ void PanelButton::paintButton(juce::Graphics& g, bool over, bool down) {
 // taken from where each label sits on the panel. All but PART are part parameters, which is what the
 // CURSOR and VALUE buttons walk over.
 namespace {
+// The PART ASSIGN cursor stops, in the EPROM's own order. The screen templates at 0x39328C are a run
+// of 40-byte records, one per stop, each holding the two display lines; their names and their order
+// are what this table is, and the owner's manual describes the same twelve in the same order on pages
+// 25 and 26. docs/interface_from_firmware.md has the dump.
+//
+// Two of them share one place on the icon strip, the way the hardware prints them: Rcv Ch with Rcv
+// Max, and Bank with Pgm#. Dry Lvl has no icon at all - the silkscreen has ten labels for twelve
+// stops - so it is named on the top line and draws nothing on the strip.
+//
+// x is the field's centre in display dots, or kNoIcon. midi is the message the hardware's MIDI View
+// shows for the stop (EPROM 0x3934BC), blank where it shows none.
+enum FieldId { fRcvCh, fRcvMax, fBank, fPgm, fVolume, fPan, fRev, fVar, fIns, fDry, fFilter, fNote,
+               kNumFields };
+constexpr float kNoIcon = -1.0f;
+
 struct Field {
     const char* label;
     float x;
     const char* group;
     const char* param;
+    const char* midi;
 };
-const Field kFields[10] = {
-    {"Part",     8.5f,   nullptr, nullptr},
-    {"Rcv Ch",   24.6f,  "Part",  "Rcv CHANNEL A1~A16, pfm, off"},
-    {"Pgm#",     44.2f,  "Part",  "PROGRAM NUMBER"},
-    {"Volume",   58.4f,  "Part",  "VOLUME"},
-    {"Filter",   67.1f,  "Part",  "FilterSw"},
-    {"Pan",      75.6f,  "Part",  "PAN Rnd,"},
-    {"RevSend",  84.7f,  "Part",  "REVERB SEND"},
-    {"VarSend",  93.2f,  "Part",  "VARIATION SEND"},
-    {"Ins Sw",   101.9f, "Part",  "INSERTION SW"},
-    {"NoteSft",  111.2f, "Part",  "NOTE SHIFT"},
+const Field kFields[kNumFields] = {
+    {"Rcv Ch",   24.6f,   "Part", "Rcv CHANNEL A1~A16, pfm, off",   ""},
+    {"Rcv Max",  24.6f,   "Part", "Rcv CHANNEL MAX A1~A16, off",    ""},
+    {"Bank",     44.2f,   "Part", "BANK NUMBER off, Int, PrA~PrK",  "Bn 20"},
+    {"Pgm#",     44.2f,   "Part", "PROGRAM NUMBER",                 "Cn"},
+    {"Volume",   58.4f,   "Part", "VOLUME",                         "Bn 07"},
+    {"Pan",      75.6f,   "Part", "PAN Rnd,",                       "Bn 0A"},
+    {"RevSend",  84.7f,   "Part", "REVERB SEND",                    "Bn 5B"},
+    {"VarSend",  93.2f,   "Part", "VARIATION SEND",                 "Bn 5D"},
+    {"InsEfSw",  101.9f,  "Part", "INSERTION SW",                   ""},
+    {"Dry Lvl",  kNoIcon, "Part", "DRY LEVEL",                      ""},
+    {"Filter",   67.1f,   "Part", "FILTER CUTOFF FREQ",             "Bn 4A"},
+    {"NoteSft",  111.2f,  "Part", "NOTE SHIFT",                     ""},
 };
+constexpr float kPartIconX = 8.5f;      // the PART icon: the part number, never a cursor stop
+
+// The PLAY screen's own stops, EPROM 0x392FEC, the same eight the manual lists on page 22. With PART =
+// ALL the strip belongs to the performance, not to a part: there is no FLT or INS icon, and BANK/PGM#
+// carries the performance's category rather than a number. Bank and Pgm# have no parameter of their
+// own - they are the performance selection, so VALUE steps the performance itself.
+enum PlayFieldId { pPfmCh, pBank, pPgm, pVol, pPan, pRev, pVar, pNote, kNumPlayFields };
+const Field kPlayFields[kNumPlayFields] = {
+    {"Pfm Ch",  24.6f,  "System",      "performance channel",    ""},
+    {"Bank",    44.2f,  nullptr,       nullptr,                  "Bn 20"},
+    {"Pgm#",    44.2f,  nullptr,       nullptr,                  "Cn"},
+    {"Pfm Vol", 58.4f,  "Performance", "performance volume",     "Bn 07"},
+    {"Pfm Pan", 75.6f,  "Performance", "performance pan",        "Bn 0A"},
+    {"Rev Rtn", 84.7f,  "Effects",     "Reverb Return",          ""},
+    {"Var Rtn", 93.2f,  "Effects",     "Variation Return",       ""},
+    {"PfmNSft", 111.2f, "Performance", "performance note shift", ""},
+};
+
+const Field* fieldTable(bool all) { return all ? kPlayFields : kFields; }
+int fieldCount(bool all) { return all ? kNumPlayFields : kNumFields; }
+
+// "Please note that the Rcv Max parameter is only available for parts 1 and 2" - owner's manual page
+// 25, so the cursor steps over it on parts 3 and 4.
+bool fieldAvailable(int f, int part, bool all) { return all || f != fRcvMax || part < 2; }
+
+int stepFieldIndex(int from, int by, int part, bool all) {
+    const int n = fieldCount(all);
+    for (int i = 0; i < n; ++i) {
+        from = (from + by + n) % n;
+        if (fieldAvailable(from, part, all)) break;
+    }
+    return from;
+}
 
 // Finds a parameter by group and name. Everything the display shows goes through the parameter list,
 // so the panel never reaches into the engine either.
@@ -239,6 +329,38 @@ int describeIndex(Processor& p, const char* group, const char* name) {
         if (d[i].group == group && d[i].name == name) return (int)i;
     return -1;
 }
+
+// The part's BANK NUMBER as the hardware prints it. The generated parameter table carries the range
+// but not the names, so they come from the same list the patch browser offers.
+juce::String bankName(int v) {
+    static const juce::StringArray banks = PatchManager::voiceBanks();
+    return banks[juce::jlimit(0, banks.size() - 1, v)];
+}
+
+// Walks the drawing for the element that carried this id in the SVG; JUCE's parser keeps it as the
+// drawable's name.
+juce::Drawable* findDrawable(juce::Drawable& d, const char* id) {
+    if (d.getName() == id) return &d;
+    if (auto* c = dynamic_cast<juce::DrawableComposite*>(&d))
+        for (int i = 0; i < c->getNumChildren(); ++i)
+            if (auto* f = findDrawable(c->getChild(i), id)) return f;
+    return nullptr;
+}
+
+// Takes one gloss arc out of the drawing: its path and colour come back, and it is blanked where it
+// stood so the cap rendered from the drawing no longer carries it.
+bool takeGloss(juce::Drawable& art, const char* id, juce::Path& path, juce::Colour& colour, float& stroke) {
+    auto* p = dynamic_cast<juce::DrawablePath*>(findDrawable(art, id));
+    if (p == nullptr) return false;
+    stroke = p->getStrokeType().getStrokeThickness();
+    const bool stroked = stroke > 0.0f && !p->getStrokeFill().colour.isTransparent();
+    colour = stroked ? p->getStrokeFill().colour : p->getFill().colour;
+    if (colour.isTransparent()) return false;
+    if (!stroked) stroke = 0.0f;
+    path = p->getPath();
+    p->replaceColour(colour, juce::Colours::transparentBlack);
+    return true;
+}
 }  // namespace
 
 // ------------------------------------------------------------------------------------------ panel
@@ -247,6 +369,11 @@ PanelView::PanelView(Processor& p) : proc(p) {
                                               (size_t)BinaryData::fs1r_panel_svgSize);
     jassert(art != nullptr);
     addAndMakeVisible(lcd);
+
+    // The four knobs edit the selected part, so they are the part's own parameters rather than raw
+    // sysex: the pages, the host and the panel then all read and move the same value.
+    static const char* toneParams[4] = {"EG ATTACK TIME", "EG RELEASE TIME", "FORMANT", "FM"};
+    for (int i = 0; i < 4; ++i) toneParam[i] = describeIndex(proc, "Part", toneParams[i]);
 
     struct { Mode m; const char* name; const char* page; } modes[] = {
         {Play, "PLAY", "All parameters"}, {Util, "UTIL", "System"}, {Search, "SEARCH", "__search"},
@@ -289,15 +416,24 @@ PanelView::PanelView(Processor& p) : proc(p) {
         proc.device().setGain(muted ? 0.0 : gain);
         showParameterOnLcd("Performance", muted ? "MUTE" : "on");
     };
-    // ponytail: no PART ALL; selectPart is 0-3 and every editor page follows it.
-    partDown->onClick = [this] { proc.selectPart(juce::jmax(0, proc.selectedPart() - 1)); };
-    partUp->onClick = [this] { proc.selectPart(juce::jmin(3, proc.selectedPart() + 1)); };
-    cursorL->onClick = [this] { field = (field + 9) % 10; };
-    cursorR->onClick = [this] { field = (field + 1) % 10; };
+    // "The PART ASSIGN mode can be selected from the PERFORMANCE PLAY mode by pressing either the PART
+    // button" (page 24), and [EXIT] goes back (page 22), so the two buttons walk ALL, 01, 02, 03, 04.
+    partDown->onClick = [this] {
+        if (allParts) setAllParts(false);
+        else if (proc.selectedPart() == 0) setAllParts(true);
+        else proc.selectPart(proc.selectedPart() - 1);
+    };
+    partUp->onClick = [this] {
+        if (allParts) setAllParts(false);
+        else proc.selectPart(juce::jmin(3, proc.selectedPart() + 1));
+    };
+    cursorL->onClick = [this] { field = stepFieldIndex(field, -1, proc.selectedPart(), allParts); };
+    cursorR->onClick = [this] { field = stepFieldIndex(field, +1, proc.selectedPart(), allParts); };
     valueDown->onClick = [this] { stepField(-1); };
     valueUp->onClick = [this] { stepField(1); };
     exitBtn->onClick = [this] {
         midiView = false;
+        setAllParts(true);
         setMode(Play);
         if (onModeButton) onModeButton("All parameters");
     };
@@ -330,12 +466,32 @@ PanelView::PanelView(Processor& p) : proc(p) {
         showParameterOnLcd("Volume", juce::String(v));
     };
     addAndMakeVisible(volume);
+    liftKnobGloss();
     setKnobMode(Tone);
 
     startTimerHz(15);
 }
 
 PanelView::~PanelView() { stopTimer(); }
+
+// The drawing's knob caps each carry one white arc across their upper left. It says the cap is a
+// cylinder lit from that side, so it belongs to the panel rather than to the cap: each one is taken
+// out of the drawing and handed to its knob, which paints it over the turned cap without turning it.
+void PanelView::liftKnobGloss() {
+    if (art == nullptr) return;
+    juce::Path p;
+    juce::Colour c;
+    float stroke = 0.0f;
+    for (int i = 0; i < 4; ++i)
+        if (takeGloss(*art, art::knobGloss[i], p, c, stroke))
+            knobs[i].setGloss(p, c, stroke,
+                              {art::knobX[i] - art::knobR, art::knobY - art::knobR,
+                               2 * art::knobR, 2 * art::knobR});
+    if (takeGloss(*art, art::volumeGloss, p, c, stroke))
+        volume.setGloss(p, c, stroke,
+                        {art::volumeX - art::volumeR, art::volumeY - art::volumeR,
+                         2 * art::volumeR, 2 * art::volumeR});
+}
 
 // ---------------------------------------------------------------------------------------- layout
 juce::Rectangle<int> PanelView::place(float x, float y, float w, float h) const {
@@ -373,6 +529,15 @@ void PanelView::buildArt() {
     {
         juce::Graphics g(panelImage);
         art->draw(g, 1.0f, fit);
+        // Move the drawn volume knob, its tick marks and its label across to where the live control
+        // sits: paint the face colour over where they were, then draw the whole panel again shifted
+        // and clipped to where they are going.
+        const auto& v = art::volumeRegion;
+        g.setColour(juce::Colour(art::faceColour));
+        g.fillRect(place(v[0], v[1], v[2], v[3]));
+        juce::Graphics::ScopedSaveState ss(g);
+        g.reduceClipRegion(place(v[0] + art::volumeShiftX, v[1], v[2], v[3]));
+        art->draw(g, 1.0f, juce::AffineTransform::translation(art::volumeShiftX, 0.0f).followedBy(fit));
     }
     const int capPx = juce::jlimit(32, 512, (int)std::lround(art::knobR * 6.0f * scale));
     knobCap = renderCap(*art, art::knobX[0], art::knobY, art::knobR, capPx);
@@ -393,7 +558,7 @@ void PanelView::resized() {
                           (getHeight() - art::panelH * scale) * 0.5f);
 
     lcd.setBounds(place(art::lcdX, art::lcdY, art::lcdW, art::lcdH));
-    volume.setBounds(placeCircle(art::volumeX, art::volumeY, art::volumeR));
+    volume.setBounds(placeCircle(art::volumeX + art::volumeShiftX, art::volumeY, art::volumeR));
     for (int i = 0; i < 4; ++i)
         knobs[i].setBounds(placeCircle(art::knobX[i], art::knobY, art::knobR));
 
@@ -430,6 +595,16 @@ void PanelView::setKnobMode(KnobMode m) {
     knobMode = m;
     knobModeButtons[0]->setLit(m == Tone);
     knobModeButtons[1]->setLit(m == Kn1to4);
+    refreshKnobs();
+}
+
+// In the tone mode the caps show the selected part's own values, so loading a patch or switching part
+// moves them, the way the hardware's knobs are read against the part they edit.
+void PanelView::refreshKnobs() {
+    if (knobMode != Tone) return;
+    for (int i = 0; i < 4; ++i)
+        if (toneParam[i] >= 0 && !knobs[i].isMouseButtonDown())
+            knobs[i].setValue(proc.parameterValue(toneParam[i]), false);
 }
 
 void PanelView::knobMoved(int knob, int v, int delta) {
@@ -437,11 +612,11 @@ void PanelView::knobMoved(int knob, int v, int delta) {
     switch (knobMode) {
         case Tone: {
             // Straight into the selected part, which is what the lit upper button means.
-            static const int addr[4] = {0x1A, 0x1C, 0x1D, 0x1E};
-            const uint8_t m[10] = {0xF0, 0x43, 0x10, 0x5E, (uint8_t)(0x30 + proc.selectedPart()), 0x00,
-                                   (uint8_t)addr[knob], 0, (uint8_t)v, 0xF7};
-            proc.device().sendMidi(m, 10);
-            showParameterOnLcd(toneNames[knob], juce::String(v - 64));
+            const int idx = toneParam[knob];
+            if (idx < 0) break;
+            auto* q = proc.parameterFor(idx);
+            q->setValueNotifyingHost(q->convertTo0to1((float)v));
+            showParameterOnLcd(toneNames[knob], proc.descriptions()[(size_t)idx].textFor(v));
             break;
         }
         case Kn1to4: {
@@ -458,38 +633,59 @@ void PanelView::knobMoved(int knob, int v, int delta) {
             // Both buttons dark: part / operator, group, cursor and value, as printed under the knobs.
             if (delta == 0) break;
             if (knob == 0) proc.selectPart(juce::jlimit(0, 3, proc.selectedPart() + (delta > 0 ? 1 : -1)));
-            else if (knob == 2) field = (field + (delta > 0 ? 1 : 9)) % 10;
+            else if (knob == 2) field = stepFieldIndex(field, delta > 0 ? 1 : -1, proc.selectedPart(), allParts);
             else if (knob == 3) stepField(delta);
             break;
     }
 }
 
+void PanelView::setAllParts(bool all) {
+    if (all == allParts) return;
+    allParts = all;
+    // The PLAY screen opens on the program number, which is what VALUE steps there; the PART ASSIGN
+    // one opens on its first stop.
+    field = all ? pPgm : fRcvCh;
+}
+
 void PanelView::stepField(int by) {
-    if (field == 0) {
-        proc.selectPart(juce::jlimit(0, 3, proc.selectedPart() + (by > 0 ? 1 : -1)));
+    const Field& f = fieldTable(allParts)[field];
+    // With PART = ALL the bank and program pair is the performance itself: VALUE walks the 384 of them,
+    // a whole bank of 128 at a time on the bank half. This is the one the demos use, and the reason
+    // VALUE changes patches with nothing else selected.
+    if (allParts && (field == pBank || field == pPgm)) {
+        const int n = PatchManager::kNumPerformances;
+        const int now = juce::jmax(0, proc.currentPerformance());
+        const int step = (field == pBank ? 128 : 1) * (by > 0 ? 1 : -1);
+        proc.selectPerformance(juce::jlimit(0, n - 1, now + step));
         return;
     }
-    const int idx = describeIndex(proc, kFields[field].group, kFields[field].param);
+    const int idx = describeIndex(proc, f.group, f.param);
     if (idx < 0) return;
     const auto& d = proc.descriptions()[(size_t)idx];
     auto* q = proc.parameterFor(idx);
     const int v = juce::jlimit(d.min, d.max,
                                (int)std::lround(q->convertFrom0to1(q->getValue())) + (by > 0 ? 1 : -1));
     q->setValueNotifyingHost(q->convertTo0to1((float)v));
-    showParameterOnLcd(kFields[field].label, d.textFor(v));
+    showParameterOnLcd(f.label, (!allParts && field == fBank) ? bankName(v) : d.textFor(v));
 }
 
+// The MIDI View, [ENTER] twice: the channel message that sets the selected parameter, exactly as the
+// hardware's own MIDI View screens spell it (EPROM 0x3934BC, " MIDI     Bank    =" / "Bn 20     = ").
+// Seven of the twelve stops have one; the rest show nothing, which is what those screens are too.
 void PanelView::showMidiView() {
-    const int idx = describeIndex(proc, kFields[field].group, kFields[field].param);
-    if (idx < 0) return;
-    const auto& d = proc.descriptions()[(size_t)idx];
-    auto* q = proc.parameterFor(idx);
-    const int v = (int)std::lround(q->convertFrom0to1(q->getValue()));
-    auto hex = [](int b) { return juce::String::toHexString(b).paddedLeft('0', 2).toUpperCase(); };
-    const int high = d.partRelative ? d.addr[0] + proc.selectedPart() : d.addr[0];
-    pendingName = d.name;
-    pendingValue = "F0 43 10 5E " + hex(high) + " " + hex(d.addr[1]) + " " + hex(d.addr[2]) + " " +
-                   hex(v) + " F7";
+    const Field& f = fieldTable(allParts)[field];
+    const juce::String msg(f.midi);
+    int v = 0;
+    if (allParts && (field == pBank || field == pPgm)) {
+        v = juce::jmax(0, proc.currentPerformance()) % 128 + 1;
+    } else {
+        const int idx = describeIndex(proc, f.group, f.param);
+        if (idx < 0) return;
+        auto* q = proc.parameterFor(idx);
+        v = (int)std::lround(q->convertFrom0to1(q->getValue())) + (field == fPgm && !allParts ? 1 : 0);
+    }
+    pendingName = "MIDI  " + juce::String(f.label);
+    pendingValue = msg.isEmpty() ? juce::String("-") : msg + " = " + juce::String(v);
     pendingCountdown = 0;
     midiView = true;
 }
@@ -530,70 +726,137 @@ static void drawSend(LcdView& l, int cx, int top, int level) {
 }
 
 void PanelView::refreshLcd() {
-    auto& dv = proc.device();
-    const int part = proc.selectedPart();
     lcd.clear();
-
     if (pendingCountdown > 0 || midiView) {
         if (pendingCountdown > 0) --pendingCountdown;
         lcd.text(3, LcdView::kLine1, pendingName.substring(0, 19));
         lcd.text(3, LcdView::kLine2, pendingValue.substring(0, 19));
+    } else if (allParts) {
+        refreshPlayScreen();
     } else {
-        // The play screen: the performance across the top, the selected part's voice below, and the
-        // field the cursor is on named on the right, where the hardware names its parameter.
-        lcd.text(3, LcdView::kLine1, juce::String(dv.performanceName()).trimEnd().substring(0, 12));
-        lcd.textRight(117, LcdView::kLine1, juce::String(kFields[field].label).substring(0, 7));
-        lcd.text(3, LcdView::kLine2,
-                 ("P" + juce::String(part + 1) + " " +
-                  juce::String(dv.voiceName(part)).trimEnd()).substring(0, 12));
-        lcd.textRight(117, LcdView::kLine2,
-                      dv.fseqFrames() ? juce::String("FSEQ")
-                                      : "ALG " + juce::String(dv.algorithm(part) + 1));
+        refreshPartScreen();
     }
 
-    // The icon strip. Everything but PART is a part parameter, read back through the parameter list.
-    for (int f = 0; f < 10; ++f) {
-        const int cx = (int)std::lround(kFields[f].x);
-        const int top = LcdView::kFieldTop;
+    // ------------------------------------------------------------------------------ the icon strip
+    const Field* table = fieldTable(allParts);
+    const int n = fieldCount(allParts);
+    const int top = LcdView::kFieldTop;
+    const int part = proc.selectedPart();
+    // The PART icon: "ALL" on the play screen, the part number otherwise. It is never a cursor stop -
+    // the part moves with the PART buttons.
+    lcd.centred((int)std::lround(kPartIconX), top + 3, allParts ? juce::String("ALL")
+                                                                : juce::String(part + 1));
+
+    for (int f = 0; f < n; ++f) {
+        // The pairs that share one place on the strip: only the half the cursor is on is drawn, and
+        // the first of the pair is what shows when the cursor is elsewhere.
+        if (!allParts) {
+            if (f == fRcvMax && field != fRcvMax) continue;
+            if (f == fRcvCh && field == fRcvMax) continue;
+            if (f == fBank && field != fBank) continue;
+            if (f == fPgm && field == fBank) continue;
+        } else if (f == pPgm) {
+            continue;                       // BANK/PGM# shows the category for both halves
+        }
+        if (table[f].x == kNoIcon) continue;                // Dry Lvl is named on the top line only
+
+        const int cx = (int)std::lround(table[f].x);
         int value = 0;
         juce::String txt;
-        if (f == 0) {
-            txt = juce::String(part + 1);
-        } else {
-            const int idx = describeIndex(proc, kFields[f].group, kFields[f].param);
-            if (idx >= 0) {
-                auto* q = proc.parameterFor(idx);
-                value = (int)std::lround(q->convertFrom0to1(q->getValue()));
-                const auto& d = proc.descriptions()[(size_t)idx];
-                if (f == 1) txt = d.textFor(value).substring(0, 3);
-                else if (f == 2) txt = juce::String(value + 1).paddedLeft('0', 3);
-                else if (f == 9) txt = d.textFor(value).upToFirstOccurrenceOf(" ", false, false);
-            }
+        const int idx = describeIndex(proc, table[f].group, table[f].param);
+        if (idx >= 0) {
+            auto* q = proc.parameterFor(idx);
+            value = (int)std::lround(q->convertFrom0to1(q->getValue()));
+            const auto& d = proc.descriptions()[(size_t)idx];
+            if (!allParts && (f == fRcvCh || f == fRcvMax)) txt = d.textFor(value).substring(0, 3);
+            else if (!allParts && f == fBank) txt = bankName(value);
+            else if (!allParts && f == fPgm) txt = juce::String(value + 1).paddedLeft('0', 3);
+            else if (allParts && f == pPfmCh) txt = juce::String(value + 1).paddedLeft('0', 2);
+            else if ((allParts && f == pNote) || (!allParts && f == fNote))
+                txt = d.textFor(value).upToFirstOccurrenceOf(" ", false, false);
         }
-        int width = 9;                                     // what the selection frame closes around
+        // With PART = ALL the bank and program place carries the performance's category, which is what
+        // the hardware shows there: "En", "Br", "Vo".
+        if (allParts && f == pBank) {
+            static const juce::StringArray cats = PatchManager::categories();
+            const int cat = describeIndex(proc, "Performance", "CATEGORY");
+            txt = cats[cat < 0 ? 0 : juce::jlimit(0, cats.size() - 1, proc.parameterValue(cat))];
+        }
+
+        int width = 9;
         if (txt.isNotEmpty()) {
             lcd.centred(cx, top + 3, txt);
             width = txt.length() * 6 + 1;
-        } else if (f == 3) drawLevel(lcd, cx, top, value);
-        else if (f == 4) {
-            if (value) {                                   // the filter switch, drawn as a cutoff corner
-                lcd.fill(cx - 3, top + 3, 4, 1);
-                lcd.fill(cx + 1, top + 3, 1, 7);
-            }
-        } else if (f == 5) { drawPan(lcd, cx, top, value); width = 11; }
-        else if (f == 6 || f == 7) drawSend(lcd, cx, top, value);
-        else if (f == 8) { if (value) lcd.fill(cx - 2, top + 4, 5, 5); }
+        } else if ((allParts && f == pVol) || (!allParts && f == fVolume)) drawLevel(lcd, cx, top, value);
+        else if (!allParts && f == fFilter) {
+            // The cutoff offset, drawn as a corner whose knee moves with it. This stop is the part's
+            // FILTER CUTOFF FREQ, which is what MIDI View calls "Bn 4A" - not the filter switch.
+            const int knee = cx - 3 + value * 5 / 127;
+            lcd.fill(cx - 3, top + 3, knee - (cx - 3) + 1, 1);
+            lcd.fill(knee, top + 3, 1, 7);
+        } else if ((allParts && f == pPan) || (!allParts && f == fPan)) {
+            drawPan(lcd, cx, top, value);
+            width = 11;
+        } else if ((allParts && (f == pRev || f == pVar)) || (!allParts && (f == fRev || f == fVar)))
+            drawSend(lcd, cx, top, value);
+        else if (!allParts && f == fIns) { if (value) lcd.fill(cx - 2, top + 4, 5, 5); }
 
-        // "A small triangular pointer appears above the icon corresponding to the selected
-        // parameter in the bottom line of the display" - owner's manual page 22.
-        if (f == field) {
-            for (int i = 0; i < 3; ++i) lcd.fill(cx - 2 + i, LcdView::kPointerRow + i, 5 - 2 * i, 1);
-            lcd.frame(cx - width / 2 - 1, top + 1, width + 2, LcdView::kFieldBottom - top);
-        }
+        // The selected stop is drawn in reverse video. The owner's manual calls it "a small triangular
+        // pointer above the icon" (pages 22 and 25), but a v1.20 unit shows a filled box with the
+        // glyphs knocked out of it and no pointer at all - see docs/interface_from_firmware.md.
+        const bool selected = f == field || (allParts && f == pBank && field == pPgm);
+        if (selected) lcd.invert(cx - width / 2 - 1, top + 1, width + 2, LcdView::kFieldBottom - top);
     }
     lcd.commit();
 }
 
-void PanelView::timerCallback() { refreshLcd(); }
+// PART = ALL. "C056 Hit" across the top and "Perform<PrC<056" along the bottom right, the pair carrying
+// the solid pointer against whichever half the cursor is on and the hollow one against the other.
+void PanelView::refreshPlayScreen() {
+    const int pf = proc.currentPerformance();
+    const auto name = juce::String(proc.device().performanceName()).trimEnd();
+    // The stop's name shares the top line with the performance's, so the performance gives way when
+    // one is showing. On the bank and program pair the hardware shows no name there at all.
+    const bool onPair = field == pBank || field == pPgm;
+    const int room = onPair ? 19 : 12;
+    if (pf >= 0) {
+        const auto& e = proc.patches().performances()[(size_t)pf];
+        lcd.text(3, LcdView::kLine1, (e.code + " " + e.name).substring(0, room));
+        // The solid pointer sits against the half the cursor is on, the hollow one against the other
+        // (owner's manual page 22). With the cursor elsewhere the program number keeps the solid one,
+        // which is where a unit sits at power-up.
+        const juce::String solid = juce::String::charToString(1), hollow = juce::String::charToString(2);
+        lcd.textRight(117, LcdView::kLine2,
+                      "Perform" + (field == pBank ? solid : hollow) + "Pr" + e.code.substring(0, 1) +
+                          (field == pBank ? hollow : solid) + e.code.substring(1));
+    } else {
+        lcd.text(3, LcdView::kLine1, name.substring(0, room));
+        lcd.textRight(117, LcdView::kLine2, "Perform");
+    }
+    if (!onPair)
+        lcd.textRight(117, LcdView::kLine1, juce::String(kPlayFields[field].label).substring(0, 7));
+}
+
+// PART = 01..04. The performance still names the top line, the part's own voice the second.
+void PanelView::refreshPartScreen() {
+    auto& dv = proc.device();
+    const int part = proc.selectedPart();
+    const int pf = proc.currentPerformance();
+    const auto name = juce::String(dv.performanceName()).trimEnd();
+    lcd.text(3, LcdView::kLine1,
+             pf >= 0 ? (proc.patches().performances()[(size_t)pf].code + " " + name).substring(0, 12)
+                     : name.substring(0, 12));
+    lcd.textRight(117, LcdView::kLine1, juce::String(kFields[field].label).substring(0, 7));
+    lcd.text(3, LcdView::kLine2,
+             ("P" + juce::String(part + 1) + " " +
+              juce::String(dv.voiceName(part)).trimEnd()).substring(0, 12));
+    lcd.textRight(117, LcdView::kLine2,
+                  dv.fseqFrames() ? juce::String("FSEQ") : "ALG " + juce::String(dv.algorithm(part) + 1));
+}
+
+void PanelView::timerCallback() {
+    refreshKnobs();
+    refreshLcd();
+}
 
 }  // namespace fs1rplug

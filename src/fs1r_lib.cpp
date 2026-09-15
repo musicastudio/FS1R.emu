@@ -317,12 +317,16 @@ struct Rom;                                  // defined with the loaders below
 static void rom_voice(const Rom& R, int idx, Voice& V);
 static int bank_voice_index(int bank, int prog);
 static bool rom_ready(const Rom* R);
-// Performance banks in the EPROM table of 360. Two boundaries are verifiable from the Data List's
-// performance list: "Sweepy Voice" (Internal 1) is entry 104 and "UprightPiano" (Preset A 1) is entry
-// 232, so those two banks are exact; the remaining 104 entries at the front are the third block.
+// Performance banks in the EPROM table of 384: the three preset banks, 128 each, in order A, B, C.
+// The Data List's performance lists match them entry for entry - "Zap !" is Preset A 1, "Sweepy Voice"
+// Preset B 1 and "UprightPiano" Preset C 1 - and the manual's own description of Preset C settles that
+// last one on its own: it is the bank for the G50 guitar controller, "the maximum MIDI receive channel
+// for these voices is 6, and the pitch bend range is -12 ... +12" (owner's manual page 21), which is
+// exactly what entries 256-383 hold and nothing else does. INTERNAL is the user's own battery-backed
+// bank, not ROM, so a bank select for it lands on Preset A, which is what the unit ships holding.
 static int bank_perf_index(int lsb, int prog) {
-    int base = lsb == 0x40 ? 104 : lsb == 0x41 ? 232 : 0;
-    return clampi(base + (prog & 0x7F), 0, 359);
+    int base = lsb == 0x42 ? 128 : lsb == 0x43 ? 256 : 0;   // PrB, PrC, else Int and PrA
+    return clampi(base + (prog & 0x7F), 0, 383);
 }
 
 struct Part {
@@ -1064,8 +1068,17 @@ struct Synth {
         case 65: pt.p[0x24] = (uint8_t)((pt.p[0x24] & 2) | (v >= 64)); break;
         case 5: pt.p[0x25] = (uint8_t)v; break;
         case 10: pt.p[0x0E] = (uint8_t)std::max(1, v); break;
-        case 91: pt.p[0x13] = (uint8_t)v; break;
-        case 94: pt.p[0x12] = (uint8_t)v; break;
+        // The five sound controllers and the two sends, read out of the firmware's own per-CC handler
+        // table at flash 0x3DA04: every entry that is not the ignore stub at 0x151C0 writes one part
+        // parameter, and the handler's immediate is the address low it writes to. 71 -> 0x19, 72 ->
+        // 0x1C, 73 -> 0x1A, 74 -> 0x18, 91 -> 0x13, 93 -> 0x12. The MIDI View screens in the EPROM
+        // print the same pairs: RevSend "Bn 5B", VarSend "Bn 5D", Filter "Bn 4A".
+        case 71: pt.p[0x19] = (uint8_t)v; break;    // filter resonance
+        case 72: pt.p[0x1C] = (uint8_t)v; break;    // EG release time
+        case 73: pt.p[0x1A] = (uint8_t)v; break;    // EG attack time
+        case 74: pt.p[0x18] = (uint8_t)v; break;    // filter cutoff
+        case 91: pt.p[0x13] = (uint8_t)v; break;    // reverb send
+        case 93: pt.p[0x12] = (uint8_t)v; break;    // variation send, not 94
         case 98: pt.rpnL = v; pt.nrpnSel = true; break;
         case 99: pt.rpnM = v; pt.nrpnSel = true; break;
         case 100: pt.rpnL = v; pt.nrpnSel = false; break;
@@ -1331,20 +1344,27 @@ static bool load_rom(Rom& R, const char* path) {
         for (size_t i = 0; i < R.d.size(); i += 2) std::swap(R.d[i], R.d[i + 1]);
     R.ok = true; return true;
 }
-// voices: 0-255 native at 0x5C280 (PrJ, PrK), 256-1407 DX7 format at 0x30091 (PrA..PrI)
+// voices: 0-255 native at 0x5C280 (PrA, PrB), 256-1407 DX7 format at 0x30091 (PrC..PrK)
 static void rom_voice(const Rom& R, int idx, Voice& V) {
     idx = clampi(idx, 0, 1407);
     if (idx < 256) memcpy(V.raw, R.d.data() + 0x5C280 + (size_t)idx * 608, 608);
     else { const uint8_t* r = R.d.data() + 0x30091 + (size_t)(idx - 256) * 155; uint8_t vced[155]; memcpy(vced, r + 10, 145); memcpy(vced + 145, r, 10); convert_dx7(vced, V.raw); }
     decode_voice(V);
 }
-static int bank_voice_index(int bank, int prog) {   // part bank 1=Int (mapped to PrJ), 2..12 = PrA..PrK
+// Part bank byte: 0 = off, 1 = Int, 2..12 = PrA..PrK. PRESET A and B are the FS1R's own 128 voices
+// each, PRESET C through K the nine banks of DX-series voices (owner's manual page 21), which is the
+// order the two ROM blocks are in: 256 native then 1152 DX7. The performances prove it - "FundaBass"
+// asks for bank 2 program 41 and native voice 41 is "FundaBass" - and across all 384 of them this
+// reading puts 439 parts on FS1R voices against 48 the other way round, and matches the performance's
+// own category 71% of the time against 10%. Int is the user bank, which ships holding Init voices, so
+// nothing is loaded for it.
+static int bank_voice_index(int bank, int prog) {
     prog &= 0x7F;
-    if (bank >= 2 && bank <= 10) return 256 + (bank - 2) * 128 + prog;
-    if (bank == 11) return prog; if (bank == 12) return 128 + prog;
+    if (bank == 2 || bank == 3) return (bank - 2) * 128 + prog;        // PrA, PrB: native
+    if (bank >= 4 && bank <= 12) return 256 + (bank - 4) * 128 + prog; // PrC..PrK: DX7
     return prog;
 }
-// performances: one table of 400-byte entries at 0xC580 (PrA, PrB, then the factory internal set from index 357)
+// performances: one table of 384 400-byte entries at 0xA000, the preset banks A, B and C in order
 static void perf_from_bytes(Synth& S, const Rom* R, const uint8_t* d) {
     Perf& P = S.perf;
     memcpy(P.c, d, 80); memcpy(P.fx, d + 80, 112);
@@ -1360,7 +1380,7 @@ static void perf_from_bytes(Synth& S, const Rom* R, const uint8_t* d) {
     }
 }
 static bool rom_perf(Synth& S, const Rom& R, int idx) {
-    idx = clampi(idx, 0, 359); size_t off = 0xC580 + (size_t)idx * 400;
+    idx = clampi(idx, 0, 383); size_t off = 0xA000 + (size_t)idx * 400;
     std::lock_guard<std::mutex> lk(S.mtx);
     perf_from_bytes(S, &R, R.d.data() + off);
     return true;
@@ -1368,7 +1388,7 @@ static bool rom_perf(Synth& S, const Rom& R, int idx) {
 static bool rom_ready(const Rom* R) { return R && R->ok; }
 void Synth::load_perf_bank(int lsb, int prog) {          // called with mtx already held
     if (!rom_ready(rom)) return;
-    perf_from_bytes(*this, rom, rom->d.data() + 0xC580 + (size_t)bank_perf_index(lsb, prog) * 400);
+    perf_from_bytes(*this, rom, rom->d.data() + 0xA000 + (size_t)bank_perf_index(lsb, prog) * 400);
 }
 static bool rom_fseq(Synth& S, const Rom& R, int n) {   // preset Fseq 1..90
     n = clampi(n, 1, 90); size_t off = n <= 10 ? 0x100A00 + (size_t)(n - 1) * 25632 : 0x83000 + (size_t)(n - 11) * 6432;
@@ -1395,9 +1415,15 @@ static bool load_sysex(Synth& S, const Rom* R, const uint8_t* d, size_t len, int
                 if (found++ != pick) continue;
                 perf_from_bytes(S, R, p); return true;
             }
-            if (ah == 0x70 && bc >= 32 + 50) {
-                if (found++ != pick) continue;
-                S.fseq.from_bytes(p, p + 32, std::min(512, (bc - 32) / 50)); if (S.fseqPart < 0) S.fseqPart = 0; return true;
+            // "FSeq Bulk does not interpret Byte Count" (Data List 3.2.1), and it cannot: a 512 frame
+            // dump is 25632 bytes and the count is 14 bits. The header's own frame count says how long
+            // the dump is, which is also how the length is known when stepping over one.
+            if (ah == 0x70 && i + 9 + 32 <= len) {
+                int frames = 128 * ((p[0x1B] & 3) + 1);
+                size_t n = 32 + (size_t)frames * 50;
+                if (i + 9 + n + 2 > len) break;
+                if (found++ != pick) { i += 10 + n; continue; }
+                S.fseq.from_bytes(p, p + 32, frames); if (S.fseqPart < 0) S.fseqPart = 0; return true;
             }
         } else if (d[i + 3] == 0x05 && d[i + 4] == 0x00 && d[i + 5] == 0x31) {
             if (i + 6 + 49 + 2 > len) break;

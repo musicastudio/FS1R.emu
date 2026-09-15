@@ -217,7 +217,7 @@ performance, the end of valid data from the Fseq header. Preset Fseqs live in th
 ## Performances
 
 360 entries of 400 bytes at EPROM 0xC580 (PrA, PrB, then the factory internal set): 80 common + 112 effect + 4 x 52
-part, sysex layout. Part bank 2..12 = PrA..PrK (PrA-PrI are the DX7-format banks, PrJ/PrK native).
+part, sysex layout. Part bank 2..12 = PrA..PrK (PrA and PrB are the native banks, PrC-PrK the DX7-format ones).
 
 ## INFERRED (chip side, not in any file)
 

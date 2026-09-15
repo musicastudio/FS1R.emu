@@ -31,24 +31,27 @@ CASES = [
     ("rom-voice0",    ["-r", "{rom}", "-p", "0"],      60, 2.0),
     ("rom-voice300",  ["-r", "{rom}", "-p", "300"],    60, 2.0),
     ("rom-voice900",  ["-r", "{rom}", "-p", "900"],    48, 2.0),
-    ("perf-everybody",["-r", "{rom}", "-P", "0"],      60, 3.0),
-    ("perf-spacypad", ["-r", "{rom}", "-P", "54"],     60, 3.0),
-    ("perf-towarp",   ["-r", "{rom}", "-P", "18"],     60, 3.0),
-    ("perf-manhattan",["-r", "{rom}", "-P", "76"],     60, 3.0),
+    ("perf-everybody",["-r", "{rom}", "-P", "24"],     60, 3.0),
+    # "Spacy Pad" is a slow pad: its own voice does not reach peak until about 5 s, so 3 s of it is
+    # silence and measures nothing.
+    ("perf-spacypad", ["-r", "{rom}", "-P", "78"],     60, 8.0),
+    ("perf-towarp",   ["-r", "{rom}", "-P", "42"],     60, 3.0),
+    ("perf-manhattan",["-r", "{rom}", "-P", "100"],    60, 3.0),
     ("fseq-shoobydo", ["-r", "{rom}", "-f", "1", "-p", "0"], 60, 3.0),
     # Away from the Fseq's assigned note, so the formant frequencies and the fundamental move apart.
     ("fseq-high",     ["-r", "{rom}", "-f", "1", "-p", "0"], 72, 3.0),
     ("fseq-low",      ["-r", "{rom}", "-f", "1", "-p", "0"], 48, 3.0),
     # The controller matrix. Every preset performance routes something, so these drive real destinations:
-    # perf 0 sends the wheel to frequency bias and KN3 to volume, perf 4 sends it to bandwidth, amplitude
-    # EG bias, filter cutoff and resonance, perf 2 sends it to LFO1 pitch mod.
-    # Perf 15 is a single part and routes the wheel to frequency bias at depth +32; -p swaps in a native
-    # voice with a frequency bias sense on every operator, so the pair brackets destination 36.
-    ("ctrl-freqbias-off", ["-r", "{rom}", "-P", "15", "-p", "183"],             60, 3.0),
-    ("ctrl-freqbias", ["-r", "{rom}", "-P", "15", "-p", "183", "-cc", "1=127"], 60, 3.0),
-    ("ctrl-volume",   ["-r", "{rom}", "-P", "0", "-cc", "18=0"],   60, 3.0),
-    ("ctrl-multi",    ["-r", "{rom}", "-P", "4", "-cc", "1=127"],  60, 3.0),
-    ("ctrl-lfo1pmod", ["-r", "{rom}", "-P", "2", "-cc", "1=127"],  60, 3.0),
+    # "Everybody" (24) sends the wheel to frequency bias and KN3 to volume, "Digital" (28) sends it to
+    # bandwidth, amplitude EG bias, filter cutoff and resonance, "Dist Mini" (26) sends it to LFO1 pitch
+    # mod. "Trance Cosmo" (39) is a single part and routes the wheel to frequency bias at depth +32; -p
+    # swaps in a native voice with a frequency bias sense on every operator, so the pair brackets
+    # destination 36. The numbers are indexes into the EPROM's 384 entry performance table at 0x20A000.
+    ("ctrl-freqbias-off", ["-r", "{rom}", "-P", "39", "-p", "183"],             60, 3.0),
+    ("ctrl-freqbias", ["-r", "{rom}", "-P", "39", "-p", "183", "-cc", "1=127"], 60, 3.0),
+    ("ctrl-volume",   ["-r", "{rom}", "-P", "24", "-cc", "18=40"], 60, 3.0),
+    ("ctrl-multi",    ["-r", "{rom}", "-P", "28", "-cc", "1=127"], 60, 3.0),
+    ("ctrl-lfo1pmod", ["-r", "{rom}", "-P", "26", "-cc", "1=127"], 60, 3.0),
 ]
 
 

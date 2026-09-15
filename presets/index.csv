@@ -1407,3 +1407,477 @@ dx7,1148,Yes Talk  ,,17,presets\dx7\1148_Yes_Talk.syx
 dx7,1149,Help me ! ,,17,presets\dx7\1149_Help_me_.syx
 dx7,1150,Paranoir  ,,6,presets\dx7\1150_Paranoir.syx
 dx7,1151,Screamy   ,,2,presets\dx7\1151_Screamy.syx
+performance,0,Zap !       ,16,,presets\performances\000_Zap_.syx
+performance,1,Shaman      ,19,,presets\performances\001_Shaman.syx
+performance,2,Nightmare   ,13,,presets\performances\002_Nightmare.syx
+performance,3,Acid King   ,5,,presets\performances\003_Acid_King.syx
+performance,4,Snow Decay  ,18,,presets\performances\004_Snow_Decay.syx
+performance,5,Hollywood   ,20,,presets\performances\005_Hollywood.syx
+performance,6,Yes No      ,16,,presets\performances\006_Yes_No.syx
+performance,7,Fetish      ,11,,presets\performances\007_Fetish.syx
+performance,8,Platipus    ,11,,presets\performances\008_Platipus.syx
+performance,9,Bots        ,13,,presets\performances\009_Bots.syx
+performance,10,Sho         ,13,,presets\performances\010_Sho.syx
+performance,11,Technical   ,5,,presets\performances\011_Technical.syx
+performance,12,Dirt Vocoder,19,,presets\performances\012_Dirt_Vocoder.syx
+performance,13,Homy        ,19,,presets\performances\013_Homy.syx
+performance,14,BeatBox     ,17,,presets\performances\014_BeatBox.syx
+performance,15,Magic Laugh ,16,,presets\performances\015_Magic_Laugh.syx
+performance,16,VocoTouch   ,19,,presets\performances\016_VocoTouch.syx
+performance,17,The Seeker  ,19,,presets\performances\017_The_Seeker.syx
+performance,18,Can You Give,19,,presets\performances\018_Can_You_Give.syx
+performance,19,Vox Morph   ,19,,presets\performances\019_Vox_Morph.syx
+performance,20,Vox Phase   ,19,,presets\performances\020_Vox_Phase.syx
+performance,21,F-Sweep     ,19,,presets\performances\021_F-Sweep.syx
+performance,22,The Vocoder ,19,,presets\performances\022_The_Vocoder.syx
+performance,23,Sand Voice  ,19,,presets\performances\023_Sand_Voice.syx
+performance,24,Everybody   ,19,,presets\performances\024_Everybody.syx
+performance,25,HyperFuzz   ,5,,presets\performances\025_HyperFuzz.syx
+performance,26,Dist Mini   ,5,,presets\performances\026_Dist_Mini.syx
+performance,27,Strobe      ,5,,presets\performances\027_Strobe.syx
+performance,28,Digital     ,5,,presets\performances\028_Digital.syx
+performance,29,Power Key   ,5,,presets\performances\029_Power_Key.syx
+performance,30,Moon Bass   ,5,,presets\performances\030_Moon_Bass.syx
+performance,31,LoFi Acid   ,5,,presets\performances\031_LoFi_Acid.syx
+performance,32,Funk Bass   ,5,,presets\performances\032_Funk_Bass.syx
+performance,33,Matze       ,5,,presets\performances\033_Matze.syx
+performance,34,Glass Harp  ,11,,presets\performances\034_Glass_Harp.syx
+performance,35,Sweepers    ,11,,presets\performances\035_Sweepers.syx
+performance,36,Nu Skool    ,11,,presets\performances\036_Nu_Skool.syx
+performance,37,Syncorgano  ,11,,presets\performances\037_Syncorgano.syx
+performance,38,Mitosis     ,11,,presets\performances\038_Mitosis.syx
+performance,39,Trance Cosmo,11,,presets\performances\039_Trance_Cosmo.syx
+performance,40,Glider      ,11,,presets\performances\040_Glider.syx
+performance,41,Night       ,16,,presets\performances\041_Night.syx
+performance,42,To Warp     ,16,,presets\performances\042_To_Warp.syx
+performance,43,Space Bomb  ,16,,presets\performances\043_Space_Bomb.syx
+performance,44,Open        ,16,,presets\performances\044_Open.syx
+performance,45,Dark        ,16,,presets\performances\045_Dark.syx
+performance,46,Walking Robo,16,,presets\performances\046_Walking_Robo.syx
+performance,47,Scaling     ,16,,presets\performances\047_Scaling.syx
+performance,48,Ghost       ,16,,presets\performances\048_Ghost.syx
+performance,49,Saucer      ,16,,presets\performances\049_Saucer.syx
+performance,50,Force Field ,16,,presets\performances\050_Force_Field.syx
+performance,51,Radio MW    ,16,,presets\performances\051_Radio_MW.syx
+performance,52,4-3-2-1     ,16,,presets\performances\052_4-3-2-1.syx
+performance,53,Slow Attack ,16,,presets\performances\053_Slow_Attack.syx
+performance,54,Spiral      ,16,,presets\performances\054_Spiral.syx
+performance,55,Morph       ,13,,presets\performances\055_Morph.syx
+performance,56,Moving      ,13,,presets\performances\056_Moving.syx
+performance,57,Prophet F   ,13,,presets\performances\057_Prophet_F.syx
+performance,58,Caravan     ,13,,presets\performances\058_Caravan.syx
+performance,59,FormantSweep,13,,presets\performances\059_FormantSweep.syx
+performance,60,Mysterians  ,13,,presets\performances\060_Mysterians.syx
+performance,61,DippeDut    ,13,,presets\performances\061_DippeDut.syx
+performance,62,Glacial     ,13,,presets\performances\062_Glacial.syx
+performance,63,Mizu Guitar ,13,,presets\performances\063_Mizu_Guitar.syx
+performance,64,Pure        ,13,,presets\performances\064_Pure.syx
+performance,65,Furry Bell  ,13,,presets\performances\065_Furry_Bell.syx
+performance,66,Replicant   ,13,,presets\performances\066_Replicant.syx
+performance,67,Miracle     ,13,,presets\performances\067_Miracle.syx
+performance,68,Swarm       ,20,,presets\performances\068_Swarm.syx
+performance,69,Venus       ,20,,presets\performances\069_Venus.syx
+performance,70,Relaxxx     ,20,,presets\performances\070_Relaxxx.syx
+performance,71,Mouth Pop   ,20,,presets\performances\071_Mouth_Pop.syx
+performance,72,R.P.M.      ,20,,presets\performances\072_R.P.M..syx
+performance,73,Solstice    ,20,,presets\performances\073_Solstice.syx
+performance,74,Bleep       ,20,,presets\performances\074_Bleep.syx
+performance,75,Starship    ,12,,presets\performances\075_Starship.syx
+performance,76,SuperPad    ,12,,presets\performances\076_SuperPad.syx
+performance,77,Moby II     ,12,,presets\performances\077_Moby_II.syx
+performance,78,Spacy Pad   ,12,,presets\performances\078_Spacy_Pad.syx
+performance,79,Pompeii     ,12,,presets\performances\079_Pompeii.syx
+performance,80,The Shadow  ,12,,presets\performances\080_The_Shadow.syx
+performance,81,Earth Wind  ,12,,presets\performances\081_Earth_Wind.syx
+performance,82,Nebulous    ,12,,presets\performances\082_Nebulous.syx
+performance,83,CineSweep   ,12,,presets\performances\083_CineSweep.syx
+performance,84,Qwerty      ,12,,presets\performances\084_Qwerty.syx
+performance,85,Warm Galaxy ,12,,presets\performances\085_Warm_Galaxy.syx
+performance,86,Octavian    ,12,,presets\performances\086_Octavian.syx
+performance,87,Fat Line    ,22,,presets\performances\087_Fat_Line.syx
+performance,88,Metallic    ,22,,presets\performances\088_Metallic.syx
+performance,89,Superarp    ,22,,presets\performances\089_Superarp.syx
+performance,90,Noble Metal ,22,,presets\performances\090_Noble_Metal.syx
+performance,91,Perc Arp    ,22,,presets\performances\091_Perc_Arp.syx
+performance,92,Dog Bytes   ,22,,presets\performances\092_Dog_Bytes.syx
+performance,93,Iron Man    ,22,,presets\performances\093_Iron_Man.syx
+performance,94,Hard Pulse  ,22,,presets\performances\094_Hard_Pulse.syx
+performance,95,Zansyo      ,18,,presets\performances\095_Zansyo.syx
+performance,96,Da Comp     ,18,,presets\performances\096_Da_Comp.syx
+performance,97,Snow Pixy   ,18,,presets\performances\097_Snow_Pixy.syx
+performance,98,Fusion      ,18,,presets\performances\098_Fusion.syx
+performance,99,Funk        ,18,,presets\performances\099_Funk.syx
+performance,100,Manhattan   ,18,,presets\performances\100_Manhattan.syx
+performance,101,Fifths      ,18,,presets\performances\101_Fifths.syx
+performance,102,Vulcan      ,18,,presets\performances\102_Vulcan.syx
+performance,103,Fluffy      ,18,,presets\performances\103_Fluffy.syx
+performance,104,Spellbound  ,18,,presets\performances\104_Spellbound.syx
+performance,105,VeloSweep   ,18,,presets\performances\105_VeloSweep.syx
+performance,106,Raymond     ,18,,presets\performances\106_Raymond.syx
+performance,107,Zapper      ,18,,presets\performances\107_Zapper.syx
+performance,108,Harry       ,18,,presets\performances\108_Harry.syx
+performance,109,Fast&Cheap  ,18,,presets\performances\109_Fast_Cheap.syx
+performance,110,Funky Tech  ,18,,presets\performances\110_Funky_Tech.syx
+performance,111,Pluck Glass ,18,,presets\performances\111_Pluck_Glass.syx
+performance,112,Komodo      ,18,,presets\performances\112_Komodo.syx
+performance,113,Suikinkutsu ,14,,presets\performances\113_Suikinkutsu.syx
+performance,114,Gamelan     ,14,,presets\performances\114_Gamelan.syx
+performance,115,Thai Boxing ,14,,presets\performances\115_Thai_Boxing.syx
+performance,116,Siam Prayer ,14,,presets\performances\116_Siam_Prayer.syx
+performance,117,EthnicPercs ,14,,presets\performances\117_EthnicPercs.syx
+performance,118,Mukkuri     ,14,,presets\performances\118_Mukkuri.syx
+performance,119,Kalimba     ,14,,presets\performances\119_Kalimba.syx
+performance,120,Drum Kit 1  ,17,,presets\performances\120_Drum_Kit_1.syx
+performance,121,Drum Kit 2  ,17,,presets\performances\121_Drum_Kit_2.syx
+performance,122,Drum Kit 3  ,17,,presets\performances\122_Drum_Kit_3.syx
+performance,123,Drum Kit 9o9,17,,presets\performances\123_Drum_Kit_9o9.syx
+performance,124,TechBeat    ,17,,presets\performances\124_TechBeat.syx
+performance,125,BoomTchak   ,17,,presets\performances\125_BoomTchak.syx
+performance,126,TechKicks   ,17,,presets\performances\126_TechKicks.syx
+performance,127,TekkSet     ,17,,presets\performances\127_TekkSet.syx
+performance,128,Sweepy Voice,19,,presets\performances\128_Sweepy_Voice.syx
+performance,129,Breathy 5th ,19,,presets\performances\129_Breathy_5th.syx
+performance,130,Lightyears  ,19,,presets\performances\130_Lightyears.syx
+performance,131,Vox Move    ,19,,presets\performances\131_Vox_Move.syx
+performance,132,Vox Tron    ,19,,presets\performances\132_Vox_Tron.syx
+performance,133,Spacy Aaah  ,19,,presets\performances\133_Spacy_Aaah.syx
+performance,134,Celebration ,19,,presets\performances\134_Celebration.syx
+performance,135,Choir       ,19,,presets\performances\135_Choir.syx
+performance,136,Human Woo   ,19,,presets\performances\136_Human_Woo.syx
+performance,137,Human Ih    ,19,,presets\performances\137_Human_Ih.syx
+performance,138,Human Eh    ,19,,presets\performances\138_Human_Eh.syx
+performance,139,Human Oh    ,19,,presets\performances\139_Human_Oh.syx
+performance,140,Shooby Do   ,19,,presets\performances\140_Shooby_Do.syx
+performance,141,Full Tines  ,1,,presets\performances\141_Full_Tines.syx
+performance,142,DX Original ,1,,presets\performances\142_DX_Original.syx
+performance,143,Dyno Rose   ,1,,presets\performances\143_Dyno_Rose.syx
+performance,144,EP 1980     ,1,,presets\performances\144_EP_1980.syx
+performance,145,Crystal Rose,1,,presets\performances\145_Crystal_Rose.syx
+performance,146,DX Phase    ,1,,presets\performances\146_DX_Phase.syx
+performance,147,DX Classic  ,1,,presets\performances\147_DX_Classic.syx
+performance,148,EP Reece    ,1,,presets\performances\148_EP_Reece.syx
+performance,149,Nu Suitcase ,1,,presets\performances\149_Nu_Suitcase.syx
+performance,150,EP Wide     ,1,,presets\performances\150_EP_Wide.syx
+performance,151,Velvet Dyno ,1,,presets\performances\151_Velvet_Dyno.syx
+performance,152,Tremolo     ,1,,presets\performances\152_Tremolo.syx
+performance,153,EP Soft     ,1,,presets\performances\153_EP_Soft.syx
+performance,154,Wurli Dirty ,1,,presets\performances\154_Wurli_Dirty.syx
+performance,155,Wurli Clean ,1,,presets\performances\155_Wurli_Clean.syx
+performance,156,CP Hard     ,1,,presets\performances\156_CP_Hard.syx
+performance,157,UprightPiano,1,,presets\performances\157_UprightPiano.syx
+performance,158,Clavmann    ,1,,presets\performances\158_Clavmann.syx
+performance,159,BryteClavman,1,,presets\performances\159_BryteClavman.syx
+performance,160,Fat Clavmann,1,,presets\performances\160_Fat_Clavmann.syx
+performance,161,Digi Clav   ,1,,presets\performances\161_Digi_Clav.syx
+performance,162,Thin Clav   ,1,,presets\performances\162_Thin_Clav.syx
+performance,163,Optical     ,5,,presets\performances\163_Optical.syx
+performance,164,FundaBass   ,5,,presets\performances\164_FundaBass.syx
+performance,165,B-Rave      ,5,,presets\performances\165_B-Rave.syx
+performance,166,Square Bass ,5,,presets\performances\166_Square_Bass.syx
+performance,167,Ethno Bass  ,5,,presets\performances\167_Ethno_Bass.syx
+performance,168,Bassline 1  ,5,,presets\performances\168_Bassline_1.syx
+performance,169,Bassline 2  ,5,,presets\performances\169_Bassline_2.syx
+performance,170,JungleBass  ,5,,presets\performances\170_JungleBass.syx
+performance,171,Plastic Bass,5,,presets\performances\171_Plastic_Bass.syx
+performance,172,Punch Bass  ,5,,presets\performances\172_Punch_Bass.syx
+performance,173,Compu Saw   ,5,,presets\performances\173_Compu_Saw.syx
+performance,174,Dry Syn     ,5,,presets\performances\174_Dry_Syn.syx
+performance,175,Earth Lead  ,11,,presets\performances\175_Earth_Lead.syx
+performance,176,Hollow      ,11,,presets\performances\176_Hollow.syx
+performance,177,Samplon     ,11,,presets\performances\177_Samplon.syx
+performance,178,Noodles     ,11,,presets\performances\178_Noodles.syx
+performance,179,BigAssSynth ,11,,presets\performances\179_BigAssSynth.syx
+performance,180,Teck Hook   ,11,,presets\performances\180_Teck_Hook.syx
+performance,181,Sunhead     ,11,,presets\performances\181_Sunhead.syx
+performance,182,Moonweed    ,11,,presets\performances\182_Moonweed.syx
+performance,183,Tech Lead   ,11,,presets\performances\183_Tech_Lead.syx
+performance,184,Retronic    ,11,,presets\performances\184_Retronic.syx
+performance,185,Formo Whistl,11,,presets\performances\185_Formo_Whistl.syx
+performance,186,Baroque     ,11,,presets\performances\186_Baroque.syx
+performance,187,Full B3     ,3,,presets\performances\187_Full_B3.syx
+performance,188,B3 Jazz Comp,3,,presets\performances\188_B3_Jazz_Comp.syx
+performance,189,B3 Perc 3rd ,3,,presets\performances\189_B3_Perc_3rd.syx
+performance,190,J.Road      ,3,,presets\performances\190_J.Road.syx
+performance,191,Disto-Jam   ,3,,presets\performances\191_Disto-Jam.syx
+performance,192,Perc Organ  ,3,,presets\performances\192_Perc_Organ.syx
+performance,193,Dirty Organ ,3,,presets\performances\193_Dirty_Organ.syx
+performance,194,ByonOrgan   ,3,,presets\performances\194_ByonOrgan.syx
+performance,195,Blazin' Jim ,3,,presets\performances\195_Blazin_Jim.syx
+performance,196,Backin Organ,3,,presets\performances\196_Backin_Organ.syx
+performance,197,LS Night    ,3,,presets\performances\197_LS_Night.syx
+performance,198,Fat organ   ,3,,presets\performances\198_Fat_organ.syx
+performance,199,70s Organ   ,3,,presets\performances\199_70s_Organ.syx
+performance,200,Jazz Organ  ,3,,presets\performances\200_Jazz_Organ.syx
+performance,201,Full Organ  ,3,,presets\performances\201_Full_Organ.syx
+performance,202,The Lounge  ,3,,presets\performances\202_The_Lounge.syx
+performance,203,ChurchOrgan ,3,,presets\performances\203_ChurchOrgan.syx
+performance,204,Hard String ,4,,presets\performances\204_Hard_String.syx
+performance,205,DX Jazz     ,4,,presets\performances\205_DX_Jazz.syx
+performance,206,EtherGuitar ,4,,presets\performances\206_EtherGuitar.syx
+performance,207,DistFeedback,4,,presets\performances\207_DistFeedback.syx
+performance,208,Strat 7II   ,4,,presets\performances\208_Strat_7II.syx
+performance,209,Taxi Brass  ,8,,presets\performances\209_Taxi_Brass.syx
+performance,210,BrightFilter,8,,presets\performances\210_BrightFilter.syx
+performance,211,Lead Horn   ,8,,presets\performances\211_Lead_Horn.syx
+performance,212,Bright      ,8,,presets\performances\212_Bright.syx
+performance,213,DX-Soft     ,8,,presets\performances\213_DX-Soft.syx
+performance,214,Brassetra   ,8,,presets\performances\214_Brassetra.syx
+performance,215,Oberhorn    ,8,,presets\performances\215_Oberhorn.syx
+performance,216,Obi Brass   ,8,,presets\performances\216_Obi_Brass.syx
+performance,217,Obi Hornz   ,8,,presets\performances\217_Obi_Hornz.syx
+performance,218,Swell       ,8,,presets\performances\218_Swell.syx
+performance,219,Stab        ,8,,presets\performances\219_Stab.syx
+performance,220,Quackz      ,8,,presets\performances\220_Quackz.syx
+performance,221,StabbaBabb  ,8,,presets\performances\221_StabbaBabb.syx
+performance,222,Fanfare     ,8,,presets\performances\222_Fanfare.syx
+performance,223,Wind Pad    ,12,,presets\performances\223_Wind_Pad.syx
+performance,224,Dark Pad    ,12,,presets\performances\224_Dark_Pad.syx
+performance,225,Thermal     ,12,,presets\performances\225_Thermal.syx
+performance,226,Spacewind   ,12,,presets\performances\226_Spacewind.syx
+performance,227,Elise       ,12,,presets\performances\227_Elise.syx
+performance,228,OB Pad      ,12,,presets\performances\228_OB_Pad.syx
+performance,229,Reflection  ,12,,presets\performances\229_Reflection.syx
+performance,230,Emperor II  ,12,,presets\performances\230_Emperor_II.syx
+performance,231,Fat Pad     ,12,,presets\performances\231_Fat_Pad.syx
+performance,232,Polar       ,12,,presets\performances\232_Polar.syx
+performance,233,Sky Bells   ,12,,presets\performances\233_Sky_Bells.syx
+performance,234,Heimdal     ,12,,presets\performances\234_Heimdal.syx
+performance,235,Ice Score   ,12,,presets\performances\235_Ice_Score.syx
+performance,236,Solair      ,12,,presets\performances\236_Solair.syx
+performance,237,Angel Bells ,12,,presets\performances\237_Angel_Bells.syx
+performance,238,Vesuvius    ,12,,presets\performances\238_Vesuvius.syx
+performance,239,Space Harp  ,12,,presets\performances\239_Space_Harp.syx
+performance,240,Ministry    ,12,,presets\performances\240_Ministry.syx
+performance,241,Ensemble    ,6,,presets\performances\241_Ensemble.syx
+performance,242,Obie Strings,6,,presets\performances\242_Obie_Strings.syx
+performance,243,JMichel     ,6,,presets\performances\243_JMichel.syx
+performance,244,Mild        ,6,,presets\performances\244_Mild.syx
+performance,245,Spacious    ,6,,presets\performances\245_Spacious.syx
+performance,246,Oktavstrgs  ,6,,presets\performances\246_Oktavstrgs.syx
+performance,247,Hit         ,7,,presets\performances\247_Hit.syx
+performance,248,Accordion   ,3,,presets\performances\248_Accordion.syx
+performance,249,Sitar       ,14,,presets\performances\249_Sitar.syx
+performance,250,Bag Pipe    ,14,,presets\performances\250_Bag_Pipe.syx
+performance,251,Alloy       ,2,,presets\performances\251_Alloy.syx
+performance,252,Tubular     ,2,,presets\performances\252_Tubular.syx
+performance,253,Far West    ,2,,presets\performances\253_Far_West.syx
+performance,254,Small Bell  ,2,,presets\performances\254_Small_Bell.syx
+performance,255,Legend Vibe ,2,,presets\performances\255_Legend_Vibe.syx
+performance,256,UprightPiano,1,,presets\performances\256_UprightPiano.syx
+performance,257,FM Piano    ,1,,presets\performances\257_FM_Piano.syx
+performance,258,EP Wide     ,1,,presets\performances\258_EP_Wide.syx
+performance,259,CP Hard     ,1,,presets\performances\259_CP_Hard.syx
+performance,260,Velvet Dyno ,1,,presets\performances\260_Velvet_Dyno.syx
+performance,261,Clear EP    ,1,,presets\performances\261_Clear_EP.syx
+performance,262,DX Harpscd  ,1,,presets\performances\262_DX_Harpscd.syx
+performance,263,Digi Clav   ,1,,presets\performances\263_Digi_Clav.syx
+performance,264,5th Piano   ,1,,presets\performances\264_5th_Piano.syx
+performance,265,Glocken     ,2,,presets\performances\265_Glocken.syx
+performance,266,MusicBox    ,2,,presets\performances\266_MusicBox.syx
+performance,267,Legend Vibe ,2,,presets\performances\267_Legend_Vibe.syx
+performance,268,Marimba     ,2,,presets\performances\268_Marimba.syx
+performance,269,Xylophon    ,2,,presets\performances\269_Xylophon.syx
+performance,270,TubulBel    ,2,,presets\performances\270_TubulBel.syx
+performance,271,Dulcimer    ,2,,presets\performances\271_Dulcimer.syx
+performance,272,B3 Perc 3rd ,3,,presets\performances\272_B3_Perc_3rd.syx
+performance,273,B3 Jazz Comp,3,,presets\performances\273_B3_Jazz_Comp.syx
+performance,274,Old Rotary  ,3,,presets\performances\274_Old_Rotary.syx
+performance,275,Full Organ  ,3,,presets\performances\275_Full_Organ.syx
+performance,276,Dist Organ  ,3,,presets\performances\276_Dist_Organ.syx
+performance,277,Accordion   ,3,,presets\performances\277_Accordion.syx
+performance,278,Chorus Harp ,3,,presets\performances\278_Chorus_Harp.syx
+performance,279,ChurchOrgan ,3,,presets\performances\279_ChurchOrgan.syx
+performance,280,Nylon Guitar,4,,presets\performances\280_Nylon_Guitar.syx
+performance,281,Steel Guitar,4,,presets\performances\281_Steel_Guitar.syx
+performance,282,Jazz Guitar ,4,,presets\performances\282_Jazz_Guitar.syx
+performance,283,Clean Guitar,4,,presets\performances\283_Clean_Guitar.syx
+performance,284,Mute Guitar ,4,,presets\performances\284_Mute_Guitar.syx
+performance,285,DistFeedback,4,,presets\performances\285_DistFeedback.syx
+performance,286,Dist Guitar ,4,,presets\performances\286_Dist_Guitar.syx
+performance,287,Punch Bass  ,5,,presets\performances\287_Punch_Bass.syx
+performance,288,Aco Bass    ,5,,presets\performances\288_Aco_Bass.syx
+performance,289,Plastic Bass,5,,presets\performances\289_Plastic_Bass.syx
+performance,290,FM Slap     ,5,,presets\performances\290_FM_Slap.syx
+performance,291,Fretless    ,5,,presets\performances\291_Fretless.syx
+performance,292,Pick Bass   ,5,,presets\performances\292_Pick_Bass.syx
+performance,293,FM Slap 2   ,5,,presets\performances\293_FM_Slap_2.syx
+performance,294,Bassline 1  ,5,,presets\performances\294_Bassline_1.syx
+performance,295,Compu Saw   ,5,,presets\performances\295_Compu_Saw.syx
+performance,296,Strobe      ,5,,presets\performances\296_Strobe.syx
+performance,297,Acid King   ,5,,presets\performances\297_Acid_King.syx
+performance,298,Power Key   ,5,,presets\performances\298_Power_Key.syx
+performance,299,5th Funk    ,5,,presets\performances\299_5th_Funk.syx
+performance,300,DX Solo Str ,6,,presets\performances\300_DX_Solo_Str.syx
+performance,301,Tremolo Str ,6,,presets\performances\301_Tremolo_Str.syx
+performance,302,FM Pizz     ,6,,presets\performances\302_FM_Pizz.syx
+performance,303,FM Harp     ,6,,presets\performances\303_FM_Harp.syx
+performance,304,Spacious    ,6,,presets\performances\304_Spacious.syx
+performance,305,FM Strings  ,7,,presets\performances\305_FM_Strings.syx
+performance,306,JMichel     ,6,,presets\performances\306_JMichel.syx
+performance,307,Ensemble    ,6,,presets\performances\307_Ensemble.syx
+performance,308,Vox Morph   ,19,,presets\performances\308_Vox_Morph.syx
+performance,309,Vox Move    ,19,,presets\performances\309_Vox_Move.syx
+performance,310,Vox Phase   ,19,,presets\performances\310_Vox_Phase.syx
+performance,311,Hit         ,7,,presets\performances\311_Hit.syx
+performance,312,FM Solo Tp  ,8,,presets\performances\312_FM_Solo_Tp.syx
+performance,313,Fanfare     ,8,,presets\performances\313_Fanfare.syx
+performance,314,DX-Soft     ,8,,presets\performances\314_DX-Soft.syx
+performance,315,Lead Horn   ,8,,presets\performances\315_Lead_Horn.syx
+performance,316,Fr.Horn     ,8,,presets\performances\316_Fr.Horn.syx
+performance,317,FM Section  ,8,,presets\performances\317_FM_Section.syx
+performance,318,Bright      ,8,,presets\performances\318_Bright.syx
+performance,319,StabbaBabb  ,8,,presets\performances\319_StabbaBabb.syx
+performance,320,FM Lead Sax ,9,,presets\performances\320_FM_Lead_Sax.syx
+performance,321,FM Dbl Reed ,9,,presets\performances\321_FM_Dbl_Reed.syx
+performance,322,Dark Clar   ,9,,presets\performances\322_Dark_Clar.syx
+performance,323,Moonweed    ,11,,presets\performances\323_Moonweed.syx
+performance,324,Hollow      ,11,,presets\performances\324_Hollow.syx
+performance,325,Tech Lead   ,11,,presets\performances\325_Tech_Lead.syx
+performance,326,Retronic    ,11,,presets\performances\326_Retronic.syx
+performance,327,HyperFuzz   ,5,,presets\performances\327_HyperFuzz.syx
+performance,328,FM Piccolo  ,10,,presets\performances\328_FM_Piccolo.syx
+performance,329,FM Flute    ,10,,presets\performances\329_FM_Flute.syx
+performance,330,RecoBell    ,10,,presets\performances\330_RecoBell.syx
+performance,331,FM PanFlute ,10,,presets\performances\331_FM_PanFlute.syx
+performance,332,FM Bottle   ,10,,presets\performances\332_FM_Bottle.syx
+performance,333,Heavy Pipe  ,10,,presets\performances\333_Heavy_Pipe.syx
+performance,334,Whistle     ,10,,presets\performances\334_Whistle.syx
+performance,335,Ocarina     ,10,,presets\performances\335_Ocarina.syx
+performance,336,Earth Layer ,11,,presets\performances\336_Earth_Layer.syx
+performance,337,Platipus    ,11,,presets\performances\337_Platipus.syx
+performance,338,FM Lead     ,11,,presets\performances\338_FM_Lead.syx
+performance,339,FM Lead 2   ,11,,presets\performances\339_FM_Lead_2.syx
+performance,340,FM Lead 3   ,11,,presets\performances\340_FM_Lead_3.syx
+performance,341,FM Lead 4   ,11,,presets\performances\341_FM_Lead_4.syx
+performance,342,Sunhead     ,11,,presets\performances\342_Sunhead.syx
+performance,343,Teck Hook   ,11,,presets\performances\343_Teck_Hook.syx
+performance,344,Space  Harp ,12,,presets\performances\344_Space_Harp.syx
+performance,345,Fat Pad     ,12,,presets\performances\345_Fat_Pad.syx
+performance,346,Thermal     ,12,,presets\performances\346_Thermal.syx
+performance,347,Nebulous    ,12,,presets\performances\347_Nebulous.syx
+performance,348,Qwerty      ,12,,presets\performances\348_Qwerty.syx
+performance,349,FM Pad      ,12,,presets\performances\349_FM_Pad.syx
+performance,350,Spacy Pad   ,12,,presets\performances\350_Spacy_Pad.syx
+performance,351,Spacewind   ,12,,presets\performances\351_Spacewind.syx
+performance,352,Rain        ,18,,presets\performances\352_Rain.syx
+performance,353,Fifths      ,18,,presets\performances\353_Fifths.syx
+performance,354,Crystal     ,18,,presets\performances\354_Crystal.syx
+performance,355,Atmospher   ,18,,presets\performances\355_Atmospher.syx
+performance,356,Bright Ens  ,12,,presets\performances\356_Bright_Ens.syx
+performance,357,Goblins     ,18,,presets\performances\357_Goblins.syx
+performance,358,Harry       ,18,,presets\performances\358_Harry.syx
+performance,359,Sci-Fi      ,18,,presets\performances\359_Sci-Fi.syx
+performance,360,Sitar 2     ,14,,presets\performances\360_Sitar_2.syx
+performance,361,Suikinkutsu ,14,,presets\performances\361_Suikinkutsu.syx
+performance,362,Mukkuri     ,14,,presets\performances\362_Mukkuri.syx
+performance,363,Kalimba     ,14,,presets\performances\363_Kalimba.syx
+performance,364,Kalimba 2   ,14,,presets\performances\364_Kalimba_2.syx
+performance,365,Bag Pipe    ,14,,presets\performances\365_Bag_Pipe.syx
+performance,366,Fiddle      ,14,,presets\performances\366_Fiddle.syx
+performance,367,Shanai      ,14,,presets\performances\367_Shanai.syx
+performance,368,TnklBell    ,15,,presets\performances\368_TnklBell.syx
+performance,369,Agogo       ,15,,presets\performances\369_Agogo.syx
+performance,370,SteelDrm    ,15,,presets\performances\370_SteelDrm.syx
+performance,371,WoodBlok    ,15,,presets\performances\371_WoodBlok.syx
+performance,372,TaikoDrm    ,15,,presets\performances\372_TaikoDrm.syx
+performance,373,Hollywood   ,20,,presets\performances\373_Hollywood.syx
+performance,374,Bleep       ,20,,presets\performances\374_Bleep.syx
+performance,375,4-3-2-1     ,16,,presets\performances\375_4-3-2-1.syx
+performance,376,DippeDut    ,13,,presets\performances\376_DippeDut.syx
+performance,377,Glacial     ,13,,presets\performances\377_Glacial.syx
+performance,378,Ice         ,13,,presets\performances\378_Ice.syx
+performance,379,Angle       ,13,,presets\performances\379_Angle.syx
+performance,380,Shooby Do   ,19,,presets\performances\380_Shooby_Do.syx
+performance,381,Everybody   ,19,,presets\performances\381_Everybody.syx
+performance,382,Vox Move 2  ,19,,presets\performances\382_Vox_Move_2.syx
+performance,383,Drum Kit 2  ,17,,presets\performances\383_Drum_Kit_2.syx
+fseq,0,ShoobyDo,,,presets\fseq\00_ShoobyDo.syx
+fseq,1,2BarBeat,,,presets\fseq\01_2BarBeat.syx
+fseq,2,D&B     ,,,presets\fseq\02_D_B.syx
+fseq,3,D&B Fill,,,presets\fseq\03_D_B_Fill.syx
+fseq,4,4BarBeat,,,presets\fseq\04_4BarBeat.syx
+fseq,5,YouCanG ,,,presets\fseq\05_YouCanG.syx
+fseq,6,EBSayHey,,,presets\fseq\06_EBSayHey.syx
+fseq,7,RtmSynth,,,presets\fseq\07_RtmSynth.syx
+fseq,8,VocalRtm,,,presets\fseq\08_VocalRtm.syx
+fseq,9,WooWaPa ,,,presets\fseq\09_WooWaPa.syx
+fseq,10,UooLha  ,,,presets\fseq\10_UooLha.syx
+fseq,11,FemRtm  ,,,presets\fseq\11_FemRtm.syx
+fseq,12,ByonRole,,,presets\fseq\12_ByonRole.syx
+fseq,13,WowYeah ,,,presets\fseq\13_WowYeah.syx
+fseq,14,ListenVo,,,presets\fseq\14_ListenVo.syx
+fseq,15,YAMAHAFS,,,presets\fseq\15_YAMAHAFS.syx
+fseq,16,Laugh   ,,,presets\fseq\16_Laugh.syx
+fseq,17,Laugh2  ,,,presets\fseq\17_Laugh2.syx
+fseq,18,AreYouR ,,,presets\fseq\18_AreYouR.syx
+fseq,19,Oiyai   ,,,presets\fseq\19_Oiyai.syx
+fseq,20,Oiaiuo  ,,,presets\fseq\20_Oiaiuo.syx
+fseq,21,UuWaUu  ,,,presets\fseq\21_UuWaUu.syx
+fseq,22,Wao     ,,,presets\fseq\22_Wao.syx
+fseq,23,RndArp1 ,,,presets\fseq\23_RndArp1.syx
+fseq,24,FiltrArp,,,presets\fseq\24_FiltrArp.syx
+fseq,25,RndArp2 ,,,presets\fseq\25_RndArp2.syx
+fseq,26,TechArp ,,,presets\fseq\26_TechArp.syx
+fseq,27,RndArp3 ,,,presets\fseq\27_RndArp3.syx
+fseq,28,Voco-Seq,,,presets\fseq\28_Voco-Seq.syx
+fseq,29,PopTech ,,,presets\fseq\29_PopTech.syx
+fseq,30,1BarBeat,,,presets\fseq\30_1BarBeat.syx
+fseq,31,1BrBeat2,,,presets\fseq\31_1BrBeat2.syx
+fseq,32,Undo    ,,,presets\fseq\32_Undo.syx
+fseq,33,RndArp4 ,,,presets\fseq\33_RndArp4.syx
+fseq,34,VoclRtm2,,,presets\fseq\34_VoclRtm2.syx
+fseq,35,Reiyowha,,,presets\fseq\35_Reiyowha.syx
+fseq,36,RndArp5 ,,,presets\fseq\36_RndArp5.syx
+fseq,37,VocalArp,,,presets\fseq\37_VocalArp.syx
+fseq,38,CanYouGi,,,presets\fseq\38_CanYouGi.syx
+fseq,39,Pu-Yo   ,,,presets\fseq\39_Pu-Yo.syx
+fseq,40,Yaof    ,,,presets\fseq\40_Yaof.syx
+fseq,41,MyaOh   ,,,presets\fseq\41_MyaOh.syx
+fseq,42,ChuckRtm,,,presets\fseq\42_ChuckRtm.syx
+fseq,43,ILoveYou,,,presets\fseq\43_ILoveYou.syx
+fseq,44,Jan-On  ,,,presets\fseq\44_Jan-On.syx
+fseq,45,Welcome ,,,presets\fseq\45_Welcome.syx
+fseq,46,One-Two ,,,presets\fseq\46_One-Two.syx
+fseq,47,Edokko  ,,,presets\fseq\47_Edokko.syx
+fseq,48,Everybdy,,,presets\fseq\48_Everybdy.syx
+fseq,49,Uwau    ,,,presets\fseq\49_Uwau.syx
+fseq,50,YEEAAH  ,,,presets\fseq\50_YEEAAH.syx
+fseq,51,4-3-2-1 ,,,presets\fseq\51_4-3-2-1.syx
+fseq,52,Test123 ,,,presets\fseq\52_Test123.syx
+fseq,53,CheckSnd,,,presets\fseq\53_CheckSnd.syx
+fseq,54,ShavaDo ,,,presets\fseq\54_ShavaDo.syx
+fseq,55,R-M-H-R ,,,presets\fseq\55_R-M-H-R.syx
+fseq,56,HiSchool,,,presets\fseq\56_HiSchool.syx
+fseq,57,M.Blastr,,,presets\fseq\57_M.Blastr.syx
+fseq,58,L&G MayI,,,presets\fseq\58_L_G_MayI.syx
+fseq,59,Hellow  ,,,presets\fseq\59_Hellow.syx
+fseq,60,ChowaUu ,,,presets\fseq\60_ChowaUu.syx
+fseq,61,Everybd2,,,presets\fseq\61_Everybd2.syx
+fseq,62,Dodidowa,,,presets\fseq\62_Dodidowa.syx
+fseq,63,Check123,,,presets\fseq\63_Check123.syx
+fseq,64,BranNewY,,,presets\fseq\64_BranNewY.syx
+fseq,65,BoomBoom,,,presets\fseq\65_BoomBoom.syx
+fseq,66,Hi=Woo  ,,,presets\fseq\66_Hi_Woo.syx
+fseq,67,FreeForm,,,presets\fseq\67_FreeForm.syx
+fseq,68,FreqPad ,,,presets\fseq\68_FreqPad.syx
+fseq,69,YouKnow ,,,presets\fseq\69_YouKnow.syx
+fseq,70,OldTech ,,,presets\fseq\70_OldTech.syx
+fseq,71,B/M     ,,,presets\fseq\71_B_M.syx
+fseq,72,MiniJngl,,,presets\fseq\72_MiniJngl.syx
+fseq,73,EveryB-S,,,presets\fseq\73_EveryB-S.syx
+fseq,74,IYaan   ,,,presets\fseq\74_IYaan.syx
+fseq,75,Yeah    ,,,presets\fseq\75_Yeah.syx
+fseq,76,ThankYou,,,presets\fseq\76_ThankYou.syx
+fseq,77,Yes=No  ,,,presets\fseq\77_Yes_No.syx
+fseq,78,UnWaEDon,,,presets\fseq\78_UnWaEDon.syx
+fseq,79,MouthPop,,,presets\fseq\79_MouthPop.syx
+fseq,80,Fire    ,,,presets\fseq\80_Fire.syx
+fseq,81,TBLine  ,,,presets\fseq\81_TBLine.syx
+fseq,82,China   ,,,presets\fseq\82_China.syx
+fseq,83,Aeiou   ,,,presets\fseq\83_Aeiou.syx
+fseq,84,YaYeYiYo,,,presets\fseq\84_YaYeYiYo.syx
+fseq,85,C7Seq   ,,,presets\fseq\85_C7Seq.syx
+fseq,86,SoundLib,,,presets\fseq\86_SoundLib.syx
+fseq,87,IYaan2  ,,,presets\fseq\87_IYaan2.syx
+fseq,88,Relax   ,,,presets\fseq\88_Relax.syx
+fseq,89,PSYAMAHA,,,presets\fseq\89_PSYAMAHA.syx

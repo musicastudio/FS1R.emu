@@ -18,7 +18,9 @@ if "%~1"=="" (
   build\test_effects.exe || goto :done
   "%~dp0bin\fs1r_emu.exe" -selftest || goto :done
   python "%~dp0tools\check_formant.py" || goto :done
-  python "%~dp0tools\check_panel.py"
+  python "%~dp0tools\check_panel.py" || goto :done
+  python "%~dp0tools\check_presets.py" || goto :done
+  python "%~dp0tools\check_interface.py"
 ) else if "%~1"=="plugin" (
   cmake -B build\plugin -S . -DFS1R_BUILD_PLUGIN=ON || goto :done
   cmake --build build\plugin --config Release

@@ -25,14 +25,18 @@ private:
     void addPage(const juce::String& name, ParameterPage* page);
     void showPage(const juce::String& name);
     void openRom();
-    void loadSyx();
+    void importSyx();
     void saveSyx();
+    void refillVoices();                 // the voice list for the bank and category now chosen
 
     Processor& proc;
     PanelView panel;
     juce::TabbedComponent tabs{juce::TabbedButtonBar::TabsAtTop};
     juce::TextButton romButton, loadButton, saveButton;
-    juce::ComboBox voiceBox, perfBox;
+    // The patch browser, in the hardware's own terms: a category, a bank and the voice inside it
+    // (owner's manual page 27). Picking one sets the part's bank and program number, which is what
+    // actually loads it.
+    juce::ComboBox catBox, bankBox, voiceBox, perfBox;
     juce::TextEditor searchBox;
     juce::OwnedArray<ParameterPage> pages;
     juce::StringArray pageNames;
@@ -42,7 +46,8 @@ private:
     std::unique_ptr<FseqView> fseqView;
     std::unique_ptr<juce::FileChooser> chooser;
     juce::TooltipWindow tooltips{this, 600};
-    int lastPart = -1, lastAlg = -1;
+    int lastPart = -1, lastAlg = -1, shownVoice = -1, shownPerf = -1;
+    bool sawImport = false;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(Editor)
 };

@@ -10,6 +10,7 @@
 #include <juce_audio_processors/juce_audio_processors.h>
 #include <atomic>
 #include <memory>
+#include <unordered_map>
 #include <vector>
 #include "fs1r_lib.h"
 #include "ParameterDescriptions.h"
@@ -53,6 +54,18 @@ public:
     int selectedPart() const { return part.load(); }
     void selectPart(int p);                        // 0-3; re-reads the engine for the new part
 
+    // Voice selection the hardware's way: the part's BANK NUMBER and PROGRAM NUMBER are the
+    // selection, and moving either loads the voice they name (owner's manual page 25). Everything
+    // that picks a voice - the panel, the browser, host automation - goes through those two.
+    int currentVoice() const;                      // the voice number the part's bank and program name
+    void selectVoice(int voiceIndex);
+    bool importSyx(const juce::File&);             // a .syx file's voices, as the browsable Usr bank
+    void selectPerformance(int index);             // and the Fseq it names
+    // Which bundled performance is loaded, or -1 when the engine is holding something else. The
+    // display names a performance by its bank and program number, so it has to know.
+    int currentPerformance() const { return perfIndex.load(); }
+    int parameterValue(int index) const;
+
     // MIDI learn: arm, then the next control change binds to this parameter.
     void startMidiLearn(int paramIndex) { learnTarget = paramIndex; }
     void cancelMidiLearn() { learnTarget = -1; }
@@ -69,6 +82,9 @@ private:
 
     void buildParameters();
     void sendParameter(int index, int value);
+    void loadSelectedVoice();
+    void loadSelectedFseq();
+    int findParameter(const char* group, const char* name) const;
     void applyIncomingParameter(int high, int mid, int low, int value);
     void refreshFromEngine();                      // ask the engine for the bulk dumps and adopt them
 
@@ -79,8 +95,16 @@ private:
     std::vector<uint8_t> shadow;                   // last byte we saw at each address, for packed fields
     std::vector<int> shadowIndex;                  // address -> shadow slot
     std::vector<std::atomic<bool>> dirty;
+    int bankParam = -1, progParam = -1;            // Part / BANK NUMBER and PROGRAM NUMBER
+    // Performance / FSEQ PART, bank and number: which Fseq the performance plays, if any.
+    int fseqPartParam = -1, fseqBankParam = -1, fseqNumParam = -1;
+    // An imported voice has no bank or program to be named by, so the one in play is remembered here
+    // until a bank and program pick a preset again.
+    std::atomic<int> importedVoice{-1};
+    std::atomic<int> perfIndex{-1};
     std::atomic<int> part{0};
-    std::atomic<bool> suppressSend{false};
+    std::atomic<int> suppressSend{0};              // nested: the audio and message threads both adopt
+    std::unordered_map<int, std::vector<int>> byAddress;   // sysex address -> the descriptions at it
     std::atomic<bool> needRefresh{true};
     int learnTarget = -1;
     std::vector<int> ccForParam;                   // -1 when unmapped

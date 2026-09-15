@@ -57,12 +57,21 @@ BSC init (0x44C): BCR1=0x2005, BCR2=0xC00C, WCR1=0x5222, WCR2=0xC534, DCR=0, RTC
 
 | EPROM address (CPU view) | contents |
 |---|---|
-| 0x230091 | 1152 preset voices (banks PrA-PrI) stored as DX7 VCED voices, 155 bytes each with the 10-char name first. The firmware converts them with its DX7 -> FS1R conversion at load time |
-| 0x25C280 | 256 preset voices (PrJ, PrK) as native 608-byte voices, byte-identical to the sysex bulk layout |
-| 0x20C580 / 0x22F350 | performance data ("Everybody", 0x40 pan bytes) |
+| 0x230091 | 1152 preset voices (banks **PrC-PrK**) stored as DX7 VCED voices, 155 bytes each with the 10-char name first. The firmware converts them with its DX7 -> FS1R conversion at load time |
+| 0x25C280 | 256 preset voices (**PrA, PrB**) as native 608-byte voices, byte-identical to the sysex bulk layout |
+
+The bank order is the manual's own, page 21: PRESET A and B hold 128 FS1R voices each and PRESET C through K the nine banks of DX-series voices. An earlier reading had the part's BANK NUMBER byte mapped the other way round (2-10 to the DX7 block, 11-12 to the native one), which made every factory performance load the wrong voices - "FundaBass" asks for bank 2 program 41, and native voice 41 is "FundaBass" while DX7 voice 41 is "E.Piano 15". Across all 384 performances the corrected reading puts 439 parts on FS1R voices against 48, matches the performance's own category on 71% of them against 10%, and names 94 performances after their own part 1 voice against none.
+| 0x20A000 | 384 preset performances, 400 bytes each, byte-identical to the sysex bulk layout. The three preset banks of 128 in order A, B, C: "Zap !" (PrA 001), "Sweepy Voice" (PrB 001) at entry 128, "UprightPiano" (PrC 001) at entry 256, ending at "Drum Kit 2" (PrC 128) with 0xFF fill after 0x22F800. Each block matches one of the Data List's performance lists entry for entry (127, 124 and 125 of 128 names identical in order; the rest are OCR damage in the text conversion). Preset C is confirmed independently of the booklet by the manual's own description of it, page 21 - the G50 guitar controller bank, "the maximum MIDI receive channel for these voices is 6, and the pitch bend range is -12 ... +12" - and entries 256-383 are the only block whose parts stop at channel A6 and whose bend range is 76/52 throughout. INTERNAL is battery-backed user RAM and is not in the image; the Data List prints its factory contents, which are a re-ordered selection from the presets, as the manual says on page 21. An earlier reading of this table started it at 0x20C580 and made it 360 entries, which silently dropped PrA 001-024 and mislabelled every bank |
+| 0x283000 | preset Fseq 11-90, 6432 bytes each: a 32-byte header and 128 50-byte frames |
+| 0x300A00 | preset Fseq 1-10, 25632 bytes each: the same header and 512 frames |
 | 0x280140 area | Fseq voices "FseqBase01..14" (native format, forms = frmt) |
 
 `tools/extract_presets.py` writes all of them to `presets/` as .syx files plus `presets/index.csv`.
+
+A 512-frame Fseq bulk is 25632 data bytes, which the dump's 14-bit byte count cannot express. That is
+why the Data List says "FSeq Bulk does not interpret Byte Count" (3.2.1): the header's own frame count
+field (byte 0x1B, frames = 128 * (n + 1)) is what says how long the dump is, and the engine's loader
+reads it there.
 
 ## 3. FS1R data model (from the Data List)
 

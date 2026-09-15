@@ -1,0 +1,6 @@
+# The preset dumps and the packed banks are byte-exact ROM data. Git's binary detection happens to get
+# every one of them right today, but core.autocrlf is on and one dump without a NUL byte in it would be
+# silently mangled on checkout, so say it outright.
+*.syx binary
+*.bin binary
+*.wav binary

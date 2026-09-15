@@ -8,15 +8,16 @@ static bool startsWith(const juce::String& s, const char* p) { return s.startsWi
 Editor::Editor(Processor& p) : juce::AudioProcessorEditor(&p), proc(p), panel(p) {
     addAndMakeVisible(panel);
     panel.onModeButton = [this](const juce::String& page) {
-        if (page == "__search") { searchBox.grabKeyboardFocus(); return; }
+        // [SEARCH] is the hardware's patch finder, so it lands on the browser's category box.
+        if (page == "__search") { catBox.grabKeyboardFocus(); return; }
         showPage(page);
     };
 
     romButton.setButtonText("EPROM...");
-    loadButton.setButtonText("Load .syx");
+    loadButton.setButtonText("Import .syx");
     saveButton.setButtonText("Save .syx");
     romButton.onClick = [this] { openRom(); };
-    loadButton.onClick = [this] { loadSyx(); };
+    loadButton.onClick = [this] { importSyx(); };
     saveButton.onClick = [this] { saveSyx(); };
     addAndMakeVisible(romButton);
     addAndMakeVisible(loadButton);
@@ -28,18 +29,32 @@ Editor::Editor(Processor& p) : juce::AudioProcessorEditor(&p), proc(p), panel(p)
     };
     addAndMakeVisible(searchBox);
 
+    catBox.addItem("all categories", 1);
+    for (const auto& c : PatchManager::categories()) catBox.addItem(c, catBox.getNumItems() + 1);
+    catBox.setSelectedId(1, juce::dontSendNotification);
+    catBox.onChange = [this] { refillVoices(); };
+    addAndMakeVisible(catBox);
+
+    bankBox.onChange = [this] { refillVoices(); };
+    addAndMakeVisible(bankBox);
+
     voiceBox.setTextWhenNothingSelected("voice");
     voiceBox.onChange = [this] {
-        int i = voiceBox.getSelectedId() - 1;
-        if (i >= 0 && proc.patches().loadVoice(i, proc.selectedPart())) proc.requestFullRefresh();
+        const int i = voiceBox.getSelectedId() - 1;
+        if (i >= 0) { shownVoice = i; proc.selectVoice(i); }
     };
     addAndMakeVisible(voiceBox);
+
     perfBox.setTextWhenNothingSelected("performance");
+    for (auto& e : proc.patches().performances())
+        perfBox.addItem(e.code + "  " + e.name + (e.category == "--" ? "" : "  " + e.category),
+                        e.index + 1);
     perfBox.onChange = [this] {
-        int i = perfBox.getSelectedId() - 1;
-        if (i >= 0 && proc.patches().loadPerformance(i)) proc.requestFullRefresh();
+        const int i = perfBox.getSelectedId() - 1;
+        if (i >= 0) { shownPerf = i; proc.selectPerformance(i); }
     };
     addAndMakeVisible(perfBox);
+    refillVoices();
 
     algView = std::make_unique<AlgorithmView>(proc);
     spectrumView = std::make_unique<SpectrumView>(proc);
@@ -116,6 +131,35 @@ void Editor::showPage(const juce::String& name) {
     if (i >= 0) tabs.setCurrentTabIndex(i);
 }
 
+// The bank list is whatever the voices actually come from, so "Usr" only appears once a .syx has been
+// imported. The voice list is then every voice that matches the bank and the category.
+void Editor::refillVoices() {
+    const auto& all = proc.patches().voices();
+    if (bankBox.getNumItems() == 0 || proc.patches().hasImport() != sawImport) {
+        sawImport = proc.patches().hasImport();
+        juce::StringArray banks;
+        for (auto& e : all) banks.addIfNotAlreadyThere(e.bank);
+        bankBox.clear(juce::dontSendNotification);
+        bankBox.addItem("all banks", 1);
+        for (const auto& b : banks) bankBox.addItem(b, bankBox.getNumItems() + 1);
+        bankBox.setSelectedId(1, juce::dontSendNotification);
+    }
+
+    const auto bank = bankBox.getSelectedId() > 1 ? bankBox.getText() : juce::String();
+    const auto cat = catBox.getSelectedId() > 1 ? catBox.getText() : juce::String();
+    voiceBox.clear(juce::dontSendNotification);
+    for (auto& e : all) {
+        if (bank.isNotEmpty() && e.bank != bank) continue;
+        if (cat.isNotEmpty() && e.category != cat) continue;
+        voiceBox.addItem(e.code + "  " + e.name + (e.category == "--" ? "" : "  " + e.category),
+                         e.index + 1);
+    }
+    // "If a corresponding performance setup or voice is not found within the specified part, category,
+    // and/or bank, 'Not Found!' will appear" - owner's manual page 27.
+    voiceBox.setTextWhenNothingSelected(voiceBox.getNumItems() == 0 ? "Not Found!" : "voice");
+    voiceBox.setSelectedId(shownVoice + 1, juce::dontSendNotification);
+}
+
 void Editor::timerCallback() {
     int part = proc.selectedPart();
     int alg = proc.device().algorithm(part);
@@ -124,13 +168,18 @@ void Editor::timerCallback() {
         lastAlg = alg;
         algView->setAlgorithm(alg);
     }
-    if (proc.patches().hasRom() && voiceBox.getNumItems() == 0) {
-        for (auto& e : proc.patches().voices())
-            voiceBox.addItem(juce::String(e.index) + " " + e.bank + " " + e.name +
-                                 (e.category.isEmpty() ? "" : " (" + e.category + ")"),
-                             e.index + 1);
-        for (auto& e : proc.patches().performances())
-            perfBox.addItem(juce::String(e.index) + " " + e.bank + " " + e.name, e.index + 1);
+    // Both browsers follow the engine, whoever moved it: the panel's VALUE buttons step the
+    // performance on the play screen and the part's voice on the part screen, and either has to show up
+    // here.
+    const int voice = proc.currentVoice();
+    if (voice != shownVoice) {
+        shownVoice = voice;
+        voiceBox.setSelectedId(voice + 1, juce::dontSendNotification);
+    }
+    const int perf = proc.currentPerformance();
+    if (perf != shownPerf) {
+        shownPerf = perf;
+        perfBox.setSelectedId(perf + 1, juce::dontSendNotification);
     }
 }
 
@@ -140,18 +189,19 @@ void Editor::openRom() {
                          [this](const juce::FileChooser& fc) {
                              if (fc.getResult() == juce::File()) return;
                              proc.patches().setRomFile(fc.getResult());
-                             voiceBox.clear();
-                             perfBox.clear();
+                             refillVoices();
                          });
 }
 
-void Editor::loadSyx() {
+// Every voice in the file joins the browser as the "Usr" bank, so an imported .syx is browsed the same
+// way the factory ones are. A performance or Fseq dump has no voices in it and goes straight in.
+void Editor::importSyx() {
     chooser = std::make_unique<juce::FileChooser>("FS1R or DX7 sysex", juce::File(), "*.syx");
     chooser->launchAsync(juce::FileBrowserComponent::openMode | juce::FileBrowserComponent::canSelectFiles,
                          [this](const juce::FileChooser& fc) {
                              if (fc.getResult() == juce::File()) return;
-                             proc.patches().loadFile(fc.getResult(), 0, proc.selectedPart());
-                             proc.requestFullRefresh();
+                             proc.importSyx(fc.getResult());
+                             refillVoices();
                          });
 }
 
@@ -173,12 +223,16 @@ void Editor::resized() {
     panel.setBounds(r.removeFromTop((int)std::lround(r.getWidth() / PanelView::kAspect)));
     r.removeFromTop(6);
     auto bar = r.removeFromTop(26);
-    romButton.setBounds(bar.removeFromLeft(90).reduced(2));
+    romButton.setBounds(bar.removeFromLeft(80).reduced(2));
     loadButton.setBounds(bar.removeFromLeft(90).reduced(2));
-    saveButton.setBounds(bar.removeFromLeft(90).reduced(2));
-    searchBox.setBounds(bar.removeFromRight(190).reduced(2));
-    voiceBox.setBounds(bar.removeFromLeft(juce::jmax(180, bar.getWidth() / 2)).reduced(2));
-    perfBox.setBounds(bar.reduced(2));
+    saveButton.setBounds(bar.removeFromLeft(80).reduced(2));
+    searchBox.setBounds(bar.removeFromRight(150).reduced(2));
+    // The performance comes first and the voice browser after it, the way the hardware is used: a
+    // performance names the four voices, so it is the wider choice and the one made first.
+    perfBox.setBounds(bar.removeFromLeft(juce::jmax(180, bar.getWidth() * 2 / 5)).reduced(2));
+    catBox.setBounds(bar.removeFromLeft(90).reduced(2));
+    bankBox.setBounds(bar.removeFromLeft(80).reduced(2));
+    voiceBox.setBounds(bar.reduced(2));
     r.removeFromTop(4);
     tabs.setBounds(r);
 }

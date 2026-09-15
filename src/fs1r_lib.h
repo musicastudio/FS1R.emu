@@ -46,7 +46,7 @@ public:
     // ---- patch sources
     bool loadRom(const char* path);            // the 2 MB v1.20 EPROM image
     bool romLoaded() const;
-    bool loadRomPerformance(int index);        // 0..359
+    bool loadRomPerformance(int index);        // 0..383, the EPROM's PrA, PrB and PrC banks
     bool loadRomVoice(int part, int index);    // 0..1407
     bool loadRomFseq(int number);              // 1..90
     // FS1R voice / performance / Fseq bulk dumps and DX7 VCED files; pick selects the n-th match.
