@@ -1,4 +1,5 @@
 #include "PluginEditor.h"
+#include <cmath>
 
 namespace fs1rplug {
 
@@ -168,7 +169,8 @@ void Editor::paint(juce::Graphics& g) { g.fillAll(juce::Colour(0xff1b1e21)); }
 
 void Editor::resized() {
     auto r = getLocalBounds().reduced(8);
-    panel.setBounds(r.removeFromTop(150));
+    // The panel is the manual's drawing, so it gets exactly the height its own proportions ask for.
+    panel.setBounds(r.removeFromTop((int)std::lround(r.getWidth() / PanelView::kAspect)));
     r.removeFromTop(6);
     auto bar = r.removeFromTop(26);
     romButton.setBounds(bar.removeFromLeft(90).reduced(2));

@@ -1,0 +1,51 @@
+"""Turns the owner's manual panel drawing into the one the plugin embeds.
+
+    python tools/make_panel_svg.py
+
+docs/FS1R-front-panel-p14-ny.svg is page 14 of the FS1R owner's manual converted from the PDF and
+cleaned up in Inkscape. The conversion left behind a clip path per drawing operation - more than a
+thousand of them, every one a clip to the page box, so every one a no-op. JUCE's SVG reader applies
+them through lunasvg and ends up clipping the whole drawing away, so they are stripped here rather
+than worked around in the plugin. Coordinates are untouched: plugin/PanelView.cpp addresses the
+drawing in its own user units and tools/check_panel.py checks them against this same file.
+
+Writes plugin/fs1r_panel.svg, which is committed so the build needs no Python.
+"""
+import re
+import sys
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parent.parent
+SRC = ROOT / "docs" / "FS1R-front-panel-p14-ny.svg"
+DST = ROOT / "plugin" / "fs1r_panel.svg"
+
+
+def strip_clips(svg: str) -> str:
+    # The <clipPath> definitions, then every reference to one, as an attribute or inside a style.
+    svg = re.sub(r"<clipPath\b.*?</clipPath>", "", svg, flags=re.S)
+    svg = re.sub(r"<clipPath\b[^>]*/>", "", svg)
+    svg = re.sub(r"\s*clip-path\s*=\s*\"[^\"]*\"", "", svg)
+    svg = re.sub(r"\s*clip-path\s*:\s*url\([^)]*\)\s*;?", "", svg)
+    # Groups that held nothing but a clip are now empty; drop the obvious ones.
+    while True:
+        out = re.sub(r"<g>\s*</g>", "", svg)
+        if out == svg:
+            return out
+        svg = out
+
+
+def main() -> int:
+    if not SRC.exists():
+        print(f"missing {SRC}", file=sys.stderr)
+        return 1
+    svg = SRC.read_text(encoding="utf-8")
+    out = strip_clips(svg)
+    before, after = svg.count("<clipPath"), out.count("<clipPath")
+    DST.write_text(out, encoding="utf-8")
+    print(f"{SRC.name}: {before} clip paths -> {after}, {len(svg)} -> {len(out)} bytes")
+    print(f"wrote {DST.relative_to(ROOT)}")
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

@@ -31,6 +31,11 @@ dump to use `-r`, `tools/extract_*.py` or the plugin's EPROM button.
 5,610,354. The text files under `docs/` are conversions kept for reference while working; the parameter
 tables in `plugin/parameterDescriptions_fs1r.json` are derived from them.
 
+**The panel artwork** in `plugin/fs1r_panel.svg` is the front panel figure from page 14 of the FS1R
+owner's manual (Yamaha, 1998), converted to vectors. It is Yamaha's drawing, redistributed here for
+the same reason as the parameter tables: the plugin is a controller for a specific piece of hardware
+and is not useful if it does not look like one. Not ours to license.
+
 **Third party, under their own licences:** JUCE (`extern/JUCE`, dual AGPL/commercial) and
 clap-juce-extensions with the CLAP SDK (`extern/clap-juce-extensions`, MIT). Neither is redistributed
 here; both are submodules.

@@ -23,7 +23,12 @@ set_target_properties(fs1r_plugin PROPERTIES
     LIBRARY_OUTPUT_DIRECTORY ${FS1R_BIN}
     RUNTIME_OUTPUT_DIRECTORY ${FS1R_BIN})
 
-juce_add_binary_data(fs1r_plugin_data SOURCES parameterDescriptions_fs1r.json)
+# fs1r_panel.svg is the front panel drawing, made from docs/FS1R-front-panel-p14-ny.svg by
+# tools/make_panel_svg.py. Edit the drawing in docs/ and run that script again; it is committed so the
+# build needs no Python.
+juce_add_binary_data(fs1r_plugin_data SOURCES
+    parameterDescriptions_fs1r.json
+    fs1r_panel.svg)
 set_target_properties(fs1r_plugin_data PROPERTIES POSITION_INDEPENDENT_CODE TRUE)
 
 target_sources(fs1r_plugin PRIVATE
