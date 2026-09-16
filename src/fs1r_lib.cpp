@@ -445,6 +445,7 @@ struct Chan {
     int keyfact = 0;           // KEYFACT >> 2
     int levelOff[8], ulevelOff[8], freqWord[8], ufreqWord[8], frmtWord[8], bwReg[8], ubwReg[8];
     int egbias[8], uegbias[8]; // image 0x1C0/0x1C8
+    int fbW[8] = {}, ufbW[8] = {};   // frequency bias words, DAT_010282bc / DAT_010283bc
     int egL[8][4], egR[8][4], egHold[8], uegL[8][4], uegR[8][4], uegHold[8];
     // pitch EG (software, FUN_00028c8e)
     int pegStage = 5, pegCur = 0, pegTarget = 0, pegRate = 255, velP = 128;
@@ -527,13 +528,15 @@ struct Synth {
         if (dest >= 17 && dest <= 45 && !(perf.c[0x28 + set] & (1 << part))) return false;
         return true;
     }
-    // A "direct" destination: the sets that select it contribute signed offsets, which compose.
+    // A "direct" destination. Every one of these handlers stores a per-part byte rather than adding to
+    // one (ctrlDest_36 writes DAT_01029748[part], ctrlDest_37 DAT_01029758, ctrlDest_39 DAT_0102979a),
+    // and FUN_00014DDC walks the sets 0 to 7, so two sets on one destination do not compose: the last
+    // one evaluated wins, exactly as for the destinations that edit a part byte.
     int ctrl_offset(int part, int dest) const {
-        int sum = 0;
-        for (int s = 0; s < 8; s++)
+        for (int s = 7; s >= 0; s--)
             if (ctrl_set_active(part, s, dest))
-                sum += scale_f9c(ctrl_set_sum(part, s), perf.c[0x48 + s] - 64);
-        return sum;
+                return scale_f9c(ctrl_set_sum(part, s), perf.c[0x48 + s] - 64);
+        return 0;
     }
     // A destination that edits a part byte: the firmware writes the byte, so the last set that selects
     // it wins rather than the offsets adding up.
@@ -574,8 +577,7 @@ struct Synth {
             int d = perf.c[0x48 + s] - 64;
             int r = (std::abs(scale_f9c(ctrl_set_sum(part, s), d)) + DEPTHTERM[std::min(31, std::abs(d))]) * 2;
             if (r > 0xFD) r = 0xFF;
-            int v = (~r) & 0xFF;
-            out = out < 0 ? v : std::min(out, v);
+            out = (~r) & 0xFF;                  // ctrlDest_35 stores DAT_01029738[part]: the last set wins
         }
         return out < 0 ? 0 : out;
     }
@@ -670,7 +672,42 @@ struct Synth {
         rt[0] = clampi(rt[0] + ((V.fltAtkVel * (vel - 64)) >> 5), 0, 63);   // attack time velocity
         C.feg.start(lv, rt);
     }
-    bool anyOther(const Chan& C) const { for (auto& x : ch) if (&x != &C && x.active && x.held) return true; return false; }
+    // The Fseq retrigger test is the part's own held-note count, not the machine's: FUN_0001228c
+    // increments DAT_010288dc[part] and calls the trigger only when that count reaches 1.
+    bool anyOther(const Chan& C) const { for (auto& x : ch) if (&x != &C && x.active && x.held && x.part == C.part) return true; return false; }
+    // The frame writer (FUN_000197b4) runs whenever the mode byte is 1 or 2 and the part matches; it is
+    // not gated on the sequence still advancing, so a sequence that has played out holds its last frame
+    // on the registers. The start delay is the one thing that does gate it: FUN_000125f8 clears the
+    // track masks while DAT_010291ca is counting, so until the delay expires the operators are the
+    // voice's own.
+    bool fseq_on(int part) const {
+        int m = perf.c[0x21] & 3;
+        return fseq.valid && fseqPart == part && (m == 1 || m == 2) && fseqDelay <= 0;
+    }
+
+    // Everything the controller matrix feeds an operator, rebuilt on the tick rather than at note-on:
+    // FUN_00014DDC re-runs the destination handler every time one of its sources moves, and
+    // FUN_0001B334 (voiced) and FUN_0001D056 (unvoiced) then rebuild the whole per-part array, so a
+    // held note follows the wheel. The frequency bias reaches the formant and fixed operators only,
+    // since the ratio branch of FUN_0001E838 adds nothing, and the unvoiced one only in normal mode.
+    void refresh_bias(Chan& C, const Part& pt) {
+        const Voice& V = pt.voice; int part = C.part;
+        int cf = ctrl_offset(part, 36), cv = ctrl_offset(part, 37), cu = ctrl_offset(part, 38), cb = ctrl_eg_bias(part);
+        for (int o = 0; o < 8; o++) {
+            const OpV& v = V.v[o]; const OpU& u = V.u[o];
+            int s = v.fbias - 7;
+            C.fbW[o] = (s && (v.form == 7 || v.fixed)) ? (int16_t)(cf * s * 0x10) >> 2 : 0;
+            s = u.fbias - 7;
+            C.ufbW[o] = (s && u.mode == 0) ? (int16_t)(cf * s * 0x10) >> 2 : 0;
+            int bo = BWBIAS[v.bwbias & 0xF] ? clampi((cv * BWBIAS[v.bwbias & 0xF]) >> 3, -128, 127) : 0;
+            C.bwReg[o] = clampi(v.bw + bo, 0, 99);
+            int ubo = BWBIAS[u.bwbias & 0xF] ? clampi((cu * BWBIAS[u.bwbias & 0xF]) >> 3, -128, 127) : 0;
+            C.ubwReg[o] = clampi(eb70(u.bw) + ubo, 0, 127);
+            // EG bias attenuation (event 0x205): |sens| * EGBIAS[ctrl or 255-ctrl] >> 3
+            auto bias = [&](int sn) { if (!sn) return 0; int idx = sn < 0 ? 255 - cb : cb; return std::min(255, (std::abs(sn) * EGBIAS[idx]) >> 3); };
+            C.egbias[o] = bias(v.egbias); C.uegbias[o] = bias(u.egbias);
+        }
+    }
 
     // FUN_00010dc4: note shifts, note table, part detune, master tune
     void compute_pitch(Chan& C, const Part& pt, int note) {
@@ -696,8 +733,6 @@ struct Synth {
     // formant transpose words (FUN_00013bc6), bandwidth registers (FUN_0001ba06), EG rates with part offsets
     void setup_ops(Chan& C, const Part& pt, int vel) {
         const Voice& V = pt.voice; int n = C.noteP; int pm = C.pitchNote - 0x53AA; int part = C.part;
-        int ctrlV = ctrl_offset(part, 37), ctrlU = ctrl_offset(part, 38), ctrlBias = ctrl_eg_bias(part);
-        int ctrlFreq = ctrl_offset(part, 36);                 // frequency bias, FUN_0001B334
         int band = (C.pitchNote >> 8) + 10; band = band < 0x50 ? 0 : band < 0x70 ? ((band ^ 0x10) & 0x1F) : 0x1F;
         int fv = (fseq.valid && fseqPart == part) ? V.fseqV : 0, fu = (fseq.valid && fseqPart == part) ? V.fseqU : 0;
         for (int o = 0; o < 8; o++) {
@@ -713,33 +748,23 @@ struct Synth {
                 else { const unsigned char* t = (v.rc == 1 || v.rc == 2) ? KSEXP : KSLIN; int x = std::min(127, (t[std::min(39, dist)] * eb86(v.rd)) >> 8); att = (v.rc == 2 || v.rc == 3) ? base - x : base + x; }
                 ks = clampi(att, 0, 127) << 1;
             }
-            C.levelOff[o] = C.fseqOp[o] ? 0 : std::min(255, vel_att(v.amsb, vel) + ks);
+            C.levelOff[o] = std::min(255, vel_att(v.amsb, vel) + ks);
             // unvoiced: 2*LEVTAB + velocity, then level key scaling
             {
                 int a = std::min(255, LEVTAB[std::min(99, u.level)] * 2 + vel_att(u.amsb, vel));
                 a += -(u.lks * 64 * (n - 60)) >> 8;
-                C.ulevelOff[o] = C.fseqUOp[o] ? 0 : clampi(a, 0, 255);
+                C.ulevelOff[o] = clampi(a, 0, 255);
             }
-            // EG bias attenuation (event 0x205): |sens| * EGBIAS[ctrl or 255-ctrl] >> 3
-            auto bias = [&](int s) { if (!s) return 0; int idx = s < 0 ? 255 - ctrlBias : ctrlBias; return std::min(255, (std::abs(s) * EGBIAS[idx]) >> 3); };
-            C.egbias[o] = bias(v.egbias); C.uegbias[o] = bias(u.egbias);
-            // frequency words
-            // frequency bias: the per-op sense (voice op 0x1F bits 6-3, -7..+7) times the controller,
-            // as a 16-bit product shifted down by two (FUN_0001B334)
-            int fb = (v.fbias - 7) ? (int16_t)(ctrlFreq * (v.fbias - 7) * 0x10) >> 2 : 0;
-            if (v.form == 7 || v.fixed) C.freqWord[o] = 8 * (v.coarse * 128 + v.fine) + 0x28ED + keytrack(v.notescale, pm) + fvs_term(v.fmsb, vel) + fb;
-            else C.freqWord[o] = 0x1243 + COARSE[v.coarse] + FINE[std::min(99, v.fine)] + fb;
+            // frequency words. The bias the controller matrix adds to them is not here: it moves while
+            // the note sounds, and refresh_bias rebuilds it every tick.
+            if (v.form == 7 || v.fixed) C.freqWord[o] = 8 * (v.coarse * 128 + v.fine) + 0x28ED + keytrack(v.notescale, pm) + fvs_term(v.fmsb, vel);
+            else C.freqWord[o] = 0x1243 + COARSE[v.coarse] + FINE[std::min(99, v.fine)];
             C.ufreqWord[o] = std::min(0x7F00, ((u.coarse & 0x1F) * 256 + u.fine * 2) * 4 + 0x28ED + keytrack(u.notescale, pm) + fvs_term(u.fmsb, vel));
             // formant transpose word (register 0x230): 0x1243 + TRANS + note dependent detune for frmt ops, else the raw byte 6
             if (v.form == 7) {
                 int d = v.detune; int dd = d < 15 ? (~d) : d - 15; int idx = (dd & 0x1F) * 32 + band; int det = FRMDET[idx & 0x1FF]; if (idx & 0x200) det = -det;
                 C.frmtWord[o] = 0x1243 + TRANS[clampi(v.transpose + 24, 0, 48)] + det;
             } else C.frmtWord[o] = v.bw;
-            // bandwidth registers: base bw + controller * bias
-            int bo = BWBIAS[v.bwbias & 0xF] ? clampi((ctrlV * BWBIAS[v.bwbias & 0xF]) >> 3, -128, 127) : 0;
-            C.bwReg[o] = clampi(v.bw + bo, 0, 99);
-            int ubo = BWBIAS[u.bwbias & 0xF] ? clampi((ctrlU * BWBIAS[u.bwbias & 0xF]) >> 3, -128, 127) : 0;
-            C.ubwReg[o] = clampi(eb70(u.bw) + ubo, 0, 127);
             // EG registers: levels LEVTAB >> 1, rates ((99-T)*0xA4)>>8, part EG offsets on attack/decay/release (assumed T1/T2/T4)
             // FUN_00019414 walks the part's EG bytes 0x1A, 0x1B, 0x1B, 0x1C against voice times T1-T4,
             // so the decay offset reaches both T2 and T3, not T2 alone.
@@ -931,9 +956,9 @@ struct Synth {
     }
     void refresh_regs(Chan& C, const Part& pt) {  // FUN_0002c798 / FUN_0002c214 / FUN_0002ad72 / FUN_0002b458
         const Voice& V = pt.voice; int part = C.part;
-        voice_ctrl(C, pt);
+        voice_ctrl(C, pt); refresh_bias(C, pt);
         int fseqPitch = 0;
-        if (fseqRun && fseqPart == part && !(perf.c[0x23] & 1) && fseq.valid) {
+        if (fseq_on(part) && !(perf.c[0x23] & 1)) {
             const uint8_t* f = fseq.frame[fseqStep];
             fseqPitch = (f[0] * 256 + f[1] * 2) - (NOTETAB[fseq.noteAssign & 0x7F] + 0x1243) + (fseq.tuning - 63);
         }
@@ -958,10 +983,10 @@ struct Synth {
         // formant frequencies. Formants staying put while the fundamental moves is the point of the format.
         for (int o = 0; o < 8; o++) {
             int l = C.levelOff[o], ul = C.ulevelOff[o];
-            if (fseqRun && fseqPart == part && fseq.valid) {
+            if (fseq_on(part)) {
                 const uint8_t* f = fseq.frame[fseqStep]; int t = V.v[o].fseqtrk;
-                if (C.fseqOp[o]) { l = f[0x12 + t] << 1; if (lvVel != 0x80) l = (~(((~l) & 0xFF) * lvVel >> 8)) & 0xFF; C.fqWord[o] = f[2 + t] * 256 + f[0xA + t] * 2; }
-                if (C.fseqUOp[o]) { ul = f[0x2A + t] << 1; if (lvVel != 0x80) ul = (~(((~ul) & 0xFF) * lvVel >> 8)) & 0xFF; C.fquWord[o] = f[0x1A + t] * 256 + f[0x22 + t] * 2; }
+                if (C.fseqOp[o]) { l = f[0x12 + t] << 1; if (lvVel != 0x80) l = (~(((~l) & 0xFF) * lvVel >> 8)) & 0xFF; C.fqWord[o] = f[2 + t] * 256 + f[0xA + t] * 2 + C.fbW[o]; }
+                if (C.fseqUOp[o]) { ul = f[0x2A + t] << 1; if (lvVel != 0x80) ul = (~(((~ul) & 0xFF) * lvVel >> 8)) & 0xFF; C.fquWord[o] = f[0x1A + t] * 256 + f[0x22 + t] * 2 + C.ufbW[o]; }
             }
             C.regLevel[o] = clampi(l + C.egbias[o] + C.vcLvl[o][0], 0, 255);
             C.regULevel[o] = clampi(ul + C.uegbias[o] + C.vcLvl[o][1], 0, 255);
@@ -1234,7 +1259,7 @@ struct Synth {
     static const int CTL = 16;
     void refresh_ctl(Chan& C) {
         const Part& pt = perf.part[C.part]; const Voice& V = pt.voice; const unsigned char* alg = FS1R_ALG[V.alg];
-        bool fs = fseqRun && fseqPart == C.part && fseq.valid;
+        bool fs = fseq_on(C.part);
         C.f0 = word_hz(C.regPitch + 0x1243 + C.regPM);                 // channel fundamental incl. LFO pitch mod (pms 7)
         C.fbGain = V.fb ? cal::FEEDBACK * pow(2.0, V.fb - 7) : 0.0;    // INFERRED feedback scale
         for (int o = 0; o < 8; o++) {
@@ -1244,9 +1269,9 @@ struct Synth {
             int pmw = (int)(C.regPM * cal::PMS_FRAC[v.pms]) + C.vcFreq[o][0];
             double fop;
             if (fs && C.fseqOp[o]) fop = word_hz(C.fqWord[o] + pmw);
-            else if (v.form == 7) fop = word_hz(C.freqWord[o] + (C.frmtWord[o] - 0x1243) + pmw + (C.regFM * v.fms) / 7);
+            else if (v.form == 7) fop = word_hz(C.freqWord[o] + C.fbW[o] + (C.frmtWord[o] - 0x1243) + pmw + (C.regFM * v.fms) / 7);
             else if (!v.fixed) fop = word_hz(C.freqWord[o] + C.regPitch + pmw);
-            else fop = word_hz(C.freqWord[o] + pmw + (C.regFM * v.fms) / 7);
+            else fop = word_hz(C.freqWord[o] + C.fbW[o] + pmw + (C.regFM * v.fms) / 7);
             if (v.form != 7) fop *= pow(2.0, ((v.detune - 15) * cal::DETUNE_CENTS) / 1200.0);       // INFERRED: detune 2 cents per step on non-formant ops
             s.fop = fop;
             s.bw = clampi(C.bwReg[o] + C.vcBw[o][0], 0, 99);
@@ -1257,7 +1282,7 @@ struct Synth {
             if (fs && C.fseqUOp[o]) nf = word_hz(C.fquWord[o]);
             else if (u.mode == 1) nf = C.f0;
             else if (u.mode == 2 && v.form == 7) nf = word_hz(C.freqWord[o] + (C.frmtWord[o] - 0x1243));
-            else nf = word_hz(C.ufreqWord[o] + (C.regFM * u.fms) / 7 + C.vcFreq[o][1]);
+            else nf = word_hz(C.ufreqWord[o] + C.ufbW[o] + (C.regFM * u.fms) / 7 + C.vcFreq[o][1]);
             s.nf = nf * pow(2.0, u.transpose / 12.0);
             double fcut = cal::NOISE_BASE_HZ * pow(2.0, clampi(C.ubwReg[o] + C.vcBw[o][1], 0, 127) / 127.0 * cal::NOISE_OCT);  // INFERRED noise formant model, see docs
             s.na = 1.0 - exp(-2 * PI * fcut / SR);
@@ -1641,7 +1666,24 @@ static int selftest(Synth& S) {
         T.perf.c[0x28] = 0x0F; T.perf.c[0x40] = 21;                   // filter cutoff edits the part byte
         ck("a part-byte destination lands on the byte",
            T.ctrl_part(0, 21, 64) == Synth::scale_f58(127, 32, 64));
+        // Two sets on one destination do not compose: each handler stores a per-part byte, so the
+        // highest-numbered one wins (FUN_00014DDC walks 0 to 7, ctrlDest_37 writes DAT_01029758).
+        T.perf.c[0x40] = 37; T.perf.c[0x29] = 0x0F;
+        T.perf.c[0x32] = 0; T.perf.c[0x33] = 1 << Synth::SRC_KN1;
+        T.perf.c[0x41] = 37; T.perf.c[0x49] = 64 + 16;                // set 2, same destination, depth +16
+        ck("the higher set wins, it does not sum", T.ctrl_offset(0, 37) == Synth::scale_f9c(127, 16));
+        // Frequency bias reaches formant and fixed operators only: the ratio branch of FUN_0001E838
+        // adds nothing, which is what detuned the demo's ratio operators under a moving controller.
+        T.perf.c[0x41] = 36; T.perf.c[0x49] = 64 + 16;                // set 2 -> frequency bias
+        T.perf.c[0x40] = 0;
+        Voice& V = T.perf.part[0].voice;
+        V.v[0].form = 7; V.v[0].fbias = 7 + 4; V.v[1].form = 0; V.v[1].fixed = 0; V.v[1].fbias = 7 + 4;
+        T.refresh_bias(T.ch[0], T.perf.part[0]);
+        int want = (int16_t)(Synth::scale_f9c(127, 16) * 4 * 0x10) >> 2;
+        ck("the formant operator takes the frequency bias", T.ch[0].fbW[0] == want && want != 0);
+        ck("the ratio operator does not", T.ch[0].fbW[1] == 0);
         memset(T.perf.c + 0x28, 0, 0x28);
+        init_default_voice(V);
     }
 
     // 6. notes still sound and stop

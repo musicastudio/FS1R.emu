@@ -95,7 +95,7 @@ From the firmware and its tables, with every CPU-side formula traced rather than
 
 Modelled, because the chips are undocumented, and gathered in `namespace cal` in `src/fs1r_lib.cpp`: EG timing and shape, dB per level step, per-op modulation sensitivity scaling, feedback and modulation index, the formant window and noise formant, the per-voice filter, and the effect algorithms. The effect *parameter encoding* is not modelled: it was read back out of the 360 preset performances and matches every documented default.
 
-Not done: nothing has been measured against real hardware yet, so none of the modelled constants are calibrated. That is now the only thing between this and a verified engine, since everything the firmware can settle has been settled. The measurement kit for it is built and waiting on recordings: see `docs/hardware_capture_request.md` and Tier 4 of `TODO.md`.
+Not done: the modelled constants are still uncalibrated against a measurement rig. There is one piece of real hardware audio, rgwan's digital recording of the built-in demo, and it is worth more than its coarseness suggests: playing the demo's own fifteen songs through the engine and lining them up against that take has moved the modulation index, the resonance curve and the filter's cutoff reading off their guesses, and tracing what the songs touch has found real firmware bugs, most recently three in the Fseq and controller paths that song 1 exercises (Tier 4, "The demo song, end to end"). The engine now sits at a median envelope correlation of 0.965 and a mean absolute band error of 5.5 dB against the unit. Settling the constants properly still needs the capture set: see `docs/hardware_capture_request.md` and Tier 4 of `TODO.md`.
 
 ## Roadmap
 
