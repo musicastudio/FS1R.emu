@@ -48,8 +48,10 @@ static const double WIN_SKIRT    = 2.0;     // formant window is sin^(WIN_SKIRT 
 static const double FRMT_BW_DB   = 20.0;    // formant window length = 2 * 2^(-bw / FRMT_BW_DB)
 static const double NOISE_BASE_HZ= 20.0;    // unvoiced bandwidth 0 lands here ...
 static const double NOISE_OCT    = 9.0;     // ... and 0..127 spans this many octaves
-static const double NOISE_BW_POW = 0.5;     // noise level vs bandwidth: 0.5 holds the RMS constant, 1.0
-                                            // holds a resonator's peak constant instead
+static const double NOISE_BW_POW = 0.5;     // noise level vs bandwidth: 0.5 holds the RMS constant, higher
+                                            // makes a narrow band louder, as a resonator driven by a pulse
+                                            // train would be. The level is held fixed at NOISE_BW_REF.
+static const double NOISE_BW_REF = 0.007;   // the one-pole coefficient at bandwidth 20, roughly 54 Hz
 // The filter is not the YMP706's: it runs on VOP3-1 and the CPU hands it coefficients, so these come
 // from the firmware's own conversions (FUN_0000C36C, FUN_0000C3D0) and only the chip's reading of them
 // is a guess. docs/ymp706_registers.md, "The per-voice filter".
@@ -1253,7 +1255,8 @@ struct Synth {
             s.nf = nf * pow(2.0, u.transpose / 12.0);
             double fcut = cal::NOISE_BASE_HZ * pow(2.0, clampi(C.ubwReg[o] + C.vcBw[o][1], 0, 127) / 127.0 * cal::NOISE_OCT);  // INFERRED noise formant model, see docs
             s.na = 1.0 - exp(-2 * PI * fcut / SR);
-            s.nscale = sqrt(1.0 + u.skirt) * pow(2.0 / s.na, cal::NOISE_BW_POW) * 0.5;
+            s.nscale = sqrt(1.0 + u.skirt) * 0.5 * sqrt(2.0 / cal::NOISE_BW_REF)
+                     * pow(cal::NOISE_BW_REF / s.na, cal::NOISE_BW_POW);
         }
     }
     inline void render_chan(Chan& C, double& outL, double& outR) {
