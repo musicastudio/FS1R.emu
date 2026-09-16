@@ -7,4 +7,6 @@ bin/
 captures/engine/
 captures/hardware/
 captures/analysis/
+captures/demo/render/
+*.flac
 __pycache__/
