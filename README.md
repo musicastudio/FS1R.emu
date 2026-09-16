@@ -18,9 +18,9 @@ https://github.com/user-attachments/assets/1261aa38-1618-4524-8296-f5b9f0c4131b
 
 [Download](https://raw.githubusercontent.com/musicastudio/FS1R.emu/main/captures/fs1r_demo01_hardware.mp4) if the player does not load.
 
-**FS1R demo song "Vokodrone" on FS1R.emu v0.3.1**
+**FS1R demo song "Vokodrone" on FS1R.emu v0.3.2**
 
-https://github.com/user-attachments/assets/3345ed4b-051a-4bff-a1d5-b05685752cfc
+https://github.com/user-attachments/assets/b1714b26-b791-407f-bc24-afadfea4e6af
 
 [Download](https://raw.githubusercontent.com/musicastudio/FS1R.emu/main/captures/fs1r_demo01_engine.mp4) if the player does not load.
 
