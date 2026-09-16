@@ -10,3 +10,6 @@ captures/analysis/
 captures/demo/render/
 *.flac
 __pycache__/
+
+# reference manuals kept in docs/ for reading, not redistributed
+docs/*.pdf

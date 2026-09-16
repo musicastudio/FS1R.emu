@@ -43,12 +43,12 @@ is firmware behaviour.
 | 0x228 / 0x229 | channel | voiced / unvoiced part level: `VNBAL[index] + 0x10` (see Part levels) |
 | 0x22A / 0x22B | channel | `~(((255 - pan) * s) >> 7)` and `(pan * s) >> 7`, s = image +0x3D (+1 when non-zero) |
 | 0x22C / 0x22D | channel | `min(255, image[+0x3E] + PANL[pan >> 1])` and the same with PANR: the main pair |
-| 0x22E / 0x22F | channel | the same with image[+0x3F] and a second pan source: the individual out pair |
+| 0x22E / 0x22F | channel | the same with image[+0x3F] and a second pan source: the individual out pair, which reaches the slave DAC and the INDIVIDUAL OUTPUT jacks |
 | 0x230/0x238 | channel, op | frmt ops: `0x1243 + TRANS[transpose] + FRMDET[detune][band]`; other forms: the raw byte 6 |
 | 0x240/0x248 | channel | 16-bit channel pitch word (see Pitch) |
 | 0x260 | channel | feedback level 0..7 |
 | 0x268 | channel | image +0x181 (init 3) |
-| 0x270 | chip | 10, or 11 when any part has its filter on |
+| 0x270 | chip | 10, or 11 when any part has its filter on: on the board this switches the CHOUT/CHIN loop to VOP3-1 in (see `docs/research.md` 2.0.1) |
 | 0x300 | channel, op | unvoiced `mode << 6 | res << 3 | skirt`, linkFF demoted to 0x80 when the voiced op is not frmt |
 | 0x308 | channel, op | unvoiced bandwidth `clamp((bw*2*0xA5)>>8 + ctrl * BWBIAS[bias], 0, 127)` |
 | 0x310/0x318 | channel, op | unvoiced transpose word `0x1243 + TRANS[transpose]` |
@@ -238,8 +238,14 @@ its pan from a different source than the channel's own. Event 0x211 also folds i
 
 ## Still unknown
 
-Which write starts a note (0xFC/FD is written before the registers are loaded), the filter registers, the
-effect algorithms, and everything the chip does with the register values listed above.
+Which write starts a note (0xFC/FD is written before the registers are loaded), the effect algorithms, and everything the
+chip does with the register values listed above.
+
+The filter is no longer on this list, and probably never belonged on it. The board wires VOP3-1 as a channel-level insert
+loop off both tone generators and 0x270 is the switch that puts it in the path, so the cutoff and resonance the CPU computes
+every tick have to arrive over the effect DSP's register block at 0x800200 rather than this bus. Those writes have not been
+found in the firmware yet, and finding them settles both the topology and the filter's structure, since the coefficient format
+says what the filter is. `docs/research.md` 2.0.1 has the wiring and what is still assumption in it.
 
 ## ROM tables (generated into src/fs1r_rom_tables.h by tools/extract_tables.py)
 

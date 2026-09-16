@@ -6,6 +6,9 @@ YSS236 is Yamaha's VOP3, the same programmable DSP that is the synthesis engine 
 AN200 and the PLG150-AN and the vocal harmony processor of the PSR-9000, so a decode would reach
 well past this one machine. MAME's AN1x driver is a skeleton over an unemulated stub.
 
+The chip's pinout is in `docs/vop3_pinout.md`, out of the AN200 service manual: 128 CPU registers,
+8 serial audio inputs and 8 outputs, and a bank of external DRAM per chip.
+
 ## Bus and boot sequence (FUN_0000BC8C)
 
 `FUN_0000B5E2(reg, value)` writes `0x800200 + reg * 2`, a 16-bit register block; status is at
