@@ -228,6 +228,45 @@ part, sysex layout. Part bank 2..12 = PrA..PrK (PrA and PrB are the native banks
 - Frequency EG range +-4 octaves, timed like the amplitude EG.
 - The formant window (bandwidth and skirt), the harmonic forms, the noise formant: patent model, see research.md.
 
+## The per-voice filter (VOP3-1, not this chip)
+
+Read out of the firmware on 2026-09-15, and it settles what rgwan's board wiring suggested: the filter is
+not a YMP706 feature. Register 0x270 only switches the tone generator's channel loop out to VOP3-1, and
+every filter parameter goes over the effect DSP's own register block at 0x800200.
+
+**The path.** A parameter change lands in `FUN_0000B2E4(address, part)`, which compares the address against
+the filter's own bytes and sets one of four per-part dirty flags at 0x01068F14/18/1C/20, then posts
+`FUN_00009FA4(7, 3)`. The groups are voice 0x54 (type) alone; 0x55, 0x56, 0x57, 0x59, 0x5B, 0x5C, 0x5D with
+part 0x18 and 0x19; 0x5A with part 0x18, 0x19, 0x2E, 0x2F; and 0x56, 0x64 with part 0x1F. Controller
+destinations write their own values first: `FUN_0000B3F4` (from ctrlDest_42) into 0x0106AE6C, `FUN_0000B40E`
+into 0x0106AE74 and `FUN_0000B428` into 0x0106AE7C, one 16-bit word per part.
+
+**The channels.** VOP3-1 carries 16 filter channels. The table at 0x0106AD8C maps each to a part, and
+`FUN_0000DB3C(part)` and `FUN_0000E2A0(part)` walk all 16 and update the ones that match, so a part's filter
+is sent once per channel it owns. The per-channel note sits at 0x0106ADAD.
+
+**Cutoff** (`FUN_0000C36C`): `coef = clamp(0xC0D + 0xA9 * cutoff + ks * (note - breakpoint), 0xC0D, 0x6000)`,
+written into the VOP3 coefficient memory at 0x01068F78 through the per-channel step address at 0x00374E44.
+`cutoff` is `voice[0x57] + part[0x18] - 0x40` plus the LFO and controller terms, clamped 0..127 first. So the
+byte is **linear in the coefficient**, spanning 8:1, not linear in octaves.
+
+**Resonance** (`FUN_0000C3D0`): `voice[0x55] + (part[0x19] - 0x40) * 2`, note the doubled part offset, plus
+`(voice[0x56] - 7)` times a velocity term, clamped 0..0x74 (116). The raw value indexes two tables, 0x00374B24
+which is exactly `(1 - 2^(-n/16)) * 0x8000` and 0x00374C24 which sits just under 1.0, and both go into the
+coefficient memory. Filter types 3 and 5 (HPF and BEF) skip the second one.
+
+**Type** (`FUN_0000C1AC`): 0..6 become 0x00, 0x20, 0x40, 0x60, 0x80, 0xA0, 0xE0 in bits 5-7 of the channel's
+register word. **Input gain** goes through `FUN_0000C576` and the table at 0x00374D24.
+
+`FUN_0000CA44` adds a mix coefficient per type: LPF18 gets +0x4000 and a unity input scaler, LPF12 gets
+-0x4000 with the same scaler, and every other type gets 0 with a half scaler, which is what a tapped ladder
+needs to turn one cascade into 24, 18 and 12 dB slopes.
+
+What the chip does with the coefficients is still the unknown part. `namespace cal` reads the cutoff
+coefficient as a one-pole `a = 1 - e^(-2 pi f / fs)`, which puts byte 0 at 755 Hz and byte 127 at 10.6 kHz,
+and the resonance table as `1/Q`, which makes raw 0 a Butterworth and raw 116 self-oscillating. Those two
+readings are the calibration targets; the formulas around them are the firmware's.
+
 ## Pan (FUN_00025BC8, FUN_00025C12, FUN_00025C5C, events 0x211 and 0x222-0x225)
 
 `pan = clamp(image[+0x19] + panOffset, 0, 255)`, index `pan >> 1` into two 128-byte tables at 0x35C0EB and

@@ -46,11 +46,21 @@ static const double FEG_SEMIS    = 48.0;    // frequency EG range for the +-50 s
 static const double FEG_TIME_K   = 0.3;     // frequency EG time as a fraction of rate_secs
 static const double WIN_SKIRT    = 2.0;     // formant window is sin^(WIN_SKIRT * (skirt + 1))
 static const double FRMT_BW_DB   = 20.0;    // formant window length = 2 * 2^(-bw / FRMT_BW_DB)
-static const double NOISE_OCT    = 9.0;     // unvoiced bandwidth 0..127 spans this many octaves from 20 Hz
-static const double CUT_BASE_HZ  = 20.0;    // filter cutoff byte 0 lands here ...
-static const double CUT_PER_OCT  = 12.7;    // ... and rises one octave every CUT_PER_OCT counts
-static const double RESO_Q0      = 0.7;     // filter Q at resonance 0 ...
-static const double RESO_PER_OCT = 25.0;    // ... doubling every RESO_PER_OCT resonance steps
+static const double NOISE_BASE_HZ= 20.0;    // unvoiced bandwidth 0 lands here ...
+static const double NOISE_OCT    = 9.0;     // ... and 0..127 spans this many octaves
+static const double NOISE_BW_POW = 0.5;     // noise level vs bandwidth: 0.5 holds the RMS constant, 1.0
+                                            // holds a resonator's peak constant instead
+// The filter is not the YMP706's: it runs on VOP3-1 and the CPU hands it coefficients, so these come
+// from the firmware's own conversions (FUN_0000C36C, FUN_0000C3D0) and only the chip's reading of them
+// is a guess. docs/ymp706_registers.md, "The per-voice filter".
+static const double CUT_COEF0    = 0xC0D / 32768.0;   // coefficient at cutoff byte 0 ...
+static const double CUT_COEF_STEP= 0xA9 / 32768.0;    // ... plus this per step, capped at 0x6000
+static const double CUT_COEF_FS  = 48000.0;           // INFERRED: read as a one-pole a = 1 - e^(-2 pi f / fs)
+static const double RESO_Q0      = 1.0;     // filter Q at raw resonance 0 (displayed -16) ...
+static const double RESO_PER_OCT = 32.0;    // ... doubling every 32 raw steps. The firmware's table is
+                                            // 1 - 2^(-n/16), so 16 would be the damping read straight off it;
+                                            // 32 is what puts the demo's resonant patches at the right peak,
+                                            // which says the chip's structure spends that damping differently.
 static const double FSEQ_DELAY_S = 1.0;     // performance Fseq start delay at its maximum of 99
 static const double VCTRL_FREQ   = 8.0;     // voice Formant/FM control: pitch word units per depth step
 static const double PMS_FRAC[8]  = {0, 0.0264, 0.0534, 0.0889, 0.1612, 0.2769, 0.4967, 1.0};  // per-op pitch mod sensitivity, DX7 curve
@@ -110,10 +120,17 @@ static inline double db2lin_fast(double db) {
 static inline double rate_secs(int q) { q = clampi(q, 0, 63); return pow(2.0, 26 - (q >> 2)) / (4 + (q & 3)) / SR; }
 #include "fs1r_effects.h"
 
-// INFERRED: filter cutoff byte 0..127 (extended by modulation) -> Hz, ten octaves from 20 Hz.
-static inline double cut_hz(double c) { return cal::CUT_BASE_HZ * pow(2.0, clampi((int)c, -40, 180) / cal::CUT_PER_OCT); }
-// INFERRED: filter resonance -16..+100 -> Q
-static inline double reso_q(int r) { return cal::RESO_Q0 * pow(2.0, clampi(r, -16, 100) / cal::RESO_PER_OCT); }
+// FUN_0000C36C: the cutoff byte reaches VOP3-1 as a coefficient, 0xC0D + 0xA9 per step capped at
+// 0x6000, so it is linear in the coefficient rather than in octaves. Reading that coefficient as a
+// one-pole's a = 1 - e^(-2 pi f / fs) puts byte 0 at 755 Hz and byte 127 at 10.6 kHz. The formula is
+// the firmware's; the reading is INFERRED and is what a recording would calibrate.
+static inline double cut_hz(double c) {
+    double a = cal::CUT_COEF0 + cal::CUT_COEF_STEP * clampi((int)c, 0, 127);
+    return -log(1.0 - std::min(a, 0.999)) * cal::CUT_COEF_FS / (2 * PI);
+}
+// FUN_0000C3D0 sends 1 - 2^(-raw/16) for raw resonance 0..116, so the damping halves every 16 steps.
+// INFERRED: read as 1/Q, which makes raw 0 (displayed -16) a Butterworth and raw 116 self-oscillating.
+static inline double reso_q(int r) { return cal::RESO_Q0 * pow(2.0, clampi(r + 16, 0, 116) / cal::RESO_PER_OCT); }
 
 struct SVF {                     // topology-preserving 2-pole state variable filter (Zavalishin)
     double g = 0, k = 1, a1 = 1, a2 = 0, a3 = 0, ic1 = 0, ic2 = 0;
@@ -135,7 +152,9 @@ struct SVF {                     // topology-preserving 2-pole state variable fi
 struct VFilter {
     SVF a, b; double p1 = 0, gp = 0;
     void setup(int type, double fHz, double q) {
-        a.set(fHz, q); if (type == 0) b.set(fHz, q);
+        // One resonance coefficient per channel reaches the chip, so LPF24's second pole pair runs flat
+        // rather than squaring the peak.
+        a.set(fHz, q); if (type == 0) b.set(fHz, 0.7);
         gp = 1.0 - exp(-2 * PI * std::min(fHz, SR * 0.45) / SR);
     }
     void clear() { a.clear(); b.clear(); p1 = 0; }
@@ -430,7 +449,7 @@ struct Chan {
     // LFO2 (filter only) and the pan / filter registers (0x22A-0x22F, 0x270)
     uint32_t lfo2Phase = 0; int lfo2Val = 0, lfo2SH = 0;
     int panBase = 63; double panL = 1, panR = 1;
-    StepEG feg; VFilter flt; int fltType = 0; bool fltOn = false; double fltGain = 1;
+    StepEG feg; VFilter flt; int fltType = 0; bool fltOn = false; double fltGain = 1, fltInGain = 1;
     int vcLvl[8][2] = {}, vcFreq[8][2] = {}, vcBw[8][2] = {};   // voice Formant/FM control offsets, [op][voiced=0]
     // registers refreshed each tick
     int regPitch = 0, regPM = 0, regFM = 0, regAM = 0, regLevel[8], regULevel[8], regC0 = 73;
@@ -637,7 +656,7 @@ struct Synth {
     void start_filter(Chan& C, const Part& pt, int vel) {
         const Voice& V = pt.voice;
         C.fltOn = (pt.p[7] & 1) != 0; C.fltType = V.fltType; C.flt.clear();
-        C.fltGain = db2lin(V.fltInGain);
+        C.fltInGain = db2lin(V.fltInGain); C.fltGain = C.fltInGain;
         double lv[4]; int rt[4];
         int ts = (V.fltTscale * C.keyfact) >> 5;
         for (int i = 0; i < 4; i++) { lv[i] = V.fltL[i] - 50; rt[i] = clampi(egrate(V.fltT[i]) + ts, 0, 63); }
@@ -981,10 +1000,15 @@ struct Synth {
         int egd = V.fegDepth + (ctrl_part(part, 23, pt.p[0x1F]) - 64) + ((V.fltEgVel * (C.vel - 64)) >> 4);
         cut += C.feg.cur * egd / 50.0;                                                 // filter EG, levels 0..100 around 50
         int fade = C.lfoFade >> 8;
-        cut += C.lfoVal * eb86(clampi(V.fltLfo1, 0, 99)) * fade / 4194304.0 * 64.0;    // LFO1 filter mod
-        cut += C.lfo2Val * eb86(clampi(V.fltLfo2 + pt.p[0x2F] - 64, 0, 99)) / 16384.0 * 64.0;   // LFO2 filter mod
-        cut += (ctrl_offset(part, 42) + ctrl_offset(part, 44)) / 4.0;
-        int reso = V.fltReso + (ctrl_part(part, 22, pt.p[0x19]) - 64) + ((V.fltResoVel * (C.vel - 64)) >> 4);
+        // Destinations 42 and 44 add to the LFO depths, not to the cutoff: FUN_0000DB3C takes the
+        // controller's word, scales it by 99/127 and adds it to the voice's own depth before clamping.
+        int lfo1d = clampi(V.fltLfo1 + ctrl_offset(part, 42) * 99 / 127, 0, 99);
+        int lfo2d = clampi(V.fltLfo2 + pt.p[0x2F] - 64 + ctrl_offset(part, 44) * 99 / 127, 0, 99);
+        cut += C.lfoVal * eb86(lfo1d) * fade / 4194304.0 * 64.0;                       // LFO1 filter mod
+        cut += C.lfo2Val * eb86(lfo2d) / 16384.0 * 64.0;                               // LFO2 filter mod
+        // FUN_0000DB3C: the part's resonance offset counts double, and the sum is clamped to the raw
+        // 0..116 the chip takes (reso_q clamps it there).
+        int reso = V.fltReso + (ctrl_part(part, 22, pt.p[0x19]) - 64) * 2 + ((V.fltResoVel * (C.vel - 64)) >> 4);
         C.flt.setup(C.fltType, cut_hz(cut), reso_q(reso));
     }
     void tick() {
@@ -1227,9 +1251,9 @@ struct Synth {
             else if (u.mode == 2 && v.form == 7) nf = word_hz(C.freqWord[o] + (C.frmtWord[o] - 0x1243));
             else nf = word_hz(C.ufreqWord[o] + (C.regFM * u.fms) / 7 + C.vcFreq[o][1]);
             s.nf = nf * pow(2.0, u.transpose / 12.0);
-            double fcut = cal::CUT_BASE_HZ * pow(2.0, clampi(C.ubwReg[o] + C.vcBw[o][1], 0, 127) / 127.0 * cal::NOISE_OCT);    // INFERRED noise formant model, see docs
+            double fcut = cal::NOISE_BASE_HZ * pow(2.0, clampi(C.ubwReg[o] + C.vcBw[o][1], 0, 127) / 127.0 * cal::NOISE_OCT);  // INFERRED noise formant model, see docs
             s.na = 1.0 - exp(-2 * PI * fcut / SR);
-            s.nscale = sqrt((1 + u.skirt) * (2.0 / s.na)) * 0.5;
+            s.nscale = sqrt(1.0 + u.skirt) * pow(2.0 / s.na, cal::NOISE_BW_POW) * 0.5;
         }
     }
     inline void render_chan(Chan& C, double& outL, double& outR) {
