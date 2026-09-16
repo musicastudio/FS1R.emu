@@ -29,12 +29,14 @@ static const double CPU_HZ = 28000000.0;         // SCI BRR 27 gives exactly 312
 static const double TICK_HZ = CPU_HZ / 16.0 / 9099.0;   // MTU2 TGRA compare every 0x238B counts at clock/16 -> 192.3 Hz LFO/PEG/portamento tick
 
 // ------------------------------------------------------------------------------------------ INFERRED calibration
-// Everything the two custom chips do that no file documents. Each number is a model from the DX7 lineage,
-// the formant patent (docs/US5610354...) or the Data List, never a measurement: nothing has been recorded
-// off a real FS1R yet (TODO tier 4). They all live here so calibrating against a recording is one table
-// edit rather than a hunt through the engine. Names match the TODO's "confirm the INFERRED constants".
+// Everything the two custom chips do that no file documents. Most are models from the DX7 lineage, the
+// formant patent (docs/US5610354...) or the Data List. A few carry "(demo)": those are fitted to rgwan's
+// recording of the built-in demo, which is real hardware but a coarse reference, fifteen songs of mixed
+// patches with their effects in the path. The capture set (TODO tier 4) is what settles any of them
+// properly. They all live here so calibrating against a recording is one table edit rather than a hunt
+// through the engine. Names match the TODO's "confirm the INFERRED constants".
 namespace cal {
-static const double FM_INDEX     = 1.0;     // cycles of phase deviation at full modulator level
+static const double FM_INDEX     = 3.0;     // cycles of phase deviation at full modulator level (demo)
 static const double LEVEL_DB     = 0.375;   // dB per step of the 8-bit level registers (LEVTAB doubled)
 static const double EG_LEVEL_DB  = 1.5;     // dB per step of the 6-bit EG level registers (LEVTAB >> 1)
 static const double CARRIER_DB   = 1.5;     // dB per step of the carrier level correction (voice 0x2D-0x34)
@@ -46,6 +48,9 @@ static const double FEG_SEMIS    = 48.0;    // frequency EG range for the +-50 s
 static const double FEG_TIME_K   = 0.3;     // frequency EG time as a fraction of rate_secs
 static const double WIN_SKIRT    = 2.0;     // formant window is sin^(WIN_SKIRT * (skirt + 1))
 static const double FRMT_BW_DB   = 20.0;    // formant window length = 2 * 2^(-bw / FRMT_BW_DB)
+static const double FRMT_NORM    = 0.0;     // how a formant's level follows its window length: 0 leaves the
+                                            // window's peak at 1, so a wide bandwidth is quiet; 1 holds the
+                                            // spectral peak instead, which is what a FOF generator does
 static const double NOISE_BASE_HZ= 20.0;    // unvoiced bandwidth 0 lands here ...
 static const double NOISE_OCT    = 9.0;     // ... and 0..127 spans this many octaves
 static const double NOISE_BW_POW = 0.5;     // noise level vs bandwidth: 0.5 holds the RMS constant, higher
@@ -59,7 +64,7 @@ static const double CUT_COEF0    = 0xC0D / 32768.0;   // coefficient at cutoff b
 static const double CUT_COEF_STEP= 0xA9 / 32768.0;    // ... plus this per step, capped at 0x6000
 static const double CUT_COEF_FS  = 48000.0;           // INFERRED: read as a one-pole a = 1 - e^(-2 pi f / fs)
 static const double RESO_Q0      = 1.0;     // filter Q at raw resonance 0 (displayed -16) ...
-static const double RESO_PER_OCT = 32.0;    // ... doubling every 32 raw steps. The firmware's table is
+static const double RESO_PER_OCT = 32.0;    // ... doubling every 32 raw steps (demo). The firmware's table is
                                             // 1 - 2^(-n/16), so 16 would be the damping read straight off it;
                                             // 32 is what puts the demo's resonant patches at the right peak,
                                             // which says the chip's structure spends that damping differently.
@@ -1218,6 +1223,7 @@ struct Synth {
             if (dc) { double x = g.w + pm * 0.25; x -= floor(x); int sign = (v.form >= 3 && ((s.halfCount - k) & 1)) ? -1 : 1; y += fwin(v.skirt, x) * sign * 2.0; }
             else { y += fwin(v.skirt, g.w) * fsin(g.c + pm); g.c += fc / SR; }
         }
+        if (v.form == 7 && cal::FRMT_NORM != 0.0) y *= pow(1.0 / wl, cal::FRMT_NORM);
         return y;
     }
     // Every CTL samples: the per-operator frequency and level maths. Its inputs only move on the 192 Hz

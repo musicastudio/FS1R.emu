@@ -11,5 +11,8 @@ captures/demo/render/
 *.flac
 __pycache__/
 
+# the calibration log tools/demo_probe.py appends to
+tools/demo_scores.txt
+
 # reference manuals kept in docs/ for reading, not redistributed
 docs/*.pdf
