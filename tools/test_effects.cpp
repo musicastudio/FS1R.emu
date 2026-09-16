@@ -45,6 +45,7 @@ int main() {
             for (int i = 0; i < 16; i++) w[i] = 40;
             for (int i = 0; i < 8; i++) b[i] = 40;
             w[0] = 20; b[3] = 3; b[4] = 64; b[5] = 8; b[6] = 64;
+            if (s.slot == FX_INSERTION && t == 20) w[2] = 6;   // Lo-Fi output gain is -6..+36 dB: 40 is +34
             fx.configure(s.slot, t, w, b);
             double peak = 0, energy = 0; bool bad = false;
             for (int i = 0; i < (int)(2 * sr); i++) {
@@ -81,6 +82,31 @@ int main() {
         double db = 10 * log10((late + 1e-30) / (early + 1e-30));
         printf("  Hall1 3.0 s: tail at 2.0 s is %.1f dB below 0.3 s\n", db);
         if (db < -60 || db > -5) { printf("  FAIL reverb decay out of range\n"); fails++; }
+    }
+
+    // The sweep above uses mid-scale parameters, which no preset uses. These two insertion types are
+    // driven with the factory words out of the preset performances instead, because both were silent
+    // with them while passing the sweep: Lo-Fi read Word Length as a bit depth (1 bit rounds every
+    // sample to zero) and its output gain as v-64, and Pitch Change read its levels one word high.
+    {
+        struct { int type; const char* name; int w[16]; } cases[2] = {
+            {20, "Lo-Fi",        {4, 1, 3, 60, 2, 29, 1, 0, 10, 127, 104, 0, 0, 0, 0, 0}},
+            {7,  "Pitch Change", {64, 127, 71, 57, 82, 28, 46, 0, 0, 46, 1, 127, 127, 127, 0, 0}},
+        };
+        for (auto& c : cases) {
+            FxBlock fx; fx.init(sr);
+            fx.configure(FX_INSERTION, c.type, c.w, nullptr);
+            double pl = 0, pr = 0;
+            for (int i = 0; i < (int)(0.5 * sr); i++) {
+                double x = sin(2 * PI * 440 * i / sr) * 0.3, l, r;
+                fx.process(x, x, l, r);
+                if (i > (int)(0.1 * sr)) { pl = std::max(pl, fabs(l)); pr = std::max(pr, fabs(r)); }
+            }
+            if (pl < 0.01 || pr < 0.01) {
+                printf("  FAIL insertion %s with its factory parameters: peak L %.4f R %.4f\n", c.name, pl, pr);
+                fails++;
+            }
+        }
     }
 
     printf(fails ? "test_effects: %d FAILURES\n" : "test_effects: ok\n", fails);

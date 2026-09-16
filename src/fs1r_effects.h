@@ -517,12 +517,16 @@ struct FxBlock {
             double o = fx_unit(w[outw]) * 2; L *= o; R *= o;
             break; }
         case C_LOFI: {
-            int bits = clampi(w[1], 1, 16); double q = pow(2.0, bits - 1);
+            // Word Length (w[1]) is the DPCM differential length, not a sample depth: reading it as one
+            // put the factory setting of 1 into a 1-bit quantizer, which rounds every sample to zero.
+            // Bit Assign (w[6], 0-6) is the depth. ponytail: mapped onto a plain 4-10 bit quantizer
+            // rather than modelled as DPCM, which is what the chip does. INFERRED either way.
+            int bits = clampi(w[6], 0, 6) + 4; double q = pow(2.0, bits - 1);
             int div = std::max(1, (int)(sr / std::max(375.0, 48000.0 / std::max(1, (int)(w[0] + 1)))));
             if (++srCount >= div) { srCount = 0; srHold[0] = inL; srHold[1] = inR; }
             L = floor(srHold[0] * q + 0.5) / q; R = floor(srHold[1] * q + 0.5) / q;
             L = lpf.run(0, L); R = lpf.run(1, R);
-            double o = pow(10.0, fx_gain_db(w[2]) / 20.0); L *= o; R *= o;
+            double o = pow(10.0, (w[2] - 6) / 20.0); L *= o; R *= o;   // Output Gain -6..+36 dB, not v-64
             break; }
         case C_AMBIENCE: {
             int d = (int)(fx_ms(w[0]) * 0.001 * sr); double s = w[1] ? -1.0 : 1.0;
@@ -563,8 +567,11 @@ struct FxBlock {
             if (z[0] > win) z[0] -= win; if (z[0] < 0) z[0] += win;
             if (z[1] > win) z[1] -= win; if (z[1] < 0) z[1] += win;
             double a = dl[0].tapf(base + z[0]), b2 = dl[0].tapf(base + z[1]);
-            double p1 = fx_unit(w[11]), p2 = fx_unit(w[13]);
-            double g1 = fx_unit(w[12]), g2 = fx_unit(w[14]);
+            // Pan1 0x11C, OutLevel1 0x11E, Pan2 0x120, OutLevel2 0x122, so words 10 to 13. Reading them
+            // one index high put OutLevel2 beyond the block: the second unit was silent and the first
+            // one was panned by its own level.
+            double p1 = fx_unit(w[10]), p2 = fx_unit(w[12]);
+            double g1 = fx_unit(w[11]), g2 = fx_unit(w[13]);
             L = a * g1 * (1 - p1) + b2 * g2 * (1 - p2); R = a * g1 * p1 + b2 * g2 * p2;
             break; }
         case C_DELAY_LCR: run_delay(inL, inR, L, R, w, true, false, false); L = shelves(0, L); R = shelves(1, R); break;

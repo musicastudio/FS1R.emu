@@ -130,7 +130,8 @@ struct SVF {                     // topology-preserving 2-pole state variable fi
 };
 // Per-voice filter, register 0x270 = 11 when any part turns it on. Chip side, so INFERRED: a 2-pole SVF,
 // cascaded for LPF24 and with one extra pole for LPF18. Coefficients are refreshed on the 192.3 Hz tick,
-// which is when the CPU would write them.
+// which is when the CPU would write them. The chip is probably not the YMP706 at all: 0x270 switches a
+// channel loop out to one of the two VOP3s, and the coefficients go over its own bus (docs/research.md 2.0.1).
 struct VFilter {
     SVF a, b; double p1 = 0, gp = 0;
     void setup(int type, double fHz, double q) {
@@ -538,15 +539,19 @@ struct Synth {
     int ctrl_eg_bias(int part) const {
         static const short DEPTHTERM[32] = {127, 119, 115, 111, 107, 103, 99, 95, 91, 87, 83, 79, 75, 71, 67, 63,
                                             59, 55, 51, 47, 43, 39, 35, 31, 27, 23, 19, 15, 11, 7, 3, 0};
-        int out = 255;
+        // No set assigned to 35 means no bias at all. 255 would be full bias, which is what an assigned
+        // set at full depth gives while its source sits at rest, so the two must not share a default:
+        // EGBIAS[255] is 255, and a positive sense of 3 then buries the operator 35 dB down.
+        int out = -1;
         for (int s = 0; s < 8; s++) {
             if (!ctrl_set_active(part, s, 35)) continue;
             int d = perf.c[0x48 + s] - 64;
             int r = (std::abs(scale_f9c(ctrl_set_sum(part, s), d)) + DEPTHTERM[std::min(31, std::abs(d))]) * 2;
             if (r > 0xFD) r = 0xFF;
-            out = std::min(out, (~r) & 0xFF);
+            int v = (~r) & 0xFF;
+            out = out < 0 ? v : std::min(out, v);
         }
-        return out;
+        return out < 0 ? 0 : out;
     }
     int bend_word(const Part& pt) const {                // FUN_00020194 + pitch bias controller (dest 34)
         int b = pt.bend; int r = (b < 0 ? pt.p[0x27] : pt.p[0x26]) - 0x40; int v;
