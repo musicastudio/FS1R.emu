@@ -12,17 +12,15 @@ Licensed GPL-3, see `LICENSE` and `NOTICE.md`.
 
 This project is still in development, still not fully accurate to hardware.
 
-Both are the FS1R's own demo song, played from the same bytes: `tools/extract_demo.py` pulls the 15 demo sequences out of the EPROM as standard MIDI files, so the hardware and the engine are driven by one sequence and `tools/check_demo.py` can line them up.
-
 **FS1R demo song "Vokodrone" from real hardware (courtesy of rgwan)**
 
-<video src="https://raw.githubusercontent.com/musicastudio/FS1R.emu/main/captures/fs1r_demo01_hardware.mp4" controls width="100%"></video>
+https://github.com/user-attachments/assets/1261aa38-1618-4524-8296-f5b9f0c4131b
 
 [Download](https://raw.githubusercontent.com/musicastudio/FS1R.emu/main/captures/fs1r_demo01_hardware.mp4) if the player does not load.
 
 **FS1R demo song "Vokodrone" on FS1R.emu v0.3.1**
 
-<video src="https://raw.githubusercontent.com/musicastudio/FS1R.emu/main/captures/fs1r_demo01_engine.mp4" controls width="100%"></video>
+https://github.com/user-attachments/assets/3345ed4b-051a-4bff-a1d5-b05685752cfc
 
 [Download](https://raw.githubusercontent.com/musicastudio/FS1R.emu/main/captures/fs1r_demo01_engine.mp4) if the player does not load.
 
