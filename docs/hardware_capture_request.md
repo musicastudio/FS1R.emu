@@ -40,7 +40,7 @@ Four captures would be plenty: boot to first sound, one note on a plain sine pat
 
 ## Questions about the hardware, answered
 
-Zhiyuan answered these on 2026-09-15. They are folded into `docs/research.md` section 2 and the KNOWN list in `TODO.md`; what is still open is at the end.
+Zhiyuan answered 1 to 5 on 2026-09-15 and 6 and 7 on 2026-09-16. They are folded into `docs/research.md` sections 2 and 8 and the KNOWN list in `TODO.md`; what is still open is at the end.
 
 1. **The tap sits after both effect DSPs and before the master volume**, which is an analogue pot. It is taken from the main DAC's I2S input, so a recording is exactly what the effect DSP hands the converter and does not depend on where the volume knob sits. Every file in `captures/requests/` therefore runs through the effect DSP, which is why all three effect blocks are set to No Effect and the master EQ flat. Any fixed gain or truncation left in that path shows up as one constant offset that the reference file measures.
 2. **One 24.576 MHz crystal clocks the whole audio side.** The main LC78834 is the I2S master at 512 Fs, so exactly 48 kHz, and it generates BCLK and LRCLK for the slave DAC, both VOP3s and both YMP706s. The tone generators are locked to the same word clock, so the engine's 48 kHz is the hardware's own rate.
@@ -48,12 +48,25 @@ Zhiyuan answered these on 2026-09-15. They are folded into `docs/research.md` se
 4. **The VOP3 pinout is in the AN200 service manual**, which is typeset rather than scanned like the FS1R's. Fetched and transcribed into `docs/vop3_pinout.md`: 128 CPU registers on CA0-CA6, 8 serial inputs and 8 outputs, and a bank of external DRAM per chip. A die shot of the VOP3 is possible if it ever becomes necessary; the YMP706 is too rare for one.
 5. **Summed in the digital domain, in the tone generators themselves.** FS1A (IC10) sends its dry and send busses, DOUT0/1 and SOUT0/1, into FS1B's (IC11) DIN0/1 and SIN0/1; FS1B sums both chips and sends four wires to VOP3-2 (IC12) on SI0-3. VOP3-2's SDO1 drives the main DAC and SDO3 the slave DAC, which is the INDIVIDUAL OUTPUT pair: the owner's manual says the VOLUME control does not affect those jacks, which is the same analogue pot in answer 1. That maps straight onto the chip's two pan register pairs, 0x22C/D main and 0x22E/F individual.
 
-**And a sixth thing we had not thought to ask.** VOP3-1 (IC31) sits in a channel-level loop off both tone generators: SI1/SI3 from FS1B's CHOUT0/1, SI5/SI7 from FS1A's CHOUT0/1, SO3/SO7 back into FS1B's CHIN0/1. Zhiyuan reads that as VOP3-1 being the per-voice filter and VOP3-2 the effects, and the firmware agrees: YMP706 register 0x270 goes from 10 to 11 the moment any part switches its filter on, which is the tone generator switching that channel loop in, and the boot upload carries a second, stripped 80-step VOP3 program (variant 1 in `docs/vop3_microcode.md`) that looks nothing like an effect algorithm. If that is right, the filter is not a YMP706 feature at all and its coefficients go over the 0x800200 block.
+**And a sixth thing we had not thought to ask.** VOP3-1 (IC31) sits in a channel-level loop off both tone generators: SI1/SI3 from FS1B's CHOUT0/1, SI5/SI7 from FS1A's CHOUT0/1, SO3/SO7 back into FS1B's CHIN0/1. Zhiyuan reads that as VOP3-1 being the per-voice filter and VOP3-2 the effects, and the firmware agrees: YMP706 register 0x270 goes from 10 to 11 the moment any part switches its filter on, which is the tone generator switching that channel loop in, and the coefficients the CPU computes every tick go out over the 0x800200 block rather than the tone generator bus. Answers 6 and 7 below settle it: 0x800200 is VOP3-1, and IC31 has no external memory to run an effect with.
 
-**Two questions the pinout raises, if you have the service manual open anyway.**
+**The two questions the pinout raised** were answered on 2026-09-16, and both came back clean.
 
-- Does IC31 have memory chips on its WA/WD pins, and does IC12? Each VOP3 can drive its own bank of external DRAM, up to 256K words of 20 bits. A reverb needs that memory and a filter does not, so if IC31's pins are unconnected and IC12's are not, the filter reading is settled without measuring anything.
-- How is the second VOP3 addressed? Each chip has one CSN and 128 registers on CA0-CA6, but every register write we have found in the firmware lands in 0x800200 to 0x800254, which is one chip's worth. Either the other chip is decoded somewhere else on CS2, or we have misread something. If the schematic shows what drives the two CSN pins, that answers it outright.
+6. **IC31's WA/WD pins are left open in the schematic.** VOP3-1 has no external DRAM, so it cannot be running a reverb or a delay, and the filter reading is settled from the diagram without measuring anything.
+7. **The two chips are decoded on A8 and A9 of CS2**, partial decoding to save gates:
+
+   ```
+   VOP3_SELN   = CS2N | A8
+   VOP3-1N     = ~A9 | VOP3_SELN     VOP3-1 on A8 = 0, A9 = 1   -> 0x800200
+   VOP3-2N     =  A9 | VOP3_SELN     VOP3-2 on A8 = 0, A9 = 0   -> 0x800000
+   IC25_26_CLK = ~A8 | CS2N | WRL    the 74HC374 pair on A8 = 1 -> 0x800100
+   ```
+
+   IC26 latches the low byte as LED0-7 and IC25 latches D8-10 as CONTA/CONTB/CONTC, which drive IC29 as the LCD contrast DAC. Nothing above A9 is decoded, so each device repeats every 0x400 through CS2.
+
+Searching CS2 for addresses that match that decode found the second driver straight away: `FUN_00039648(reg, value)` writes `0x800000 + 2*reg` and carries 18 wrappers, a near copy of the 0x800200 driver, with its own boot init (`FUN_0003A064`) and its own 512-step program upload (`FUN_0003C9C4`) out of EPROM 0x372204 and 0x373604. So we had not misread the bus, we had only found half of it.
+
+It also turns the chip assignment the right way up. 0x800200 is VOP3-1, and everything that block does is filter work: 16 channels initialised at boot, cutoff with key scaling, resonance, the per-slope mix coefficient. What we had documented as the effect DSP interface, and extracted as the effect microcode, is the filter chip's. The real effect microcode is the pair of images `FUN_0003C9C4` uploads, which nobody has looked at yet. Details in `docs/research.md` section 8.
 
 Still open: the logic analyzer capture above, and the recordings.
 
@@ -67,8 +80,8 @@ Everything is GPL-3 and your work is credited in `NOTICE.md` and the README. The
 
 You asked about joining the reversing and design side. Three things are open, and all three are more your ground than ours:
 
-**The VOP3 instruction set.** The YSS236 is Yamaha's VOP3, the same DSP as the AN1x synthesis engine. The FS1R uploads its whole program and coefficient tables at boot, and we have extracted the upload with the destination register of every word: `docs/vop3_microcode.md` and `docs/vop3/`. Nobody has decoded the encoding. That is the only route to exact effects, and it would be useful well beyond this project, since MAME's AN1x driver is a stub for the same reason. Your answer about the two chips gives a smaller way in than the effect programs: if VOP3-1 really is the per-voice filter, the 80 live steps of variant 1 are one biquad and its state, which is a far smaller program than an effect algorithm and one whose output we can predict, since a cutoff sweep on a known filter type is something either of us can check against.
+**The VOP3 instruction set.** The YSS236 is Yamaha's VOP3, the same DSP as the AN1x synthesis engine. The FS1R uploads its whole program and coefficient tables at boot, and we have extracted the upload with the destination register of every word: `docs/vop3_microcode.md` and `docs/vop3/`. Nobody has decoded the encoding. That is the only route to exact effects, and it would be useful well beyond this project. Your answer about the addressing gives a smaller way in than the effect programs: the 0x800200 upload we already extracted is VOP3-1's, so it is the filter program, and a filter is a far smaller thing to decode than a reverb and one whose output we can predict, since a cutoff sweep on a known filter type is something either of us can check against.
 
-**A YMP706 driver.** `docs/ymp706_registers.md` documents the bus, the register map and every CPU-side conversion. What is missing is the chip's response, which is what the recordings above start to pin down. If you still want the MAME driver you mentioned, that document plus the captures is the foundation for it.
+**A YMP706 driver.** `docs/ymp706_registers.md` documents the bus, the register map and every CPU-side conversion. What is missing is the chip's response, which is what the recordings above start to pin down. If a hardware-level driver for the chip is ever worth writing, by you or by anyone else, that document plus the captures is the foundation for it.
 
 **Running the firmware.** gearmulator has an SH-2 core with the SH7040-family peripherals. Running the real flash and EPROM on it and logging the YMP706 writes would verify our rewrite of the CPU side completely, and would catch anything the port missed. `tools/ghidra_ctrl_dests.py` shows the trick for reaching the code Ghidra never turns into functions, which was most of what made the flash hard to read.

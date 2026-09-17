@@ -15,9 +15,7 @@ Started 2026-09-12. Goal: a Windows softsynth (exe with MIDI input first, VST la
 | `la/` | DSLogic capture of the UART dump | nothing for us |
 | `doc/plg150-dx-sm.pdf` | PLG150-DX service manual | block diagram, parts list (HD6437043E00F, YMP706-F, YSS233-F, XS516/XS720/XS936/XS992, 2x M5M51008 SRAM) |
 
-**Forum thread** (yamahamusicians.com, 11 posts, Aug 2025 to Jun 2026). Author's stated goal is a MAME driver. Last status (2026-06-09): "I'm analyzing firmware/FS chip, preparing for emulating it in MAME". Nothing about the chip's register interface has been published. The thread contains no synthesis information.
-
-**MAME** has SH7042/SH7043 CPU peripherals (`src/devices/cpu/sh/sh7042.cpp`, used by the MU128/MU2000/PSR540 drivers) and reverse-engineered Yamaha AWM chips (SWP00/20/30). No FS1R driver, no YMP706. So the CPU side of a hardware emulation is largely available under BSD-3; the tone generator is not.
+**Forum thread** (yamahamusicians.com, 11 posts, Aug 2025 to Jun 2026) documents the dumps and the board work. Nothing about the tone generator's register interface was published there, and the thread carries no synthesis information.
 
 **Other**: the YMP706 is "8 operator 32 ch FS sound generator", QFP128, only used in FS1R and PLG150-DX (undocumentedsoundchips). No register documentation anywhere public.
 
@@ -29,7 +27,7 @@ Conclusion: the reverse engineering that exists covers booting, flashing and rep
 - Address map (SH7040 series): flash 0x0-0x3FFFF; EPROM 0x200000-0x3FFFFF; CS1 0x400000, CS2 0x800000, CS3 0xC00000 (4 MB each, board peripherals: YMP706, effect DSP, SRAM/NVRAM, LCD, panel); peripheral registers 0xFFFF8000+ (SCI0 0xFFFF81A0, SCI1 0xFFFF81B0, MTU 0xFFFF8200+, flash control FLMCR at 0xFFFF8580).
 - Vector table at 0x0 and a second copy at 0x8000 (the loader hands over to it).
 - Version tag string at flash 0x3FC00: `#A0281 ver1.20 1998.09.10-01`.
-- Two YMP706-F tone generators ("FS"), two YSS236-F effect DSPs (Yamaha "VOP3": also the synthesis engine of the AN1x/AN200/PLG150-AN and the vocal harmony processor of the PSR-9000; the PLG150-DX uses the smaller YSS233 instead), two Sanyo LC78834M 18-bit stereo DACs. Chip identification from the studiorepair.com FS1R gallery. The whole audio side runs off one 24.576 MHz crystal: the main LC78834 is the I2S master at 512 Fs, so exactly 48 kHz, and it clocks the slave DAC, both VOP3s and both YMP706s (rgwan, 2026-09-15). The CPU has its own 7 MHz crystal with the PLL at 4x, so 28 MHz, confirmed the same day: the tick and the sample clock are not locked to each other on hardware.
+- Two YMP706-F tone generators ("FS"), two YSS236-F DSPs, one per-voice filter and one effect processor (Yamaha "VOP3": also the synthesis engine of the AN1x/AN200/PLG150-AN and the vocal harmony processor of the PSR-9000; the PLG150-DX uses the smaller YSS233 instead), two Sanyo LC78834M 18-bit stereo DACs. Chip identification from the studiorepair.com FS1R gallery. The whole audio side runs off one 24.576 MHz crystal: the main LC78834 is the I2S master at 512 Fs, so exactly 48 kHz, and it clocks the slave DAC, both VOP3s and both YMP706s (rgwan, 2026-09-15). The CPU has its own 7 MHz crystal with the PLL at 4x, so 28 MHz, confirmed the same day: the tick and the sample clock are not locked to each other on hardware.
 
 ### 2.0 YMP706 pinout (PLG150-DX service manual p.13, "FS1-AB AWM Tone Generator & Digital Filter")
 
@@ -54,7 +52,8 @@ Consequences:
 
 - The two tone generators are summed digitally before the effects, by FS1B, on the dry and send busses. The chip chaining that the PLG150-DX pinout hints at in section 2.0 is exactly how the FS1R wires it.
 - The chip's two pan register pairs land where the register map says they do: 0x22C/0x22D through SDO1 to the main outputs, 0x22E/0x22F through SDO3 to the individual outputs. The owner's manual's note that the VOLUME control does not affect the individual jacks is the analogue pot sitting on the main pair alone.
-- **The per-voice filter is VOP3-1, not the YMP706.** rgwan's wiring said it and the firmware confirms it: every filter parameter is converted and written into the effect DSP's coefficient memory over the 0x800200 block, sixteen filter channels mapped to parts by a table in DRAM. Register 0x270 only switches the tone generator's channel loop out to the DSP. The whole path, with the cutoff and resonance conversions, is in `docs/ymp706_registers.md` under "The per-voice filter". The stripped 80-step variant 1 program (section 8) is presumably what runs it.
+- **The per-voice filter is VOP3-1, not the YMP706.** rgwan's wiring said it and the firmware confirms it: every filter parameter is converted and written into VOP3-1's coefficient memory over the 0x800200 block, sixteen filter channels mapped to parts by a table in DRAM. Register 0x270 only switches the tone generator's channel loop out to the DSP. The whole path, with the cutoff and resonance conversions, is in `docs/ymp706_registers.md` under "The per-voice filter".
+- **IC31 has nothing on its WA/WD pins** (rgwan, 2026-09-16): VOP3-1's external DRAM bus is left open in the schematic. A reverb or a delay needs that memory and a filter does not, so the split is settled from the diagram alone. VOP3-2 is the chip with effect memory.
 - rgwan's digital-out board taps the main DAC's I2S input, so every recording from it is post-effects and pre-volume: the effect DSP is always in the path, and the recorded level does not depend on the pot.
 
 ### 2.1 Board map from the firmware (v1.20)
@@ -67,8 +66,9 @@ BSC init (0x44C): BCR1=0x2005, BCR2=0xC00C, WCR1=0x5222, WCR2=0xC534, DCR=0, RTC
 |---|---|---|
 | 0x00000000-0x0003FFFF | SH7044 flash | vectors, ISRs (SCI RX at 0x2F6E8, TX 0x2F930) |
 | 0x00200000-0x003FFFFF | EPROM | main code 0x200000-0x22FFFF and 0x390000-0x3C7FFF, data in between |
-| 0x00800100 | panel/LED latch on CS2 (16-bit, bit 9 set with every write; also pulsed by the flash-upgrade code) | FUN_003C04B8, FUN_003B0588 |
-| 0x00800200-0x0080024F | YSS236 effect DSP host interface on CS2: 16-bit registers at 0x800200 + 2n, status at 0x800242 (bit 4 ready, bits 0-3 index) | FUN_0000B5E2 and its wrappers, see section 8 |
+| 0x00800000-0x008000FF | **VOP3-2** (IC12), the effect DSP: 16-bit registers at 0x800000 + 2n | FUN_00039648 and its wrappers, see section 8 |
+| 0x00800100 | LED and LCD-contrast latch on CS2, two 74HC374s (16-bit, bit 9 set with every write; also pulsed by the flash-upgrade code) | FUN_003C04B8, FUN_003B0588 |
+| 0x00800200-0x008002FF | **VOP3-1** (IC31), the per-voice filter: 16-bit registers at 0x800200 + 2n, status at 0x800242 (bit 4 ready, bits 0-3 index) | FUN_0000B5E2 and its wrappers, see section 8 |
 | 0x00C00000-0x00C007FF | the two YMP706s on CS3 (0xC00000 and 0xC00400) | `docs/ymp706_registers.md` |
 | 0x01000000-0x0107FFFF | 512 KB DRAM work RAM | literal pools (0x0100xxxx-0x0106xxxx) and the entry code |
 | 0x0140xxxx | second external device or SRAM/NVRAM (583 pointer words in the EPROM code) | to be identified |
@@ -127,13 +127,12 @@ Two roads, and the plan uses both:
 
 1. **Behavioural softsynth now** (this repo, C++, WinMM MIDI in + waveOut): implement the data model of section 3 with the synthesis model of section 4, load real FS1R voices, play from MIDI. Accuracy is limited by the guesses in section 4.
 2. **Firmware analysis to replace the guesses** (`FS1R_DISASM`, Ghidra SH-2 via `tools/build_fs1r_ghidra.py`): find the YMP706 register block in CS1-CS3, the parameter -> register conversion tables (EG rates, level curves, frequency tables, window width/skirt tables, algorithm connection table for the 88 algorithms, DX7 map), and the preset voice/performance/Fseq data. These tables go straight into the softsynth.
-3. Later, if exactness is wanted: run the real firmware on an SH-2 interpreter (MAME's SH7042 peripherals are a template) and drive the same synthesis engine from captured YMP706 register writes. That is the "true emulator" and also the author's MAME goal; it needs register semantics that only measurement of a real unit can confirm.
+3. Later, if exactness is wanted: run the real firmware on an SH-2 interpreter (gearmulator's SH-2 core carries the SH7040-family peripherals) and drive the same synthesis engine from captured YMP706 register writes. That is the "true emulator"; it needs register semantics that only measurement of a real unit can confirm.
 
 ## 6. Sources
 
 - https://github.com/rgwan/fs1r_firmware_RE
 - http://studiorepair.com/gallery/Yamaha/FS1R/ (board photos with every chip identified)
-- https://github.com/mamedev/mame/blob/master/src/mame/yamaha/yman1x.cpp (AN1x skeleton: names the YSS236-F as VOP3, no emulation)
 - https://github.com/rgwan/completed-fs1r (18-bit I2S digital out board)
 - https://yamahamusicians.com/forum/threads/im-trying-to-emulating-an-fs1r.23211/
 - https://sites.google.com/site/undocumentedsoundchips/yamaha/ymp706
@@ -142,7 +141,6 @@ Two roads, and the plan uses both:
 - Owner's manual: https://usa.yamaha.com/files/download/other_assets/5/333335/FS1RE1.PDF
 - FS1R service manual (scanned images): https://elektrotanya.com/yamaha_fs1r_service_manual.zip/download.html
 - AN200 service manual, which has the VOP3 pinout typeset rather than scanned: https://elektrotanya.com/yamaha_an200.pdf/download.html (kept as `docs/yamaha_an200_service_manual.pdf`, page 12 transcribed into `docs/vop3_pinout.md`)
-- MAME SH7042: https://github.com/mamedev/mame/blob/master/src/devices/cpu/sh/sh7042.cpp
 
 ## 7. Firmware findings (2026-09-13)
 
@@ -162,9 +160,44 @@ Two roads, and the plan uses both:
 - Chip-side only: EG timing and shapes, dB per level step, per-op modulation sensitivity scaling, the formant window
   and noise formant, the filter, effects. Those are modelled with DX7 and patent priors and marked INFERRED.
 
-## 8. Effect DSP (2026-09-14)
+## 8. The two VOP3s (2026-09-14, addressing settled 2026-09-16)
 
-The effects run on two YSS236-F chips, and the chip's pinout is now in `docs/vop3_pinout.md` (AN200 service manual page 12: 128 CPU registers on CA0-CA6, 8 serial inputs and 8 outputs, a bank of external DRAM per chip). The firmware drives them through one 16-bit register block at 0x800200 (`FUN_0000B5E2(reg, value)` writes `0x800200 + 2*reg`; `FUN_0000BC56/BC68` read the status word at 0x800242). Register 0 is an address latch (bit 15 selects a second address space), the other registers are data ports into the DSP's internal memories:
+The board carries two YSS236-F chips with different jobs (section 2.0.1), and the pinout is in `docs/vop3_pinout.md` (AN200 service manual page 12: 128 CPU registers on CA0-CA6, 8 serial inputs and 8 outputs, a bank of external DRAM per chip). Each chip has one CSN, and rgwan read what drives the two of them off the FS1R schematic (2026-09-16):
+
+```
+VOP3_SELN   = CS2N | A8
+VOP3-1N     = ~A9 | VOP3_SELN     VOP3-1 answers on CS2 with A8 = 0, A9 = 1
+VOP3-2N     =  A9 | VOP3_SELN     VOP3-2 answers on CS2 with A8 = 0, A9 = 0
+IC25_26_CLK = ~A8 | CS2N | WRL    the latch clocks on CS2 with A8 = 1, on the low write strobe
+```
+
+This is partial decoding, the usual way of saving gates on a machine of this age: only A8 and A9 are examined and nothing above them, so all three devices repeat every 0x400 bytes through the whole 4 MB of CS2, and A9 is a don't-care for the latch. CA0-CA6 are the CPU's A1-A7, which is why one chip's 128 registers occupy 0x100 bytes as 16-bit words.
+
+| CS2 address | A9 | A8 | device |
+|---|---|---|---|
+| 0x800000 + 2n | 0 | 0 | **VOP3-2** (IC12), the effects |
+| 0x800100 | x | 1 | IC26 and IC25, two 74HC374s on the data bus: D0-7 are LED0-7, D8-10 are CONTA/CONTB/CONTC into IC29, the LCD contrast DAC |
+| 0x800200 + 2n | 1 | 0 | **VOP3-1** (IC31), the per-voice filter |
+| 0x800300 | x | 1 | the same latch again |
+
+Searching CS2 for addresses that satisfy those conditions turned up the second driver at once: `FUN_00039648(reg, value)` writes `0x800000 + 2*reg` and has 18 wrappers of its own, a near copy of the 0x800200 driver. Nothing in the firmware touches any of the aliases; both drivers use the lowest image of their window.
+
+| | VOP3-1, 0x800200 | VOP3-2, 0x800000 |
+|---|---|---|
+| register write | `FUN_0000B5E2(reg, val)` | `FUN_00039648(reg, val)` |
+| status read | `FUN_0000BC56/BC68` at 0x800242 | never read |
+| boot init | `FUN_0000BC8C(variant)`, from `FUN_0000B010` | `FUN_0003A064` |
+| program upload | inside `FUN_0000BC8C` | `FUN_0003C9C4(image)`, 512 steps x 5 words from EPROM 0x373604 or 0x372204 |
+| program patch | `FUN_0000B600` | `FUN_00039652`, `FUN_000396A6` |
+| coefficient and byte ports | `FUN_0000B6A4` (0xB), `FUN_0000B788/B7EE` (0xC) | `FUN_000396FC/39764` (0xC), `FUN_000397F4` (0xD and 0xE as one 18-bit pair) |
+| per-bus levels | `FUN_0000B85E`, register 0x16 | `FUN_000397BA`, register 0x16 |
+| algorithm setup | `FUN_0000D050` per channel | `FUN_000398C2` per algorithm |
+
+Both drivers use register 0 as an address latch with bit 15 selecting a second address space, and the same 1 / 5 / 0x16 / 0x17 init order, so the two chips are driven identically and only the base address differs.
+
+**Which chip is which, settled.** The block the firmware drives hardest, 0x800200, is VOP3-1, the chip wired into the tone generators' channel loop, and three things in the firmware agree: `FUN_0000B010` initialises exactly 16 channels through it, which is the filter channel count and not any effect count; every routine that driver reaches is a filter routine (`FUN_0000C36C` cutoff with key scaling and a note breakpoint, `FUN_0000C3D0` resonance, `FUN_0000CA44` the per-slope mix coefficient); and the table at 0x374F2E that `FUN_0000D050` indexes reads `02 03 04 ... 0F 00 01`, a 16-entry channel-to-block rotation rather than a list of effect types. So `FUN_0000D050` is the filter setup for one channel and not the effect type change this section called it before the decode arrived.
+
+The registers below are therefore VOP3-1's, the filter chip's:
 
 | register | written by | contents |
 |---|---|---|
@@ -177,6 +210,10 @@ The effects run on two YSS236-F chips, and the chip's pinout is now in `docs/vop
 | 0x17 | init | 0x23 during the upload, 0 after |
 | 0x24-0x2A | FUN_0000B8EC..BA84 | 15 per-bus values each (levels, sends, pans; defaults 0x15, 0, 0x1000) |
 
-The step addresses written before each data word come from the list at 0x37501A. `FUN_0000BC8C(variant)` does the whole upload at boot; `FUN_0020315C` returns the variant (0-3) that picks between the table sets and is not yet understood. The board has two VOP3s with different jobs behind this one register block (section 2.0.1), so the obvious reading of the two table sets is one program per chip: the full 512-step program for VOP3-2's effects and the stripped 80-step variant 1 for VOP3-1's filter. The chip select is not identified, and the pinout makes that a real question rather than a detail: each chip has one CSN and one range of 128 registers, so the two cannot both answer at 0x800200, yet every write the firmware makes lands in 0x800200-0x800254. Bit 15 of register 0 is the only candidate we have read, and it does not look like one, since the boot upload uses it to reach the byte table and the coefficients on what must be the same chip. An effect type change (`FUN_0000D050(block, part)`, types listed at 0x374F2E) writes 0x0E to the block's steps, waits, patches the program words through `FUN_0000B600` with the per-type table (0x378629/0x37862F/0x378635/0x37863B, 0x378642), then restores. Parameter edits go through `FUN_0000C36C..C6C0` into the 0xB/0xC ports.
+The step addresses written before each data word come from the list at 0x37501A. The variant argument of `FUN_0000BC8C` is a literal at both call sites rather than a computed value: `FUN_0000B010` passes 0 on the normal boot from `FUN_003B0108`, and `FUN_0000B0E2` passes 1 from `FUN_003C2038`, the diagnostic entry, which loads VOP3-2's image 0 in the same breath. So the two table sets are two configurations of the filter chip, the ordinary one and the test one, not one program per chip. (`FUN_0020315C`, named here before as the variant selector, is a division helper; that was a misread of the decompiler's `0x800000` constants.)
 
-Consequences: the effect algorithms are about 6 KB of VOP3 microcode in the EPROM, not fixed functions in the chip. MAME has no VOP3 core (`yman1x.cpp` is a skeleton that maps the chip onto an unemulated stub) and no instruction set description exists in public, so exact effects would need the ISA reverse engineered from this microcode plus recordings. The plan models the effects from the Data List and keeps the firmware's parameter-to-coefficient conversions and the extracted microcode as reference (TODO.md, Tier 0 and Tier 4).
+`FUN_0000D050(channel, part)` mutes a filter channel's steps with 0x0E, waits, patches the program words through `FUN_0000B600` with the per-type table (0x378629/0x37862F/0x378635/0x37863B, 0x378642), then restores. Parameter edits go through `FUN_0000C36C..C6C0` into the 0xB and 0xC ports.
+
+Consequences: the filter and the effect algorithms are both VOP3 microcode in the EPROM, not fixed functions in the chips. No public description of the instruction set exists, so exact effects would need the ISA decoded from this microcode plus recordings. The plan models the effects from the Data List and keeps the firmware's parameter-to-coefficient conversions and the extracted microcode as reference (TODO.md, Tier 0 and Tier 4).
+
+**What `docs/vop3_microcode.md` actually holds.** It is the 0x800200 upload, so it is VOP3-1's filter program and not the effect algorithms. The effect microcode is the pair of 512-step images at EPROM 0x372204 and 0x373604 that `FUN_0003C9C4` uploads, and nobody has extracted it. That is a straight extension of `tools/extract_vop3.py`, which now has the second driver's register map to work from.

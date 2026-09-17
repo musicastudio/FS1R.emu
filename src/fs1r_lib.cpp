@@ -154,8 +154,8 @@ struct SVF {                     // topology-preserving 2-pole state variable fi
 };
 // Per-voice filter, register 0x270 = 11 when any part turns it on. Chip side, so INFERRED: a 2-pole SVF,
 // cascaded for LPF24 and with one extra pole for LPF18. Coefficients are refreshed on the 192.3 Hz tick,
-// which is when the CPU would write them. The chip is probably not the YMP706 at all: 0x270 switches a
-// channel loop out to one of the two VOP3s, and the coefficients go over its own bus (docs/research.md 2.0.1).
+// which is when the CPU would write them. The chip is not the YMP706: 0x270 switches a channel loop out
+// to VOP3-1, and the coefficients go over its own register block at 0x800200 (docs/research.md 2.0.1 and 8).
 struct VFilter {
     SVF a, b; double p1 = 0, gp = 0;
     void setup(int type, double fHz, double q) {

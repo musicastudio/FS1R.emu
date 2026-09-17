@@ -232,7 +232,8 @@ part, sysex layout. Part bank 2..12 = PrA..PrK (PrA and PrB are the native banks
 
 Read out of the firmware on 2026-09-15, and it settles what rgwan's board wiring suggested: the filter is
 not a YMP706 feature. Register 0x270 only switches the tone generator's channel loop out to VOP3-1, and
-every filter parameter goes over the effect DSP's own register block at 0x800200.
+every filter parameter goes over VOP3-1's own register block at 0x800200 (the chip select is settled:
+`docs/research.md` section 8).
 
 **The path.** A parameter change lands in `FUN_0000B2E4(address, part)`, which compares the address against
 the filter's own bytes and sets one of four per-part dirty flags at 0x01068F14/18/1C/20, then posts
@@ -280,11 +281,11 @@ its pan from a different source than the channel's own. Event 0x211 also folds i
 Which write starts a note (0xFC/FD is written before the registers are loaded), the effect algorithms, and everything the
 chip does with the register values listed above.
 
-The filter is no longer on this list, and probably never belonged on it. The board wires VOP3-1 as a channel-level insert
-loop off both tone generators and 0x270 is the switch that puts it in the path, so the cutoff and resonance the CPU computes
-every tick have to arrive over the effect DSP's register block at 0x800200 rather than this bus. Those writes have not been
-found in the firmware yet, and finding them settles both the topology and the filter's structure, since the coefficient format
-says what the filter is. `docs/research.md` 2.0.1 has the wiring and what is still assumption in it.
+The filter is no longer on this list, and never belonged on it. The board wires VOP3-1 as a channel-level insert loop off
+both tone generators and 0x270 is the switch that puts it in the path, so the cutoff and resonance the CPU computes every tick
+arrive over VOP3-1's register block at 0x800200 rather than this bus. Those are the writes traced above, and the chip at that
+address is confirmed: rgwan read the CS2 decode off the schematic on 2026-09-16 and A9 = 1 selects VOP3-1. What the chip does
+with a coefficient is still the model. `docs/research.md` 2.0.1 has the wiring and section 8 the addressing.
 
 ## ROM tables (generated into src/fs1r_rom_tables.h by tools/extract_tables.py)
 

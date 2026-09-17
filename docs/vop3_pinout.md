@@ -97,17 +97,17 @@ supply" the wrong way round, so those cells are left empty here rather than copy
   FS1B's four busses on SI0-3 and drives the two DACs from SDO1 and SDO3, VOP3-1 takes CHOUT on SI1/SI3/SI5/SI7 and
   returns on SO3/SO7. Nothing in the pinout contradicts the channel-loop reading of VOP3-1.
 - **The CPU side is CA0-CA6, CD00-CD15, CSN, RDN, WRN, BTYP**: 7 address lines, so 128 register addresses, with CA0
-  doubling as the high/low byte select when BTYP asks for an 8-bit bus. The FS1R uses the 16-bit bus and everything it
-  writes lands in 0x800200 to 0x800254, well inside one chip's 256 bytes.
-- **So "two DSPs behind one register block" cannot be literally true.** Each chip has one CSN and answers to one
-  address range. Three ways out of that, and one of them has to be right: the second chip is decoded somewhere else on CS2
-  that no firmware write we have found reaches, or something we read as an internal address space is really the chip
-  select (register 0's bit 15 is the only candidate), or the chips share the bus and take the same upload, which makes
-  the two program images something other than one per chip. FUN_0020315C's variant falls out of whichever it is.
+  doubling as the high/low byte select when BTYP asks for an 8-bit bus. The FS1R uses the 16-bit bus, so CA0-CA6 are the
+  CPU's A1-A7 and one chip's 128 registers occupy 0x100 bytes.
+- **Each chip has its own window on CS2, decoded on A8 and A9** (rgwan, 2026-09-16). VOP3-1 answers with A8 = 0 and
+  A9 = 1, so 0x800200; VOP3-2 with A8 = 0 and A9 = 0, so 0x800000; A8 = 1 clocks the LED and LCD-contrast latch at
+  0x800100. Nothing above A9 is decoded. The firmware has a full driver for each, `FUN_0000B5E2` and `FUN_00039648`,
+  and the one we found first is the filter chip's. `docs/research.md` section 8 has the logic and the two drivers side
+  by side.
 - **External memory: WA00-WA17, WD00-WD19, with WEN, OEN, RASN, CASN and CEN**, so up to 256K words of 20-bit DRAM per
-  chip. That is the delay memory a reverb needs and a filter does not, which makes it a cheap test of the split: if
-  IC31 has no memory on those pins and IC12 does, VOP3-1 is not running effects. The FS1R's 512 KB DRAM at 0x01000000
-  is the CPU's, on a different bus.
+  chip. **IC31's are left open in the schematic** (rgwan, 2026-09-16), so VOP3-1 has no delay memory and cannot be
+  running a reverb. That confirms the split from the diagram. The FS1R's 512 KB DRAM at 0x01000000 is the CPU's, on a
+  different bus.
 - **Clocking.** CLKIN is the master clock in, XTAL_I/O plus MCLK let a VOP3 run off its own crystal instead, SYWIN takes
   a sync signal and SYW/SYWD pass it on, and CLKO, WCLK, HCLK and QCLK are 512, 256, 128 and 64 fs outputs. A VOP3 can
   therefore be the clock source for the tone generators, whose pinout wants CLK in and HCLK out. On the FS1R the main
