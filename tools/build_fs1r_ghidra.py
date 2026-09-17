@@ -34,8 +34,8 @@ SH704X_COMMON = [
     ("cs1", 0x00400000, 0x400000, None, False),
     ("cs2", 0x00800000, 0x400000, None, False),
     ("cs3", 0x00C00000, 0x400000, None, False),
-    ("dram", 0x01000000, 0x80000, None, False),    # 512 KB work RAM (literal pools use 0x0100xxxx-0x0106xxxx; MU2000/PSR540 map DRAM here too)
-    ("ext14", 0x01400000, 0x80000, None, True),    # second external device, 0x0140xxxx is referenced 583 times in the EPROM code
+    ("dram", 0x01000000, 0x80000, None, False),    # 512 KB work RAM, the only thing populated in the SH7044's dedicated
+                                                   # DRAM area 0x01000000-0x01FFFFFF (literal pools use 0x0100xxxx-0x0106xxxx)
     ("periph", 0xFFFF8000, 0x7000, None, True),   # on-chip peripheral registers (SCI, MTU, INTC, BSC, DMAC, PFC, ports, A/D, flash ctl)
     ("ram", 0xFFFFF000, 0x1000, None, False),      # on-chip RAM, SP reset value is 0xFFFFFFFC
 ]

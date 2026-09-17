@@ -70,8 +70,16 @@ BSC init (0x44C): BCR1=0x2005, BCR2=0xC00C, WCR1=0x5222, WCR2=0xC534, DCR=0, RTC
 | 0x00800100 | LED and LCD-contrast latch on CS2, two 74HC374s (16-bit, bit 9 set with every write; also pulsed by the flash-upgrade code) | FUN_003C04B8, FUN_003B0588 |
 | 0x00800200-0x008002FF | **VOP3-1** (IC31), the per-voice filter: 16-bit registers at 0x800200 + 2n, status at 0x800242 (bit 4 ready, bits 0-3 index) | FUN_0000B5E2 and its wrappers, see section 8 |
 | 0x00C00000-0x00C007FF | the two YMP706s on CS3 (0xC00000 and 0xC00400) | `docs/ymp706_registers.md` |
-| 0x01000000-0x0107FFFF | 512 KB DRAM work RAM | literal pools (0x0100xxxx-0x0106xxxx) and the entry code |
-| 0x0140xxxx | second external device or SRAM/NVRAM (583 pointer words in the EPROM code) | to be identified |
+| 0x01000000-0x0107FFFF | 512 KB DRAM work RAM. The whole of 0x01000000-0x01FFFFFF is the SH7044's dedicated DRAM area, so nothing else is up there | literal pools (0x0100xxxx-0x0106xxxx) and the entry code |
+
+**0x0140xxxx is nothing.** It sat in this table as "second external device or SRAM/NVRAM, 583 pointer words in the
+EPROM code" and it is neither. The NVRAM is the 1 Mbit part on CS1 at 0x400000, and 0x01000000-0x01FFFFFF is the
+SH7044's dedicated DRAM area, so that address cannot be a peripheral at all (rgwan, 2026-09-16). Three checks agree:
+`decomp.py --refs 0x1400000-0x140ffff` returns nothing, so no code touches it; the 682 four-byte-aligned words in the
+EPROM that happen to read 0x0140xxxx sit in no contiguous table longer than eight, so they are coincidences in the
+preset and voice data rather than a pointer list; and the flash has none at all. Had anything addressed it, 0x400000
+is exactly eight times the populated 512 KB, so 0x0140xxxx would alias byte for byte onto 0x0100xxxx, the same way
+CS2's three devices repeat every 0x400 (section 8).
 
 ### 2.2 ROM data
 

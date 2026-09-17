@@ -252,9 +252,12 @@ written into the VOP3 coefficient memory at 0x01068F78 through the per-channel s
 byte is **linear in the coefficient**, spanning 8:1, not linear in octaves.
 
 **Resonance** (`FUN_0000C3D0`): `voice[0x55] + (part[0x19] - 0x40) * 2`, note the doubled part offset, plus
-`(voice[0x56] - 7)` times a velocity term, clamped 0..0x74 (116). The raw value indexes two tables, 0x00374B24
-which is exactly `(1 - 2^(-n/16)) * 0x8000` and 0x00374C24 which sits just under 1.0, and both go into the
-coefficient memory. Filter types 3 and 5 (HPF and BEF) skip the second one.
+`(voice[0x56] - 7)` times a velocity term, clamped 0..0x74 (116). The raw value indexes two tables and both go
+into the coefficient memory. With `r = 2^(-raw/16)` the damping, 0x00374B24 is `A = 1 - r` and 0x00374C24 is
+`B = max(0, 0.5 - 2r^2)`, quadratic in the same damping: zero while `r >= 0.5`, then rising to 0.5. Filter types
+3 and 5 (HPF and BEF) write zero instead of B. The two land in different regions of the coefficient memory
+(`docs/research.md` section 8): A in a run of four adjacent slots, one per channel of a block, and B alongside
+that channel's two input-gain slots, which is where a feedforward term would sit.
 
 **Type** (`FUN_0000C1AC`): 0..6 become 0x00, 0x20, 0x40, 0x60, 0x80, 0xA0, 0xE0 in bits 5-7 of the channel's
 register word. **Input gain** goes through `FUN_0000C576` and the table at 0x00374D24.
@@ -263,10 +266,13 @@ register word. **Input gain** goes through `FUN_0000C576` and the table at 0x003
 -0x4000 with the same scaler, and every other type gets 0 with a half scaler, which is what a tapped ladder
 needs to turn one cascade into 24, 18 and 12 dB slopes.
 
-What the chip does with the coefficients is still the unknown part. `namespace cal` reads the cutoff
-coefficient as a one-pole `a = 1 - e^(-2 pi f / fs)`, which puts byte 0 at 755 Hz and byte 127 at 10.6 kHz,
-and the resonance table as `1/Q`, which makes raw 0 a Butterworth and raw 116 self-oscillating. Those two
-readings are the calibration targets; the formulas around them are the firmware's.
+What the chip does with the coefficients is still the unknown part, but their shape narrows it. One cutoff
+coefficient, one resonance coefficient, one input-side coefficient per channel, and three lowpass slopes taken
+off the same thing by FUN_0000CA44's tap mix, is a ladder and not three separate topologies. `namespace cal`
+reads it that way now: the cutoff coefficient is a one-pole `a = 1 - e^(-2 pi f / fs)`, which puts byte 0 at
+755 Hz and byte 127 at 10.6 kHz, resonance table A scales the ladder's feedback (`LADDER_K`) and table B is
+available as passband compensation (`RESO_COMP`). HPF, BPF and BEF are separate chip modes and keep the 2-pole
+reading. Those constants are the calibration targets; the formulas around them are the firmware's.
 
 ## Pan (FUN_00025BC8, FUN_00025C12, FUN_00025C5C, events 0x211 and 0x222-0x225)
 

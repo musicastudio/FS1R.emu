@@ -64,10 +64,16 @@ static const double CUT_COEF0    = 0xC0D / 32768.0;   // coefficient at cutoff b
 static const double CUT_COEF_STEP= 0xA9 / 32768.0;    // ... plus this per step, capped at 0x6000
 static const double CUT_COEF_FS  = 48000.0;           // INFERRED: read as a one-pole a = 1 - e^(-2 pi f / fs)
 static const double RESO_Q0      = 1.0;     // filter Q at raw resonance 0 (displayed -16) ...
-static const double RESO_PER_OCT = 32.0;    // ... doubling every 32 raw steps (demo). The firmware's table is
-                                            // 1 - 2^(-n/16), so 16 would be the damping read straight off it;
-                                            // 32 is what puts the demo's resonant patches at the right peak,
-                                            // which says the chip's structure spends that damping differently.
+static const double RESO_PER_OCT = 32.0;    // ... doubling every 32 raw steps, for the HPF/BPF/BEF modes only.
+                                            // The three lowpasses go through the ladder below instead.
+static const double LADDER_K     = 2.0;     // ladder feedback when resonance table A reads 1. Four would be
+                                            // the self-oscillation point of a 4-pole ladder; the demo wants a
+                                            // much milder peak than that, which is the same thing the old
+                                            // single-1/Q reading was saying when it needed RESO_PER_OCT = 32.
+static const double RESO_COMP    = 0.0;     // how much of resonance table B is spent lifting the passband on
+                                            // top of the ladder's own (1 + k) normalisation. The demo says
+                                            // none of it: any broadband lift here shows up directly as a level
+                                            // error on the songs whose patches sit near 0 dB already.
 static const double FSEQ_DELAY_S = 1.0;     // performance Fseq start delay at its maximum of 99
 static const double VCTRL_FREQ   = 8.0;     // voice Formant/FM control: pitch word units per depth step
 static const double PMS_FRAC[8]  = {0, 0.0264, 0.0534, 0.0889, 0.1612, 0.2769, 0.4967, 1.0};  // per-op pitch mod sensitivity, DX7 curve
@@ -135,9 +141,20 @@ static inline double cut_hz(double c) {
     double a = cal::CUT_COEF0 + cal::CUT_COEF_STEP * clampi((int)c, 0, 127);
     return -log(1.0 - std::min(a, 0.999)) * cal::CUT_COEF_FS / (2 * PI);
 }
-// FUN_0000C3D0 sends 1 - 2^(-raw/16) for raw resonance 0..116, so the damping halves every 16 steps.
-// INFERRED: read as 1/Q, which makes raw 0 (displayed -16) a Butterworth and raw 116 self-oscillating.
+// FUN_0000C3D0 sends TWO resonance coefficients per channel, not one. Table 0x374B24 is
+// A = 1 - 2^(-raw/16) = 1 - r, and 0x374C24 is B = max(0, 0.5 - 2r^2), quadratic in the same damping and
+// zeroed by the firmware for HPF and BEF. Two coefficients around a single shared cutoff coefficient is a
+// ladder with feedback and passband compensation, which is also what FUN_0000CA44's per-type input scaler
+// (0x40 vs 0x7F) and +-0x4000 tap mix want. Reading A alone as 1/Q is what forced RESO_PER_OCT to 32.
+// INFERRED is what the two become: A scales the ladder's feedback and B is available as passband lift.
+// The demo settled both scalings, and neither landed on the textbook value. See TODO.md, Tier 4.
+static inline double reso_r(int r) { return pow(2.0, -clampi(r + 16, 0, 116) / 16.0); }
 static inline double reso_q(int r) { return cal::RESO_Q0 * pow(2.0, clampi(r + 16, 0, 116) / cal::RESO_PER_OCT); }
+static inline double reso_fb(int r) { return cal::LADDER_K * (1.0 - reso_r(r)); }
+static inline double reso_comp(int type, int r) {
+    if (type == 3 || type == 5) return 0.0;                 // the firmware zeroes table B for HPF and BEF
+    double x = reso_r(r); return cal::RESO_COMP * std::max(0.0, 0.5 - 2 * x * x);
+}
 
 struct SVF {                     // topology-preserving 2-pole state variable filter (Zavalishin)
     double g = 0, k = 1, a1 = 1, a2 = 0, a3 = 0, ic1 = 0, ic2 = 0;
@@ -152,25 +169,51 @@ struct SVF {                     // topology-preserving 2-pole state variable fi
     }
     void clear() { ic1 = ic2 = 0; }
 };
-// Per-voice filter, register 0x270 = 11 when any part turns it on. Chip side, so INFERRED: a 2-pole SVF,
-// cascaded for LPF24 and with one extra pole for LPF18. Coefficients are refreshed on the 192.3 Hz tick,
-// which is when the CPU would write them. The chip is not the YMP706: 0x270 switches a channel loop out
-// to VOP3-1, and the coefficients go over its own register block at 0x800200 (docs/research.md 2.0.1 and 8).
-struct VFilter {
-    SVF a, b; double p1 = 0, gp = 0;
-    void setup(int type, double fHz, double q) {
-        // One resonance coefficient per channel reaches the chip, so LPF24's second pole pair runs flat
-        // rather than squaring the peak.
-        a.set(fHz, q); if (type == 0) b.set(fHz, 0.7);
-        gp = 1.0 - exp(-2 * PI * std::min(fHz, SR * 0.45) / SR);
+// Four one-pole stages behind one cutoff coefficient and one feedback, resolved zero-delay (Zavalishin)
+// so it stays stable up to the self-oscillation point. The firmware writes one cutoff coefficient per
+// filter channel and takes the three lowpass slopes off the same cascade, so they are taps rather than
+// three separate topologies. ponytail: the tap is a plain stage output; FUN_0000CA44's literal +-0x4000
+// mix word and its 0x40/0x7F input scaler are not modelled, because what the chip does with them needs
+// the VOP3 instruction set. All three taps have the same DC gain, which is what that pairing implies.
+struct Ladder {
+    double G = 0, k = 0, comp = 0, z[4] = {};
+    void set(double fHz, double kk, double cc) {
+        double g = tan(PI * std::min(fHz, SR * 0.45) / SR);
+        G = g / (1.0 + g); k = kk; comp = cc;
     }
-    void clear() { a.clear(); b.clear(); p1 = 0; }
+    void clear() { z[0] = z[1] = z[2] = z[3] = 0; }
+    inline double run(double x, int tap) {
+        // (1 + k) holds the passband at unity as the feedback rises, which is what the chip must do:
+        // table B only spans 0 to 0.5 and could not pay back the 14 dB an unnormalised loop loses.
+        x *= (1.0 + k) * (1.0 + comp);
+        double S = 0;                                       // G^3 s1 + G^2 s2 + G s3 + s4, s_i = (1-G) z_i
+        for (int i = 0; i < 4; i++) S = S * G + (1.0 - G) * z[i];
+        double G4 = G * G * G * G, y4 = (G4 * x + S) / (1.0 + k * G4);
+        double u = x - k * y4, out = 0;
+        for (int i = 0; i < 4; i++) {
+            double v = (u - z[i]) * G, y = v + z[i];
+            z[i] = y + v; u = y;
+            if (i + 1 == tap) out = y;
+        }
+        return out;
+    }
+};
+// Per-voice filter, register 0x270 = 11 when any part turns it on. Chip side, so INFERRED. Coefficients
+// are refreshed on the 192.3 Hz tick, which is when the CPU would write them. The chip is not the YMP706:
+// 0x270 switches a channel loop out to VOP3-1, and the coefficients go over its own register block at
+// 0x800200 (docs/research.md 2.0.1 and 8). The three lowpasses are taps off one ladder; HPF, BPF and BEF
+// are separate chip modes (FUN_0000C1AC writes the type into bits 5-7) and keep the 2-pole SVF reading.
+struct VFilter {
+    SVF a; Ladder lad;
+    void setup(int type, double fHz, int reso) {
+        if (type <= 2) lad.set(fHz, reso_fb(reso), reso_comp(type, reso));
+        else a.set(fHz, reso_q(reso));
+    }
+    void clear() { a.clear(); lad.clear(); }
     inline double run(int type, double x) {
+        if (type <= 2) return lad.run(x, 4 - type);                                 // LPF24 / LPF18 / LPF12
         double lp, bp, hp; a.run(x, lp, bp, hp);
         switch (type) {
-        case 0: { double l2, b2, h2; b.run(lp, l2, b2, h2); return l2; }            // LPF24
-        case 1: p1 += (lp - p1) * gp; return p1;                                    // LPF18
-        case 2: return lp;                                                          // LPF12
         case 3: return hp;                                                          // HPF
         case 4: return bp;                                                          // BPF
         default: return lp + hp;                                                    // BEF
@@ -1041,7 +1084,7 @@ struct Synth {
         // FUN_0000DB3C: the part's resonance offset counts double, and the sum is clamped to the raw
         // 0..116 the chip takes (reso_q clamps it there).
         int reso = V.fltReso + (ctrl_part(part, 22, pt.p[0x19]) - 64) * 2 + ((V.fltResoVel * (C.vel - 64)) >> 4);
-        C.flt.setup(C.fltType, cut_hz(cut), reso_q(reso));
+        C.flt.setup(C.fltType, cut_hz(cut), reso);
     }
     void tick() {
         double dt = 1.0 / TICK_HZ;
@@ -1584,6 +1627,17 @@ static int selftest(Synth& S) {
     }
     ck("voice decode followed the change", S.perf.part[2].voice.fltType == 2);
     ck("op level decode followed the change", S.perf.part[3].voice.v[5].level == 77);
+    // The ladder's zero-delay solve and its (1 + k) normalisation: a DC input has to come back out at
+    // unity from every tap, at every feedback the resonance table can reach. The mean over the second
+    // half of the run averages the ring away, and a loop that has gone unstable blows this up.
+    for (int raw : {0, 32, 64, 116}) {
+        for (int tap = 2; tap <= 4; tap++) {
+            Ladder L; L.set(1000.0, reso_fb(raw - 16), 0.0);
+            double acc = 0; int n = 0;
+            for (int i = 0; i < 96000; i++) { double y = L.run(1.0, tap); if (i >= 48000) { acc += y; n++; } }
+            ck("ladder unity passband", fabs(acc / n - 1.0) < 0.05);
+        }
+    }
 
     // 2. a parameter request comes back as a parameter change with the same value
     { uint8_t m[8] = {0xF0, 0x43, 0x30, 0x5E, 0x10, 0, 0x11, 0xF7};
