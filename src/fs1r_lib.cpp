@@ -46,7 +46,8 @@ static const double DETUNE_CENTS = 2.0;     // cents per detune step on non-form
 static const double FEEDBACK     = 0.5;     // feedback gain = FEEDBACK * 2^(fb - 7)
 static const double EG_ATTACK_K  = 0.25;    // rising EG time constant as a fraction of rate_secs
 static const double EG_OVERSHOOT = 6.0;     // dB the rising EG aims past its target
-static const double FEG_SEMIS    = 48.0;    // frequency EG range for the +-50 sysex value (four octaves)
+static const double FEG_SEMIS    = 48.0;    // frequency EG range at the full register swing of 128 (four octaves).
+                                            // The sysex byte reaches the register through FEGLVL, which is measured
 static const double FEG_TIME_K   = 0.3;     // frequency EG time as a fraction of rate_secs
 static const double WIN_SKIRT    = 2.0;     // formant window is sin^(WIN_SKIRT * (skirt + 1))
 static const double FRMT_BW_DB   = 20.0;    // formant window length = 2 * 2^(-bw / FRMT_BW_DB)
@@ -473,10 +474,14 @@ struct EG {                      // amplitude EG on the chip: hold, 4 segments. 
     }
     bool done() const { return stage == 5 || (stage == 4 && cur <= -120); }
 };
-struct FreqEG {                  // INFERRED: init -> attack level -> 0, +-50 = +-4 octaves, EG time curve as the amplitude EG
+struct FreqEG {                  // init -> attack level -> 0. The level curve is the firmware's, read back off the
+                                 // voice images (FEGLVL, register 0x60/0x68); the range and the time curve are INFERRED.
     double cur = 0, target = 0, k = 0, kdec = 0; int stage = 2;
+    // The sysex byte is not linear in the register: FEGLVL maps 0..100 onto 0..255 with 128 the centre, and
+    // half the displayed depth is only a fifth of the register offset. 128 register steps = FEG_SEMIS.
+    static double feg_semis(int v) { return (FEGLVL[clampi(v + 50, 0, 100)] - 128) * cal::FEG_SEMIS / 128.0; }
     void start(int init, int att, int attT, int decT) {
-        cur = init * cal::FEG_SEMIS / 50.0; target = att * cal::FEG_SEMIS / 50.0; stage = (init == 0 && att == 0) ? 2 : 0;
+        cur = feg_semis(init); target = feg_semis(att); stage = (init == 0 && att == 0) ? 2 : 0;
         k = 1.0 - exp(-1.0 / (rate_secs(egrate(attT)) * cal::FEG_TIME_K * SR + 1)); kdec = 1.0 - exp(-1.0 / (rate_secs(egrate(decT)) * cal::FEG_TIME_K * SR + 1));
     }
     inline double tick() {
@@ -684,7 +689,7 @@ struct Synth {
         C = Chan(); C.active = true; C.part = part; C.note = note; C.vel = vel; C.held = true; C.age = ++clock;
         C.lfoPhase = sync ? 0 : keepPhase;
         C.lfo2Phase = V.lfo2sync ? (uint32_t)(V.lfo2phase * 0x4000) : (uint32_t)(rand() & 0xFFFF);
-        C.panBase = pt.p[0x0E] ? pt.p[0x0E] - 1 : (rand() % 127);   // part pan 0 = random per note
+        C.panBase = pt.p[0x0E] ? pt.p[0x0E] : (rand() % 128);       // part pan 0 = random per note; the rest is the table index
         compute_pitch(C, pt, note);
         // portamento start (FUN_000124fe)
         int porta = pt.p[0x24]; C.portaTarget = C.pitchNote; C.portaCur = C.pitchNote;
@@ -1071,8 +1076,12 @@ struct Synth {
     }
     // registers 0x22A-0x22F: the pan index (part pan, pan scaling, pan LFO, performance pan, the Panpot
     // controller) read through the firmware's own pan tables as a 0.375 dB attenuation per side.
+    // FUN_00025bc8 and FUN_0002c36c keep the pan as 0..255 and index the tables at pan >> 1, and the voice
+    // image carries 2 * the part byte at +0x2E, so the table index is the part byte itself, not one below it.
+    // The offsets below are still summed in the index domain; whether the firmware sums them in the 0..255
+    // domain, which would halve them, is the next thing to read off a running unit.
     void refresh_pan(Chan& C, const Part& pt) {
-        int base = pt.p[0x0E] ? ctrl_part(C.part, 18, pt.p[0x0E]) - 1 : C.panBase;         // Panpot edits the part byte
+        int base = pt.p[0x0E] ? ctrl_part(C.part, 18, pt.p[0x0E]) : C.panBase;             // Panpot edits the part byte
         int idx = base + ((clampi(pt.p[0x28], 0, 100) - 50) * (C.noteP - 60)) / 48;        // pan scaling: -50..+50, pan by key around C3
         idx += (C.lfoVal * clampi(pt.p[0x29], 0, 99) * (int)(C.lfoFade >> 8)) >> 16;       // pan LFO depth, faded in, LFO1
         if (perf.c[0x11]) idx += perf.c[0x11] - 64;                                    // performance pan

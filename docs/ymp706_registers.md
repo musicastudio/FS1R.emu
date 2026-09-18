@@ -25,8 +25,8 @@ is firmware behaviour.
 | 0x48 | channel, op | level attenuation, 8-bit: `min(255, levelOffset + egBias) | flags`, refreshed every tick (see Levels) |
 | 0x50 | channel, op | EG time scaling 0..7 |
 | 0x58 | channel, op | `fms << 3 | ams` (freq mod sense only when the op is fixed) |
-| 0x60-0x78 | channel, op | frequency EG init level, attack level, attack time, decay time (raw sysex bytes) |
-| 0x80 | channel, op | detune (raw sysex byte, 0..30) |
+| 0x60-0x78 | channel, op | frequency EG init level, attack level (`FEGLVL[v]`, 0..255 with 128 the centre, image +0x98/+0xA0) and attack, decay time as rates (image +0xA8/+0xB0) |
+| 0x80 | channel, op | detune as sign-magnitude, low nibble the amount and 0xF0 the sign: `d - 15` for d >= 15, `~d` below (image +0xB8) |
 | 0x90/0x98 | channel, op | 16-bit operator frequency word (see Frequency) |
 | 0xA0/0xA8 | channel | 16-bit LFO frequency modulation word (see LFO), 0xA8 written with the low byte |
 | 0xB0 | channel | LFO amplitude modulation attenuation 0..255 (see LFO); 0xB8 always 0 |
@@ -40,7 +40,7 @@ is firmware behaviour.
 | 0x210 | channel, op | form (bits 0-2), skirt (3-5), fixed (6) |
 | 0x218 | channel, op | voiced bandwidth `clamp(bw + ctrl * BWBIAS[bias], 0, 99)`, bit 7 passed through |
 | 0x220 | channel, op | pitch mod sense 0..7 |
-| 0x228 / 0x229 | channel | voiced / unvoiced part level: `VNBAL[index] + 0x10` (see Part levels) |
+| 0x228 / 0x229 | channel | voiced / unvoiced part level: `min(255, VNBAL[index] + 0x10)` (see Part levels) |
 | 0x22A / 0x22B | channel | `~(((255 - pan) * s) >> 7)` and `(pan * s) >> 7`, s = image +0x3D (+1 when non-zero) |
 | 0x22C / 0x22D | channel | `min(255, image[+0x3E] + PANL[pan >> 1])` and the same with PANR: the main pair |
 | 0x22E / 0x22F | channel | the same with image[+0x3F] and a second pan source: the individual out pair, which reaches the slave DAC and the INDIVIDUAL OUTPUT jacks |
@@ -49,7 +49,7 @@ is firmware behaviour.
 | 0x260 | channel | feedback level 0..7 |
 | 0x268 | channel | image +0x181 (init 3) |
 | 0x270 | chip | 10, or 11 when any part has its filter on: on the board this switches the CHOUT/CHIN loop to VOP3-1 in (see `docs/research.md` 2.0.1) |
-| 0x300 | channel, op | unvoiced `mode << 6 | res << 3 | skirt`, linkFF demoted to 0x80 when the voiced op is not frmt |
+| 0x300 | channel, op | unvoiced `(mode + 1) << 6 | res << 3 | skirt`, so the three modes are 1, 2, 3 on the chip; linkFF demoted to 0x80 when the voiced op is not frmt |
 | 0x308 | channel, op | unvoiced bandwidth `clamp((bw*2*0xA5)>>8 + ctrl * BWBIAS[bias], 0, 127)` |
 | 0x310/0x318 | channel, op | unvoiced transpose word `0x1243 + TRANS[transpose]` |
 | 0x3FF | chip | channel select |
@@ -76,6 +76,86 @@ is firmware behaviour.
   (+0x21), portamento rate (+0x2A), portamento switch (+0x3B).
 - 0xF00/0xF04: note-on image copy (27 groups of 8 bytes + 2 bytes, tables 0x35C6AC / 0x35C6EC / 0x35C768), 0xF01 the
   algorithm words, 0xF08-0xF0D LFO waveform helpers.
+
+## The voice image, measured
+
+The driver keeps sixteen 512-byte voice images per tone generator at 0x01039384, `image_base + n * 0x200`, and a
+channel plays one of them. The image is the CPU's decoded copy of the voice, so the register table above quotes
+offsets into it. rgwan read all sixteen back off a running unit for each of the 492 segments of the audio capture
+set on 2026-09-18, with the exact voice and performance bulk that produced each one, which places every byte that
+moves and turns the conversions into measurements rather than readings of the code.
+
+**The image is the same under every note and every velocity.** That is the structural thing to know about it. The
+level offsets, the frequency words, the pitch word and the bandwidth registers are all note or velocity dependent
+and none of them is here; they live in the per-channel arrays at 0x0103B384, 0x01044C44 and 0x01045544. Nothing to
+do with the filter is here either, since that is VOP3-1's and sits at 0x0106AExx.
+
+Rows the capture set never moved are marked "event list": those come from the 0x300-0x32B event table above and
+are where the firmware puts them, but nothing here has checked the value.
+
+| offset | contents |
+|---|---|
+| +0x02 | LFO1 speed increment, 16-bit: `2 * v * (v < 160 ? 11 : 11 + (v - 160) / 4)` for `v = eb86(speed)`, 22 when v is 0 |
+| +0x04 | LFO1 delay increment, 16-bit: `((16 + (q & 15)) << 10) >> (7 - (q >> 4))`, `q = 99 - delay` |
+| +0x06..+0x0D | pitch EG times (event list) |
+| +0x0E..+0x17 | pitch EG levels, words (event list) |
+| +0x18 | PEG velocity sensitivity (event list) |
+| +0x19 | LFO1 waveform |
+| +0x1A | LFO1 key sync |
+| +0x1B | PEG range (event list) |
+| +0x1C / +0x1D / +0x1E | PMD / AMD / FMD, each `eb86(v)` |
+| +0x1F | pan LFO depth, `eb86(v)`, reading back as 1 rather than 0 at depth 0 |
+| +0x21 | PEG time scaling (event list) |
+| +0x2A | portamento rate (event list) |
+| +0x2E | pan, twice the part byte, 254 raised to 255. The table index is `pan >> 1`, so it is the part byte itself |
+| +0x3B | portamento switch (event list) |
+| +0x3D / +0x3E / +0x3F | the three output pair scalers, registers 0x22A/B, 0x22C/D and 0x22E/F |
+| +0x40..+0x5F | EG levels L1-L4, `LEVTAB[L] >> 1` |
+| +0x60..+0x7F | EG rates T1-T4, `((99 - T)*0xA4)>>8` with the part's EG offsets already in T |
+| +0x80..+0x87 | EG hold rate, the same conversion then +4 capped 0x3E, and 0x3F left alone |
+| +0x88..+0x8F | EG time scaling |
+| +0x90..+0x97 | `fms << 3 \| ams` |
+| +0x98..+0x9F | frequency EG init level, `FEGLVL[v]` |
+| +0xA0..+0xA7 | frequency EG attack level, `FEGLVL[v]` |
+| +0xA8..+0xAF | frequency EG attack rate, the EG rate conversion |
+| +0xB0..+0xB7 | frequency EG decay rate |
+| +0xB8..+0xBF | detune, sign-magnitude |
+| +0xC0..+0x137 | the unvoiced operators, the same eight stripes in the same order |
+| +0x140..+0x147 | pitch mod sense |
+| +0x148 / +0x149 | voiced / unvoiced part level, registers 0x228/0x229 |
+| +0x150 / +0x158 | register 0x230 word, hi and lo |
+| +0x160..+0x167 | register 0x300, `(mode + 1) << 6 \| res << 3 \| skirt` |
+| +0x180 | feedback level |
+| +0x181 | register 0x268, 1 in every segment captured |
+| +0x190 / +0x198 | algorithm word, hi and lo |
+| +0x1A0..+0x1A7 | register 0x210, form, skirt and fixed |
+| +0x1C0 / +0x1C8 | EG bias, voiced and unvoiced (event 0x205, event list) |
+
+`FS1R.unlock/captures/image_check.py` walks a session and checks every one of those against the conversion, which
+is 147,548 checks on the 2026-09-19 set, all of them passing, with nothing unexplained left over. Six came back
+different from what this file said:
+
+- the frequency EG levels go through `FEGLVL` rather than being linear in the sysex byte, and half the displayed
+  depth is only a fifth of the register offset,
+- the frequency EG times are rate-converted like the amplitude EG, not the raw bytes,
+- the unvoiced mode field is one higher on the chip than in the voice,
+- the detune register is sign-magnitude, not the raw 0..30 byte,
+- `VNBAL[index] + 0x10` saturates instead of wrapping,
+- and the pan index is the part's pan byte, not one below it, which the Pan section below sets out.
+
+Everything else held exactly, including the two LFO1 increments, both EG level and rate conversions, the hold
+rate's +4, the part level chain through volume, expression and balance, and the whole unvoiced half. Two things
+the set cannot speak to: every segment leaves the part's EG offsets at 64, so the decay offset reaching T2 and T3
+both is still FUN_00019414's word rather than the unit's, and the pitch EG never moves.
+
+**The algorithm word.** The connection table's two bytes per operator become `hi = t0 >> 1`, `lo = (t1 << 1) | (t0 & 1)`,
+with the carrier level correction in bits 4-7 of the low byte, and an input select of 0 promoted to 1 on the way.
+Only three distinct `t0` values appear in the capture set, so the promotion is the least tested line here.
+
+**Which pair carries the sound.** In all 492 segments +0x3D reads 0x7F and +0x3E and +0x3F read 0xFF, which mutes
+the 0x22C/D and 0x22E/F pairs and leaves 0x22A/0x22B as the pair the note comes out of. Those patches send nothing
+to either effect block, so the reading is that 0x22A/0x22B is the dry pair and the other two are the sends; the
+capture set never moved a send level, so that is an observation rather than a measurement.
 
 ## Note on (FUN_00010B48, FUN_000112C0, FUN_000125F8)
 
@@ -195,7 +275,9 @@ Fseq) are performance-wide.
 
 `u = ((volume + 1) * expression) >> 8`; voiced index = unvoiced index = u + 1; balance below 64 scales the unvoiced
 index by `(u + 2) * bal >> 6`, above 64 the voiced index by `(u + 2) * (128 - bal) >> 6`; registers 0x228/0x229 =
-`VNBAL[index] + 0x10`. Expression is 0..254 (CC11 * 2), initial 254.
+`min(255, VNBAL[index] + 0x10)`. Expression is 0..254 (CC11 * 2), initial 254. The saturation is not cosmetic:
+balance 0 lands on `VNBAL[0] = 255`, and wrapping there would turn a muted unvoiced half into a loud one.
+Measured against the volume, expression and balance sweeps in the 2026-09-19 voice images.
 
 ## Fseq playback (FUN_0000FFFA, FUN_0001A59E, FUN_0001E838)
 
@@ -276,11 +358,18 @@ reading. Those constants are the calibration targets; the formulas around them a
 
 ## Pan (FUN_00025BC8, FUN_00025C12, FUN_00025C5C, events 0x211 and 0x222-0x225)
 
-`pan = clamp(image[+0x19] + panOffset, 0, 255)`, index `pan >> 1` into two 128-byte tables at 0x35C0EB and
+`pan = clamp(chan[+0x19] + panOffset, 0, 255)`, index `pan >> 1` into two 128-byte tables at 0x35C0EB and
 0x35C16B, which are one curve read forwards and backwards. Read as 0.375 dB attenuations they give a
 constant-power law: 0 dB at one end, silence at the other, -3 dB on both sides at the centre. Each output
 pair has its own scaler byte added to the attenuation and clamped at 255, and the individual-out pair takes
 its pan from a different source than the channel's own. Event 0x211 also folds in the part's random pan.
+
+`chan[+0x19]` is the per-channel block at 0x0103B384, not the voice image: FUN_00025D84 walks the 32 channels
+and reads `+0x19` of each, adds the pan offset, clamps to 0..255 and halves for the index. The voice image feeds
+that byte from its own +0x2E, which is twice the part's pan byte, so the table index is the part byte itself and
+not one below it. Everything else in the sum, pan scaling, the pan LFO and the performance pan, is added in the
+0..255 domain, which is half a table step per unit; `namespace cal` still adds them a whole step at a time, and
+reading the three scaler events off the firmware is what settles that.
 
 ## Still unknown
 
@@ -295,7 +384,7 @@ with a coefficient is still the model. `docs/research.md` 2.0.1 has the wiring a
 
 ## ROM tables (generated into src/fs1r_rom_tables.h by tools/extract_tables.py)
 
-PANL 0x35C0EB, PANR 0x35C16B, LEVTAB 0x35B4A8, PEGLVL 0x35B50C, PEGTIME 0x35B5D6, VELW 0x35BA1E, VELCURVE 0x35B99E, VELCURVES 0x35B71E, EGBIAS
+PANL 0x35C0EB, PANR 0x35C16B, LEVTAB 0x35B4A8, FEGLVL 0x35B2E0, PEGLVL 0x35B50C, PEGTIME 0x35B5D6, VELW 0x35BA1E, VELCURVE 0x35B99E, VELCURVES 0x35B71E, EGBIAS
 0x35CD24, KSEXP 0x35C3EB, KSLIN 0x35C413, KEYFACT 0x35C43B, NOTETAB 0x35B346, COARSE 0x35BC32, FINE 0x35BC72, TRANS
 0x35B446, BENDTAB 0x35BBD0, SINE64 0x35CC94, SHTAB 0x35CF24, FVSTAB 0x35C4BC, BWBIAS 0x35C533, FRMDET 0x35BE06, VNBAL
 0x35BB1E, PEGVEL 0x35C870, SENDTAB 0x35C006, algorithms 0x37C0DC.

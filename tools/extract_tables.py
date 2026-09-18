@@ -10,6 +10,7 @@ tables = [  # name, ctype, values, comment
  ("LEVTAB", "unsigned char", B(0x35B4A8, 100), "level 0..99 -> attenuation, 0.75 dB per step (DX7 curve)"),
  ("PEGLVL", "unsigned short", W(0x35B50C, 101), "pitch EG level 0..100 -> 0..256, 128 = centre; word = (v-128)<<7"),
  ("PEGTIME", "unsigned short", W(0x35B5D6, 100), "pitch EG / portamento time 0..99 -> level units per tick"),
+ ("FEGLVL", "unsigned char", B(0x35B2E0, 101), "frequency EG level 0..100 -> 0..255, 128 = centre (registers 0x60/0x68, image +0x98/+0xA0). MEASURED against the voice images in FS1R.unlock/captures/2026-09-19"),
  ("VELW", "unsigned char", [x & 0xFF for x in W(0x35BA1E, 128)], "velocity 0..127 -> attenuation, 0.375 dB units (255 at 0)"),
  ("VELCURVE", "unsigned char", B(0x35B99E, 128), "velocity remap used for the Fseq level velocity"),
  ("EGBIAS", "unsigned char", [min(255, x) for x in W(0x35CD24, 256)], "controller 0..255 -> attenuation for EG bias and LFO AM"),
