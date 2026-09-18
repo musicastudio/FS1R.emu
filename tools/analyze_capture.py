@@ -320,6 +320,13 @@ def analyze(wav, manifest, tables, label):
     return res
 
 
+# The engine renders digital silence as exactly zero and the hardware's digital output does too, but a
+# 24-bit capture floors at -144.5 dB where a float render floors at -200. Comparing those two straight
+# scores a segment that is silent on both as a 55 dB disagreement, which then swamps the median. Anything
+# under this is silence on either side and the comparison skips it.
+SILENT_DB = -120.0
+
+
 def compare(hw, eng):
     """Where the engine and the hardware disagree, worst first."""
     byid = {s["id"]: s for s in eng["segments"]}
@@ -327,6 +334,8 @@ def compare(hw, eng):
     for s in hw["segments"]:
         e = byid.get(s["id"])
         if not e:
+            continue
+        if s["rms_db"] < SILENT_DB and e["rms_db"] < SILENT_DB:
             continue
         d = s["rms_db"] - e["rms_db"]
         f = None

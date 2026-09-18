@@ -26,6 +26,12 @@ endif()
 add_executable(test_effects tools/test_effects.cpp)
 target_include_directories(test_effects PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src)
 
+# The renderer behind the calibration loop. The console does this too, but only on Windows, and
+# tools/analyze_capture.py needs a render of every capture request to compare a recording against.
+add_executable(render_capture tools/render_capture.cpp)
+target_link_libraries(render_capture PRIVATE fs1rLib)
+set_target_properties(render_capture PROPERTIES RUNTIME_OUTPUT_DIRECTORY "$<1:${FS1R_BIN}>")
+
 enable_testing()
 add_test(NAME effects COMMAND test_effects)
 

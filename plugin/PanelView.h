@@ -149,7 +149,7 @@ private:
     // performances one at a time before anything else has been pressed.
     int field = 2;
     bool muted = false;
-    double gain = 0.25;
+    double gain = 1.0;
     juce::String pendingName, pendingValue;
     int pendingCountdown = 0;
     juce::uint32 lastEnterClick = 0;

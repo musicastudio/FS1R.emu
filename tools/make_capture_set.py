@@ -19,6 +19,7 @@ says what the YMP706 does with a level, a rate or a bandwidth, so it has to be m
 import argparse
 import hashlib
 import json
+import os
 import subprocess
 import sys
 from datetime import date
@@ -31,6 +32,7 @@ ROOT = Path(__file__).resolve().parents[1]
 OUT = ROOT / "captures/requests"
 ENGINE_OUT = ROOT / "captures/engine"
 EXE = ROOT / "bin/fs1r_emu.exe"
+RENDER = ROOT / ("bin/render_capture.exe" if os.name == "nt" else "bin/render_capture")
 
 MAX_SEG = 36              # segments per file, so no file runs much past four minutes
 SETTLE_PERF = 700         # ms after a performance bulk: it reloads all four parts
@@ -556,12 +558,17 @@ def main():
           f"{total / 60:.0f} minutes of playback")
     if args.render:
         ENGINE_OUT.mkdir(parents=True, exist_ok=True)
-        if not EXE.exists():
-            sys.exit(f"{EXE} is missing: run build.bat first")
+        # render_capture is the portable one and writes 32-bit float, so the render carries no
+        # quantisation floor of its own against a 24-bit capture. Fall back to the console on Windows.
+        if RENDER.exists():
+            cmd = lambda mid, wav: [str(RENDER), "-f", "-d", "1", str(wav), str(mid)]
+        elif EXE.exists():
+            cmd = lambda mid, wav: [str(EXE), "-smf", str(mid), "-w", str(wav), "-d", "1"]
+        else:
+            sys.exit(f"neither {RENDER} nor {EXE} exists: build render_capture (cmake) or run build.bat")
         for f in manifest["files"]:
             wav = ENGINE_OUT / (Path(f["file"]).stem + ".wav")
-            r = subprocess.run([str(EXE), "-smf", str(OUT / f["file"]), "-w", str(wav), "-d", "1"],
-                               capture_output=True, text=True)
+            r = subprocess.run(cmd(OUT / f["file"], wav), capture_output=True, text=True)
             line = [x for x in r.stdout.splitlines() if x.startswith("wrote")]
             print(f["file"], line[0] if line else r.stdout.strip() or r.stderr.strip())
 

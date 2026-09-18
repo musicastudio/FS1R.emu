@@ -37,7 +37,9 @@ static const double TICK_HZ = CPU_HZ / 16.0 / 9099.0;   // MTU2 TGRA compare eve
 // through the engine. Names match the TODO's "confirm the INFERRED constants".
 namespace cal {
 static const double FM_INDEX     = 3.0;     // cycles of phase deviation at full modulator level (demo)
-static const double LEVEL_DB     = 0.375;   // dB per step of the 8-bit level registers (LEVTAB doubled)
+static const double LEVEL_DB     = 0.3795;  // dB per step of the 8-bit level registers (LEVTAB doubled). MEASURED:
+                                            // the level ladder in 01_reference gives 0.3792 to 0.3800 by three
+                                            // routes, against the 0.375 the DX7 lineage assumed.
 static const double EG_LEVEL_DB  = 1.5;     // dB per step of the 6-bit EG level registers (LEVTAB >> 1)
 static const double CARRIER_DB   = 1.5;     // dB per step of the carrier level correction (voice 0x2D-0x34)
 static const double DETUNE_CENTS = 2.0;     // cents per detune step on non-formant operators
@@ -77,6 +79,16 @@ static const double RESO_COMP    = 0.0;     // how much of resonance table B is 
 static const double FSEQ_DELAY_S = 1.0;     // performance Fseq start delay at its maximum of 99
 static const double VCTRL_FREQ   = 8.0;     // voice Formant/FM control: pitch word units per depth step
 static const double PMS_FRAC[8]  = {0, 0.0264, 0.0534, 0.0889, 0.1612, 0.2769, 0.4967, 1.0};  // per-op pitch mod sensitivity, DX7 curve
+// The output path, MEASURED from rgwan's recording of the whole capture set on 2026-09-18. These three
+// are no longer inferred: they come off the digital tap itself. captures/analysis/ holds the numbers and
+// docs/capture_0918.md the working.
+static const double OUT_GAIN     = 0.14992; // fixed gain between the summed bus and the digital tap. Nine
+                                            // single-operator segments agree to 0.005 dB.
+static const double CHAN_CLIP    = 1.1919;  // the channel accumulator saturates here, hard and memoryless,
+                                            // before the filter loop. stack-4 and stack-8 are driven 4x and
+                                            // 8x past one carrier and recover the same ceiling to five places.
+static const double FLT_LOSS     = 0.3190;  // flat 9.93 dB the VOP3-1 filter loop costs, constant to 0.06 dB
+                                            // across every type, cutoff and resonance the capture sweeps.
 }
 using cal::FM_INDEX;
 using cal::LEVEL_DB;
@@ -511,7 +523,7 @@ struct Chan {
 };
 
 struct Synth {
-    Perf perf; Chan ch[NCHAN]; uint32_t clock = 0; double gain = 0.25;
+    Perf perf; Chan ch[NCHAN]; uint32_t clock = 0; double gain = 1.0;   // the analogue volume pot, after the tap
     FxSection fx;
     const Rom* rom = nullptr;
     uint8_t sys[76] = {};                      // system parameters, sysex table 4
@@ -708,7 +720,7 @@ struct Synth {
     void start_filter(Chan& C, const Part& pt, int vel) {
         const Voice& V = pt.voice;
         C.fltOn = (pt.p[7] & 1) != 0; C.fltType = V.fltType; C.flt.clear();
-        C.fltInGain = db2lin(V.fltInGain); C.fltGain = C.fltInGain;
+        C.fltInGain = db2lin(V.fltInGain); C.fltGain = C.fltInGain * cal::FLT_LOSS;
         double lv[4]; int rt[4];
         int ts = (V.fltTscale * C.keyfact) >> 5;
         for (int i = 0; i < 4; i++) { lv[i] = V.fltL[i] - 50; rt[i] = clampi(egrate(V.fltT[i]) + ts, 0, 63); }
@@ -1371,6 +1383,10 @@ struct Synth {
         bool alive = false;
         for (auto& s : C.op) if (!s.eg.done() || !s.ueg.done()) { alive = true; break; }
         if (!alive) C.active = false;
+        // The channel accumulator saturates before the filter loop, which is where the capture puts it:
+        // eight carriers stacked in one channel clip flat, while the filter's own output on ingain-12 rides
+        // 4 dB above that ceiling, so nothing downstream of CHOUT can be what clips.
+        mix = std::clamp(mix, -cal::CHAN_CLIP, cal::CHAN_CLIP);
         if (C.fltOn) mix = C.flt.run(C.fltType, mix * C.fltGain);
         outL = mix * C.panL; outR = mix * C.panR;
     }
@@ -1429,12 +1445,15 @@ struct Synth {
                 l = r = 0.0;
             }
             fx.master(l, r);
-            l *= gain * pvol; r *= gain * pvol;
-            l = l / (1.0 + fabs(l) * 0.5); r = r / (1.0 + fabs(r) * 0.5);
+            // Down to the scale of the digital output board, which is what the capture measured, and then
+            // the main DAC's own ceiling. gain is ours: it stands in for the analogue volume pot, which on
+            // the hardware sits after the tap and so cannot be part of the measurement.
+            l *= cal::OUT_GAIN * pvol; r *= cal::OUT_GAIN * pvol;
             // An effect block given parameters no preset would use can run away or go non-finite. The
             // engine is a plugin: whatever happens upstream, it must not hand the host a NaN.
-            if (!(l > -2.0 && l < 2.0)) l = 0.0;
-            if (!(r > -2.0 && r < 2.0)) r = 0.0;
+            if (!(l > -1e6 && l < 1e6)) l = 0.0;
+            if (!(r > -1e6 && r < 1e6)) r = 0.0;
+            l = std::clamp(l, -1.0, 1.0) * gain; r = std::clamp(r, -1.0, 1.0) * gain;
             outL[i] = (float)l; outR[i] = (float)r;
         }
     }
