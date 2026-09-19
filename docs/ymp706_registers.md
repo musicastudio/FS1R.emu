@@ -159,6 +159,8 @@ capture set never moved a send level, so that is an observation rather than a me
 
 ## Note on (FUN_00010B48, FUN_000112C0, FUN_000125F8)
 
+How the message reaches `FUN_00010B48` at all, and what Control Change and aftertouch do instead, is in [`midi_dispatch.md`](midi_dispatch.md).
+
 1. Part filters: note limit low/high and velocity limit low/high (a high below low means "outside the gap").
 2. Velocity: `v' = clamp(((depth * VELCURVES[sysCurve][v]) >> 6) + (offset - 64) * 2, 1, 127)` with the part's velocity
    sense depth/offset and the system velocity curve (thru, soft 1, soft 2, wide, hard).

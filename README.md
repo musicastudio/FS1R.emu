@@ -103,7 +103,7 @@ The ROM image the `-r` examples use is rgwan's EPROM dump with its 16-bit words 
 - `tools/build_fs1r_ghidra.py` imports and decompiles the firmware into `../FS1R_DISASM` with pyghidra (SH-2); `tools/decomp.py`, `tools/ghidra_disasm.py`, `tools/ghidra_switches.py`, `tools/ghidra_handlers.py` query it
 - `tools/extract_presets.py` pulls the 1408 preset voices, the 384 preset performances and the 90 preset formant sequences out of the EPROM image into `presets/`; `tools/extract_vop3.py` pulls VOP3-1's microcode into `docs/vop3/`; `tools/ghidra_ctrl_dests.py` decompiles the 48 controller destination handlers, which Ghidra never turns into functions because only a pointer table reaches them
 - `captures/requests/` the hardware capture kit: MIDI files that play a measurement into a real FS1R, built by `tools/make_capture_set.py` out of `tools/fs1r_patch.py`, measured by `tools/analyze_capture.py`, and explained in `docs/hardware_capture_request.md`
-- `docs/` research notes, the register map and engine description, the plugin guide, `interface_from_firmware.md` (the panel's cursor stops and controller set, read out of the EPROM's own screen tables), the VOP3 reference, data list and manual text, the formant patent
+- `docs/` research notes, the register map and engine description, the plugin guide, `midi_dispatch.md` (how a Note On, a Control Change and both aftertouches get from the SCI0 interrupt to the tone generator), `interface_from_firmware.md` (the panel's cursor stops and controller set, read out of the EPROM's own screen tables), the VOP3 reference, data list and manual text, the formant patent
 
 ## Status
 
