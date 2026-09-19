@@ -36,11 +36,17 @@ static const double TICK_HZ = CPU_HZ / 16.0 / 9099.0;   // MTU2 TGRA compare eve
 // properly. They all live here so calibrating against a recording is one table edit rather than a hunt
 // through the engine. Names match the TODO's "confirm the INFERRED constants".
 namespace cal {
-static const double FM_INDEX     = 4.0;     // cycles of phase deviation at full modulator level. MEASURED: the
-                                            // 2026-09-19 sweep held algorithm 8 and stepped the modulator's level
-                                            // register, and the sidebands give 25.11 radians at register 0, which
-                                            // is 3.997 cycles over 25 fitted steps with a 0.009 dB residual. The
-                                            // 3.0 this replaces was fitted from fifteen demo songs.
+static const double FM_INDEX     = 3.369;   // cycles of phase deviation at full modulator level. MEASURED: two
+                                            // sweeps of algorithm 8's modulator level register, 2026-09-19, whose
+                                            // sidebands give 21.139 and 21.205 radians at register 0 over 25 and
+                                            // 24 fitted steps, 3.3644 and 3.3749 cycles. The 4.0 this replaces
+                                            // came off the first of those two takes read one step early: the
+                                            // analyzer anchored the sweep on where the tone starts, and the rig
+                                            // brings its note up 1.55 s before the first step writes anything, so
+                                            // every spectrum was scored against its neighbour's register value.
+                                            // The error is exactly one step of the sweep, 10^(4*LEVEL_DB/20) =
+                                            // 1.1887, and 25.116/1.1887 is 21.13. FS1R.unlock's sweep_check.py
+                                            // anchors on the ladder's first step now and both takes agree.
 static const double LEVEL_DB     = 0.376287;// dB per step of the 8-bit level registers (LEVTAB doubled). MEASURED:
                                             // the same sweep's sideband ladder reads 0.3761 with a 0.005 dB residual
                                             // over 36 dB, and its own level ladder reads 0.3767 over the top 21 dB.

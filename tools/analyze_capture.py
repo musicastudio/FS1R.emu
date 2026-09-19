@@ -384,10 +384,26 @@ def curve_error(h, e, key="envelope_db", slack=4):
     return best
 
 
+def band_error(h, e):
+    """(rms dB, bands) between two spectra, level divided out, so this is timbre and not gain.
+
+    A `spectrum` segment's rms_db and peak frequency say nothing about the shape between them, and the
+    shape is what a modulation index or a formant window is. cal::FM_INDEX sat at 4.0 for a day on a
+    misread sweep while 03_fm's own spectra said 4.46 dB of band error; at the measured 3.369 they say
+    0.25. Nothing was reading them.
+    """
+    a, b = np.array(h["bands"]["db"]), np.array(e["bands"]["db"])
+    m = (a > -90) | (b > -90)
+    if m.sum() < 3:
+        return None
+    d = np.clip(a[m], -90, None) - np.clip(b[m], -90, None)
+    return float(np.sqrt(np.mean((d - np.median(d)) ** 2))), int(m.sum())
+
+
 def compare(hw, eng):
     """Where the engine and the hardware disagree, worst first."""
     byid = {s["id"]: s for s in eng["segments"]}
-    rows, curves = [], []
+    rows, curves, bands = [], [], []
     for s in hw["segments"]:
         e = byid.get(s["id"])
         if not e:
@@ -402,6 +418,10 @@ def compare(hw, eng):
         c = curve_error(s, e) if "envelope_db" in s else None
         if c:
             curves.append((c[0], s["id"], c[1]))
+        if s.get("bands") and e.get("bands"):
+            g = band_error(s, e)
+            if g:
+                bands.append((g[0], s["id"], g[1]))
     rows.sort(reverse=True)
     print("  level differences, hardware minus engine (worst 12):")
     for _, sid, d, f in rows[:12]:
@@ -415,6 +435,12 @@ def compare(hw, eng):
         for r, sid, n in curves[:6]:
             print(f"    {sid:22s} {r:7.2f} dB over {n} steps")
         print(f"    mean {np.mean([c[0] for c in curves]):.2f} dB over {len(curves)} envelopes")
+    if bands:
+        bands.sort(reverse=True)
+        print("  spectrum shape, rms dB over the octave bands with the level divided out (worst 6):")
+        for r, sid, n in bands[:6]:
+            print(f"    {sid:22s} {r:7.2f} dB over {n} bands")
+        print(f"    mean {np.mean([b[0] for b in bands]):.2f} dB over {len(bands)} spectra")
 
 
 def main():
