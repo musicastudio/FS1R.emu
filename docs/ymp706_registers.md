@@ -339,7 +339,11 @@ byte is **linear in the coefficient**, spanning 8:1, not linear in octaves.
 `(voice[0x56] - 7)` times a velocity term, clamped 0..0x74 (116). The raw value indexes two tables and both go
 into the coefficient memory. With `r = 2^(-raw/16)` the damping, 0x00374B24 is `A = 1 - r` and 0x00374C24 is
 `B = max(0, 0.5 - 2r^2)`, quadratic in the same damping: zero while `r >= 0.5`, then rising to 0.5. Filter types
-3 and 5 (HPF and BEF) write zero instead of B. The two land in different regions of the coefficient memory
+3 and 5 (HPF and BEF) write zero instead of B. **Confirmed on hardware** (capture3's `convhand`, 2026-09-20):
+the routine is `FUN_0000C3D0(channel r4, raw r5)`, it stages table A at `0x01068F78[slot]` per the per-channel
+table at 0x374E64, ships it through `FUN_0000B6A4`, and returns nothing, which is why two automated `convert`
+sessions read a constant 257 out of r0. The resonance byte indexes A un-offset: table A reads `1 - 2^(-byte/16)`,
+measured at bytes 0, 64 and 116 (staged words 0x0000, 0x7800, 0x7F28, exactly the EPROM's table).
 (`docs/research.md` section 8): A in a run of four adjacent slots, one per channel of a block, and B alongside
 that channel's two input-gain slots, which is where a feedforward term would sit.
 
