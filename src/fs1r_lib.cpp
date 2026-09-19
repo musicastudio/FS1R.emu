@@ -1222,13 +1222,14 @@ struct Synth {
     // controller) read through the firmware's own pan tables as a 0.375 dB attenuation per side.
     // FUN_00025bc8 and FUN_0002c36c keep the pan as 0..255 and index the tables at pan >> 1, and the voice
     // image carries 2 * the part byte at +0x2E, so the table index is the part byte itself, not one below it.
-    // The offsets below are still summed in the index domain; whether the firmware sums them in the 0..255
-    // domain, which would halve them, is the next thing to read off a running unit.
+    // The firmware keeps the whole sum in the 0..255 domain and halves it once with pan >> 1 (docs/
+    // ymp706_registers.md, Pan). pan_index returns the part-pan-plus-scaling in the index domain, so the two
+    // terms that follow — the pan LFO and the performance pan — are each summed at 0..255 and land halved.
     void refresh_pan(Chan& C, const Part& pt) {
         int base = pt.p[0x0E] ? ctrl_part(C.part, 18, pt.p[0x0E]) : C.panBase;             // Panpot edits the part byte
         int idx = pan_index(base, pt.p[0x28], C.noteP);
-        idx += (C.lfoVal * clampi(pt.p[0x29], 0, 99) * (int)(C.lfoFade >> 8)) >> 16;       // pan LFO depth, faded in, LFO1
-        if (perf.c[0x11]) idx += perf.c[0x11] - 64;                                    // performance pan
+        idx += ((C.lfoVal * clampi(pt.p[0x29], 0, 99) * (int)(C.lfoFade >> 8)) >> 16) / 2; // pan LFO depth, faded in, LFO1
+        if (perf.c[0x11]) idx += (perf.c[0x11] - 64) / 2;                              // performance pan
         idx = clampi(idx, 0, 127);
         C.panL = db2lin(-LEVEL_DB * PANL[idx]); C.panR = db2lin(-LEVEL_DB * PANR[idx]);
     }

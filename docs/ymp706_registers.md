@@ -370,11 +370,12 @@ its pan from a different source than the channel's own. Event 0x211 also folds i
 and reads `+0x19` of each, adds the pan offset, clamps to 0..255 and halves for the index. The voice image feeds
 that byte from its own +0x2E, which is twice the part's pan byte, so the table index is the part byte itself and
 not one below it. Everything else in the sum, pan scaling, the pan LFO and the performance pan, is added in the
-0..255 domain, which is half a table step per unit. Pan scaling is measured now: `10_envelope2` leaves that byte
+0..255 domain and lands halved by the `pan >> 1`, half a table step per unit: the LFO depth and the
+performance-pan byte each contribute half a table step per unit, which is what `refresh_pan` now does. Pan
+scaling is measured: `10_envelope2` leaves that byte
 at 0 and sweeps the pan across the keyboard, and the index comes out as `64 - 4 * (note - 60) / 3`, hard right at
 note 12 and hard left from note 108, which is the whole 128 of one side in the 0..255 domain at byte 0 and matches
-all ten notes and both ends of the table. `docs/aeg.md`. The pan LFO and the performance pan are still added a
-whole index step at a time and no recording has asked them anything, since every request file centres both.
+all ten notes and both ends of the table. `docs/aeg.md`.
 
 ## Still unknown
 
