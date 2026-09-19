@@ -94,15 +94,14 @@ static const double FEG_SEMIS    = 48.0;    // frequency EG range at the full re
                                             // The sysex byte reaches the register through FEGLVL, which is measured
 static const double FEG_TIME_K   = 0.3;     // frequency EG time as a fraction of rate_secs
 static const double WIN_SKIRT    = 2.0;     // formant window is sin^(WIN_SKIRT * (skirt + 1))
-static const double FORM_LEVEL   = 0.520;   // what a grain train is worth on the all and odd forms against
-                                            // the same window read as a formant. MEASURED at one bandwidth,
-                                            // the only one the capture set has for these forms: the unit
-                                            // puts all1 and all2 5.67 dB under the engine's grain sum and
-                                            // odd1 and odd2 2.15 dB under, and the 3.5 dB between them is
-                                            // the doubled grain rate carrying its power, so the root of the
-                                            // rate is taken out and this is what is left. One point per
-                                            // form is not a law; a bandwidth sweep on the harmonic forms is
-                                            // what would replace it. docs/formant.md.
+static const double FORM_LEVEL   = 0.520;   // what a grain train is worth on every form but the formant,
+                                            // against a grain sum normalised by its own window length.
+                                            // MEASURED: it puts all1, all2, odd1, odd2 and both resonant
+                                            // forms within 0.14 dB of the unit at once, which the ad-hoc
+                                            // root-of-the-grain-rate factor it replaces could not. The
+                                            // 3.5 dB between the all forms and the odd ones is not a
+                                            // constant at all: it falls out of the odd forms retriggering
+                                            // twice a period under a window half as long. docs/formant.md.
 static const double FRMT_BW_HZ0  = 3.1;     // the formant window's bandwidth in Hz at byte 0 ...
 static const double FRMT_BW_DB   = 8.0;     // ... doubling every FRMT_BW_DB steps, so the window lasts
                                             // 1 / (FRMT_BW_HZ0 * 2^(bw / FRMT_BW_DB)) seconds.
@@ -1431,8 +1430,20 @@ struct Synth {
         // spectrum" and which the voice image confirms carries the raw byte for them and the formant
         // transpose word for the formant. What it does there is unmeasured: the sweep meant to settle it
         // wrote 0x218. INFERRED, FS1R.unlock/docs/unknowns.md experiment 9.
-        else if (v.form == 5 || v.form == 6) { fw = fop; fc = fop * (1 + ratio * 31.0 / 99.0); wl = v.form == 5 ? 0.5 : 2.0; }
-        else { fw = (v.form >= 3 ? 2 * fop : fop); fc = fop; wl = 2.0; }
+        // res1 and res2 put a three-partial group on harmonic ratio + 1 and are otherwise identical.
+        // MEASURED on 2026-09-19 by sweeping register 0x230 through all hundred values on each: the peak
+        // lands on partial ratio + 1 at every one of the hundred, on both forms, with the two partials
+        // either side 6 dB down and everything else at the noise floor, and the peak level flat across
+        // the whole range. The 1 + ratio * 31 / 99 this replaces topped out at 32 times the fundamental
+        // where the unit reaches 100. docs/formant.md.
+        // The window is one grain period for the odd and resonant forms and two for all1 and all2.
+        // MEASURED off the sideband ratios, which a sin^2 window fixes exactly: a grain exactly one
+        // period long makes the two partials either side of the peak 6.02 dB down and kills everything
+        // beyond them, which is what the unit gives res1 and res2 at every one of a hundred settings.
+        // all1 and all2 are a single partial with nothing within 88 dB, so their window is the longer
+        // one the engine has slots for.
+        else if (v.form == 5 || v.form == 6) { fw = fop; fc = fop * (ratio + 1); wl = 1.0; }
+        else { fw = (v.form >= 3 ? 2 * fop : fop); fc = fop; wl = v.form < 3 ? 2.0 : 1.0; }
         wl = std::min(wl, 2.0);
         s.fphase += fw / SR;
         if (s.fphase >= 1) {
@@ -1451,7 +1462,7 @@ struct Synth {
             y += fwin(v.skirt, g.w) * fsin(g.c + pm); g.c += fc / SR;
         }
         if (v.form == 7) { if (cal::FRMT_NORM != 0.0) y *= pow(1.0 / wl, cal::FRMT_NORM); }
-        else if (v.form < 5) y *= cal::FORM_LEVEL * (v.form >= 3 ? 1.4142135624 : 1.0);
+        else y *= cal::FORM_LEVEL * 2.0 / wl;    // every form but sine and frmt; a shorter grain carries less
         return y;
     }
     // Every CTL samples: the per-operator frequency and level maths. Its inputs only move on the 192 Hz

@@ -61,6 +61,20 @@ All four forms then land on the right partial with the peak 0.0 to 0.5 dB off. W
 
 Spectrum error on the four form segments: **25.4 dB before, 0.3 dB after**. On `06_filter_1`'s twenty all1 segments, 29.3 dB before and under 1 after.
 
+## res1 and res2 put a three-line group on harmonic byte + 1
+
+The resonant forms were the biggest number left outside the effects, 16.9 dB over nineteen segments, and nothing about them had been modelled. Sweeping register 0x230 through all hundred values settles them completely.
+
+**The peak lands on partial `byte + 1`. At every one of the hundred values, on both forms, at two fundamentals.** The engine had `fc = fop * (1 + ratio * 31 / 99)`, which tops out at 32 times the fundamental where the unit reaches 100.
+
+**The group is three lines and nothing else**: the partials either side of the peak are 6 dB down and the next ones are 90 dB down, at every setting. That is exactly what a `sin^2` window exactly one grain period long gives, and it is a stronger constraint than any fit, because the Hann kernel is precisely 1, 0.5, 0 at offsets of 0, 1 and 2 over the sample spacing. So the resonant forms' window is one period, where all1 and all2's is two.
+
+**And res1 and res2 are the same thing.** Identical peak partial, identical level, identical sidebands at every setting. Whatever distinguishes them is not in the spectrum of a held note.
+
+That third fact tidied the level constant as well. `cal::FORM_LEVEL` had an ad-hoc root-of-the-grain-rate factor bolted on to explain why the odd forms sit 3.5 dB above the all forms. With the grain sum normalised by its own window length, that 3.5 dB falls out of the odd forms retriggering twice a period under a window half as long, the factor is gone, and one constant puts all six non-formant forms within **0.14 dB** of the unit at once.
+
+`04_formant_3` goes from 3.05 dB of level error and 16.89 dB of spectrum error to **0.30 and 1.03**.
+
 ## Which moved the filter loss again
 
 `cal::FLT_LOSS` has now been measured three times and it was wrong twice for reasons outside the filter.
@@ -81,10 +95,10 @@ At 1.23 dB the two filter files sit at 0.01 and 0.00 dB in level and 0.76 and 0.
 |---|---|---|
 | `04_formant_1` level / shape | 4.32 / 6.32 dB | **0.06 / 0.77 dB** |
 | `04_formant_2` level / shape | 5.61 / 7.48 dB | **1.13 / 3.12 dB** |
-| `04_formant_3` shape, the four form segments | 25.4 dB | **0.3 dB** |
+| `04_formant_3` level / shape | 3.05 / 16.89 dB | **0.30 / 1.03 dB** |
 | `06_filter_1` / `_2` shape | 14.72 / 14.76 dB | **0.76 / 0.24 dB** |
 | `06_filter_2` filter EG envelopes | 15.68 dB | **5.43 dB** |
-| demo band tilt, mean | 2.75 dB | **2.57 dB** |
+| demo band tilt, mean | 2.75 dB | **2.55 dB** |
 | demo envelope correlation, median | 0.9755 | **0.9775** |
 
 The demo is a wash on the last step of this, 2.52 dB of tilt against 2.57, and the capture set is not. The measurement wins: the window being a time rather than a fraction of the period is settled by three separate tests and the demo has fifteen songs of modelled effects in front of it.
@@ -95,7 +109,7 @@ One song went the other way. Ana-Unison's band tilt improves from 4.26 to 2.76 d
 
 ## What is still open
 
-* **`res1` and `res2`**, the two resonant forms, at 16.9 dB over nineteen segments and untouched here. They spend byte 6 on a resonance that moves a peak up the series instead of on a window, they take it through register 0x230 like the other non-formant forms, and `04_formant_3` sweeps it in ten steps for each. That is the biggest number left outside the effects.
-* **The skirt**, at 3.18 dB over `04_formant_2`'s sixteen segments, down from 7.48 but not right. The unit's skirts *rise* with the parameter, 45 dB of difference at the twelfth partial between skirt 0 and skirt 7, and `sin^(2(skirt+1))` does not reproduce that shape at either bandwidth. A better window family would, and the data to choose one is already recorded.
-* **What voice byte 6 does to the six forms that are not the formant.** It reaches them as register 0x230 and the sweep wrote 0x218, so this is still open and `cal::FORM_LEVEL` and their fixed window still rest on one setting of it. It would also say whether all1 and all2 differ at all: at byte 6 = 0 they are identical to a tenth of a decibel and the engine treats them as the same thing. `FS1R.unlock/docs/unknowns.md` experiment 9, rewritten for the right register.
-* **`05_unvoiced`**, 3.8 and 6.6 dB, which is the noise formant's own bandwidth law and a separate model.
+* **What shapes all1, all2, odd1 and odd2.** Voice byte 6 does not: the register sweep moved it through all hundred values at both registers it reaches and those four did not budge, while the formant's window opened and the resonant forms' peak walked the whole harmonic series. So they have a fixed one-partial or two-partial spectrum and no width control that has been found. The only candidate left is the spectral skirt, voice byte 5, and `FS1R.unlock`'s `sweep.py skirt` run asks it directly by parameter change. If that comes back flat too then those four genuinely have no shape control, which the engine already assumes.
+* **The skirt**, at 3.12 dB over `04_formant_2`'s sixteen segments, down from 7.48 but not right. The unit's skirts *rise* with the parameter, 45 dB of difference at the twelfth partial between skirt 0 and skirt 7, and `sin^(2(skirt+1))` does not reproduce that shape at either bandwidth. A better window family would, and the data to choose one is already recorded.
+* **`05_unvoiced`**, 3.8 and 6.6 dB, which is the noise formant's own bandwidth law and a separate model. It is fitted at note 60 alone, which is exactly the hole the formant window fell into: nothing has asked whether its bandwidth is a time or a fraction of the period either.
+* **What separates res1 from res2, and all1 from all2.** Each pair is identical in the spectrum of a held note at every setting measured. Whatever the difference is, it is not there.
