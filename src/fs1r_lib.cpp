@@ -93,14 +93,27 @@ static const double EG_HOLD_LAG  = 0.0081;  // ... plus this, fixed. MEASURED ov
 static const double FEG_SEMIS    = 48.0;    // frequency EG range at the full register swing of 128 (four octaves).
                                             // The sysex byte reaches the register through FEGLVL, which is measured
 static const double FEG_TIME_K   = 0.3;     // frequency EG time as a fraction of rate_secs
-static const double WIN_SKIRT    = 2.0;     // window is sin^(WIN_SKIRT * (skirt + 1)) on every form but
-                                            // sine, the skirt being the one shape control all1, all2,
-                                            // odd1 and odd2 have (voice byte 6 is the formant's
-                                            // bandwidth and res1/res2's resonance, and those four read
-                                            // neither). INFERRED and known wrong in shape: 04_formant_2
-                                            // says the unit's skirts rise with the parameter, 45 dB at
-                                            // the twelfth partial between skirt 0 and 7, which no
-                                            // exponent of this family gives. FS1R.unlock sweep.py skirt
+static const double WIN_SKIRT    = 2.0;     // the grain window is sin^p, p = WIN_SKIRT * step^skirt. The
+                                            // skirt is the one shape control all1, all2, odd1 and odd2
+                                            // have, voice byte 6 being the formant's bandwidth and
+                                            // res1/res2's resonance, which those four do not read.
+                                            // MEASURED: skirt 0 is sin^2 on every form, which puts the
+                                            // two partials either side of a one-period grain 6.02 dB
+                                            // down, exactly as the unit does on res1, res2, odd1 and odd2
+static const double WIN_SKIRT_STEP = 2.0;   // what the skirt multiplies p by, per step, on all/odd/res.
+                                            // MEASURED on odd2 and res2, whose grain is one period long
+                                            // under a carrier at an integer multiple of the grain rate,
+                                            // so their line amplitudes are the window's own Fourier
+                                            // coefficients: p = 2, 4, 8, 16, 32, 64, 128 reproduces them
+                                            // to 0.01 dB at skirt 1 and 0.7 dB at skirt 6. all1, odd1 and
+                                            // res1 take the same law here and are still 10 to 14 dB out,
+                                            // which is what the pairs differ by and is not yet modelled
+static const double WIN_SKIRT_FRMT = 1.4142136;  // the same per step for the formant, sqrt(2) rather than
+                                            // 2. FITTED against 04_formant_2's sixteen segments at two
+                                            // bandwidths; INFERRED as a law, since the fit is per skirt
+                                            // and only its slope is closed-form. The family itself is
+                                            // still wrong there: no exponent of any sin^p gets the
+                                            // formant's skirt closer than 2.6 dB of band shape
 static const double FORM_LEVEL   = 0.520;   // what a grain train is worth on every form but the formant,
                                             // against a grain sum normalised by its own window length.
                                             // MEASURED: it puts all1, all2, odd1, odd2 and both resonant
@@ -239,18 +252,26 @@ static inline double word_hz(int w) { return 440.0 * pow(2.0, (w - 26861) / 1024
 
 // ------------------------------------------------------------------------------------------ tables (chip side)
 static float g_sin[4097];
-static float g_win[8][1025];
+static float g_win[2][8][1025];       // [formant?][skirt]: the two window families
 static float g_db2lin[2305];                                          // -128 .. +16 dB in 1/16 dB steps
 static void init_tables() {
     for (int i = 0; i <= 4096; i++) g_sin[i] = (float)sin(2 * PI * i / 4096.0);
     for (int i = 0; i <= 2304; i++) g_db2lin[i] = (float)pow(10.0, (i / 16.0 - 128.0) / 20.0);
-    for (int s = 0; s < 8; s++) {                                     // INFERRED window shape: sin^(2(skirt+1)), patent
-        double p = cal::WIN_SKIRT * (s + 1);
-        for (int i = 0; i <= 1024; i++) g_win[s][i] = (float)pow(sin(PI * i / 1024.0), p);
-    }
+    // MEASURED 2026-09-19, FS1R.unlock's skirt sweep: the grain window is sin^p and the skirt multiplies
+    // p, it does not step it. On odd2 and res2, whose grain is exactly one period long under a carrier at
+    // an integer multiple of the grain rate, p = 2 * 2^skirt reproduces the unit's line amplitudes to
+    // 0.01 dB at skirt 1 and under 0.7 dB out to skirt 6, which is the measurement's own floor. The
+    // formant goes slower, p = 2 * sqrt(2)^skirt, fitted against 04_formant_2's sixteen segments at two
+    // bandwidths; no exponent of any sin^p family gets its shape closer than 2.6 dB, so the family itself
+    // is still wrong there and this is the best member of it. docs/formant.md.
+    for (int f = 0; f < 2; f++)
+        for (int s = 0; s < 8; s++) {
+            double p = cal::WIN_SKIRT * pow(f ? cal::WIN_SKIRT_FRMT : cal::WIN_SKIRT_STEP, s);
+            for (int i = 0; i <= 1024; i++) g_win[f][s][i] = (float)pow(sin(PI * i / 1024.0), p);
+        }
 }
 static inline float fsin(double ph) { double x = (ph - floor(ph)) * 4096.0; int i = (int)x; float f = (float)(x - i); return g_sin[i] + (g_sin[i + 1] - g_sin[i]) * f; }
-static inline float fwin(int s, double x) { double y = x * 1024.0; int i = (int)y; if (i >= 1024) return 0.f; float f = (float)(y - i); return g_win[s][i] + (g_win[s][i + 1] - g_win[s][i]) * f; }
+static inline float fwin(int fam, int s, double x) { double y = x * 1024.0; int i = (int)y; if (i >= 1024) return 0.f; float f = (float)(y - i); const float* w = g_win[fam][s]; return w[i] + (w[i + 1] - w[i]) * f; }
 // The per-sample level path: the table above with linear interpolation (error under 1e-5) instead of a
 // pow() per operator per sample. Anything above the table is rare enough to compute.
 static inline double db2lin_fast(double db) {
@@ -1466,7 +1487,7 @@ struct Synth {
         for (int k = 0; k < 2; k++) {
             WinGen& g = s.g[k]; if (!g.on) continue;
             g.w += winc; if (g.w >= 1) { g.on = false; continue; }
-            y += fwin(v.skirt, g.w) * fsin(g.c + pm); g.c += fc / SR;
+            y += fwin(v.form == 7, v.skirt, g.w) * fsin(g.c + pm); g.c += fc / SR;
         }
         if (v.form == 7) { if (cal::FRMT_NORM != 0.0) y *= pow(1.0 / wl, cal::FRMT_NORM); }
         else y *= cal::FORM_LEVEL * 2.0 / wl;    // every form but sine and frmt; a shorter grain carries less
@@ -1861,6 +1882,27 @@ static int selftest(Synth& S) {
         ck("the window is four times as many periods an octave down",
            fabs(wl(72, 65.41) * 4.0 - wl(72, 261.64)) < 1e-6);
         ck("the window clamps at two periods", wl(0, 261.64) == cal::FRMT_WL_MAX);
+    }
+    // The skirt multiplies the window exponent, it does not step it. A sin^(2n) window one grain period
+    // long puts its lines on the binomial row C(2n, n-k), which is what res2 gives the unit: 6.02 dB down
+    // either side at skirt 0, 3.52 and 15.56 at skirt 1. Checking the table against those rows pins the
+    // law and the doubling at once, and the sine table's own interpolation with them.
+    {
+        auto line = [&](int s, int k) {          // the k-th Fourier coefficient of g_win[0][s]
+            double re = 0;
+            for (int i = 0; i < 1024; i++) re += g_win[0][s][i] * cos(2 * PI * k * i / 1024.0);
+            return re;
+        };
+        auto row_db = [&](int s, int k) { return 20 * log10(fabs(line(s, k) / line(s, 0))); };
+        ck("skirt 0 is sin^2: one period either side 6.02 dB down", fabs(row_db(0, 1) + 6.0206) < 0.02);
+        ck("skirt 0 is sin^2: nothing two periods out", row_db(0, 2) < -60);
+        ck("skirt 1 is sin^4, not sin^4 by a different route", fabs(row_db(1, 1) + 3.5218) < 0.02
+                                                            && fabs(row_db(1, 2) + 15.563) < 0.05);
+        ck("skirt 2 is sin^8", fabs(row_db(2, 1) + 1.9382) < 0.02 && fabs(row_db(2, 3) + 18.837) < 0.1);
+        ck("the exponent doubles rather than stepping", fabs(row_db(3, 1) + 1.0216) < 0.02);
+        ck("the formant's exponent goes by sqrt(2)",                    // 2 * sqrt(2)^2 = 4 = skirt 1's
+           fabs(row_db(0, 1) - 20 * log10(fabs(line(0, 1) / line(0, 0)))) < 1e-12
+           && fabs(cal::WIN_SKIRT * cal::WIN_SKIRT_FRMT * cal::WIN_SKIRT_FRMT - 4.0) < 1e-6);
     }
     // Register 0xC0 against the note. docs/ymp706_registers.md used to gloss it as "note/3 + 10", which is
     // out by 63 and is what made the old rate scaling look like dead code when it was merely wrong.

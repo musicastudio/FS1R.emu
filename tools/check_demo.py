@@ -87,7 +87,7 @@ def main():
     args = ap.parse_args()
     ref = mono(args.reference)
     renv = envelope(ref)
-    files = sorted(Path(args.renders).glob("*.wav"))
+    files = sorted(f for f in Path(args.renders).glob("*.wav") if f.name[:2].isdigit())
     if not files:
         sys.exit("no .wav renders in %s" % args.renders)
     print("%-22s %7s %7s %6s  %s" % ("song", "lag s", "gap s", "env r", "  ".join("%5d" % lo for lo, _ in BANDS)))

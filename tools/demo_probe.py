@@ -171,7 +171,9 @@ def _align():
     ref = cd.mono(ROOT / "captures/FS1R DEMO.flac")
     renv = cd.envelope(ref)
     prev, out = None, []
-    for f in sorted((ROOT / "captures/demo/render").glob("*.wav")):
+    # Only the numbered songs. captures/demo/ also holds all.mid, the whole demo in one file, and a
+    # render of that sorts in beside the fifteen and aligns against nothing.
+    for f in sorted(f for f in (ROOT / "captures/demo/render").glob("*.wav") if f.name[:2].isdigit()):
         own = cd.mono(f)
         lo, hi = (0, 3000) if prev is None else (int(prev * 100) - 100, int((prev + 10) * 100))
         oenv = cd.envelope(own)
