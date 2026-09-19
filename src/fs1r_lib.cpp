@@ -150,7 +150,12 @@ static const double NOISE_OCT    = 9.0;     // ... and 0..127 spans this many oc
 static const double NOISE_BW_POW = 0.5;     // noise level vs bandwidth: 0.5 holds the RMS constant, higher
                                             // makes a narrow band louder, as a resonator driven by a pulse
                                             // train would be. The level is held fixed at NOISE_BW_REF.
+                                            // Measured off the 05b take at note 36: the old 0.5 left the demo
+                                            // too quiet across the sweep where the hardware reads flat.
 static const double NOISE_BW_REF = 0.007;   // the one-pole coefficient at bandwidth 20, roughly 54 Hz
+static const double NOISE_LEVEL  = 0.836;   // unvoiced level hand, linear gain = 10^(-1.56/20). The 05b take at
+                                            // note 36 put the engine 1.56 dB loud across the ubw sweep with
+                                            // the rest of the law unchanged; this centres it. (measured)
 // The filter is not the YMP706's: it runs on VOP3-1 and the CPU hands it coefficients, so these come
 // from the firmware's own conversions (FUN_0000C36C, FUN_0000C3D0) and only the chip's reading of them
 // is a guess. docs/ymp706_registers.md, "The per-voice filter".
@@ -1532,7 +1537,7 @@ struct Synth {
             s.nf = nf * pow(2.0, u.transpose / 12.0);
             double fcut = cal::NOISE_BASE_HZ * pow(2.0, clampi(C.ubwReg[o] + C.vcBw[o][1], 0, 127) / 127.0 * cal::NOISE_OCT);  // INFERRED noise formant model, see docs
             s.na = 1.0 - exp(-2 * PI * fcut / SR);
-            s.nscale = sqrt(1.0 + u.skirt) * 0.5 * sqrt(2.0 / cal::NOISE_BW_REF)
+            s.nscale = sqrt(1.0 + u.skirt) * 0.5 * sqrt(2.0 / cal::NOISE_BW_REF) * cal::NOISE_LEVEL
                      * pow(cal::NOISE_BW_REF / s.na, cal::NOISE_BW_POW);
         }
     }
