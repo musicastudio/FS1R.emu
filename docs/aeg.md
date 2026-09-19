@@ -28,9 +28,23 @@ A discrete simulation of the EGS staircase, where the multiplier steps down in i
 
 After the change the eleven attack segments lie within a decibel rms of the hardware on the 10 ms envelope, down from 45, and inside four on the 1 ms one, which is where the jump itself lands and where a millisecond of MIDI timing is worth tens of decibels.
 
-## The key rate scaling did nothing at all
+## The key rate scaling was wrong at every note
 
-Register 0x50 is the operator's EG time scaling, 0 to 7, and register 0xC0 is the key code, `(pitchWord >> 8) + 10`, which moves by one for every three semitones. The chip combines them and shortens every rate as the note rises. The engine's model was `(tscale * clamp(keycode - 80, 0, 31)) >> 3`, taken from the DX7's `note / 3 - 7`, and the pivot was wrong by more than the keyboard is wide: key code 80 is above the top note, so the clamp returned zero for every note and the rate scaling had no effect on anything, ever.
+> **Corrected 2026-09-19.** This section first said the old model "had no effect on anything, ever", and that is false. What follows is the corrected account; the measurement below it never depended on the claim and did not change.
+
+Register 0x50 is the operator's EG time scaling, 0 to 7, and register 0xC0 is the key code, `(pitchWord >> 8) + 10`, which moves by one for every three semitones. The chip combines them and shortens every rate as the note rises. The engine's model was `(tscale * clamp(keycode - 80, 0, 31)) >> 3`, taken from the DX7's `note / 3 - 7`.
+
+`docs/ymp706_registers.md` glossed register 0xC0 as "`(pitchWord >> 8) + 10` = note/3 + 10". The formula is right and the gloss is out by 63: the pitch word is 0x3FAA at note 0, not 0, so the key code is note/3 + **73**, and at middle C it is 93, not 30. Reading the gloss instead of the number made `clamp(93 - 80, 0, 31)` look like `clamp(30 - 80, 0, 31)`, which is zero, and the conclusion "dead code" followed. The engine's own debug print said `C0 93` in the same session.
+
+What the old model actually did, at time scaling 7:
+
+| note | 0 | 24 | 36 | 48 | 60 | 84 | 108 | 127 |
+|---|---|---|---|---|---|---|---|---|
+| key code | 73 | 81 | 85 | 89 | 93 | 101 | 109 | 116 |
+| old rate offset | 0 | 0 | +4 | +7 | +11 | +18 | +25 | +27 |
+| measured | −11 | −11 | −8 | −4 | −1 | +3 | +10 | +11 |
+
+So it was not dead, it was wrong by 11 to 16 chip steps at every note on the keyboard and always in the same direction. A chip rate step is a quarter of an octave of decay time, so that is between 6.7 and 16 times too fast, everywhere. Which is still exactly why Full Tines lost its tail, and is a worse bug than the one first described, but the mechanism written here was not the mechanism.
 
 The 24 `tscale` segments of `02_envelope_3` settle the law. Each one decays at nominal rate 34 and the slope recovers the chip's actual rate exactly, landing on the `(4 + (q & 3)) << (q >> 2)` ladder to three decimal places:
 
@@ -49,7 +63,7 @@ Each column is `trunc(tscale * x / 8)` added to the rate, for a single x per not
 
 The awkward part is that those three x values do not sit on a line. The key code moves by 8 between each pair of notes, so a law linear in the key code would give −10, −2, +6, and +6 is ruled out: it puts tscale 3 at note 84 two rate steps up where the recording says one, and tscale 7 five steps up where the recording says three. Three notes cannot say whether that is a kink at middle C, a dead band around it, or a ceiling further up. The engine took the piecewise reading, one rate step per key code step below key code 93 and three quarters of one above. **`10_envelope2`'s twenty `tkey` segments settled it and it is neither a kink nor a dead band; see "The key code law is a table" below.**
 
-This is the change that fixed Full Tines. The song's decays and releases run on operators with a nonzero time scaling, and with the scaling dead every note below middle C released at its unscaled rate instead of the slower one the unit uses. The engine's last audible frame moves from 14.02 s to 17.57 s against the unit's 18.28, and the envelope correlation from 0.838 to 0.976.
+This is the change that fixed Full Tines. The song's decays and releases run on operators with a nonzero time scaling, and the old model ran every one of them 7 to 16 times too fast. The engine's last audible frame moves from 14.02 s to 17.57 s against the unit's 18.28, and the envelope correlation from 0.838 to 0.976.
 
 ## The hold is half a traverse plus a lag the recording cannot place better than a few milliseconds
 

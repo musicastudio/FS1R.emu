@@ -30,7 +30,7 @@ is firmware behaviour.
 | 0x90/0x98 | channel, op | 16-bit operator frequency word (see Frequency) |
 | 0xA0/0xA8 | channel | 16-bit LFO frequency modulation word (see LFO), 0xA8 written with the low byte |
 | 0xB0 | channel | LFO amplitude modulation attenuation 0..255 (see LFO); 0xB8 always 0 |
-| 0xC0 | channel | key code `(pitchWord >> 8) + 10` = note/3 + 10, for the chip's rate scaling. Measured at ten key codes: a table, not a line, saturating at +-13; `docs/aeg.md` |
+| 0xC0 | channel | key code `(pitchWord >> 8) + 10`, which is **note/3 + 73**, not note/3 + 10 as this line said until 2026-09-19: the pitch word is 0x3FAA at note 0, not 0. That gloss is what made the engine's old rate scaling look like dead code when it was merely wrong. Measured at ten key codes: a table, not a line, saturating at +-13; `docs/aeg.md` |
 | 0xC8 | chip | init 2 |
 | 0xF8/0xF9 | channel | 16-bit LFO pitch modulation word, signed, +-0x7FF (see LFO) |
 | 0xFA/0xFB | chip | channel bit mask written at note off (release: EG stage 4) |

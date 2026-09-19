@@ -28,7 +28,7 @@ A recording of the right test tones turns each of those guesses into a measureme
 
 ### 2026-09-19: one new file, `10_envelope2`
 
-Your 0918 recording of 02 settled the amplitude EG's rates and then showed that three other things about it were wrong, two of them badly: the attack was four times too slow and the key rate scaling did nothing at all. `docs/aeg.md` is the working and the engine has all three now. What the three envelope files cannot finish is in `10_envelope2.mid`, 28 segments and 2.8 minutes, recorded exactly like the others and in no hurry. It is worth more than 05 to 09 if you are choosing.
+Your 0918 recording of 02 settled the amplitude EG's rates and then showed that three other things about it were wrong, two of them badly: the attack was four times too slow and the key rate scaling ran every note 7 to 16 times too fast. `docs/aeg.md` is the working and the engine has all three now. What the three envelope files cannot finish is in `10_envelope2.mid`, 28 segments and 2.8 minutes, recorded exactly like the others and in no hurry. It is worth more than 05 to 09 if you are choosing.
 
 Most of it is one question. The chip shortens every EG rate as the note rises, and how much it shortens by is fitted through three notes, which do not sit on a straight line. Twenty of the segments play the same decay at two time-scaling settings across ten notes from the bottom of the keyboard to the top, which settles it outright.
 
