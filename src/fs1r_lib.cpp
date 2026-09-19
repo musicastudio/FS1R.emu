@@ -93,7 +93,14 @@ static const double EG_HOLD_LAG  = 0.0081;  // ... plus this, fixed. MEASURED ov
 static const double FEG_SEMIS    = 48.0;    // frequency EG range at the full register swing of 128 (four octaves).
                                             // The sysex byte reaches the register through FEGLVL, which is measured
 static const double FEG_TIME_K   = 0.3;     // frequency EG time as a fraction of rate_secs
-static const double WIN_SKIRT    = 2.0;     // formant window is sin^(WIN_SKIRT * (skirt + 1))
+static const double WIN_SKIRT    = 2.0;     // window is sin^(WIN_SKIRT * (skirt + 1)) on every form but
+                                            // sine, the skirt being the one shape control all1, all2,
+                                            // odd1 and odd2 have (voice byte 6 is the formant's
+                                            // bandwidth and res1/res2's resonance, and those four read
+                                            // neither). INFERRED and known wrong in shape: 04_formant_2
+                                            // says the unit's skirts rise with the parameter, 45 dB at
+                                            // the twelfth partial between skirt 0 and 7, which no
+                                            // exponent of this family gives. FS1R.unlock sweep.py skirt
 static const double FORM_LEVEL   = 0.520;   // what a grain train is worth on every form but the formant,
                                             // against a grain sum normalised by its own window length.
                                             // MEASURED: it puts all1, all2, odd1, odd2 and both resonant
@@ -1800,6 +1807,7 @@ static int selftest(Synth& S) {
         {0x31, 0, 0x0E, 20, "part 2 pan"},
         {0x42, 0, 0x54, 2, "part 3 voice filter type"},
         {0x63, 5, 0x16, 77, "part 4 op 6 level"},
+        {0x60, 1, 0x05, 5 << 3 | 1, "part 1 op 2 skirt"},   // what captures/sweep.py skirt sweeps
     };
     for (auto& t : pc) {
         uint8_t m[10] = {0xF0, 0x43, 0x10, 0x5E, (uint8_t)t.ah, (uint8_t)t.am, (uint8_t)t.al, 0, (uint8_t)t.v, 0xF7};
