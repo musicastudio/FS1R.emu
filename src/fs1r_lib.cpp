@@ -36,10 +36,18 @@ static const double TICK_HZ = CPU_HZ / 16.0 / 9099.0;   // MTU2 TGRA compare eve
 // properly. They all live here so calibrating against a recording is one table edit rather than a hunt
 // through the engine. Names match the TODO's "confirm the INFERRED constants".
 namespace cal {
-static const double FM_INDEX     = 3.0;     // cycles of phase deviation at full modulator level (demo)
-static const double LEVEL_DB     = 0.3795;  // dB per step of the 8-bit level registers (LEVTAB doubled). MEASURED:
-                                            // the level ladder in 01_reference gives 0.3792 to 0.3800 by three
-                                            // routes, against the 0.375 the DX7 lineage assumed.
+static const double FM_INDEX     = 4.0;     // cycles of phase deviation at full modulator level. MEASURED: the
+                                            // 2026-09-19 sweep held algorithm 8 and stepped the modulator's level
+                                            // register, and the sidebands give 25.11 radians at register 0, which
+                                            // is 3.997 cycles over 25 fitted steps with a 0.009 dB residual. The
+                                            // 3.0 this replaces was fitted from fifteen demo songs.
+static const double LEVEL_DB     = 0.376287;// dB per step of the 8-bit level registers (LEVTAB doubled). MEASURED:
+                                            // the same sweep's sideband ladder reads 0.3761 with a 0.005 dB residual
+                                            // over 36 dB, and its own level ladder reads 0.3767 over the top 21 dB.
+                                            // Both land on 20*log10(2)/16, a halving every sixteen steps, which is
+                                            // what a binary attenuator does. The 0.3795 this replaces came off the
+                                            // 0918 recording, where the fit ran into the output path's own droop
+                                            // below -68 dB (see fs1r_capture_session2_results.md) and read high.
 static const double EG_LEVEL_DB  = 1.5;     // dB per step of the 6-bit EG level registers (LEVTAB >> 1)
 static const double CARRIER_DB   = 1.5;     // dB per step of the carrier level correction (voice 0x2D-0x34)
 static const double DETUNE_CENTS = 2.0;     // cents per detune step on non-formant operators
@@ -1344,8 +1352,10 @@ struct Synth {
             s.uatt = C.regULevel[o] * LEVEL_DB + C.regAM * LEVEL_DB * u.ams / 7.0;
             double nf;
             if (fs && C.fseqUOp[o]) nf = word_hz(C.fquWord[o]);
-            else if (u.mode == 1) nf = C.f0;
             else if (u.mode == 2 && v.form == 7) nf = word_hz(C.freqWord[o] + (C.frmtWord[o] - 0x1243));
+            // MEASURED: link-ff on a voiced partner that is not a formant operator reaches register 0x300 as
+            // link-fo, not as itself. uv-linkff-sine's image reads mode 1 where the sysex asked for 2.
+            else if (u.mode) nf = C.f0;
             else nf = word_hz(C.ufreqWord[o] + C.ufbW[o] + (C.regFM * u.fms) / 7 + C.vcFreq[o][1]);
             s.nf = nf * pow(2.0, u.transpose / 12.0);
             double fcut = cal::NOISE_BASE_HZ * pow(2.0, clampi(C.ubwReg[o] + C.vcBw[o][1], 0, 127) / 127.0 * cal::NOISE_OCT);  // INFERRED noise formant model, see docs
