@@ -26,7 +26,9 @@ The measured plateau carries about 4.5% of overshoot, which is a downstream filt
 
 ## What the capture confirms
 
-**The EG rate model is right.** `tools/analyze_capture.py` recovered 38 of the 64 rates. Against `rate_secs`, the DX7-lineage formula the engine already uses, the ratio is 0.9945 with a standard deviation of 0.0008 over rates 16 to 33, which is as close as the measurement can resolve. Rates 37 to 47 come out about 3% slow and the whole range 16 to 60 sits at 1.009 ± 0.017. Rate 63 and rate 8 are at the ends of what a four-second segment can measure and should be ignored. This was one of the three models the engine leans on hardest and it needed no change.
+**The EG rate model is right, and it was the only part of the EG this pass looked at.** `docs/aeg.md` goes back over the same three files for the shape, the hold and the key scaling, and finds three of those wrong.
+
+ `tools/analyze_capture.py` recovered 38 of the 64 rates. Against `rate_secs`, the DX7-lineage formula the engine already uses, the ratio is 0.9945 with a standard deviation of 0.0008 over rates 16 to 33, which is as close as the measurement can resolve. Rates 37 to 47 come out about 3% slow and the whole range 16 to 60 sits at 1.009 ± 0.017. Rate 63 and rate 8 are at the ends of what a four-second segment can measure and should be ignored. This was one of the three models the engine leans on hardest and it needed no change.
 
 **The frequency scale and the note table are right.** `fixed-220` measures 220.006 Hz and `fixed-440` measures 440.039 Hz, so the firmware's pitch word, the note table and the 48 kHz rate are all confirmed together. The engine runs about 0.5 cents flat of the hardware across the keyboard, which is 0.03% and not worth chasing yet.
 

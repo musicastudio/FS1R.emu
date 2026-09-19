@@ -52,8 +52,28 @@ static const double EG_LEVEL_DB  = 1.5;     // dB per step of the 6-bit EG level
 static const double CARRIER_DB   = 1.5;     // dB per step of the carrier level correction (voice 0x2D-0x34)
 static const double DETUNE_CENTS = 2.0;     // cents per detune step on non-formant operators
 static const double FEEDBACK     = 0.5;     // feedback gain = FEEDBACK * 2^(fb - 7)
-static const double EG_ATTACK_K  = 0.25;    // rising EG time constant as a fraction of rate_secs
-static const double EG_OVERSHOOT = 6.0;     // dB the rising EG aims past its target
+static const double EG_ATTACK_K  = 0.0625;  // rising EG time constant as a fraction of rate_secs. MEASURED:
+                                            // the eleven attack-rate segments of 02_envelope_2 fit an
+                                            // exponential in dB with tau/rate_secs = 0.0615 over rates 36 to 44,
+                                            // where the 1 ms envelope resolves the whole rise. 1/16 is also what
+                                            // the DX7 EGS does, its attack increment being (17 - level/2^24) times
+                                            // the decay's, so the constant and the lineage agree. The 0.25 this
+                                            // replaces left a rate-24 attack 45 dB below the unit's after 400 ms.
+static const double EG_OVERSHOOT = 3.8;     // dB the rising EG aims past its target. MEASURED with EG_ATTACK_K
+                                            // fixed at 1/16 and the floor below free: 3.78 dB, 0.70 dB rms over
+                                            // 381 envelope points. The DX7's own 17/16 of full scale is 6 dB and
+                                            // fits 1.5 dB rms, so the chip's approach flattens more than the EGS.
+static const double EG_ATTACK_FLOOR = -53.2;// dB the EG jumps to when a segment starts rising from below it,
+                                            // MEASURED as the level the unit is already at one millisecond into
+                                            // an attack from silence. The DX7 does the same thing with a jump
+                                            // target of 1716 of 4096, which is 55.8 dB below full.
+static const double EG_HOLD_FRAC = 0.5;     // the hold segment as a fraction of a full traverse at the hold rate.
+static const double EG_HOLD_LAG  = 0.0114;  // ... plus this, fixed. MEASURED off hold-20/40/60, whose onsets sit
+                                            // 25.5, 150.2 and 1363.3 ms after a hold-0 that has none. Fitting both
+                                            // terms on relative error lands on 0.5007 and 8.5 frames, so half a
+                                            // traverse plus 11.4 ms, all three within 1.4 %. Any pure fraction of
+                                            // rate_secs misses hold-20 by 80 %. Hold register 0x3F means no hold
+                                            // at all, which is why the firmware leaves that one value alone.
 static const double FEG_SEMIS    = 48.0;    // frequency EG range at the full register swing of 128 (four octaves).
                                             // The sysex byte reaches the register through FEGLVL, which is measured
 static const double FEG_TIME_K   = 0.3;     // frequency EG time as a fraction of rate_secs
@@ -107,6 +127,16 @@ static inline int clampi(int v, int lo, int hi) { return v < lo ? lo : v > hi ? 
 static inline int eb86(int v) { return std::min(255, (((v & 0xFF) << 1) * 0xA5) >> 7); }   // 0..99 -> 0..127
 static inline int eb70(int v) { return (((v & 0xFF) << 1) * 0xA5) >> 8; }                   // 0..99 -> 0..127 (bandwidth)
 static inline int egrate(int t) { return ((99 - clampi(t, 0, 99)) * 0xA4) >> 8; }          // EG time -> chip rate 0..63
+// The chip's own rate scaling: register 0x50 is the operator's time scaling 0..7 and register 0xC0 the key code,
+// and it adds (tscale * keyoff) / 8 to every rate, truncating toward zero. MEASURED off the 24 tscale segments of
+// 02_envelope_3, which recover the decay rate exactly: keyoff is -10 at note 36 (key code 85), -2 at note 60 (93)
+// and +4 at note 84 (101). Below middle C that is one rate step per key code step; above it the three notes say
+// three quarters of one, and three notes cannot tell a kink from a dead zone. INFERRED between and beyond them.
+static inline int eg_keyoff(int c0) { return c0 <= 93 ? c0 - 95 : ((c0 - 93) * 3) / 4 - 2; }
+static inline int eg_ratescale(int tscale, int c0) {
+    int x = (tscale & 7) * eg_keyoff(c0);
+    return x < 0 ? -((-x) >> 3) : x >> 3;                                                 // truncates toward zero
+}
 static inline int keygroup(int n) { return std::max(0, (KEYFACT[clampi(n, 0, 127)] >> 2) - 3); }
 // FUN_00010d7a: key tracking of fixed/formant frequencies, notescale 0..99, pm = pitch word - C3
 static inline int keytrack(int ns, int pm) { int k = eb70(ns); return k ? ((k + 1) * pm) / 128 : 0; }
@@ -462,14 +492,19 @@ struct EG {                      // amplitude EG on the chip: hold, 4 segments. 
     void start(const int* lv, const int* rt, int h, int rateScale) {
         for (int i = 0; i < 4; i++) { L[i] = lv[i]; R[i] = rt[i]; } hold = h; rs = rateScale; cur = lvl_db(L[3]); stage = 0;
         int hr = egrate(h); if (hr < 0x3F) hr = std::min(hr + 4, 0x3E);   // FUN_00019414: +4 only below 0x3F
-        holdLeft = h ? rate_secs(std::min(63, hr + rs)) * SR : 0;
+        // 0x3F is the firmware's "no hold", the one value it does not offset. Anything else holds for half a
+        // traverse at that rate plus a fixed lag, both measured.
+        holdLeft = hr < 0x3F ? (rate_secs(hr + rs) * cal::EG_HOLD_FRAC + cal::EG_HOLD_LAG) * SR : 0;
         if (holdLeft < 1) next(1);
     }
     void next(int s) {
         stage = s; if (s > 4) { target = -200; return; }
         target = lvl_db(L[s - 1]);
-        double secs = rate_secs(std::min(63, R[s - 1] + rs));
+        double secs = rate_secs(R[s - 1] + rs);
         rising = target > cur;
+        // A rising segment does not crawl up from silence: the chip is already at EG_ATTACK_FLOOR one
+        // millisecond in, so the climb starts there, or at the target if that is lower still.
+        if (rising && cur < cal::EG_ATTACK_FLOOR) cur = std::min(target, cal::EG_ATTACK_FLOOR);
         rate = rising ? 1.0 - exp(-1.0 / (secs * cal::EG_ATTACK_K * SR + 1)) : 96.0 / (secs * SR + 1);
     }
     void release() { if (stage < 4) next(4); }
@@ -719,11 +754,10 @@ struct Synth {
         }
         for (int o = 0; o < 8; o++) {
             OpState& s = C.op[o]; const OpV& v = V.v[o]; const OpU& u = V.u[o];
-            int rs = (v.tscale * clampi(C.regC0 - 80, 0, 31)) >> 3;   // INFERRED rate scaling: 0xC0 = pitch>>8 + 10 is note/3 + 10, DX7 uses tscale*(note/3-7)>>3
-            s.eg.start(C.egL[o], C.egR[o], C.egHold[o], rs);
+            s.eg.start(C.egL[o], C.egR[o], C.egHold[o], eg_ratescale(v.tscale, C.regC0));
             s.feg.start(v.fegInit, v.fegAtt, v.fegAttT, v.fegDecT);
             s.phase = v.keysync ? 0.0 : (double)rand() / RAND_MAX;
-            s.ueg.start(C.uegL[o], C.uegR[o], C.uegHold[o], (u.tscale * std::max(0, C.regC0 - 76)) >> 3);
+            s.ueg.start(C.uegL[o], C.uegR[o], C.uegHold[o], eg_ratescale(u.tscale, C.regC0));
             s.ufeg.start(u.fegInit, u.fegAtt, u.fegAttT, u.fegDecT);
             s.rng = 0x9E3779B9u * (o + 1) ^ clock; if (!s.rng) s.rng = 1;
         }
@@ -1675,6 +1709,32 @@ static int selftest(Synth& S) {
             for (int i = 0; i < 96000; i++) { double y = L.run(1.0, tap); if (i >= 48000) { acc += y; n++; } }
             ck("ladder unity passband", fabs(acc / n - 1.0) < 0.05);
         }
+    }
+
+    // The chip's EG key rate scaling, against the 24 rates 02_envelope_3 measured. Key codes 85, 93
+    // and 101 are notes 36, 60 and 84; the rows are the rate offset at time scaling 0 to 7, and the
+    // truncation toward zero is what separates the middle row from a flooring divide. docs/aeg.md.
+    {
+        const int kc[3] = {85, 93, 101};
+        const int want[3][8] = {{0, -1, -2, -3, -5, -6, -7, -8},
+                                {0, 0, 0, 0, -1, -1, -1, -1},
+                                {0, 0, 1, 1, 2, 2, 3, 3}};
+        for (int n = 0; n < 3; n++)
+            for (int t = 0; t < 8; t++) ck("EG rate scaling", eg_ratescale(t, kc[n]) == want[n][t]);
+    }
+    // A rise from silence starts at the attack floor and gets to its target, and the hold is half a
+    // traverse plus the lag. Both are measured; an EG that crawls up from -200 dB is the old bug.
+    {
+        int L[4] = {0, 0, 0, 63}, R[4] = {32, 0, 0, 0};        // L1 full, L4 silent, attack at rate 32
+        EG e; e.start(L, R, 0, 0);
+        ck("no hold at register 0x3F", e.holdLeft == 0 && e.stage == 1);
+        ck("attack starts at the floor", fabs(e.cur - cal::EG_ATTACK_FLOOR) < 1e-9);
+        for (int i = 0; i < (int)(rate_secs(32) * SR); i++) e.tick();
+        ck("attack reaches its target", e.cur > -0.5);
+        int H[4] = {63, 63, 63, 63};
+        EG h; h.start(L, H, 40, 0);                             // hold 40 -> register 41
+        double want = (rate_secs(41) * cal::EG_HOLD_FRAC + cal::EG_HOLD_LAG) * SR;
+        ck("hold is half a traverse plus the lag", fabs(h.holdLeft - want) < 1.0);
     }
 
     // 2. a parameter request comes back as a parameter change with the same value

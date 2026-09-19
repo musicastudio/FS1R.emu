@@ -21,16 +21,16 @@ is firmware behaviour.
 |---|---|---|
 | 0x00-0x18 | channel, op (voiced) | EG levels L1-L4 = `LEVTAB[L] >> 1` (6-bit attenuation, image +0x40..+0x5F) |
 | 0x20-0x38 | channel, op | EG times T1-T4 as rates `((99-T)*0xA4)>>8` (0..63), part EG attack/decay/release offsets added to T (image +0x60..+0x7F) |
-| 0x40 | channel, op | EG hold: same rate formula then +4, capped 0x3E |
+| 0x40 | channel, op | EG hold: same rate formula then +4, capped 0x3E. 0x3F means no hold. The chip holds for half a traverse at that rate plus 11.4 ms, measured; `docs/aeg.md` |
 | 0x48 | channel, op | level attenuation, 8-bit: `min(255, levelOffset + egBias) | flags`, refreshed every tick (see Levels) |
-| 0x50 | channel, op | EG time scaling 0..7 |
+| 0x50 | channel, op | EG time scaling 0..7. The chip adds `trunc(tscale * keyoff / 8)` to every rate, where keyoff comes off register 0xC0; measured, `docs/aeg.md` |
 | 0x58 | channel, op | `fms << 3 | ams` (freq mod sense only when the op is fixed) |
 | 0x60-0x78 | channel, op | frequency EG init level, attack level (`FEGLVL[v]`, 0..255 with 128 the centre, image +0x98/+0xA0) and attack, decay time as rates (image +0xA8/+0xB0) |
 | 0x80 | channel, op | detune as sign-magnitude, low nibble the amount and 0xF0 the sign: `d - 15` for d >= 15, `~d` below (image +0xB8) |
 | 0x90/0x98 | channel, op | 16-bit operator frequency word (see Frequency) |
 | 0xA0/0xA8 | channel | 16-bit LFO frequency modulation word (see LFO), 0xA8 written with the low byte |
 | 0xB0 | channel | LFO amplitude modulation attenuation 0..255 (see LFO); 0xB8 always 0 |
-| 0xC0 | channel | key code `(pitchWord >> 8) + 10` = note/3 + 10, for the chip's rate scaling |
+| 0xC0 | channel | key code `(pitchWord >> 8) + 10` = note/3 + 10, for the chip's rate scaling. It reads -10 at note 36, -2 at note 60 and +4 at note 84, which is not one line; `docs/aeg.md` |
 | 0xC8 | chip | init 2 |
 | 0xF8/0xF9 | channel | 16-bit LFO pitch modulation word, signed, +-0x7FF (see LFO) |
 | 0xFA/0xFB | chip | channel bit mask written at note off (release: EG stage 4) |

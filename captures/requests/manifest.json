@@ -1,5 +1,5 @@
 {
- "generated": "2026-09-15",
+ "generated": "2026-09-19",
  "engine_rate_hz": 48000,
  "marker_hz": 1002.134,
  "note": "Times are seconds from the start of the MIDI file. Align a recording with the three marker bursts at each end, then read the segment times off this manifest.",
@@ -10324,6 +10324,508 @@
    "why": "impulse responses of the three effect blocks (optional)",
    "part": 3,
    "parts": 3
+  },
+  {
+   "file": "10_envelope2.mid",
+   "segments": [
+    {
+     "id": "tkey7-note12",
+     "what": "EG time scaling 7 at note 12: the key code law across the whole keyboard rather than the three notes tscale measured",
+     "pins": [
+      "rate scaling"
+     ],
+     "measure": "envelope",
+     "note": 12,
+     "velocity": 100,
+     "t_on": 3.4,
+     "t_off": 8.4,
+     "t_end": 8.8,
+     "steady": [
+      4.0,
+      8.2
+     ]
+    },
+    {
+     "id": "tkey7-note24",
+     "what": "EG time scaling 7 at note 24: the key code law across the whole keyboard rather than the three notes tscale measured",
+     "pins": [
+      "rate scaling"
+     ],
+     "measure": "envelope",
+     "note": 24,
+     "velocity": 100,
+     "t_on": 9.3,
+     "t_off": 14.3,
+     "t_end": 14.7,
+     "steady": [
+      9.9,
+      14.1
+     ]
+    },
+    {
+     "id": "tkey7-note36",
+     "what": "EG time scaling 7 at note 36: the key code law across the whole keyboard rather than the three notes tscale measured",
+     "pins": [
+      "rate scaling"
+     ],
+     "measure": "envelope",
+     "note": 36,
+     "velocity": 100,
+     "t_on": 15.2,
+     "t_off": 20.2,
+     "t_end": 20.6,
+     "steady": [
+      15.8,
+      20.0
+     ]
+    },
+    {
+     "id": "tkey7-note48",
+     "what": "EG time scaling 7 at note 48: the key code law across the whole keyboard rather than the three notes tscale measured",
+     "pins": [
+      "rate scaling"
+     ],
+     "measure": "envelope",
+     "note": 48,
+     "velocity": 100,
+     "t_on": 21.1,
+     "t_off": 26.1,
+     "t_end": 26.5,
+     "steady": [
+      21.7,
+      25.9
+     ]
+    },
+    {
+     "id": "tkey7-note60",
+     "what": "EG time scaling 7 at note 60: the key code law across the whole keyboard rather than the three notes tscale measured",
+     "pins": [
+      "rate scaling"
+     ],
+     "measure": "envelope",
+     "note": 60,
+     "velocity": 100,
+     "t_on": 27.0,
+     "t_off": 32.0,
+     "t_end": 32.4,
+     "steady": [
+      27.6,
+      31.8
+     ]
+    },
+    {
+     "id": "tkey7-note72",
+     "what": "EG time scaling 7 at note 72: the key code law across the whole keyboard rather than the three notes tscale measured",
+     "pins": [
+      "rate scaling"
+     ],
+     "measure": "envelope",
+     "note": 72,
+     "velocity": 100,
+     "t_on": 32.9,
+     "t_off": 37.9,
+     "t_end": 38.3,
+     "steady": [
+      33.5,
+      37.7
+     ]
+    },
+    {
+     "id": "tkey7-note84",
+     "what": "EG time scaling 7 at note 84: the key code law across the whole keyboard rather than the three notes tscale measured",
+     "pins": [
+      "rate scaling"
+     ],
+     "measure": "envelope",
+     "note": 84,
+     "velocity": 100,
+     "t_on": 38.8,
+     "t_off": 43.8,
+     "t_end": 44.2,
+     "steady": [
+      39.4,
+      43.6
+     ]
+    },
+    {
+     "id": "tkey7-note96",
+     "what": "EG time scaling 7 at note 96: the key code law across the whole keyboard rather than the three notes tscale measured",
+     "pins": [
+      "rate scaling"
+     ],
+     "measure": "envelope",
+     "note": 96,
+     "velocity": 100,
+     "t_on": 44.7,
+     "t_off": 49.7,
+     "t_end": 50.1,
+     "steady": [
+      45.3,
+      49.5
+     ]
+    },
+    {
+     "id": "tkey7-note108",
+     "what": "EG time scaling 7 at note 108: the key code law across the whole keyboard rather than the three notes tscale measured",
+     "pins": [
+      "rate scaling"
+     ],
+     "measure": "envelope",
+     "note": 108,
+     "velocity": 100,
+     "t_on": 50.6,
+     "t_off": 55.6,
+     "t_end": 56.0,
+     "steady": [
+      51.2,
+      55.4
+     ]
+    },
+    {
+     "id": "tkey7-note120",
+     "what": "EG time scaling 7 at note 120: the key code law across the whole keyboard rather than the three notes tscale measured",
+     "pins": [
+      "rate scaling"
+     ],
+     "measure": "envelope",
+     "note": 120,
+     "velocity": 100,
+     "t_on": 56.5,
+     "t_off": 61.5,
+     "t_end": 61.9,
+     "steady": [
+      57.1,
+      61.3
+     ]
+    },
+    {
+     "id": "tkey3-note12",
+     "what": "EG time scaling 3 at note 12: the key code law across the whole keyboard rather than the three notes tscale measured",
+     "pins": [
+      "rate scaling"
+     ],
+     "measure": "envelope",
+     "note": 12,
+     "velocity": 100,
+     "t_on": 62.4,
+     "t_off": 67.4,
+     "t_end": 67.8,
+     "steady": [
+      63.0,
+      67.2
+     ]
+    },
+    {
+     "id": "tkey3-note24",
+     "what": "EG time scaling 3 at note 24: the key code law across the whole keyboard rather than the three notes tscale measured",
+     "pins": [
+      "rate scaling"
+     ],
+     "measure": "envelope",
+     "note": 24,
+     "velocity": 100,
+     "t_on": 68.3,
+     "t_off": 73.3,
+     "t_end": 73.7,
+     "steady": [
+      68.9,
+      73.1
+     ]
+    },
+    {
+     "id": "tkey3-note36",
+     "what": "EG time scaling 3 at note 36: the key code law across the whole keyboard rather than the three notes tscale measured",
+     "pins": [
+      "rate scaling"
+     ],
+     "measure": "envelope",
+     "note": 36,
+     "velocity": 100,
+     "t_on": 74.2,
+     "t_off": 79.2,
+     "t_end": 79.6,
+     "steady": [
+      74.8,
+      79.0
+     ]
+    },
+    {
+     "id": "tkey3-note48",
+     "what": "EG time scaling 3 at note 48: the key code law across the whole keyboard rather than the three notes tscale measured",
+     "pins": [
+      "rate scaling"
+     ],
+     "measure": "envelope",
+     "note": 48,
+     "velocity": 100,
+     "t_on": 80.1,
+     "t_off": 85.1,
+     "t_end": 85.5,
+     "steady": [
+      80.7,
+      84.9
+     ]
+    },
+    {
+     "id": "tkey3-note60",
+     "what": "EG time scaling 3 at note 60: the key code law across the whole keyboard rather than the three notes tscale measured",
+     "pins": [
+      "rate scaling"
+     ],
+     "measure": "envelope",
+     "note": 60,
+     "velocity": 100,
+     "t_on": 86.0,
+     "t_off": 91.0,
+     "t_end": 91.4,
+     "steady": [
+      86.6,
+      90.8
+     ]
+    },
+    {
+     "id": "tkey3-note72",
+     "what": "EG time scaling 3 at note 72: the key code law across the whole keyboard rather than the three notes tscale measured",
+     "pins": [
+      "rate scaling"
+     ],
+     "measure": "envelope",
+     "note": 72,
+     "velocity": 100,
+     "t_on": 91.9,
+     "t_off": 96.9,
+     "t_end": 97.3,
+     "steady": [
+      92.5,
+      96.7
+     ]
+    },
+    {
+     "id": "tkey3-note84",
+     "what": "EG time scaling 3 at note 84: the key code law across the whole keyboard rather than the three notes tscale measured",
+     "pins": [
+      "rate scaling"
+     ],
+     "measure": "envelope",
+     "note": 84,
+     "velocity": 100,
+     "t_on": 97.8,
+     "t_off": 102.8,
+     "t_end": 103.2,
+     "steady": [
+      98.4,
+      102.6
+     ]
+    },
+    {
+     "id": "tkey3-note96",
+     "what": "EG time scaling 3 at note 96: the key code law across the whole keyboard rather than the three notes tscale measured",
+     "pins": [
+      "rate scaling"
+     ],
+     "measure": "envelope",
+     "note": 96,
+     "velocity": 100,
+     "t_on": 103.7,
+     "t_off": 108.7,
+     "t_end": 109.1,
+     "steady": [
+      104.3,
+      108.5
+     ]
+    },
+    {
+     "id": "tkey3-note108",
+     "what": "EG time scaling 3 at note 108: the key code law across the whole keyboard rather than the three notes tscale measured",
+     "pins": [
+      "rate scaling"
+     ],
+     "measure": "envelope",
+     "note": 108,
+     "velocity": 100,
+     "t_on": 109.6,
+     "t_off": 114.6,
+     "t_end": 115.0,
+     "steady": [
+      110.2,
+      114.4
+     ]
+    },
+    {
+     "id": "tkey3-note120",
+     "what": "EG time scaling 3 at note 120: the key code law across the whole keyboard rather than the three notes tscale measured",
+     "pins": [
+      "rate scaling"
+     ],
+     "measure": "envelope",
+     "note": 120,
+     "velocity": 100,
+     "t_on": 115.5,
+     "t_off": 120.5,
+     "t_end": 120.9,
+     "steady": [
+      116.1,
+      120.3
+     ]
+    },
+    {
+     "id": "hold-10",
+     "what": "EG hold 10 before a fixed decay: the hold fraction against its lag",
+     "pins": [
+      "EG_HOLD_FRAC",
+      "EG_HOLD_LAG"
+     ],
+     "measure": "envelope",
+     "note": 60,
+     "velocity": 100,
+     "t_on": 121.4,
+     "t_off": 126.4,
+     "t_end": 126.8,
+     "steady": [
+      122.0,
+      126.2
+     ]
+    },
+    {
+     "id": "hold-30",
+     "what": "EG hold 30 before a fixed decay: the hold fraction against its lag",
+     "pins": [
+      "EG_HOLD_FRAC",
+      "EG_HOLD_LAG"
+     ],
+     "measure": "envelope",
+     "note": 60,
+     "velocity": 100,
+     "t_on": 127.3,
+     "t_off": 132.3,
+     "t_end": 132.7,
+     "steady": [
+      127.9,
+      132.1
+     ]
+    },
+    {
+     "id": "hold-50",
+     "what": "EG hold 50 before a fixed decay: the hold fraction against its lag",
+     "pins": [
+      "EG_HOLD_FRAC",
+      "EG_HOLD_LAG"
+     ],
+     "measure": "envelope",
+     "note": 60,
+     "velocity": 100,
+     "t_on": 133.2,
+     "t_off": 138.2,
+     "t_end": 138.6,
+     "steady": [
+      133.8,
+      138.0
+     ]
+    },
+    {
+     "id": "hold-70",
+     "what": "EG hold 70 before a fixed decay: the hold fraction against its lag",
+     "pins": [
+      "EG_HOLD_FRAC",
+      "EG_HOLD_LAG"
+     ],
+     "measure": "envelope",
+     "note": 60,
+     "velocity": 100,
+     "t_on": 139.1,
+     "t_off": 144.1,
+     "t_end": 144.5,
+     "steady": [
+      139.7,
+      143.9
+     ]
+    },
+    {
+     "id": "attackto-70",
+     "what": "attack at chip rate 32 to level 70 rather than to full: the overshoot, which a rise to full cannot tell apart from the floor",
+     "pins": [
+      "EG_OVERSHOOT"
+     ],
+     "measure": "envelope",
+     "note": 60,
+     "velocity": 100,
+     "t_on": 145.0,
+     "t_off": 149.0,
+     "t_end": 149.4,
+     "steady": [
+      145.6,
+      148.8
+     ]
+    },
+    {
+     "id": "attackto-40",
+     "what": "attack at chip rate 32 to level 40 rather than to full: the overshoot, which a rise to full cannot tell apart from the floor",
+     "pins": [
+      "EG_OVERSHOOT"
+     ],
+     "measure": "envelope",
+     "note": 60,
+     "velocity": 100,
+     "t_on": 149.9,
+     "t_off": 153.9,
+     "t_end": 154.3,
+     "steady": [
+      150.5,
+      153.7
+     ]
+    },
+    {
+     "id": "attackfrom-50",
+     "what": "attack at chip rate 32 from level 50 rather than from silence: whether the floor is a jump the chip takes from any level below it",
+     "pins": [
+      "EG_ATTACK_FLOOR"
+     ],
+     "measure": "envelope",
+     "note": 60,
+     "velocity": 100,
+     "t_on": 154.8,
+     "t_off": 158.8,
+     "t_end": 159.2,
+     "steady": [
+      155.4,
+      158.6
+     ]
+    },
+    {
+     "id": "attackfrom-20",
+     "what": "attack at chip rate 32 from level 20 rather than from silence: whether the floor is a jump the chip takes from any level below it",
+     "pins": [
+      "EG_ATTACK_FLOOR"
+     ],
+     "measure": "envelope",
+     "note": 60,
+     "velocity": 100,
+     "t_on": 159.7,
+     "t_off": 163.7,
+     "t_end": 164.1,
+     "steady": [
+      160.3,
+      163.5
+     ]
+    }
+   ],
+   "marker_start": [
+    1.2,
+    1.5,
+    1.8
+   ],
+   "marker_end": [
+    164.6,
+    164.9,
+    165.2
+   ],
+   "duration_s": 166.32,
+   "sha1": "a4d67628c8e0692e7337ea2bd5767beb01916cdc",
+   "group": "envelope2",
+   "group_number": 10,
+   "why": "the amplitude EG, second pass: the key code law, the hold, the attack shape",
+   "part": 1,
+   "parts": 1
   }
  ]
 }

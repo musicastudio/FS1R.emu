@@ -18,7 +18,7 @@ https://github.com/user-attachments/assets/1261aa38-1618-4524-8296-f5b9f0c4131b
 
 [Download](https://raw.githubusercontent.com/musicastudio/FS1R.emu/main/captures/fs1r_demo01_hardware.mp4) if the player does not load.
 
-**FS1R demo song "Vokodrone" on FS1R.emu v0.3.2**
+**FS1R demo song "Vokodrone" on FS1R.emu v0.3.3**
 
 https://github.com/user-attachments/assets/344fa64c-4c79-4513-9388-a0d28e15c197
 
@@ -32,13 +32,13 @@ https://github.com/user-attachments/assets/344fa64c-4c79-4513-9388-a0d28e15c197
 
 [Download](https://raw.githubusercontent.com/musicastudio/FS1R.emu/main/captures/fs1r_demo02_hardware.mp4) if the player does not load.
 
-**FS1R demo song "Full Tines" on FS1R.emu v0.3.2**
+**FS1R demo song "Full Tines" on FS1R.emu v0.3.3**
 
 <!-- Same again for captures/fs1r_demo02_engine.mp4. -->
 
 [Download](https://raw.githubusercontent.com/musicastudio/FS1R.emu/main/captures/fs1r_demo02_engine.mp4) if the player does not load.
 
-Both Full Tines clips carry the same +10 dB, so the level between them is the unit's against ours: the engine is about 10 dB quieter on the demo, and its ending stops about four seconds before the hardware's does. Neither is fixed yet; the working is in `TODO.md` under Tier 4.
+Both Full Tines clips carry the same +10 dB, so the level between them is the unit's against ours. The four-second gap at the end is gone: the chip's EG key rate scaling had been reaching a clamp whose pivot sat above the top of the keyboard, so every rate ran unscaled and the low notes released too fast. It is measured now, the engine's last note stops 0.7 s before the unit's rather than four seconds, and the song's envelope correlation went from 0.838 to 0.976. `docs/aeg.md` is the working. The remaining 10 dB is the recording rather than the engine, `TODO.md` under Tier 4.
 
 ## Thanks
 
@@ -113,7 +113,7 @@ Modelled, because the chips are undocumented, and gathered in `namespace cal` in
 
 Partly done: rgwan recorded the whole 46 minute capture set off his FS1R's digital output board on 2026-09-18, and the first round of constants is measured rather than modelled. The output path's fixed gain, the hard clip on the channel accumulator and the filter loop's insertion loss are now numbers off the tap, and the EG rate law, the carrier level step, the frequency scale and the note table all came back confirmed as they stood. The unvoiced and formant level laws, the filter's cutoff reading, detune and AM sensitivity are measured and still modelled wrongly. `docs/capture_0918.md` is the working and Tier 4 of `TODO.md` tracks what is left.
 
-Before that there was one piece of real hardware audio, rgwan's digital recording of the built-in demo, and it was worth more than its coarseness suggested: playing the demo's own fifteen songs through the engine and lining them up against that take moved the modulation index, the resonance curve and the filter's cutoff reading off their guesses, and tracing what the songs touch found real firmware bugs, most recently three in the Fseq and controller paths that song 1 exercises (Tier 4, "The demo song, end to end"). The engine sits at a median envelope correlation of 0.965 and a mean absolute band error of 5.5 dB against the unit.
+Before that there was one piece of real hardware audio, rgwan's digital recording of the built-in demo, and it was worth more than its coarseness suggested: playing the demo's own fifteen songs through the engine and lining them up against that take moved the modulation index, the resonance curve and the filter's cutoff reading off their guesses, and tracing what the songs touch found real firmware bugs, most recently three in the Fseq and controller paths that song 1 exercises (Tier 4, "The demo song, end to end"). The engine sits at a median envelope correlation of 0.971 against the unit, worst 0.879, and a mean band tilt of 2.9 dB.
 
 ## Roadmap
 

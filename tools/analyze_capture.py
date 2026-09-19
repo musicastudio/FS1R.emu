@@ -327,10 +327,42 @@ def analyze(wav, manifest, tables, label):
 SILENT_DB = -120.0
 
 
+# An envelope segment's rms_db is one 100 ms window just after the attack, which says nothing about the
+# shape of the seconds that follow. This is the shape: the two curves laid on top of each other, note on
+# against note on, and the rms dB between them. Note on itself is not comparable to better than a few
+# milliseconds, since the unit answers MIDI on its own 192.3 Hz tick and the player has its own jitter,
+# so the alignment is searched over a small window rather than assumed.
+CURVE_FLOOR_DB = -100.0
+
+
+def curve_error(h, e, key="envelope_db", slack=4):
+    """(rms dB, points, shift) between two envelope curves, aligned on their own onsets."""
+    a, b = np.array(h.get(key, [])), np.array(e.get(key, []))
+    if len(a) < 8 or len(b) < 8:
+        return None
+    thr = max(a.max(), b.max()) - 40
+    ia = int(np.argmax(a > thr)) if (a > thr).any() else 0
+    i0 = int(np.argmax(b > thr)) if (b > thr).any() else 0
+    best = None
+    for sh in range(-slack, slack + 1):
+        ib = i0 + sh
+        n = min(len(a) - ia, len(b) - ib)
+        if ib < 0 or n < 4:
+            continue
+        aa, bb = a[ia:ia + n], b[ib:ib + n]
+        m = (aa > CURVE_FLOOR_DB) & (bb > CURVE_FLOOR_DB)
+        if m.sum() < 4:
+            continue
+        r = float(np.sqrt(np.mean((aa[m] - bb[m]) ** 2)))
+        if best is None or r < best[0]:
+            best = (r, int(m.sum()), sh)
+    return best
+
+
 def compare(hw, eng):
     """Where the engine and the hardware disagree, worst first."""
     byid = {s["id"]: s for s in eng["segments"]}
-    rows = []
+    rows, curves = [], []
     for s in hw["segments"]:
         e = byid.get(s["id"])
         if not e:
@@ -342,6 +374,9 @@ def compare(hw, eng):
         if s.get("peaks") and e.get("peaks"):
             f = 1200 * np.log2(s["peaks"][0][0] / e["peaks"][0][0]) if e["peaks"][0][0] > 0 else None
         rows.append((abs(d), s["id"], d, f))
+        c = curve_error(s, e) if "envelope_db" in s else None
+        if c:
+            curves.append((c[0], s["id"], c[1]))
     rows.sort(reverse=True)
     print("  level differences, hardware minus engine (worst 12):")
     for _, sid, d, f in rows[:12]:
@@ -349,6 +384,12 @@ def compare(hw, eng):
     rest = [r[2] for r in rows]
     if rest:
         print(f"    median |difference| {np.median([abs(v) for v in rest]):.2f} dB over {len(rest)} segments")
+    if curves:
+        curves.sort(reverse=True)
+        print("  envelope shape, rms dB over the aligned curves (worst 6):")
+        for r, sid, n in curves[:6]:
+            print(f"    {sid:22s} {r:7.2f} dB over {n} steps")
+        print(f"    mean {np.mean([c[0] for c in curves]):.2f} dB over {len(curves)} envelopes")
 
 
 def main():

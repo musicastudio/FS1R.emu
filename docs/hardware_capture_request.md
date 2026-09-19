@@ -12,7 +12,7 @@ A recording of the right test tones turns each of those guesses into a measureme
 
 ## The recordings
 
-`captures/requests/` holds 21 Standard MIDI Files and a manifest. Each file sets up every patch itself with sysex, so the unit needs no preparation and nothing is written to its memory: only the current performance and voice buffers change, and a power cycle clears them.
+`captures/requests/` holds 22 Standard MIDI Files and a manifest. Each file sets up every patch itself with sysex, so the unit needs no preparation and nothing is written to its memory: only the current performance and voice buffers change, and a power cycle clears them.
 
 **Procedure.** Play one MIDI file into the FS1R's MIDI IN from any player or DAW that sends sysex faithfully. Record the digital output for the whole file. Save one WAV per MIDI file, named after it, so `01_reference_1.mid` becomes `01_reference_1.wav`. Start the recorder before playback and stop it afterwards: the files open and close with three short beeps that we align to, so trimming, latency and clock drift are all handled at our end. Nothing else needs to be exact.
 
@@ -24,7 +24,13 @@ A recording of the right test tones turns each of those guesses into a measureme
 
 **Order.** The files are numbered by value. Please do `01_reference_1` and `01_reference_2` first and send just those two, so we can confirm the alignment and the levels look right before you spend more time. After that, 02 (the envelope), 03 (modulation index and feedback) and 04 (the formant window) carry most of the remaining value. 05 to 08 are worth having when you get to them. 09 is the effects and is genuinely optional: those run on the YSS236 and we cannot make them exact from a recording anyway.
 
-`captures/requests/README.md` lists every file with its length and what it settles. Total playback across all 21 is about 46 minutes.
+`captures/requests/README.md` lists every file with its length and what it settles. Total playback across all 22 is about 49 minutes.
+
+### 2026-09-19: one new file, `10_envelope2`
+
+Your 0918 recording of 02 settled the amplitude EG's rates and then showed that three other things about it were wrong, two of them badly: the attack was four times too slow and the key rate scaling did nothing at all. `docs/aeg.md` is the working and the engine has all three now. What the three envelope files cannot finish is in `10_envelope2.mid`, 28 segments and 2.8 minutes, recorded exactly like the others and in no hurry. It is worth more than 05 to 09 if you are choosing.
+
+Most of it is one question. The chip shortens every EG rate as the note rises, and how much it shortens by is fitted through three notes, which do not sit on a straight line. Twenty of the segments play the same decay at two time-scaling settings across ten notes from the bottom of the keyboard to the top, which settles it outright.
 
 **One more, free-form:** a minute or two of you playing a few of your favourite preset performances normally, recorded the same way, with a note of which performances they were. That is the sanity check that the whole engine sounds like the instrument rather than merely measuring correctly.
 

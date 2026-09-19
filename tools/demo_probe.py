@@ -228,8 +228,12 @@ def cmd_score(a):
         rows.append(cd.bands(own, ref[lag * cd.HOP:lag * cd.HOP + len(own)]))
         rs.append(r)
     d = np.abs(np.array(rows))
-    line = ("%-24s mean|err| %5.2f dB   per band %s   env r median %.3f worst %.3f"
-            % (a.label, d.mean(), " ".join("%5.1f" % v for v in d.mean(0)), np.median(rs), min(rs)))
+    # The recording's own level is not ours to match: it is one take through whatever gain rgwan's
+    # converter sat at, where the capture set was measured off the digital tap. Drop each song's median
+    # band and what is left is the tilt, which is the part a calibration can move.
+    t = np.abs(np.array(rows) - np.median(rows, 1, keepdims=True))
+    line = ("%-24s mean|err| %5.2f dB   tilt %5.2f dB   per band %s   env r median %.3f worst %.3f"
+            % (a.label, d.mean(), t.mean(), " ".join("%5.1f" % v for v in t.mean(0)), np.median(rs), min(rs)))
     print(line)
     with open(ROOT / "tools/demo_scores.txt", "a") as fh:
         fh.write(line + "\n")

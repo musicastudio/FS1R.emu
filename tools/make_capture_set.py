@@ -187,6 +187,50 @@ def g_eg():
                       eg_sine(tscale=s, eg_l=(99, 0, 0, 0), eg_t=(0, eg_time_for_rate(34), 0, 0)),
                       note=n, hold=5000, tail=400, measure="envelope")
 
+def g_eg2():
+    """The amplitude EG, second pass: what the first one measured but could not finish.
+
+    Separate from `g_eg` rather than appended to it because 02_envelope_1 to _3 have been recorded on a
+    real unit and their segment times are what that recording is read against. Adding to the group would
+    redraw the file boundaries and throw the recording away. docs/aeg.md has what each of these settles.
+    """
+    def eg_sine(**kw):
+        c, f, _ = fp.fixed_bytes(2000.0)
+        return sine(fixed=1, coarse=c, fine=f, **kw)
+
+    # Three notes do not sit on one line: the key code moves the rate one step per step below middle C and
+    # three quarters of a step above it. Ten notes at two settings say whether that is a kink, a dead band
+    # or a ceiling, and the ends of the keyboard say where the law stops.
+    for s in (7, 3):
+        for n in (12, 24, 36, 48, 60, 72, 84, 96, 108, 120):
+            yield Seg(f"tkey{s}-note{n}", f"EG time scaling {s} at note {n}: the key code law across the "
+                      "whole keyboard rather than the three notes tscale measured",
+                      ["rate scaling"],
+                      eg_sine(tscale=s, eg_l=(99, 0, 0, 0), eg_t=(0, eg_time_for_rate(34), 0, 0)),
+                      note=n, hold=5000, tail=400, measure="envelope")
+    # The hold comes out as half a traverse at its own rate plus a fixed 12 ms that nothing explains.
+    # Four values between the ones already measured separate the two terms.
+    for h in (10, 30, 50, 70):
+        yield Seg(f"hold-{h}", f"EG hold {h} before a fixed decay: the hold fraction against its lag",
+                  ["EG_HOLD_FRAC", "EG_HOLD_LAG"],
+                  eg_sine(hold=h, eg_l=(99, 0, 0, 0), eg_t=(0, eg_time_for_rate(40), 0, 0)),
+                  hold=5000, tail=400, measure="envelope")
+    # Every attack measured so far runs from silence to full, where the floor the rise starts from and the
+    # overshoot it aims past trade off against each other. A target part way up separates them.
+    for L in (70, 40):
+        yield Seg(f"attackto-{L}", f"attack at chip rate 32 to level {L} rather than to full: the "
+                  "overshoot, which a rise to full cannot tell apart from the floor",
+                  ["EG_OVERSHOOT"],
+                  eg_sine(eg_l=(L, L, L, 0), eg_t=(eg_time_for_rate(32), 0, 0, 0)),
+                  hold=4000, tail=400, measure="envelope")
+    # And a rise that starts above the floor and one that starts below it: whether the floor is a level the
+    # chip jumps to from anywhere or only where a rise from silence happens to begin.
+    for L in (50, 20):
+        yield Seg(f"attackfrom-{L}", f"attack at chip rate 32 from level {L} rather than from silence: "
+                  "whether the floor is a jump the chip takes from any level below it",
+                  ["EG_ATTACK_FLOOR"],
+                  eg_sine(eg_l=(99, 99, 99, L), eg_t=(eg_time_for_rate(32), 0, 0, 0)),
+                  hold=4000, tail=400, measure="envelope")
 
 def g_fm():
     """Phase modulation depth and feedback: the two numbers that set the brightness of every FM patch."""
@@ -467,6 +511,7 @@ GROUPS = [
     (7, "modulation", "per-operator sensitivities, the LFO and the frequency EG", g_modulation),
     (8, "panlevel", "pan and the part level path", g_pan),
     (9, "effects", "impulse responses of the three effect blocks (optional)", g_effects),
+    (10, "envelope2", "the amplitude EG, second pass: the key code law, the hold, the attack shape", g_eg2),
 ]
 
 
