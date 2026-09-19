@@ -34,7 +34,7 @@ is firmware behaviour.
 | 0xC8 | chip | init 2 |
 | 0xF8/0xF9 | channel | 16-bit LFO pitch modulation word, signed, +-0x7FF (see LFO) |
 | 0xFA/0xFB | chip | channel bit mask written at note off (release: EG stage 4) |
-| 0xFC/0xFD | chip | channel bit mask written at the start of note on, init 0xFFFF (damp / restart) |
+| 0xFC/0xFD | chip | channel bit mask written at the start of note on, init 0xFFFF (damp / restart). Measured, `captures/2026-09-20-notediff`: among registers 0x00..0x8F and 0xC0..0xFF this is the only one that flips at note-on on a real unit, with the channel block's Fseq word advancing beside it, so this is the write that starts the note |
 | 0x100-0x1C8 | same as 0x00-0xC8 for the unvoiced operators | image +0xC0..+0x13F, 0x148 level, 0x190/0x198 frequency |
 | 0x200/0x208 | channel, op | 16-bit algorithm word (`src/fs1r_algorithms.h`) with carrier level correction 0..15 in bits 4-7 of the low byte |
 | 0x210 | channel, op | form (bits 0-2), skirt (3-5), fixed (6) |
@@ -383,8 +383,15 @@ all ten notes and both ends of the table. `docs/aeg.md`.
 
 ## Still unknown
 
-Which write starts a note (0xFC/FD is written before the registers are loaded), the effect algorithms, and everything the
-chip does with the register values listed above.
+The effect algorithms, and everything the chip does with the register values listed above.
+
+Which write starts a note is settled, by capture `captures/2026-09-20-notediff` (the chip-side dump around a real note-on):
+registers 0x00..0x8F and 0xC0..0xFF do not move; chip register **0xFC/0xFD** flips and the driver channel block's Fseq words
+advance, so the write that starts a note is the 0xFC/0xFD channel mask going out against the already-loaded note
+(the 0xF00 image copy writes the operator registers first). The `call`-through-monitor path cannot reproduce it, because
+that path never allocates a channel: the note-on channel allocator (`FUN_000112C0`'s first half) runs only on the real
+MIDI note-on, and three rounds of `note_on_probe.py` feeding the events by hand made no sound because the events landed
+on a free channel's leftover state. `docs/ymp706_registers.md` still holds, and the capture proves it.
 
 The filter is no longer on this list, and never belonged on it. The board wires VOP3-1 as a channel-level insert loop off
 both tone generators and 0x270 is the switch that puts it in the path, so the cutoff and resonance the CPU computes every tick
