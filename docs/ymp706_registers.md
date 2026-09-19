@@ -30,7 +30,7 @@ is firmware behaviour.
 | 0x90/0x98 | channel, op | 16-bit operator frequency word (see Frequency) |
 | 0xA0/0xA8 | channel | 16-bit LFO frequency modulation word (see LFO), 0xA8 written with the low byte |
 | 0xB0 | channel | LFO amplitude modulation attenuation 0..255 (see LFO); 0xB8 always 0 |
-| 0xC0 | channel | key code `(pitchWord >> 8) + 10` = note/3 + 10, for the chip's rate scaling. It reads -10 at note 36, -2 at note 60 and +4 at note 84, which is not one line; `docs/aeg.md` |
+| 0xC0 | channel | key code `(pitchWord >> 8) + 10` = note/3 + 10, for the chip's rate scaling. Measured at ten key codes: a table, not a line, saturating at +-13; `docs/aeg.md` |
 | 0xC8 | chip | init 2 |
 | 0xF8/0xF9 | channel | 16-bit LFO pitch modulation word, signed, +-0x7FF (see LFO) |
 | 0xFA/0xFB | chip | channel bit mask written at note off (release: EG stage 4) |
@@ -368,8 +368,11 @@ its pan from a different source than the channel's own. Event 0x211 also folds i
 and reads `+0x19` of each, adds the pan offset, clamps to 0..255 and halves for the index. The voice image feeds
 that byte from its own +0x2E, which is twice the part's pan byte, so the table index is the part byte itself and
 not one below it. Everything else in the sum, pan scaling, the pan LFO and the performance pan, is added in the
-0..255 domain, which is half a table step per unit; `namespace cal` still adds them a whole step at a time, and
-reading the three scaler events off the firmware is what settles that.
+0..255 domain, which is half a table step per unit. Pan scaling is measured now: `10_envelope2` leaves that byte
+at 0 and sweeps the pan across the keyboard, and the index comes out as `64 - 4 * (note - 60) / 3`, hard right at
+note 12 and hard left from note 108, which is the whole 128 of one side in the 0..255 domain at byte 0 and matches
+all ten notes and both ends of the table. `docs/aeg.md`. The pan LFO and the performance pan are still added a
+whole index step at a time and no recording has asked them anything, since every request file centres both.
 
 ## Still unknown
 

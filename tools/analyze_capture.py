@@ -187,6 +187,30 @@ def envelope(seg, sr, step_ms=10, analytic=False):
     return [round(float(db(v)), 2) for v in e]
 
 
+def unpan(w):
+    """One waveform with the pan taken out of it.
+
+    The two channels carry the same signal at two gains and the FS1R's pan law is constant power, so the
+    pair's total power is the signal's wherever the note sits in the image. Scaling the louder channel up
+    to that leaves a real waveform, which the spectrum and the analytic envelope both need, at a level
+    that does not move with the pan. A centred segment comes back exactly as its left channel did, so
+    every number measured before this existed still reads the same.
+
+    It matters because every request file leaves the performance's PAN SCALING byte at 0, which is the
+    extreme, so any segment played away from C3 is panned. Measuring the left channel alone read that as
+    a level difference: `docs/capture_0918.md`'s "level varies with note ... by 14.6 dB on the hardware
+    and 9.1 dB in the engine" is this and nothing else.
+    """
+    if w.ndim < 2 or w.shape[1] < 2:
+        return w[:, 0] if w.ndim > 1 else w
+    L, R = w[:, 0], w[:, 1]
+    pl, pr = float((L ** 2).mean()), float((R ** 2).mean())
+    if pl + pr <= 0:
+        return L
+    loud, hi = (L, pl) if pl >= pr else (R, pr)
+    return loud * np.sqrt((pl + pr) / 2.0 / hi)
+
+
 def measure_segment(x, sr, seg, scale, offset):
     def cut(t0, t1):
         a = int((scale * t0 + offset) * sr)
@@ -198,19 +222,20 @@ def measure_segment(x, sr, seg, scale, offset):
     # A decaying segment has no steady state, so its level is read just after the attack instead.
     body = cut(seg["t_on"] + 0.05, seg["t_on"] + 0.15) if kind in ("envelope", "impulse") else cut(*seg["steady"])
     whole = cut(seg["t_on"] - 0.05, seg["t_end"])
-    L = body[:, 0] if body.size else np.zeros(1)
+    L = unpan(body) if body.size else np.zeros(1)
     R = body[:, 1] if body.ndim > 1 and body.shape[1] > 1 and body.size else L
     out = {"id": seg["id"], "measure": kind,
            "rms_db": round(rms_db(L), 3),
            "peak": round(float(np.max(np.abs(body))) if body.size else 0.0, 6)}
-    if kind == "stereo":
-        out["rms_db_l"], out["rms_db_r"] = round(rms_db(L), 3), round(rms_db(R), 3)
+    if kind == "stereo":                                       # the one measure that wants the pan left in
+        out["rms_db_l"] = round(rms_db(body[:, 0] if body.size else np.zeros(1)), 3)
+        out["rms_db_r"] = round(rms_db(R), 3)
     if kind in ("spectrum", "stereo"):
         fr, S = spectrum(L, sr)
         out["peaks"] = peaks(fr, S)
         out["bands"] = bands(fr, S)
     if kind in ("envelope", "impulse"):
-        w = whole[:, 0] if whole.size else np.zeros(1)
+        w = unpan(whole) if whole.size else np.zeros(1)
         e = envelope(w, sr)
         out["envelope_db"] = e
         out["envelope_step_ms"] = 10
@@ -219,7 +244,7 @@ def measure_segment(x, sr, seg, scale, offset):
         out["peak_db"] = round(max(e), 2) if e else -200.0
         # The fastest EG rates cross 96 dB in a tenth of a second, which a 10 ms step cannot resolve.
         fast = cut(seg["t_on"] - 0.02, seg["t_on"] + 0.4)
-        out["envelope_fast_db"] = envelope(fast[:, 0] if fast.size else np.zeros(1), sr, step_ms=1,
+        out["envelope_fast_db"] = envelope(unpan(fast) if fast.size else np.zeros(1), sr, step_ms=1,
                                            analytic=True)
         out["envelope_fast_step_ms"] = 1
     return out

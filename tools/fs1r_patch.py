@@ -277,6 +277,9 @@ def set_part(p, i, **kw):
     p[b + 0x25] = g("portatime", 0)
     p[b + 0x26] = 0x40 + 2
     p[b + 0x27] = 0x40 - 2
+    # 0 is the extreme, not the centre: the Data List gives PAN SCALING as 0..100 and the chip pans a full
+    # 64 index steps per 48 semitones at 0, so every file built on this default pans hard by key. Left alone
+    # because the recordings that exist were made with it; pass panscale=50 for a centred image.
     p[b + 0x28] = g("panscale", 0)
     p[b + 0x29] = g("panlfo", 0)
     p[b + 0x2A] = 1

@@ -12,6 +12,16 @@ needs no setting up and the state cannot drift. Each file opens and closes with 
 bursts of a fixed 1 kHz tone, so a recording can be aligned to the manifest's segment times whatever the
 recorder was doing when playback started.
 
+**The pan.** Every file is built on `fs1r_patch.init_performance`, which leaves the performance part's PAN
+SCALING byte at 0. The Data List gives that parameter as 0 to 100, so 0 is not the centre, it is the extreme,
+and the unit pans hard by key: a segment at note 24 comes out hard right and one at note 108 hard left. That
+was not deliberate and it went unnoticed until `10_envelope2` was recorded, where it read as a level that
+moved with the note. It stays as it is. The recordings that exist were made with these exact files, so
+centring the byte now would throw them away, `tools/analyze_capture.py` takes the pan back out of every
+measure that does not want it, and a pan sweep in every file is a free check on the pan key scaling law,
+which is what measured it. `docs/aeg.md`, "The pan was in front of everything". A new group that wants a
+centred image should pass `pan_scaling=50` to `fp.set_part`.
+
 Every segment isolates one thing. What is being measured is the chip behaviour behind the register
 values, which is the whole INFERRED list in namespace cal in src/fs1r_lib.cpp: nothing in the firmware
 says what the YMP706 does with a level, a rate or a bandwidth, so it has to be measured.

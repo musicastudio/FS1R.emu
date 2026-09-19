@@ -2,7 +2,7 @@
 
 The 0918 capture measured the EG's rate table and declared the model right, and it was right about the rates. What it did not measure was everything the rates are *used for*: the shape of a rise, the length of the hold and the key scaling that shortens every segment as you go up the keyboard. Those three were still DX7 guesses, and two of them were wrong by more than an order of magnitude. Demo song 2, Full Tines, is where it showed: 0.838 envelope correlation, the second worst of the fifteen, with a tail four seconds shorter than the unit's.
 
-This is the working. The numbers come from `captures/hardware/02_envelope_[123].wav`, rgwan's recording of the three envelope request files, read against `captures/requests/manifest.json`. The register values behind them are not in question: `FS1R.unlock/captures/2026-09-19/images/02_envelope/` holds the voice image the unit was actually playing for every one of these hundred segments, so what is measured here is the chip and nothing else.
+This is the working, over two passes. The first reads `captures/hardware/02_envelope_[123].wav`, rgwan's recording of the three envelope request files. The second reads `captures/hardware/10_envelope2.wav`, recorded on 2026-09-19 to answer what the first could not, and it moved more than the EG: the key code law turned out to be a saturating table rather than a line, the attack turned out to aim at the top of the scale rather than at its own target, and the pan sweep nobody asked for measured the pan key scaling and uncovered a 4.24 dB error in the filter loop. Both are read against `captures/requests/manifest.json`. The register values behind them are not in question: `FS1R.unlock/captures/2026-09-19/images/02_envelope/` holds the voice image the unit was actually playing for every one of these hundred segments, so what is measured here is the chip and nothing else.
 
 ## What was already right
 
@@ -22,7 +22,7 @@ Three things were wrong and only one of them was the shape.
 
 **The rise starts 53 dB below full, not at silence.** One millisecond into an attack from silence at rate 32 the unit is already 52.5 dB below its peak, and at rate 24 it is 55 dB below. A joint fit with the time constant fixed puts the floor at −53.2 dB. This is the DX7's jump target under another name: the EGS forces the level counter to 1716 of 4096 before a rising segment, which is 55.8 dB below full. `EG_ATTACK_FLOOR` is −53.2, and a rising segment that starts below it starts there instead, or at its target if the target is lower still.
 
-**The overshoot is 3.8 dB, not 6.** With the time constant pinned at a sixteenth, fitting the floor and the overshoot together over 381 envelope points gives −53.2 and 3.78 dB, at 0.70 dB rms. The DX7's own 17/16 of full scale is 6 dB and costs 1.5 dB rms, so the chip's approach flattens a little more than the EGS near the top. The floor and the overshoot trade off against each other when every attack runs to full level, which every one of these does, so this pair is the weakest number here. `10_envelope2`'s `attackto-70` and `attackto-40` separate them.
+**The overshoot is 3.8 dB, not 6.** With the time constant pinned at a sixteenth, fitting the floor and the overshoot together over 381 envelope points gives −53.2 and 3.78 dB, at 0.70 dB rms. The DX7's own 17/16 of full scale is 6 dB and costs 1.5 dB rms, so the chip's approach flattens a little more than the EGS near the top. The floor and the overshoot trade off against each other when every attack runs to full level, which every one of these does, so this pair is the weakest number here. **`10_envelope2` settled it, and found the aiming wrong as well; see "The attack aims at the top of the scale" below.** The constants below are the first pass's and the ones in `namespace cal` are the second's.
 
 A discrete simulation of the EGS staircase, where the multiplier steps down in integers from 17 to 1, fits worse than the plain exponential at 2.3 dB rms. The chip is not running the DX7's arithmetic, only something very like its curve.
 
@@ -47,44 +47,98 @@ The 24 `tscale` segments of `02_envelope_3` settle the law. Each one decays at n
 
 Each column is `trunc(tscale * x / 8)` added to the rate, for a single x per note, and there is exactly one x that fits all eight rows: −10 at note 36, −2 at note 60 and +4 at note 84. The division truncates toward zero rather than flooring, which is what separates note 60's row, where tscale 1 to 3 give nothing and 4 to 7 give one step, from the flooring version that would give one step from tscale 1 up.
 
-The awkward part is that those three x values do not sit on a line. The key code moves by 8 between each pair of notes, so a law linear in the key code would give −10, −2, +6, and +6 is ruled out: it puts tscale 3 at note 84 two rate steps up where the recording says one, and tscale 7 five steps up where the recording says three. Three notes cannot say whether that is a kink at middle C, a dead band around it, or a ceiling further up. The engine takes the piecewise reading, one rate step per key code step below key code 93 and three quarters of one above, and `10_envelope2`'s twenty `tkey` segments across ten notes are what settle it.
+The awkward part is that those three x values do not sit on a line. The key code moves by 8 between each pair of notes, so a law linear in the key code would give −10, −2, +6, and +6 is ruled out: it puts tscale 3 at note 84 two rate steps up where the recording says one, and tscale 7 five steps up where the recording says three. Three notes cannot say whether that is a kink at middle C, a dead band around it, or a ceiling further up. The engine took the piecewise reading, one rate step per key code step below key code 93 and three quarters of one above. **`10_envelope2`'s twenty `tkey` segments settled it and it is neither a kink nor a dead band; see "The key code law is a table" below.**
 
 This is the change that fixed Full Tines. The song's decays and releases run on operators with a nonzero time scaling, and with the scaling dead every note below middle C released at its unscaled rate instead of the slower one the unit uses. The engine's last audible frame moves from 14.02 s to 17.57 s against the unit's 18.28, and the envelope correlation from 0.838 to 0.976.
 
-## The hold is half a traverse plus eleven milliseconds
+## The hold is half a traverse plus a lag the recording cannot place better than a few milliseconds
 
 The hold rate register is `((99 - T) * 0xA4) >> 8` then +4, capped at 0x3E, with 0x3F left alone; the firmware's own conversion, confirmed byte for byte in the register image. What the chip does with it was a guess: the engine held for a full traverse at that rate.
 
-Measured at sample resolution off the recording, against a `hold-0` that has no hold at all, the onsets are 25.54 ms at register 54, 150.15 ms at 41 and 1363.29 ms at 28. Registers 16 and 4 hold longer than the five-second note and never sound, which is the right answer and is also what the unit does.
+Seven hold settings are measured now, three from `02_envelope_3` and four from `10_envelope2`, spanning 19 ms to 3.65 s. Onsets at sample resolution, each against a segment in its own file that starts immediately:
 
-No pure fraction of `rate_secs` fits: the three would need 0.898, 0.550 and 0.499 of a traverse. Fitting a fraction and a fixed term together on relative error lands on 0.5007 and 8.5 frames of 64 samples, so half a traverse plus 11.4 ms, and that pair holds all three within 1.4%. Where the fixed term comes from is not known. It is not note-on latency, because `hold-0` is the reference and starts immediately; the most likely reading is that the firmware's special case for 0x3F is the chip's too, that 0x3F skips the hold stage entirely, and that entering the stage at all costs a fixed eight or nine frames. `10_envelope2` adds four hold values between the measured ones to separate the fraction from the lag.
+| hold | register | half a traverse | measured | left over |
+|---|---|---|---|---|
+| 10 | 61 | 4.27 ms | 19.00 ms | 14.7 ms |
+| 20 | 54 | 14.22 ms | 25.54 ms | 11.3 ms |
+| 30 | 48 | 42.67 ms | 44.88 ms | 2.2 ms |
+| 40 | 41 | 136.53 ms | 150.15 ms | 13.6 ms |
+| 50 | 35 | 390.10 ms | 400.58 ms | 10.5 ms |
+| 60 | 28 | 1365.33 ms | 1363.29 ms | −2.0 ms |
+| 70 | 22 | 3640.89 ms | 3647.44 ms | 6.6 ms |
 
-Whether the key rate scaling reaches the hold is untested: every hold segment leaves the time scaling at 0. The engine applies it, on the reasoning that the hold register sits in the same per-operator stripe as the four rates.
+A free fit of a fraction and a fixed term over the five slowest lands on 0.4998, so the fraction is exactly a half and nothing else is worth fitting. The lag is then the mean of what the seven leave over, 8.1 ms, and its six-millisecond scatter is what two note-ons quantised to the 192.3 Hz tick cost; 5.2 ms each, and the reference is a note-on too. A recording cannot place it better than that. What it is remains unexplained: the likeliest reading is still that 0x3F's special case in the firmware is the chip's too, that 0x3F skips the hold stage, and that entering the stage at all costs a fixed few frames.
+
+Settings 80 and 99 hold for longer than a five-second note and never sound, which is the right answer and is what the unit does.
+
+Whether the key rate scaling reaches the hold is still untested: every hold segment leaves the time scaling at 0. The engine applies it, on the reasoning that the hold register sits in the same per-operator stripe as the four rates.
+
+## The key code law is a table, and it saturates
+
+`10_envelope2` plays the same decay at time scaling 7 and 3 across ten notes, one per octave from 12 to 120, which is ten key codes four apart. Every one of the twenty slopes lands on the `(4 + (q & 3)) << (q >> 2)` ladder to within 0.6 %, so the chip's rate comes out as an integer, and the two settings together bound the key offset to a single value at nine of the ten:
+
+| key code | 77 | 81 | 85 | 89 | 93 | 97 | 101 | 105 | 109 | 113 |
+|---|---|---|---|---|---|---|---|---|---|---|
+| note | 12 | 24 | 36 | 48 | 60 | 72 | 84 | 96 | 108 | 120 |
+| tscale 7 | −11 | −11 | −8 | −4 | −1 | +1 | +3 | +7 | +10 | +11 |
+| tscale 3 | −4 | −4 | −3 | −1 | 0 | 0 | +1 | +3 | +4 | +4 |
+| key offset | −13 | −13 | −10 | −5 | −2 | +2 | +4 | +8 or +9 | +12 | +13 |
+
+Two things fall out. It **saturates at ±13**: notes 12 and 24 give the same offset, and note 120 adds only one step over note 108. And it is **not linear**, not even piecewise linear in any tidy way: the step from key code 85 to 89 is five where the step from 89 to 93 is three, and a search over every `trunc((a * c0 + b) / c)` with `a` and `c` under 32 returns nothing that fits all ten. The three-point fit this replaces read the shape right in the middle and was wrong at both ends by three rate steps, which is an octave and a half of decay time.
+
+So the engine carries the table and interpolates between its samples. Four key codes is three semitones, so the interpolation is a guess over a small gap, and the ends are measured rather than extrapolated. What would settle the rest is register 0xC0 driven away from the note's own pitch, which is `FS1R.unlock`'s experiment 8.
+
+## The attack aims at the top of the scale, not at its own target
+
+Every attack in `02_envelope_2` runs from silence to full, and with only those the shape is ambiguous: an exponential aimed a little past the target and one aimed at the top of the scale and clamped at the target are the same curve when the target *is* the top. `attackto-70` separates them. Its target is 21 dB down, and the unit climbs to it at the same speed a climb to full does, reaching it in about 75 ms at chip rate 32 where an approach aimed at the target needs 190 ms and the engine was taking 400. Six decibels of error at the moment the note speaks, on every operator whose L1 is not 99, which is most of them.
+
+The DX7's EGS is the same shape and says so plainly: its rising increment is `((17 << 24) - level) >> 24`, the distance from the top of the scale, and the segment simply stops when the level reaches the target. The engine now does `cur += (EG_OVERSHOOT - cur) * rate` and clamps.
+
+Refitting the three attack constants over ten segments that reach three different targets from three different levels, 780 envelope points, gives `EG_ATTACK_K` 0.0648 against the 1/16 it is pinned at, `EG_OVERSHOOT` 3.94 and `EG_ATTACK_FLOOR` −54.48, at 0.85 dB rms. The constants barely moved; the aiming is the whole change.
+
+`attackfrom-50` and `attackfrom-20` settle the floor's nature at the same time. The first starts its rise at L4 = 36 dB down and stays there, the second starts at 58.5 dB down and the unit is already at 52.7 one millisecond in. So the floor is a level the chip jumps to from anywhere below it, not merely where a rise from silence happens to begin, which is what the engine already assumed and now has a measurement for.
+
+## The pan was in front of everything
+
+`10_envelope2` moves the pan hard across the keyboard, and rgwan asked whether that is the unit misbehaving. It is not: the unit is doing exactly what the patch asks. Every file in `captures/requests/` is built on `fs1r_patch.init_performance`, which leaves the performance part's PAN SCALING byte at 0. The Data List gives that parameter as 0 to 100, so 0 is not neutral, it is the extreme, and the FS1R pans by key as hard as it can.
+
+That turned out to be worth having, because it measures the law. The performance's part pan is centre, so the index starts at 64, and inverting the recording's channel balance through the firmware's own pan tables gives the index at each note:
+
+| note | 12 | 24 | 36 | 48 | 60 | 72 | 84 | 96 | 108 | 120 |
+|---|---|---|---|---|---|---|---|---|---|---|
+| index | 127 | 112 | 96 | 80 | 64 | 48 | 32 | 16 | 0 | 0 |
+
+which is `64 − 4 * (note − 60) / 3`, hard right at note 12 and hard left from note 108 up, matching every note to within half a decibel and reproducing both ends of the table exactly. That is 64 index steps per 48 semitones at byte 0. The engine had 50, so every pan-scaled patch was 28 % shy of the unit.
+
+Two things came out of the correction that are bigger than the pan itself.
+
+**The filter loop's insertion loss was 4.24 dB wrong, and two errors had been cancelling.** Both `06_filter` files play at note 24, where the pan sits at index 112, so those segments are panned hard right. `tools/analyze_capture.py` measured the left channel alone, and the engine's own pan law happened to be shy by almost exactly the amount that hid the difference. With the analyzer reading the pan-independent level and the engine's pan law measured, the hardware reads 4.236 dB above the engine on every filter type, every resonance from 0 to 100, every input gain and every cutoff from 48 up. `cal::FLT_LOSS` goes from 0.3190 to 0.5196, a 5.69 dB loop loss rather than 9.93, and the two filter files land at a median difference of 0.01 and 0.00 dB.
+
+**"Level varies with note" was never a level.** `docs/capture_0918.md` records `ratio-note24` through `ratio-note96` varying by 14.6 dB on the hardware and 9.1 dB in the engine and calls it incidental but unexplained. It is this pan, seen through one channel, and the gap between the two numbers is the 28 %. `tools/analyze_capture.py` now takes the pan out of every measure but the one that asks for it: the two channels carry the same signal at two gains under a constant-power law, so the pair's total power is the signal's wherever it sits in the image, and scaling the louder channel up to that leaves a real waveform at a level that does not move. A centred segment comes back exactly as its left channel did, so every constant measured before this existed still reads the same.
+
+The request files are left as they are. Regenerating them with the byte centred would invalidate the recordings that exist, the analyzer takes the pan out, and a sweep in every file is a free check on the pan law rather than a nuisance.
 
 ## Where it stands
 
-`tools/analyze_capture.py --compare` now reports envelope shape as well as level: the two curves aligned on their own onsets, and the rms dB between them. Over the hundred segments of `02_envelope_1` to `_3`:
+`tools/analyze_capture.py --compare` reports envelope shape as well as level: the two curves aligned on their own onsets, and the rms dB between them.
 
-| | before | after |
-|---|---|---|
-| envelope shape, mean rms | 5.45 dB | 0.58 dB |
-| envelope shape, median rms | 0.58 dB | 0.38 dB |
-| `02_envelope_3` level, median | 7.31 dB | 0.53 dB |
-| demo envelope correlation, median | 0.955 | 0.971 |
-| demo envelope correlation, worst | 0.750 | 0.879 |
-| demo band tilt, mean | 3.10 dB | 2.89 dB |
+| | before the EG work | after `02_envelope` | after `10_envelope2` |
+|---|---|---|---|
+| `02_envelope_1..3` shape, mean rms | 5.45 dB | 0.58 dB | 0.57 dB |
+| `10_envelope2` level, median | | 0.82 dB | 0.47 dB |
+| `10_envelope2` shape, mean rms | | 3.37 dB | 0.81 dB |
+| `06_filter_1` level, median | 0.23 dB | 0.23 dB | 0.01 dB |
+| `06_filter_2` level, median | 0.23 dB | 0.23 dB | 0.00 dB |
+| demo envelope correlation, median | 0.955 | 0.971 | 0.974 |
+| demo band tilt, mean | 3.10 dB | 2.89 dB | 2.76 dB |
 
-Nothing else in the capture set moved. `04_formant`, `05_unvoiced` and `09_effects` are unchanged to the decimal; `06_filter_2`'s filter EG segments move by about a decibel on curves that are already 13 dB out, which is the open filter EG item and not this one.
+`04_formant`, `05_unvoiced` and `09_effects` did not move; they are the bandwidth level laws and the zeroed effect blocks, both open elsewhere.
 
-Two notes on reading the demo numbers. The band tilt is each song's per-octave error with its own median band removed, because `captures/FS1R DEMO.flac` is one take through whatever gain rgwan's converter sat at, where the capture set was measured off the digital tap; the recording's absolute level is not the engine's to match, and `tools/demo_probe.py score` reports both. And `captures/demo/render/` had been left over from a build that predated `cal::OUT_GAIN`, which is why the old renders appeared to sit 10 dB closer than they were.
+Two notes on reading the demo numbers. The band tilt is each song's per-octave error with its own median band removed, because `captures/FS1R DEMO.flac` is one take through whatever gain rgwan's converter sat at, where the capture set was measured off the digital tap; the recording's absolute level is not the engine's to match, and `tools/demo_probe.py score` reports both.
 
 ## What is still open
 
-All of it goes through `captures/requests/10_envelope2.mid`, 28 segments and 2.8 minutes, which needs a recording the same way the first three did.
-
-* **The key code law away from three notes.** `tkey7` and `tkey3` at ten notes from 12 to 120. This is the one that matters: it is the only piece of the EG that varies across the keyboard and it is fitted through three points.
-* **The hold's fraction against its fixed lag.** `hold-10`, `hold-30`, `hold-50`, `hold-70`.
-* **The overshoot against the attack floor.** `attackto-70` and `attackto-40` rise to a target part way up, where the two stop trading off against each other.
-* **Whether the attack floor is a jump or a starting point.** `attackfrom-50` starts above it and `attackfrom-20` below it. If the chip jumps from any level below the floor, the second will start where the first does.
-
-Two things the audio set cannot answer, and which `FS1R.unlock`'s register harness can. Whether the rate scaling reaches the hold register, and whether the key code the chip scales by is register 0xC0 itself or something derived from the pitch word behind it. Both need register 0xC0 driven directly while a note sounds, which is `sweep.py`'s shape exactly; `FS1R.unlock/docs/unknowns.md` has the experiment.
+* **The key code law between its samples.** Ten key codes four apart, interpolated. Register 0xC0 driven directly gives all 128, and says whether the chip latches a rate at its segment's start or re-reads the key code every frame. `FS1R.unlock/docs/unknowns.md` experiment 8, `sweep.py keycode`.
+* **Whether the rate scaling reaches the hold register.** Free with the same run, since its patch carries a hold.
+* **The hold's fixed lag.** 8.1 ms with six milliseconds of scatter that is the 192.3 Hz tick. A register sweep does not fix that either; only a trace of the chip's own writes would, which is the SH-2 core item.
+* **The 0.55 % the decay rates sit under `rate_secs`** over rates 16 to 33, unexplained and too small to model.

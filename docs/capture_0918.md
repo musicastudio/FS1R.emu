@@ -20,7 +20,7 @@ The clip is not a limiter and it is not the DAC. `ingain-12` in `06_filter_2` re
 
 The measured plateau carries about 4.5% of overshoot, which is a downstream filter ringing on the clip transitions and not part of the clip.
 
-**The filter loop costs a flat 9.93 dB.** Every segment in `06_filter_*` whose tone sits in the passband reads that much below the engine once the output gain is taken out, constant to 0.06 dB across filter types 0, 1, 2 and 5, cutoff bytes 48 to 112, and every resonance from 0 to 100. That is `cal::FLT_LOSS` 0.3190 on the filter's input gain.
+**The filter loop costs a flat 9.93 dB.** *(Corrected 2026-09-19 to 5.69 dB: both filter files play at note 24, where the request set's pan scaling puts the segment hard right, and reading the left channel alone against an engine whose own pan law was shy hid 4.24 dB of it. `docs/aeg.md`, "The pan was in front of everything".)* Every segment in `06_filter_*` whose tone sits in the passband reads that much below the engine once the output gain is taken out, constant to 0.06 dB across filter types 0, 1, 2 and 5, cutoff bytes 48 to 112, and every resonance from 0 to 100. That is `cal::FLT_LOSS` 0.3190 on the filter's input gain.
 
 **`LEVEL_DB` is 0.3795, not 0.375.** Three routes over the level ladder in `01_reference` give 0.3792, 0.3797 and 0.3800. The DX7 lineage's 0.375 is 1% shy.
 
@@ -58,7 +58,7 @@ These are all clean, repeatable measurements that need more than a constant chan
 
 **Operator level below sysex 27 leaves the straight line**, and at `level-7` the hardware still sounds at −105 dB where the engine is silent. The engine's cutoff to silence is more aggressive than the chip's.
 
-**Level varies with note in `ratio-note24` through `ratio-note96` on both sides, by 14.6 dB on the hardware and 9.1 dB in the engine.** The segment exists to tie the note table to Hz and does that cleanly, so this is incidental, but something in the amplitude EG or its key scaling is scaled differently. `02_envelope_3`'s `tscale` segments are the ones that settle it and they disagree badly.
+**Level varies with note in `ratio-note24` through `ratio-note96` on both sides, by 14.6 dB on the hardware and 9.1 dB in the engine.** *(Settled 2026-09-19: it is not a level at all. Every request file leaves the performance's pan scaling at its extreme, so a segment away from C3 is panned, and this is that pan read through one channel. The 5.5 dB between the two numbers is the engine's pan law being 28 % shy. `docs/aeg.md`.)* The segment exists to tie the note table to Hz and does that cleanly, so this is incidental, but something in the amplitude EG or its key scaling is scaled differently. `02_envelope_3`'s `tscale` segments are the ones that settle it and they disagree badly.
 
 ## The effects files
 

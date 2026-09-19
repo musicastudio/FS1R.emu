@@ -59,21 +59,31 @@ static const double EG_ATTACK_K  = 0.0625;  // rising EG time constant as a frac
                                             // the DX7 EGS does, its attack increment being (17 - level/2^24) times
                                             // the decay's, so the constant and the lineage agree. The 0.25 this
                                             // replaces left a rate-24 attack 45 dB below the unit's after 400 ms.
-static const double EG_OVERSHOOT = 3.8;     // dB the rising EG aims past its target. MEASURED with EG_ATTACK_K
-                                            // fixed at 1/16 and the floor below free: 3.78 dB, 0.70 dB rms over
-                                            // 381 envelope points. The DX7's own 17/16 of full scale is 6 dB and
-                                            // fits 1.5 dB rms, so the chip's approach flattens more than the EGS.
-static const double EG_ATTACK_FLOOR = -53.2;// dB the EG jumps to when a segment starts rising from below it,
-                                            // MEASURED as the level the unit is already at one millisecond into
-                                            // an attack from silence. The DX7 does the same thing with a jump
-                                            // target of 1716 of 4096, which is 55.8 dB below full.
+static const double EG_OVERSHOOT = 3.9;     // dB past the TOP OF THE SCALE that a rising EG aims at, not past
+                                            // its own target: 10_envelope2's attackto-70 climbs to a target 21 dB
+                                            // down at the same speed a climb to full does, which only an approach
+                                            // aimed at the top and clamped at the target can do. The DX7's EGS is
+                                            // the same shape, its rising increment being (17 - level/2^24) where
+                                            // 16 is full scale. MEASURED 3.94 with the floor below free and
+                                            // EG_ATTACK_K pinned at 1/16, 0.85 dB rms over 780 envelope points of
+                                            // ten segments that reach three different targets from three levels.
+static const double EG_ATTACK_FLOOR = -54.5;// dB the EG jumps to when a segment starts rising from below it.
+                                            // MEASURED: attackfrom-20 starts its rise at L4 = 58.5 dB down and the
+                                            // unit is at 52.7 dB one millisecond in, where attackfrom-50 starts at
+                                            // 36 dB down and stays there, so the floor is a jump the chip takes
+                                            // from anywhere below it and not merely where a rise from silence
+                                            // begins. The DX7 does the same with a jump target of 1716 of 4096,
+                                            // which is 55.8 dB below full.
 static const double EG_HOLD_FRAC = 0.5;     // the hold segment as a fraction of a full traverse at the hold rate.
-static const double EG_HOLD_LAG  = 0.0114;  // ... plus this, fixed. MEASURED off hold-20/40/60, whose onsets sit
-                                            // 25.5, 150.2 and 1363.3 ms after a hold-0 that has none. Fitting both
-                                            // terms on relative error lands on 0.5007 and 8.5 frames, so half a
-                                            // traverse plus 11.4 ms, all three within 1.4 %. Any pure fraction of
-                                            // rate_secs misses hold-20 by 80 %. Hold register 0x3F means no hold
-                                            // at all, which is why the firmware leaves that one value alone.
+static const double EG_HOLD_LAG  = 0.0081;  // ... plus this, fixed. MEASURED over seven hold settings from 19 ms
+                                            // to 3.65 s: a free fit of both terms over the five slowest lands on
+                                            // 0.4998 of a traverse, so the fraction is exactly a half, and the
+                                            // lag is then the mean of what the seven leave over. It scatters by
+                                            // about six milliseconds either way, which is two note-ons quantised
+                                            // to the 192.3 Hz tick and is as well as a recording can place it.
+                                            // Any pure fraction of rate_secs misses the fastest holds by 80 %.
+                                            // Hold register 0x3F means no hold at all, which is why the firmware
+                                            // leaves that one value alone.
 static const double FEG_SEMIS    = 48.0;    // frequency EG range at the full register swing of 128 (four octaves).
                                             // The sysex byte reaches the register through FEGLVL, which is measured
 static const double FEG_TIME_K   = 0.3;     // frequency EG time as a fraction of rate_secs
@@ -116,8 +126,15 @@ static const double OUT_GAIN     = 0.14992; // fixed gain between the summed bus
 static const double CHAN_CLIP    = 1.1919;  // the channel accumulator saturates here, hard and memoryless,
                                             // before the filter loop. stack-4 and stack-8 are driven 4x and
                                             // 8x past one carrier and recover the same ceiling to five places.
-static const double FLT_LOSS     = 0.3190;  // flat 9.93 dB the VOP3-1 filter loop costs, constant to 0.06 dB
-                                            // across every type, cutoff and resonance the capture sweeps.
+static const double FLT_LOSS     = 0.5196;  // flat 5.69 dB the VOP3-1 filter loop costs, constant to 0.02 dB
+                                            // across every type, every resonance from 0 to 100, every input
+                                            // gain and every cutoff from 48 up. The 0.3190 this replaces read
+                                            // 9.93 dB off the same recording on 2026-09-18, because both
+                                            // filter files play at note 24 and every request file leaves the
+                                            // performance's pan scaling at its extreme, so the segments are
+                                            // panned hard and were being measured on the left channel alone
+                                            // while the engine's own pan law was 28 % shy. Two errors that
+                                            // cancelled; docs/aeg.md, "The pan was in front of everything".
 }
 using cal::FM_INDEX;
 using cal::LEVEL_DB;
@@ -128,14 +145,33 @@ static inline int eb86(int v) { return std::min(255, (((v & 0xFF) << 1) * 0xA5) 
 static inline int eb70(int v) { return (((v & 0xFF) << 1) * 0xA5) >> 8; }                   // 0..99 -> 0..127 (bandwidth)
 static inline int egrate(int t) { return ((99 - clampi(t, 0, 99)) * 0xA4) >> 8; }          // EG time -> chip rate 0..63
 // The chip's own rate scaling: register 0x50 is the operator's time scaling 0..7 and register 0xC0 the key code,
-// and it adds (tscale * keyoff) / 8 to every rate, truncating toward zero. MEASURED off the 24 tscale segments of
-// 02_envelope_3, which recover the decay rate exactly: keyoff is -10 at note 36 (key code 85), -2 at note 60 (93)
-// and +4 at note 84 (101). Below middle C that is one rate step per key code step; above it the three notes say
-// three quarters of one, and three notes cannot tell a kink from a dead zone. INFERRED between and beyond them.
-static inline int eg_keyoff(int c0) { return c0 <= 93 ? c0 - 95 : ((c0 - 93) * 3) / 4 - 2; }
+// and it adds (tscale * keyoff) / 8 to every rate, truncating toward zero. The 24 tscale segments of 02_envelope_3
+// and the 20 tkey segments of 10_envelope2 recover the rate exactly off the (4 + (q & 3)) << (q >> 2) ladder, and
+// between them they pin keyoff at ten key codes, four apart, which is one note per octave from 12 to 120. It
+// saturates at both ends: notes 12 and 24 both read -13, and note 120 reads +13 where 108 reads +12. Nothing
+// linear fits the ten, a search over every trunc((a * c0 + b) / c) with a and c under 32 comes back empty, so
+// this is a table on the chip. Four key codes is three semitones, and the engine interpolates between the
+// samples it has. Sweeping 0xC0 as a register is what closes the gap: FS1R.unlock/docs/unknowns.md experiment 8.
+static const int EG_KEYOFF[10] = {-13, -13, -10, -5, -2, 2, 4, 8, 12, 13};   // key codes 77, 81, 85 ... 113
+static inline int eg_keyoff(int c0) {
+    int i = (c0 - 77) >> 2;
+    if (i < 0) return EG_KEYOFF[0];
+    if (i >= 9) return EG_KEYOFF[9];
+    int a = EG_KEYOFF[i], b = EG_KEYOFF[i + 1];
+    return a + ((b - a) * ((c0 - 77) & 3) + 2) / 4;
+}
 static inline int eg_ratescale(int tscale, int c0) {
     int x = (tscale & 7) * eg_keyoff(c0);
     return x < 0 ? -((-x) >> 3) : x >> 3;                                                 // truncates toward zero
+}
+// Pan key scaling, MEASURED off 10_envelope2 on 2026-09-19. Every request file leaves the performance's
+// PAN SCALING byte at 0, the extreme, so the recording sweeps the pan right across the keyboard and reads
+// the law out: the index is 64 - 4 * (note - 60) / 3, hard right at note 12 and hard left from note 108
+// up, which matches all ten notes and both ends of the table. That is 64 index steps per 48 semitones at
+// byte 0, where the engine had 50, so every pan-scaled patch was 28 % shy of the unit. In the firmware's
+// own 0..255 pan domain (docs/ymp706_registers.md, Pan) a byte of 0 is the whole 128 of one side.
+static inline int pan_index(int base, int scaling, int note) {
+    return base + ((clampi(scaling, 0, 100) - 50) * 64 / 50) * (note - 60) / 48;
 }
 static inline int keygroup(int n) { return std::max(0, (KEYFACT[clampi(n, 0, 127)] >> 2) - 3); }
 // FUN_00010d7a: key tracking of fixed/formant frequencies, notescale 0..99, pm = pitch word - C3
@@ -511,7 +547,7 @@ struct EG {                      // amplitude EG on the chip: hold, 4 segments. 
     inline double tick() {
         if (stage == 0) { if (--holdLeft <= 0) next(1); return cur; }
         if (stage > 4) return cur;
-        if (rising) { cur += (target + cal::EG_OVERSHOOT - cur) * rate; if (cur >= target) { cur = target; if (stage < 3) next(stage + 1); else if (stage == 4) stage = 5; } }
+        if (rising) { cur += (cal::EG_OVERSHOOT - cur) * rate; if (cur >= target) { cur = target; if (stage < 3) next(stage + 1); else if (stage == 4) stage = 5; } }
         else { cur -= rate; if (cur <= target) { cur = target; if (stage < 3) next(stage + 1); else if (stage == 4) stage = 5; } }
         return cur;
     }
@@ -1124,7 +1160,7 @@ struct Synth {
     // domain, which would halve them, is the next thing to read off a running unit.
     void refresh_pan(Chan& C, const Part& pt) {
         int base = pt.p[0x0E] ? ctrl_part(C.part, 18, pt.p[0x0E]) : C.panBase;             // Panpot edits the part byte
-        int idx = base + ((clampi(pt.p[0x28], 0, 100) - 50) * (C.noteP - 60)) / 48;        // pan scaling: -50..+50, pan by key around C3
+        int idx = pan_index(base, pt.p[0x28], C.noteP);
         idx += (C.lfoVal * clampi(pt.p[0x29], 0, 99) * (int)(C.lfoFade >> 8)) >> 16;       // pan LFO depth, faded in, LFO1
         if (perf.c[0x11]) idx += perf.c[0x11] - 64;                                    // performance pan
         idx = clampi(idx, 0, 127);
@@ -1721,6 +1757,24 @@ static int selftest(Synth& S) {
                                 {0, 0, 1, 1, 2, 2, 3, 3}};
         for (int n = 0; n < 3; n++)
             for (int t = 0; t < 8; t++) ck("EG rate scaling", eg_ratescale(t, kc[n]) == want[n][t]);
+        // and 10_envelope2's ten key codes, one note per octave from 12 to 120, at time scaling 7 and 3
+        const int kc2[10] = {77, 81, 85, 89, 93, 97, 101, 105, 109, 113};
+        const int w7[10] = {-11, -11, -8, -4, -1, 1, 3, 7, 10, 11};
+        const int w3[10] = {-4, -4, -3, -1, 0, 0, 1, 3, 4, 4};
+        for (int n = 0; n < 10; n++) {
+            ck("EG rate scaling, tscale 7", eg_ratescale(7, kc2[n]) == w7[n]);
+            ck("EG rate scaling, tscale 3", eg_ratescale(3, kc2[n]) == w3[n]);
+        }
+        ck("EG rate scaling saturates low", eg_ratescale(7, 60) == -11);
+        ck("EG rate scaling saturates high", eg_ratescale(7, 127) == 11);
+    }
+    // Pan key scaling at its extreme byte, the ten notes 10_envelope2 measured: hard right at 12, centre
+    // at 60, hard left from 108 up.
+    {
+        const int note[10] = {12, 24, 36, 48, 60, 72, 84, 96, 108, 120};
+        const int want[10] = {128, 112, 96, 80, 64, 48, 32, 16, 0, -16};
+        for (int i = 0; i < 10; i++) ck("pan key scaling", pan_index(64, 0, note[i]) == want[i]);
+        ck("pan key scaling centred", pan_index(64, 50, 12) == 64 && pan_index(64, 50, 120) == 64);
     }
     // A rise from silence starts at the attack floor and gets to its target, and the hold is half a
     // traverse plus the lag. Both are measured; an EG that crawls up from -200 dB is the old bug.
@@ -1731,6 +1785,14 @@ static int selftest(Synth& S) {
         ck("attack starts at the floor", fabs(e.cur - cal::EG_ATTACK_FLOOR) < 1e-9);
         for (int i = 0; i < (int)(rate_secs(32) * SR); i++) e.tick();
         ck("attack reaches its target", e.cur > -0.5);
+        // A rise to a target part way up takes the same route: the chip aims at the top of the scale and
+        // stops at the target, so it gets there in a fraction of the time an approach aimed at the target
+        // itself would need. Level 70 is 21 dB down; the unit is there inside 80 ms at rate 32.
+        int M[4] = {LEVTAB[70] >> 1, 0, 0, 63};
+        EG m; m.start(M, R, 0, 0);
+        int n = 0;
+        while (m.stage == 1 && n < (int)(0.5 * SR)) { m.tick(); n++; }
+        ck("a rise to a mid target aims at the top", n > (int)(0.04 * SR) && n < (int)(0.10 * SR));
         int H[4] = {63, 63, 63, 63};
         EG h; h.start(L, H, 40, 0);                             // hold 40 -> register 41
         double want = (rate_secs(41) * cal::EG_HOLD_FRAC + cal::EG_HOLD_LAG) * SR;
