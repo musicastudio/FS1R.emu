@@ -472,6 +472,52 @@ def rom_effect_blocks():
     return out
 
 
+# Factory defaults for the types no ROM performance uses, transcribed from the Effect Parameter List
+# (docs/FS1R_DataList_text.txt) into the engine's word order: reverb value = {"w": 8 words, "b": 8 trailing
+# bytes}; variation / insertion = 16 words. Words the Data List doesn't list for a type are 0.
+#   rev 11 Basement, 12 Canyon; var 15 Noise Gate, 22 Delay L,R, 24 CrossDelay, 25-28 Hall/Room/Stage/Plate;
+#   ins 18 Wah+DS+Dly, 19 Wah+OD+Dly, 23 Noise Gate, 27 Cmp+OD+Dly, 33 Delay LCR, 35 Echo, 36 CrossDelay,
+#   37 ER 1, 38 ER 2, 40 Revrs Gate (names per the Effect Type List; ins_to_common agrees).
+FX_DEFAULTS = {
+    ("rev", 11): {"w": [5, 6, 1, 0, 34, 67, 0, 97], "b": [15, 0, 32, 3, 74, 10, 36, 0]},
+    ("rev", 12): {"w": [59, 6, 31, 0, 45, 89, 166, 253], "b": [13, 0, 11, 4, 72, 4, 100, 0]},
+    ("var", 15): [0, 22, 82, 50, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    ("var", 22): [2500, 3750, 3752, 3750, 87, 3, 0, 0, 0, 0, 0, 0, 26, 64, 46, 64],
+    ("var", 24): [3650, 3650, 88, 1, 5, 0, 0, 0, 0, 0, 0, 0, 25, 64, 50, 62],
+    ("var", 25): [18, 10, 4, 13, 49, 0, 0, 0, 0, 0, 0, 2, 50, 8, 64, 0],
+    ("var", 26): [5, 10, 8, 4, 49, 0, 0, 0, 0, 0, 0, 2, 64, 8, 64, 0],
+    ("var", 27): [19, 10, 8, 7, 54, 0, 0, 0, 0, 0, 0, 2, 64, 6, 64, 0],
+    ("var", 28): [25, 10, 3, 8, 49, 0, 0, 0, 0, 0, 0, 2, 64, 5, 64, 0],
+    ("ins", 18): [1900, 84, 30, 60, 53, 68, 72, 0, 0, 127, 102, 20, 23, 13, 0, 0],
+    ("ins", 19): [1600, 84, 50, 16, 87, 64, 64, 0, 0, 127, 80, 35, 30, 25, 0, 0],
+    ("ins", 23): [0, 22, 82, 50, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    ("ins", 27): [1900, 74, 50, 18, 65, 68, 69, 0, 0, 127, 6, 3, 95, 6, 0, 0],
+    ("ins", 33): [3333, 1667, 5000, 5000, 74, 100, 3, 0, 0, 32, 0, 0, 26, 64, 46, 64],
+    ("ins", 35): [2200, 86, 2100, 85, 5, 2300, 2350, 62, 0, 32, 0, 0, 23, 58, 50, 63],
+    ("ins", 36): [3650, 3650, 88, 1, 5, 0, 0, 0, 0, 32, 0, 0, 25, 64, 50, 62],
+    ("ins", 37): [0, 40, 5, 3, 74, 0, 46, 0, 0, 29, 7, 1, 10, 0, 0, 0],
+    ("ins", 38): [2, 20, 8, 2, 67, 0, 55, 0, 0, 29, 5, 3, 10, 0, 0, 0],
+    ("ins", 40): [1, 25, 8, 1, 64, 0, 47, 0, 0, 127, 6, 3, 10, 0, 0, 0],
+}
+
+
+def data_list_block(slot, t):
+    """Encode FX_DEFAULTS[(slot, t)] into a 112-byte effect block; None if not covered."""
+    e = FX_DEFAULTS.get((slot, t))
+    if e is None:
+        return None
+    blk = bytearray(112)
+    base = {"rev": 0x00, "var": 0x18, "ins": 0x38}[slot]
+    w, b = (e["w"], e["b"]) if isinstance(e, dict) else (e, None)
+    for k, v in enumerate(w):
+        blk[base + 2 * k] = v >> 7
+        blk[base + 2 * k + 1] = v & 0x7F
+    if b:
+        for i, v in enumerate(b):
+            blk[0x10 + i] = v
+    return bytes(blk)
+
+
 def g_effects():
     """Impulse responses of the three effect blocks. The effects run on a DSP whose instruction set
     nobody has decoded, so these are for modelling by ear and by measurement, not for exactness. Lowest
@@ -481,6 +527,10 @@ def g_effects():
     def with_block(slot, t, **part):
         p = fp.init_performance("Effect Test ")
         fx = blocks.get((slot, t))
+        src = "a factory parameter set from the preset performances"
+        if fx is None:
+            fx = data_list_block(slot, t)
+            src = "the Data List default parameter set"
         known = fx is not None
         if known:
             p[80:192] = fx
@@ -493,20 +543,20 @@ def g_effects():
         fp.set_part(p, 0, **part)
         for i in (1, 2, 3):
             fp.set_part(p, i)
-        return p, known
+        return p, known, src
 
     for slot, count, ret, part, tail in (
             ("rev", 17, 0x5A, dict(dry=0, revsend=127), 5000),
             ("var", 29, 0x5D, dict(dry=0, varsend=127), 4000),
             ("ins", 41, None, dict(inssw=1), 4000)):
         for t in range(1, count):
-            p, known = with_block(slot, t, **part)
+            p, known, src = with_block(slot, t, **part)
             if ret is not None:
                 p[80 + ret] = 127                           # return level
             name = {"rev": "reverb", "var": "variation", "ins": "insertion"}[slot]
             yield Seg(f"{name}-{t}", f"{name} type {t} with "
-                      + ("a factory parameter set from the preset performances" if known else
-                         "zeroed parameters: no preset uses this type, so the unit's own defaults apply")
+                      + (src if known else
+                         "zeroed parameters: no preset or Data List entry covers this type")
                       + ", one click in",
                       [name], click(), perf=p, hold=200, tail=tail, measure="impulse")
 
