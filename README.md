@@ -24,6 +24,22 @@ https://github.com/user-attachments/assets/344fa64c-4c79-4513-9388-a0d28e15c197
 
 [Download](https://raw.githubusercontent.com/musicastudio/FS1R.emu/main/captures/fs1r_demo01_engine.mp4) if the player does not load.
 
+**FS1R demo song "Full Tines" from real hardware (courtesy of rgwan)**
+
+<!-- Inline players need a github.com/user-attachments/assets URL, which only the web editor mints:
+     drag captures/fs1r_demo02_hardware.mp4 into a comment box on GitHub and paste the URL it gives
+     back on the line below, the way the two Vokodrone clips above were done. -->
+
+[Download](https://raw.githubusercontent.com/musicastudio/FS1R.emu/main/captures/fs1r_demo02_hardware.mp4) if the player does not load.
+
+**FS1R demo song "Full Tines" on FS1R.emu v0.3.2**
+
+<!-- Same again for captures/fs1r_demo02_engine.mp4. -->
+
+[Download](https://raw.githubusercontent.com/musicastudio/FS1R.emu/main/captures/fs1r_demo02_engine.mp4) if the player does not load.
+
+Both Full Tines clips carry the same +10 dB, so the level between them is the unit's against ours: the engine is about 10 dB quieter on the demo, and its ending stops about four seconds before the hardware's does. Neither is fixed yet; the working is in `TODO.md` under Tier 4.
+
 ## Thanks
 
 This project would not exist without **[rgwan/fs1r_firmware_RE](https://github.com/rgwan/fs1r_firmware_RE)** and its author, Zhiyuan Wan. That project dumped the SH7044's 256 KB internal flash through a hooked UART, dumped the 2 MB external EPROM, dumped the PLG150-DX ROM, captured the board's UART traffic, and published a Ghidra project with the boot, loader, flash and LCD code already named. Every byte of firmware and every preset this emulator reads comes from those dumps. This project is a synth engine that runs the firmware's logic directly, but it stands entirely on that groundwork. That work is written up in the [yamahamusicians.com thread](https://yamahamusicians.com/forum/threads/im-trying-to-emulating-an-fs1r.23211/).
