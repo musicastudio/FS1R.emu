@@ -94,7 +94,25 @@ static const double FEG_SEMIS    = 48.0;    // frequency EG range at the full re
                                             // The sysex byte reaches the register through FEGLVL, which is measured
 static const double FEG_TIME_K   = 0.3;     // frequency EG time as a fraction of rate_secs
 static const double WIN_SKIRT    = 2.0;     // formant window is sin^(WIN_SKIRT * (skirt + 1))
-static const double FRMT_BW_DB   = 20.0;    // formant window length = 2 * 2^(-bw / FRMT_BW_DB)
+static const double FORM_LEVEL   = 0.520;   // what a grain train is worth on the all and odd forms against
+                                            // the same window read as a formant. MEASURED at one bandwidth,
+                                            // the only one the capture set has for these forms: the unit
+                                            // puts all1 and all2 5.67 dB under the engine's grain sum and
+                                            // odd1 and odd2 2.15 dB under, and the 3.5 dB between them is
+                                            // the doubled grain rate carrying its power, so the root of the
+                                            // rate is taken out and this is what is left. One point per
+                                            // form is not a law; a bandwidth sweep on the harmonic forms is
+                                            // what would replace it. docs/formant.md.
+static const double FRMT_BW_KNEE = 44.0;    // bandwidth does nothing at all below this. MEASURED: the first
+                                            // eleven bandwidths of 04_formant_1, bytes 0 to 40, give the
+                                            // same spectrum to a tenth of a decibel, and 44 is where the
+                                            // window starts to open. That is also why the 0918 capture
+                                            // found the formant's level flat to bandwidth 40.
+static const double FRMT_BW_DB   = 8.0;     // ... and above it the window halves every FRMT_BW_DB steps:
+                                            // window length = 2 * 2^(-max(0, bw - FRMT_BW_KNEE) / FRMT_BW_DB).
+                                            // MEASURED by rendering the 25-segment sweep over a grid of
+                                            // both: 11.86 dB of spectrum error at the 20 and no knee this
+                                            // replaces, 1.99 dB here. docs/formant.md.
 static const double FRMT_NORM    = 0.0;     // how a formant's level follows its window length: 0 leaves the
                                             // window's peak at 1, so a wide bandwidth is quiet; 1 holds the
                                             // spectral peak instead, which is what a FOF generator does
@@ -132,7 +150,7 @@ static const double OUT_GAIN     = 0.14992; // fixed gain between the summed bus
 static const double CHAN_CLIP    = 1.1919;  // the channel accumulator saturates here, hard and memoryless,
                                             // before the filter loop. stack-4 and stack-8 are driven 4x and
                                             // 8x past one carrier and recover the same ceiling to five places.
-static const double FLT_LOSS     = 0.5196;  // flat 5.69 dB the VOP3-1 filter loop costs, constant to 0.02 dB
+static const double FLT_LOSS     = 0.8681;  // flat 1.23 dB the VOP3-1 filter loop costs, constant to 0.02 dB
                                             // across every type, every resonance from 0 to 100, every input
                                             // gain and every cutoff from 48 up. The 0.3190 this replaces read
                                             // 9.93 dB off the same recording on 2026-09-18, because both
@@ -141,6 +159,11 @@ static const double FLT_LOSS     = 0.5196;  // flat 5.69 dB the VOP3-1 filter lo
                                             // panned hard and were being measured on the left channel alone
                                             // while the engine's own pan law was 28 % shy. Two errors that
                                             // cancelled; docs/aeg.md, "The pan was in front of everything".
+                                            // Re-derived again on 2026-09-19: both filter files drive the
+                                            // loop with an all1 operator, and the engine was giving that a
+                                            // whole harmonic series the unit does not produce, so the loss
+                                            // had been absorbing the spectral form's error too. 9.93, then
+                                            // 5.69, now 1.23 dB. docs/formant.md.
 }
 using cal::FM_INDEX;
 using cal::LEVEL_DB;
@@ -1382,21 +1405,37 @@ struct Synth {
     // ---------------------------------------------------------------- chip model (INFERRED beyond the register values)
     inline double op_sample(OpState& s, const OpV& v, double f0, double fop, int bw, double pm) {
         if (v.form == 0) { s.phase += fop / SR; if (s.phase >= 1) s.phase -= 1; return fsin(s.phase + pm); }
-        double fw, fc, wl; bool dc = false;
+        double fw, fc, wl;
         if (v.form == 7) { fw = f0; fc = fop; wl = s.wl7; }                                                          // formant: window at the fundamental (INFERRED bw curve)
+        // all1/all2/odd1/odd2 are a group that starts at the operator's own frequency and reaches up as
+        // the bandwidth opens, so they are the same windowed carrier the formant is, with the carrier at
+        // fop and the window length the bandwidth's. MEASURED: at bandwidth 0 the unit gives one partial
+        // on all1 and all2 and partials 1 and 3 on odd1 and odd2, where the fixed quarter-period window
+        // at DC this replaces gave a full harmonic series at every bandwidth. Retriggering at twice fop
+        // is what leaves the odd partials: a grain train at that spacing under a carrier at fop puts its
+        // lines at fop, 3 fop, 5 fop and nowhere else. res1 and res2 spend the byte on a
+        // resonance instead of a bandwidth, so they keep a window of their own.
         else if (v.form == 5 || v.form == 6) { fw = fop; fc = fop * (1 + bw * 31.0 / 99.0); wl = v.form == 5 ? 0.5 : 2.0; }
-        else { fw = (v.form >= 3 ? 2 * fop : fop); fc = 0; dc = true; wl = (v.form & 1) ? 0.25 : 1.0; }
+        else { fw = (v.form >= 3 ? 2 * fop : fop); fc = fop; wl = s.wl7; }
         wl = std::min(wl, 2.0);
         s.fphase += fw / SR;
-        if (s.fphase >= 1) { s.fphase -= 1; WinGen& g = s.g[s.nextGen]; g.on = true; g.w = 0; g.c = 0; s.nextGen ^= 1; s.halfCount++; }
+        if (s.fphase >= 1) {
+            s.fphase -= 1; WinGen& g = s.g[s.nextGen]; g.on = true; g.w = 0;
+            // The formant restarts its carrier every grain, which is what holds its peak still while the
+            // fundamental moves. The odd forms retrigger twice a period, so restarting there would put
+            // half a cycle of alternation into the grain train and land the group on the even partials;
+            // half a cycle back is the same carrier running on.
+            g.c = (v.form == 3 || v.form == 4) && (s.halfCount & 1) ? 0.5 : 0.0;
+            s.nextGen ^= 1; s.halfCount++;
+        }
         double winc = fw / (wl * SR), y = 0;
         for (int k = 0; k < 2; k++) {
             WinGen& g = s.g[k]; if (!g.on) continue;
             g.w += winc; if (g.w >= 1) { g.on = false; continue; }
-            if (dc) { double x = g.w + pm * 0.25; x -= floor(x); int sign = (v.form >= 3 && ((s.halfCount - k) & 1)) ? -1 : 1; y += fwin(v.skirt, x) * sign * 2.0; }
-            else { y += fwin(v.skirt, g.w) * fsin(g.c + pm); g.c += fc / SR; }
+            y += fwin(v.skirt, g.w) * fsin(g.c + pm); g.c += fc / SR;
         }
-        if (v.form == 7 && cal::FRMT_NORM != 0.0) y *= pow(1.0 / wl, cal::FRMT_NORM);
+        if (v.form == 7) { if (cal::FRMT_NORM != 0.0) y *= pow(1.0 / wl, cal::FRMT_NORM); }
+        else if (v.form < 5) y *= cal::FORM_LEVEL * (v.form >= 3 ? 1.4142135624 : 1.0);
         return y;
     }
     // Every CTL samples: the per-operator frequency and level maths. Its inputs only move on the 192 Hz
@@ -1423,7 +1462,7 @@ struct Synth {
             if (v.form != 7) fop *= pow(2.0, ((v.detune - 15) * cal::DETUNE_CENTS) / 1200.0);       // INFERRED: detune 2 cents per step on non-formant ops
             s.fop = fop;
             s.bw = clampi(C.bwReg[o] + C.vcBw[o][0], 0, 99);
-            s.wl7 = 2.0 * pow(2.0, -s.bw / cal::FRMT_BW_DB);
+            s.wl7 = 2.0 * pow(2.0, -std::max(0.0, s.bw - cal::FRMT_BW_KNEE) / cal::FRMT_BW_DB);
             // unvoiced (noise formant) operator
             s.uatt = C.regULevel[o] * LEVEL_DB + C.regAM * LEVEL_DB * u.ams / 7.0;
             double nf;
@@ -1773,6 +1812,14 @@ static int selftest(Synth& S) {
         }
         ck("EG rate scaling saturates low", eg_ratescale(7, 60) == -11);
         ck("EG rate scaling saturates high", eg_ratescale(7, 127) == 11);
+    }
+    // The formant window against the bandwidth byte, 04_formant_1's own staircase: flat to 40, opening
+    // from 44, halving every eight steps after that.
+    {
+        auto wl = [](double bw) { return 2.0 * pow(2.0, -std::max(0.0, bw - cal::FRMT_BW_KNEE) / cal::FRMT_BW_DB); };
+        for (int b = 0; b <= 40; b += 4) ck("formant window flat below the knee", fabs(wl(b) - 2.0) < 1e-12);
+        ck("formant window halves every eight", fabs(wl(52) / wl(60) - 2.0) < 1e-9);
+        ck("formant window at the top", fabs(wl(96) - 2.0 * pow(2.0, -6.5)) < 1e-9);
     }
     // Pan key scaling at its extreme byte, the ten notes 10_envelope2 measured: hard right at 12, centre
     // at 60, hard left from 108 up.
