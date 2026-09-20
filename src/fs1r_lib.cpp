@@ -56,22 +56,6 @@ static const double LEVEL_DB     = 0.376287;// dB per step of the 8-bit level re
                                             // below -68 dB (see fs1r_capture_session2_results.md) and read high.
 static const double EG_LEVEL_DB  = 1.5;     // dB per step of the 6-bit EG level registers (LEVTAB >> 1)
 static const double CARRIER_DB   = 1.5;     // dB per step of the carrier level correction (voice 0x2D-0x34)
-// Detune in cents for the raw 0..30 byte, 15 = none, on non-formant operators. MEASURED off the eleven
-// detune segments of 07_modulation_2: the hardware is a curve, about 1.21 cents per step near zero
-// rising to 2.7 at the ends, and it is not quite symmetric, +6 and +15 sitting short of their negatives
-// by 0.6 and 0.2 cents in a reading that holds to a millihertz for two seconds. The 2.0 per step this
-// replaces was inferred from the DX7 and detuned every patch that uses the control 65% too far, which
-// is heard as a beat between the operators at nearly twice the rate the unit has. The capture stepped
-// by three, so the steps between two measured points are straight-line fills, and
-// docs/hardware_capture_request.md asks for the ones that are missing.
-static const double DETUNE_CENTS[31] = {
-     -25.621,  -22.964,  -20.307,  -17.650,  -15.615,  -13.579,
-     -11.544,  -10.123,   -8.703,   -7.282,   -6.067,   -4.852,
-      -3.637,   -2.425,   -1.212,    0.000,    1.210,    2.419,
-       3.629,    4.635,    5.642,    6.648,    8.254,    9.861,
-      11.467,   13.469,   15.470,   17.472,   20.263,   23.053,
-      25.844,
-};
 static const double FEEDBACK     = 0.5;     // feedback gain = FEEDBACK * 2^(fb - 7)
 static const double EG_ATTACK_K  = 0.0625;  // rising EG time constant as a fraction of rate_secs. MEASURED:
                                             // the eleven attack-rate segments of 02_envelope_2 fit an
@@ -669,6 +653,7 @@ struct Chan {
     int pitchNote = 0;         // NOTETAB + detune + tune (DAT_01028a84)
     int keyfact = 0;           // KEYFACT >> 2
     int levelOff[8], ulevelOff[8], freqWord[8], ufreqWord[8], frmtWord[8], bwReg[8], ubwReg[8];
+    int detW[8] = {};                // detune, key scaled, in pitch word units (register 0x80)
     int egbias[8], uegbias[8]; // image 0x1C0/0x1C8
     int fbW[8] = {}, ufbW[8] = {};   // frequency bias words, DAT_010282bc / DAT_010283bc
     int egL[8][4], egR[8][4], egHold[8], uegL[8][4], uegR[8][4], uegHold[8];
@@ -984,11 +969,16 @@ struct Synth {
             if (v.form == 7 || v.fixed) C.freqWord[o] = 8 * (v.coarse * 128 + v.fine) + 0x28ED + keytrack(v.notescale, pm) + fvs_term(v.fmsb, vel);
             else C.freqWord[o] = 0x1243 + COARSE[v.coarse] + FINE[std::min(99, v.fine)];
             C.ufreqWord[o] = std::min(0x7F00, ((u.coarse & 0x1F) * 256 + u.fine * 2) * 4 + 0x28ED + keytrack(u.notescale, pm) + fvs_term(u.fmsb, vel));
-            // formant transpose word (register 0x230): 0x1243 + TRANS + note dependent detune for frmt ops, else the raw byte 6
-            if (v.form == 7) {
-                int d = v.detune; int dd = d < 15 ? (~d) : d - 15; int idx = (dd & 0x1F) * 32 + band; int det = FRMDET[idx & 0x1FF]; if (idx & 0x200) det = -det;
-                C.frmtWord[o] = 0x1243 + TRANS[clampi(v.transpose + 24, 0, 48)] + det;
-            } else C.frmtWord[o] = v.bw;
+            // Detune, in pitch word units, from the ROM's own key scaled table. MEASURED: the chip does
+            // the same thing to a ratio operator's register 0x80 that the CPU does to a formant
+            // operator's transpose word, so both read FRMDET and the amount shrinks as the note rises.
+            {
+                int d = v.detune; int dd = d < 15 ? (~d) : d - 15; int idx = (dd & 0x1F) * 32 + band;
+                C.detW[o] = (idx & 0x200) ? -FRMDET[idx & 0x1FF] : FRMDET[idx & 0x1FF];
+            }
+            // formant transpose word (register 0x230): 0x1243 + TRANS + that detune for frmt ops, else the raw byte 6
+            if (v.form == 7) C.frmtWord[o] = 0x1243 + TRANS[clampi(v.transpose + 24, 0, 48)] + C.detW[o];
+            else C.frmtWord[o] = v.bw;
             // EG registers: levels LEVTAB >> 1, rates ((99-T)*0xA4)>>8, part EG offsets on attack/decay/release (assumed T1/T2/T4)
             // FUN_00019414 walks the part's EG bytes 0x1A, 0x1B, 0x1B, 0x1C against voice times T1-T4,
             // so the decay offset reaches both T2 and T3, not T2 alone.
@@ -1530,12 +1520,14 @@ struct Synth {
             s.att = C.regLevel[o] * LEVEL_DB + C.regAM * LEVEL_DB * v.ams / 7.0;   // INFERRED: ams scales the channel AM attenuation linearly
             if (alg[2 * o + 1] & 1) s.att += cal::CARRIER_DB * V.corr[o];         // carrier level correction (bits in the 0x200 word), 1.5 dB steps INFERRED
             int pmw = (int)(C.regPM * cal::PMS_FRAC[v.pms]) + C.vcFreq[o][0];
+            // The detune word goes into the frequency word rather than onto the result: it is a pitch
+            // word offset on the chip, and the formant branch already carries it inside frmtWord.
+            int det = v.form == 7 ? 0 : C.detW[o];
             double fop;
-            if (fs && C.fseqOp[o]) fop = word_hz(C.fqWord[o] + pmw);
+            if (fs && C.fseqOp[o]) fop = word_hz(C.fqWord[o] + pmw + det);
             else if (v.form == 7) fop = word_hz(C.freqWord[o] + C.fbW[o] + (C.frmtWord[o] - 0x1243) + pmw + (C.regFM * v.fms) / 7);
-            else if (!v.fixed) fop = word_hz(C.freqWord[o] + C.regPitch + pmw);
-            else fop = word_hz(C.freqWord[o] + C.fbW[o] + pmw + (C.regFM * v.fms) / 7);
-            if (v.form != 7) fop *= pow(2.0, cal::DETUNE_CENTS[clampi(v.detune, 0, 30)] / 1200.0);
+            else if (!v.fixed) fop = word_hz(C.freqWord[o] + C.regPitch + pmw + det);
+            else fop = word_hz(C.freqWord[o] + C.fbW[o] + pmw + det + (C.regFM * v.fms) / 7);
             s.fop = fop;
             s.bw = clampi(C.bwReg[o] + C.vcBw[o][0], 0, 99);                 // register 0x218, the formant's
             s.ratio = v.form == 7 ? 0 : clampi(C.frmtWord[o], 0, 99);         // register 0x230, every other form's
@@ -2064,13 +2056,48 @@ static int selftest(Synth& S) {
         init_default_voice(V);
     }
 
-    // 5b. the detune curve, against the segments it was measured from (07_modulation_2, note 60)
-    ck("detune centre is none", cal::DETUNE_CENTS[15] == 0.0);
-    ck("detune -15 is the measured -25.6 cents", fabs(cal::DETUNE_CENTS[0] + 25.621) < 0.001);
-    ck("detune +15 is the measured +25.8 cents", fabs(cal::DETUNE_CENTS[30] - 25.844) < 0.001);
-    ck("detune +3 is 1.21 cents a step, not 2", fabs(cal::DETUNE_CENTS[18] - 3.629) < 0.001);
-    for (int i = 1; i < 31; i++)
-        ck("detune rises with the byte", cal::DETUNE_CENTS[i] > cal::DETUNE_CENTS[i - 1]);
+    // 5b. the detune law: the ROM's own key scaled table, against what 11_detune measured. The band is
+    // (pitchNote >> 8) + 10 - 0x50, which advances four per octave, so note 60 is band 13.
+    {
+        auto detw = [](int byte, int band) {
+            int dd = byte < 15 ? (~byte) : byte - 15, idx = (dd & 0x1F) * 32 + band;
+            return (idx & 0x200) ? -(int)FRMDET[idx & 0x1FF] : (int)FRMDET[idx & 0x1FF];
+        };
+        ck("detune centre is none", detw(15, 13) == 0);
+        ck("detune +7 at note 60 is 7 word units", detw(22, 13) == 7);      // 8.20 cents, measured 7.85
+        ck("detune -7 at note 60 mirrors it", detw(8, 13) == -7);
+        ck("detune +15 at note 60 is 22 units", detw(30, 13) == 22);        // 25.78 cents, measured 25.84
+        ck("the same detune is smaller three octaves up", detw(30, 25) == 7 && detw(22, 25) == 2);
+        ck("and larger three octaves down", detw(30, 1) == 37 && detw(22, 1) == 13);
+
+        // And that it reaches the operator. Earlier sections leave note shifts scribbled, so the band
+        // is read back off the channel rather than assumed: what is under test here is that the word
+        // reaches the frequency at all, the table itself being checked above.
+        Synth& T = S;
+        Voice& V = T.perf.part[0].voice;
+        init_default_voice(V);
+        std::vector<float> a(64), b(64);
+        auto play = [&](int det) {
+            V.v[0].detune = det;
+            T.midi_in(0x90, 60, 100);
+            T.render(a.data(), b.data(), 64);
+            Chan* c = nullptr;
+            for (auto& ch : T.ch) if (ch.active && ch.note == 60) { c = &ch; break; }
+            double f = c ? c->op[0].fop : 0.0;
+            int bnd = c ? (c->pitchNote >> 8) + 10 : 0;
+            bnd = bnd < 0x50 ? 0 : bnd < 0x70 ? ((bnd ^ 0x10) & 0x1F) : 0x1F;
+            T.midi_in(0x80, 60, 0); T.midi_in(0xB0, 120, 0);
+            return std::make_pair(f, bnd);
+        };
+        auto centred = play(15), up = play(22), down = play(8);
+        ck("a centred operator has a frequency at all", centred.first > 1.0);
+        double want = detw(22, up.second) * 1200.0 / 1024.0;
+        ck("detune +7 moves the operator by its table entry",
+           fabs(1200.0 * log2(up.first / centred.first) - want) < 0.01 && want > 0.0);
+        ck("detune -7 moves it the other way by the same",
+           fabs(1200.0 * log2(down.first / centred.first) + want) < 0.01);
+        init_default_voice(V);
+    }
 
     // 6. notes still sound and stop
     S.midi_in(0x90, 60, 100);

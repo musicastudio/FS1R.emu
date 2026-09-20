@@ -26,7 +26,7 @@ is firmware behaviour.
 | 0x50 | channel, op | EG time scaling 0..7. The chip adds `trunc(tscale * keyoff / 8)` to every rate, where keyoff comes off register 0xC0; measured, `docs/aeg.md` |
 | 0x58 | channel, op | `fms << 3 | ams` (freq mod sense only when the op is fixed) |
 | 0x60-0x78 | channel, op | frequency EG init level, attack level (`FEGLVL[v]`, 0..255 with 128 the centre, image +0x98/+0xA0) and attack, decay time as rates (image +0xA8/+0xB0) |
-| 0x80 | channel, op | detune as sign-magnitude, low nibble the amount and 0xF0 the sign: `d - 15` for d >= 15, `~d` below (image +0xB8) |
+| 0x80 | channel, op | detune as sign-magnitude, low nibble the amount and 0xF0 the sign: `d - 15` for d >= 15, `~d` below (image +0xB8). MEASURED: the chip turns that into `FRMDET[amount][band]` pitch word units, the same key scaled table the CPU applies to a formant operator at 0x230, so the same detune is worth 30 cents at note 24 and 5 at note 96 (`docs/detune.md`) |
 | 0x90/0x98 | channel, op | 16-bit operator frequency word (see Frequency) |
 | 0xA0/0xA8 | channel | 16-bit LFO frequency modulation word (see LFO), 0xA8 written with the low byte |
 | 0xB0 | channel | LFO amplitude modulation attenuation 0..255 (see LFO); 0xB8 always 0 |
@@ -308,7 +308,7 @@ part, sysex layout. Part bank 2..12 = PrA..PrK (PrA and PrB are the native banks
 - Level register step 0.375 dB (LEVTAB is the DX7 0.75 dB curve and the chip gets 2 x LEVTAB), EG level step 1.5 dB.
 - EG timing: rate 0..63 timed like the DX7 EGS (Dexed increments), rate scaling `tscale * (keycode - 80) >> 3`.
 - Per-op pms as the DX7 pitch mod sensitivity curve, ams and fms as linear fractions of the channel words.
-- Feedback `0.5 * 2^(fb - 7)`, modulation index 1 cycle at full level. Detune is no longer here: `cal::DETUNE_CENTS` is the curve measured off `07_modulation_2`, 1.21 cents a step near zero and 2.7 at the ends, with the steps in between filled by straight lines until `11_detune` plays them.
+- Feedback `0.5 * 2^(fb - 7)`, modulation index 1 cycle at full level. Detune is no longer here at all: the chip reads the EPROM's own `FRMDET`, measured over six octaves, and `cal::DETUNE_CENTS` is gone.
 - Frequency EG range +-4 octaves, timed like the amplitude EG.
 - The formant window (bandwidth and skirt), the harmonic forms, the noise formant: patent model, see research.md.
 

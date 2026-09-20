@@ -32,6 +32,10 @@ Your 0918 recording of 02 settled the amplitude EG's rates and then showed that 
 
 Most of it is one question. The chip shortens every EG rate as the note rises, and how much it shortens by is fitted through three notes, which do not sit on a straight line. Twenty of the segments play the same decay at two time-scaling settings across ten notes from the bottom of the keyboard to the top, which settles it outright.
 
+### 2026-09-20: `11_detune`, recorded and answered the same day
+
+Both files came back, and so did a `sweep.py detune` session, and between them they closed detune outright. It is the EPROM's own key scaled table and the engine reads it now rather than modelling anything: `docs/detune.md`. Nothing further is needed on this one. What follows is the request as it went out.
+
 ### 2026-09-20: two more, `11_detune`
 
 Your 0918 recording settled detune as well, and the engine had it 65% too wide: the unit runs about 1.21 cents per step near zero rising to 2.7 at the ends, not the flat 2.0 the DX7 lineage suggested. That is fixed. It matters more than a pitch error sounds, because operators detuned against each other beat at the difference between them, so the wrong width is heard as a warble at the wrong rate. Demo song 2 "Full Tines" went out of here with a vibrato your unit does not have, which is how it was found.

@@ -94,10 +94,22 @@ def main():
     ap.add_argument("--out", default=str(HARDWARE), help="where the per-file WAVs go")
     ap.add_argument("--tol", type=float, default=0.25, help="how far a marker span may sit from the manifest, seconds")
     ap.add_argument("--dry-run", action="store_true", help="report the split without writing anything")
+    # Takes arrive a few files at a time now rather than as one pass over the whole set, and the
+    # assignment walks the manifest in order, so a two-file recording has to say which two or it looks
+    # for 01_reference_1 and gives up on the first span it cannot find.
+    ap.add_argument("--files", help="comma separated stems this recording holds, in playing order; "
+                                    "the whole manifest by default")
     args = ap.parse_args()
 
     manifest = json.loads((REQUESTS / "manifest.json").read_text())
     files = manifest["files"]
+    if args.files:
+        want = [w.strip() for w in args.files.split(",") if w.strip()]
+        by_stem = {Path(f["file"]).stem: f for f in files}
+        missing = [w for w in want if w not in by_stem]
+        if missing:
+            raise SystemExit("not in the manifest: " + ", ".join(missing))
+        files = [by_stem[w] for w in want]
     hz = manifest.get("marker_hz", 1002.3)
 
     x, sr = sf.read(args.recording, dtype="float64", always_2d=True)
