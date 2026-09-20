@@ -45,17 +45,28 @@ import fs1r_patch as fp
 import make_capture_set as m
 
 FSEQ = 33           # performance common 0x17, zero based: preset Fseq 34 "RndArp4"
+END = 127           # its last frame, and the loop end the performance has to carry itself
 HOLD = 4000         # two passes at 100 %, half a pass at 20 %
 NOTES = (36, 48, 60, 72, 84, 96)
 
 
 def perf(ratio=1000):
-    """Part 1 with the Fseq assigned to it, at `ratio` tenths of a percent of its own speed."""
+    """Part 1 with the Fseq assigned to it, at `ratio` tenths of a percent of its own speed.
+
+    The loop points are the performance's, and `init_performance` leaves them at zero. A zero length
+    loop is not a missing setting the player fills in: FUN_0001A894 wraps to the loop start and clears
+    the run flags where start and end are the same step, so the sequence advances once and holds frame
+    0 for the whole note. rgwan's first take of this file is that, four seconds of frame 0 per segment,
+    digital silence wherever the voiced track is attenuated there and steady noise from the unvoiced.
+    """
     p = fp.init_performance("Fseq Level")
     p[0x15] = 1                              # Fseq part = part 1
     p[0x16] = 1                              # preset bank
     p[0x17] = FSEQ
     p[0x18], p[0x19] = ratio >> 7, ratio & 0x7F
+    p[0x1C], p[0x1D] = 0, 0                  # loop start: the first frame
+    p[0x1E], p[0x1F] = END >> 7, END & 0x7F  # loop end: the last, so a held note plays the whole thing
+    p[0x20] = 0                              # one way, so it wraps rather than turning round
     return p
 
 

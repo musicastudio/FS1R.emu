@@ -295,7 +295,12 @@ frame instead of its own frequency and level. The fundamental follows `framePitc
 (tuning - 63)` unless the performance's formant pitch mode is 1; FUN_000127FC confirms that expression
 to the constant. Nothing shifts the frame's own formant frequencies, which is the point of the format:
 the formants stay where the sequence put them while the fundamental follows the key. Loop start/end and start offset come from the
-performance, the end of valid data from the Fseq header. Preset Fseqs live in the EPROM at 0x300A00 (1-10, 512 frames,
+performance, the end of valid data from the Fseq header. **From the performance and nowhere else**: FUN_0000FFFA reads
+0x1C-0x1F into DAT_010291CE and DAT_010291D0 at every trigger, and the Fseq header's own pair is the default the panel
+copies in when you select the Fseq, not a fallback the player reaches for. A performance whose two loop points are the
+same step does not play: FUN_0001A894 and FUN_0001A8E0 wrap to the far point and clear the run flags when the two are
+equal, so the sequence advances once and holds that frame for the rest of the note. Eight factory performances do this
+on purpose, "Zap !" at 127 and "Replicant" at 94, which is how an Fseq is made to hold one frame. Preset Fseqs live in the EPROM at 0x300A00 (1-10, 512 frames,
 25632 bytes each) and 0x283000 (11-90, 128 frames, 6432 bytes each), header 32 bytes then frames.
 
 ## Performances

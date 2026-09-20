@@ -1054,9 +1054,15 @@ struct Synth {
     void all_release() { for (auto& c : ch) if (c.active && (c.held || c.sustained)) { c.held = c.sustained = false; release(c); } for (auto& p : perf.part) p.nheld = 0; }
 
     // ---------------------------------------------------------------- Fseq (FUN_0000fffa / FUN_0001a59e)
+    // The loop points are the performance's own bytes and nothing else. FUN_0000fffa reads 0x1C-0x1F
+    // straight into DAT_010291CE and DAT_010291D0 at every trigger; the Fseq header's own pair is the
+    // default the panel copies into a performance when you select the Fseq, not a fallback the player
+    // reaches for. This used to fall back when the two were equal, which turned a performance that the
+    // unit freezes on its first frame into one that plays. Eight factory performances set them equal on
+    // purpose, "Zap !" at 127 and "Replicant" at 94, and so did the first draft of 12_fseqlevel, which
+    // is how it was found: the unit recorded digital silence where the engine played.
     void fseq_loop(int& lo, int& hi, int& dir) const {     // loop points, and the direction they imply
         int ls = perf.c[0x1C] << 7 | perf.c[0x1D], le = perf.c[0x1E] << 7 | perf.c[0x1F];
-        if (ls == le) { ls = fseq.loopStart; le = fseq.loopEnd; }
         dir = le >= ls ? 1 : -1;
         lo = clampi(std::min(ls, le), 0, fseq.endStep); hi = clampi(std::max(ls, le), 0, fseq.endStep);
     }
@@ -1087,8 +1093,10 @@ struct Synth {
             if (fseqStep >= hi) { fseqStep = hi; fseqDir = -1; }
             else if (fseqStep <= lo) { fseqStep = lo; fseqDir = 1; }
         } else if (fseqHeld) {
-            if (fseqDir > 0 && fseqStep > hi) fseqStep = lo;
-            else if (fseqDir < 0 && fseqStep < lo) fseqStep = hi;
+            // FUN_0001A894 and FUN_0001A8E0 wrap to the far loop point and clear the run flags where the
+            // two points are the same step, so a zero length loop advances once and then holds that frame.
+            if (fseqDir > 0 && fseqStep > hi) { fseqStep = lo; if (lo == hi) fseqRun = false; }
+            else if (fseqDir < 0 && fseqStep < lo) { fseqStep = hi; if (lo == hi) fseqRun = false; }
         } else {
             if (fseqStep >= fseq.endStep) { fseqStep = fseq.endStep; fseqRun = false; }
             else if (fseqStep <= 0) { fseqStep = 0; fseqRun = false; }

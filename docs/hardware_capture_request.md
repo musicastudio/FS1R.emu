@@ -46,6 +46,10 @@ Two models fit. Either the operator carries the level it was fired with, so a wr
 
 Fourteen segments, 1.3 minutes, recorded exactly like the rest of the set. The whole file is one voice at a time with no effects and no filter, and it peaks around -21 dBFS because the Fseq's own levels are low; do not ride the gain, the analysis is frame-synchronous and reads the transitions off the waveform.
 
+**The first take was spoiled and the file is regenerated, so please record it once more.** You reported eleven of the fourteen segments silent and the other three a steady noise, and you were reading the unit correctly. The performance the file sent left the Fseq loop start and loop end both at frame 0, and a zero length loop does not play: FUN_0001A894 wraps to the loop start and clears the run flags when the two points are the same step, so the sequence advanced once and held frame 0 for the whole note. Frame 0 of "RndArp4" has its voiced track fully attenuated and its unvoiced track near full level, which is exactly the digital silence and the steady noise you heard. The file now sets the loop to the whole sequence.
+
+Your take earned its keep anyway. The engine played that same file, because it fell back to the Fseq header's own loop points whenever the performance's two were equal, and nothing in the firmware does that. Eight factory performances set them equal on purpose, "Zap !" at 127 and "Replicant" at 94, and the engine was looping all eight where the unit holds one frame. That is fixed, and the engine now renders your first take's silence.
+
 ### 2026-09-20: `11_detune`, recorded and answered the same day
 
 Both files came back, and so did a `sweep.py detune` session, and between them they closed detune outright. It is the EPROM's own key scaled table and the engine reads it now rather than modelling anything: `docs/detune.md`. Nothing further is needed on this one. What follows is the request as it went out.
