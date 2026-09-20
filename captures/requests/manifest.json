@@ -1,5 +1,5 @@
 {
- "generated": "2026-09-19",
+ "generated": "2026-09-20",
  "engine_rate_hz": 48000,
  "marker_hz": 1002.134,
  "note": "Times are seconds from the start of the MIDI file. Align a recording with the three marker bursts at each end, then read the segment times off this manifest.",
@@ -9006,7 +9006,7 @@
     },
     {
      "id": "reverb-11",
-     "what": "reverb type 11 with zeroed parameters: no preset uses this type, so the unit's own defaults apply, one click in",
+     "what": "reverb type 11 with the Data List default parameter set, one click in",
      "pins": [
       "reverb"
      ],
@@ -9023,7 +9023,7 @@
     },
     {
      "id": "reverb-12",
-     "what": "reverb type 12 with zeroed parameters: no preset uses this type, so the unit's own defaults apply, one click in",
+     "what": "reverb type 12 with the Data List default parameter set, one click in",
      "pins": [
       "reverb"
      ],
@@ -9322,7 +9322,7 @@
     171.9
    ],
    "duration_s": 173.02,
-   "sha1": "49c0663ec7c3089629af206a824dc51d3f71bc2b",
+   "sha1": "e3ef597fcbb96664c8bd93f961c779bec0c86335",
    "group": "effects",
    "group_number": 9,
    "why": "impulse responses of the three effect blocks (optional)",
@@ -9368,7 +9368,7 @@
     },
     {
      "id": "variation-15",
-     "what": "variation type 15 with zeroed parameters: no preset uses this type, so the unit's own defaults apply, one click in",
+     "what": "variation type 15 with the Data List default parameter set, one click in",
      "pins": [
       "variation"
      ],
@@ -9487,7 +9487,7 @@
     },
     {
      "id": "variation-22",
-     "what": "variation type 22 with zeroed parameters: no preset uses this type, so the unit's own defaults apply, one click in",
+     "what": "variation type 22 with the Data List default parameter set, one click in",
      "pins": [
       "variation"
      ],
@@ -9521,7 +9521,7 @@
     },
     {
      "id": "variation-24",
-     "what": "variation type 24 with zeroed parameters: no preset uses this type, so the unit's own defaults apply, one click in",
+     "what": "variation type 24 with the Data List default parameter set, one click in",
      "pins": [
       "variation"
      ],
@@ -9538,7 +9538,7 @@
     },
     {
      "id": "variation-25",
-     "what": "variation type 25 with zeroed parameters: no preset uses this type, so the unit's own defaults apply, one click in",
+     "what": "variation type 25 with the Data List default parameter set, one click in",
      "pins": [
       "variation"
      ],
@@ -9555,7 +9555,7 @@
     },
     {
      "id": "variation-26",
-     "what": "variation type 26 with zeroed parameters: no preset uses this type, so the unit's own defaults apply, one click in",
+     "what": "variation type 26 with the Data List default parameter set, one click in",
      "pins": [
       "variation"
      ],
@@ -9572,7 +9572,7 @@
     },
     {
      "id": "variation-27",
-     "what": "variation type 27 with zeroed parameters: no preset uses this type, so the unit's own defaults apply, one click in",
+     "what": "variation type 27 with the Data List default parameter set, one click in",
      "pins": [
       "variation"
      ],
@@ -9589,7 +9589,7 @@
     },
     {
      "id": "variation-28",
-     "what": "variation type 28 with zeroed parameters: no preset uses this type, so the unit's own defaults apply, one click in",
+     "what": "variation type 28 with the Data List default parameter set, one click in",
      "pins": [
       "variation"
      ],
@@ -9820,7 +9820,7 @@
     155.9
    ],
    "duration_s": 157.02,
-   "sha1": "9fb4adc719894f200a634a701101979deda3cc33",
+   "sha1": "2d84c2063e74bb0d2905d25884c0fddb2985ef7c",
    "group": "effects",
    "group_number": 9,
    "why": "impulse responses of the three effect blocks (optional)",
@@ -9917,7 +9917,7 @@
     },
     {
      "id": "insertion-18",
-     "what": "insertion type 18 with zeroed parameters: no preset uses this type, so the unit's own defaults apply, one click in",
+     "what": "insertion type 18 with the Data List default parameter set, one click in",
      "pins": [
       "insertion"
      ],
@@ -9934,7 +9934,7 @@
     },
     {
      "id": "insertion-19",
-     "what": "insertion type 19 with zeroed parameters: no preset uses this type, so the unit's own defaults apply, one click in",
+     "what": "insertion type 19 with the Data List default parameter set, one click in",
      "pins": [
       "insertion"
      ],
@@ -10002,7 +10002,7 @@
     },
     {
      "id": "insertion-23",
-     "what": "insertion type 23 with zeroed parameters: no preset uses this type, so the unit's own defaults apply, one click in",
+     "what": "insertion type 23 with the Data List default parameter set, one click in",
      "pins": [
       "insertion"
      ],
@@ -10070,7 +10070,7 @@
     },
     {
      "id": "insertion-27",
-     "what": "insertion type 27 with zeroed parameters: no preset uses this type, so the unit's own defaults apply, one click in",
+     "what": "insertion type 27 with the Data List default parameter set, one click in",
      "pins": [
       "insertion"
      ],
@@ -10172,7 +10172,7 @@
     },
     {
      "id": "insertion-33",
-     "what": "insertion type 33 with zeroed parameters: no preset uses this type, so the unit's own defaults apply, one click in",
+     "what": "insertion type 33 with the Data List default parameter set, one click in",
      "pins": [
       "insertion"
      ],
@@ -10206,7 +10206,7 @@
     },
     {
      "id": "insertion-35",
-     "what": "insertion type 35 with zeroed parameters: no preset uses this type, so the unit's own defaults apply, one click in",
+     "what": "insertion type 35 with the Data List default parameter set, one click in",
      "pins": [
       "insertion"
      ],
@@ -10223,7 +10223,7 @@
     },
     {
      "id": "insertion-36",
-     "what": "insertion type 36 with zeroed parameters: no preset uses this type, so the unit's own defaults apply, one click in",
+     "what": "insertion type 36 with the Data List default parameter set, one click in",
      "pins": [
       "insertion"
      ],
@@ -10240,7 +10240,7 @@
     },
     {
      "id": "insertion-37",
-     "what": "insertion type 37 with zeroed parameters: no preset uses this type, so the unit's own defaults apply, one click in",
+     "what": "insertion type 37 with the Data List default parameter set, one click in",
      "pins": [
       "insertion"
      ],
@@ -10257,7 +10257,7 @@
     },
     {
      "id": "insertion-38",
-     "what": "insertion type 38 with zeroed parameters: no preset uses this type, so the unit's own defaults apply, one click in",
+     "what": "insertion type 38 with the Data List default parameter set, one click in",
      "pins": [
       "insertion"
      ],
@@ -10291,7 +10291,7 @@
     },
     {
      "id": "insertion-40",
-     "what": "insertion type 40 with zeroed parameters: no preset uses this type, so the unit's own defaults apply, one click in",
+     "what": "insertion type 40 with the Data List default parameter set, one click in",
      "pins": [
       "insertion"
      ],
@@ -10318,7 +10318,7 @@
     155.9
    ],
    "duration_s": 157.02,
-   "sha1": "b21b2841f94c0214f05dd74154b9ac3b21da293b",
+   "sha1": "6aa362ba95dbcbefed8b896cd95df2deb67eb212",
    "group": "effects",
    "group_number": 9,
    "why": "impulse responses of the three effect blocks (optional)",
@@ -10826,6 +10826,917 @@
    "why": "the amplitude EG, second pass: the key code law, the hold, the attack shape",
    "part": 1,
    "parts": 1
+  },
+  {
+   "file": "11_detune_1.mid",
+   "segments": [
+    {
+     "id": "det--15",
+     "what": "detune -15 at note 60: the cents this step is worth",
+     "pins": [
+      "DETUNE_CENTS"
+     ],
+     "measure": "spectrum",
+     "note": 60,
+     "velocity": 100,
+     "t_on": 3.4,
+     "t_off": 6.4,
+     "t_end": 7.1,
+     "steady": [
+      4.0,
+      6.2
+     ]
+    },
+    {
+     "id": "det--14",
+     "what": "detune -14 at note 60: the cents this step is worth",
+     "pins": [
+      "DETUNE_CENTS"
+     ],
+     "measure": "spectrum",
+     "note": 60,
+     "velocity": 100,
+     "t_on": 7.6,
+     "t_off": 10.6,
+     "t_end": 11.3,
+     "steady": [
+      8.2,
+      10.4
+     ]
+    },
+    {
+     "id": "det--13",
+     "what": "detune -13 at note 60: the cents this step is worth",
+     "pins": [
+      "DETUNE_CENTS"
+     ],
+     "measure": "spectrum",
+     "note": 60,
+     "velocity": 100,
+     "t_on": 11.8,
+     "t_off": 14.8,
+     "t_end": 15.5,
+     "steady": [
+      12.4,
+      14.6
+     ]
+    },
+    {
+     "id": "det--12",
+     "what": "detune -12 at note 60: the cents this step is worth",
+     "pins": [
+      "DETUNE_CENTS"
+     ],
+     "measure": "spectrum",
+     "note": 60,
+     "velocity": 100,
+     "t_on": 16.0,
+     "t_off": 19.0,
+     "t_end": 19.7,
+     "steady": [
+      16.6,
+      18.8
+     ]
+    },
+    {
+     "id": "det--11",
+     "what": "detune -11 at note 60: the cents this step is worth",
+     "pins": [
+      "DETUNE_CENTS"
+     ],
+     "measure": "spectrum",
+     "note": 60,
+     "velocity": 100,
+     "t_on": 20.2,
+     "t_off": 23.2,
+     "t_end": 23.9,
+     "steady": [
+      20.8,
+      23.0
+     ]
+    },
+    {
+     "id": "det--10",
+     "what": "detune -10 at note 60: the cents this step is worth",
+     "pins": [
+      "DETUNE_CENTS"
+     ],
+     "measure": "spectrum",
+     "note": 60,
+     "velocity": 100,
+     "t_on": 24.4,
+     "t_off": 27.4,
+     "t_end": 28.1,
+     "steady": [
+      25.0,
+      27.2
+     ]
+    },
+    {
+     "id": "det--9",
+     "what": "detune -9 at note 60: the cents this step is worth",
+     "pins": [
+      "DETUNE_CENTS"
+     ],
+     "measure": "spectrum",
+     "note": 60,
+     "velocity": 100,
+     "t_on": 28.6,
+     "t_off": 31.6,
+     "t_end": 32.3,
+     "steady": [
+      29.2,
+      31.4
+     ]
+    },
+    {
+     "id": "det--8",
+     "what": "detune -8 at note 60: the cents this step is worth",
+     "pins": [
+      "DETUNE_CENTS"
+     ],
+     "measure": "spectrum",
+     "note": 60,
+     "velocity": 100,
+     "t_on": 32.8,
+     "t_off": 35.8,
+     "t_end": 36.5,
+     "steady": [
+      33.4,
+      35.6
+     ]
+    },
+    {
+     "id": "det--7",
+     "what": "detune -7 at note 60: the cents this step is worth",
+     "pins": [
+      "DETUNE_CENTS"
+     ],
+     "measure": "spectrum",
+     "note": 60,
+     "velocity": 100,
+     "t_on": 37.0,
+     "t_off": 40.0,
+     "t_end": 40.7,
+     "steady": [
+      37.6,
+      39.8
+     ]
+    },
+    {
+     "id": "det--6",
+     "what": "detune -6 at note 60: the cents this step is worth",
+     "pins": [
+      "DETUNE_CENTS"
+     ],
+     "measure": "spectrum",
+     "note": 60,
+     "velocity": 100,
+     "t_on": 41.2,
+     "t_off": 44.2,
+     "t_end": 44.9,
+     "steady": [
+      41.8,
+      44.0
+     ]
+    },
+    {
+     "id": "det--5",
+     "what": "detune -5 at note 60: the cents this step is worth",
+     "pins": [
+      "DETUNE_CENTS"
+     ],
+     "measure": "spectrum",
+     "note": 60,
+     "velocity": 100,
+     "t_on": 45.4,
+     "t_off": 48.4,
+     "t_end": 49.1,
+     "steady": [
+      46.0,
+      48.2
+     ]
+    },
+    {
+     "id": "det--4",
+     "what": "detune -4 at note 60: the cents this step is worth",
+     "pins": [
+      "DETUNE_CENTS"
+     ],
+     "measure": "spectrum",
+     "note": 60,
+     "velocity": 100,
+     "t_on": 49.6,
+     "t_off": 52.6,
+     "t_end": 53.3,
+     "steady": [
+      50.2,
+      52.4
+     ]
+    },
+    {
+     "id": "det--3",
+     "what": "detune -3 at note 60: the cents this step is worth",
+     "pins": [
+      "DETUNE_CENTS"
+     ],
+     "measure": "spectrum",
+     "note": 60,
+     "velocity": 100,
+     "t_on": 53.8,
+     "t_off": 56.8,
+     "t_end": 57.5,
+     "steady": [
+      54.4,
+      56.6
+     ]
+    },
+    {
+     "id": "det--2",
+     "what": "detune -2 at note 60: the cents this step is worth",
+     "pins": [
+      "DETUNE_CENTS"
+     ],
+     "measure": "spectrum",
+     "note": 60,
+     "velocity": 100,
+     "t_on": 58.0,
+     "t_off": 61.0,
+     "t_end": 61.7,
+     "steady": [
+      58.6,
+      60.8
+     ]
+    },
+    {
+     "id": "det--1",
+     "what": "detune -1 at note 60: the cents this step is worth",
+     "pins": [
+      "DETUNE_CENTS"
+     ],
+     "measure": "spectrum",
+     "note": 60,
+     "velocity": 100,
+     "t_on": 62.2,
+     "t_off": 65.2,
+     "t_end": 65.9,
+     "steady": [
+      62.8,
+      65.0
+     ]
+    },
+    {
+     "id": "det-0",
+     "what": "detune 0 at note 60: the cents this step is worth",
+     "pins": [
+      "DETUNE_CENTS"
+     ],
+     "measure": "spectrum",
+     "note": 60,
+     "velocity": 100,
+     "t_on": 66.4,
+     "t_off": 69.4,
+     "t_end": 70.1,
+     "steady": [
+      67.0,
+      69.2
+     ]
+    },
+    {
+     "id": "det-1",
+     "what": "detune 1 at note 60: the cents this step is worth",
+     "pins": [
+      "DETUNE_CENTS"
+     ],
+     "measure": "spectrum",
+     "note": 60,
+     "velocity": 100,
+     "t_on": 70.6,
+     "t_off": 73.6,
+     "t_end": 74.3,
+     "steady": [
+      71.2,
+      73.4
+     ]
+    },
+    {
+     "id": "det-2",
+     "what": "detune 2 at note 60: the cents this step is worth",
+     "pins": [
+      "DETUNE_CENTS"
+     ],
+     "measure": "spectrum",
+     "note": 60,
+     "velocity": 100,
+     "t_on": 74.8,
+     "t_off": 77.8,
+     "t_end": 78.5,
+     "steady": [
+      75.4,
+      77.6
+     ]
+    },
+    {
+     "id": "det-3",
+     "what": "detune 3 at note 60: the cents this step is worth",
+     "pins": [
+      "DETUNE_CENTS"
+     ],
+     "measure": "spectrum",
+     "note": 60,
+     "velocity": 100,
+     "t_on": 79.0,
+     "t_off": 82.0,
+     "t_end": 82.7,
+     "steady": [
+      79.6,
+      81.8
+     ]
+    },
+    {
+     "id": "det-4",
+     "what": "detune 4 at note 60: the cents this step is worth",
+     "pins": [
+      "DETUNE_CENTS"
+     ],
+     "measure": "spectrum",
+     "note": 60,
+     "velocity": 100,
+     "t_on": 83.2,
+     "t_off": 86.2,
+     "t_end": 86.9,
+     "steady": [
+      83.8,
+      86.0
+     ]
+    },
+    {
+     "id": "det-5",
+     "what": "detune 5 at note 60: the cents this step is worth",
+     "pins": [
+      "DETUNE_CENTS"
+     ],
+     "measure": "spectrum",
+     "note": 60,
+     "velocity": 100,
+     "t_on": 87.4,
+     "t_off": 90.4,
+     "t_end": 91.1,
+     "steady": [
+      88.0,
+      90.2
+     ]
+    },
+    {
+     "id": "det-6",
+     "what": "detune 6 at note 60: the cents this step is worth",
+     "pins": [
+      "DETUNE_CENTS"
+     ],
+     "measure": "spectrum",
+     "note": 60,
+     "velocity": 100,
+     "t_on": 91.6,
+     "t_off": 94.6,
+     "t_end": 95.3,
+     "steady": [
+      92.2,
+      94.4
+     ]
+    },
+    {
+     "id": "det-7",
+     "what": "detune 7 at note 60: the cents this step is worth",
+     "pins": [
+      "DETUNE_CENTS"
+     ],
+     "measure": "spectrum",
+     "note": 60,
+     "velocity": 100,
+     "t_on": 95.8,
+     "t_off": 98.8,
+     "t_end": 99.5,
+     "steady": [
+      96.4,
+      98.6
+     ]
+    },
+    {
+     "id": "det-8",
+     "what": "detune 8 at note 60: the cents this step is worth",
+     "pins": [
+      "DETUNE_CENTS"
+     ],
+     "measure": "spectrum",
+     "note": 60,
+     "velocity": 100,
+     "t_on": 100.0,
+     "t_off": 103.0,
+     "t_end": 103.7,
+     "steady": [
+      100.6,
+      102.8
+     ]
+    },
+    {
+     "id": "det-9",
+     "what": "detune 9 at note 60: the cents this step is worth",
+     "pins": [
+      "DETUNE_CENTS"
+     ],
+     "measure": "spectrum",
+     "note": 60,
+     "velocity": 100,
+     "t_on": 104.2,
+     "t_off": 107.2,
+     "t_end": 107.9,
+     "steady": [
+      104.8,
+      107.0
+     ]
+    },
+    {
+     "id": "det-10",
+     "what": "detune 10 at note 60: the cents this step is worth",
+     "pins": [
+      "DETUNE_CENTS"
+     ],
+     "measure": "spectrum",
+     "note": 60,
+     "velocity": 100,
+     "t_on": 108.4,
+     "t_off": 111.4,
+     "t_end": 112.1,
+     "steady": [
+      109.0,
+      111.2
+     ]
+    }
+   ],
+   "marker_start": [
+    1.2,
+    1.5,
+    1.8
+   ],
+   "marker_end": [
+    112.6,
+    112.9,
+    113.2
+   ],
+   "duration_s": 114.32,
+   "sha1": "dac803aea182d82e3e8c76b2bcd807474e25de23",
+   "group": "detune",
+   "group_number": 11,
+   "why": "detune: every step, and whether it is a fixed offset or a fixed ratio",
+   "part": 1,
+   "parts": 2
+  },
+  {
+   "file": "11_detune_2.mid",
+   "segments": [
+    {
+     "id": "det-11",
+     "what": "detune 11 at note 60: the cents this step is worth",
+     "pins": [
+      "DETUNE_CENTS"
+     ],
+     "measure": "spectrum",
+     "note": 60,
+     "velocity": 100,
+     "t_on": 3.4,
+     "t_off": 6.4,
+     "t_end": 7.1,
+     "steady": [
+      4.0,
+      6.2
+     ]
+    },
+    {
+     "id": "det-12",
+     "what": "detune 12 at note 60: the cents this step is worth",
+     "pins": [
+      "DETUNE_CENTS"
+     ],
+     "measure": "spectrum",
+     "note": 60,
+     "velocity": 100,
+     "t_on": 7.6,
+     "t_off": 10.6,
+     "t_end": 11.3,
+     "steady": [
+      8.2,
+      10.4
+     ]
+    },
+    {
+     "id": "det-13",
+     "what": "detune 13 at note 60: the cents this step is worth",
+     "pins": [
+      "DETUNE_CENTS"
+     ],
+     "measure": "spectrum",
+     "note": 60,
+     "velocity": 100,
+     "t_on": 11.8,
+     "t_off": 14.8,
+     "t_end": 15.5,
+     "steady": [
+      12.4,
+      14.6
+     ]
+    },
+    {
+     "id": "det-14",
+     "what": "detune 14 at note 60: the cents this step is worth",
+     "pins": [
+      "DETUNE_CENTS"
+     ],
+     "measure": "spectrum",
+     "note": 60,
+     "velocity": 100,
+     "t_on": 16.0,
+     "t_off": 19.0,
+     "t_end": 19.7,
+     "steady": [
+      16.6,
+      18.8
+     ]
+    },
+    {
+     "id": "det-15",
+     "what": "detune 15 at note 60: the cents this step is worth",
+     "pins": [
+      "DETUNE_CENTS"
+     ],
+     "measure": "spectrum",
+     "note": 60,
+     "velocity": 100,
+     "t_on": 20.2,
+     "t_off": 23.2,
+     "t_end": 23.9,
+     "steady": [
+      20.8,
+      23.0
+     ]
+    },
+    {
+     "id": "detnote36--15",
+     "what": "detune -15 at note 36: whether detune is a fixed frequency offset or a fixed ratio",
+     "pins": [
+      "DETUNE_CENTS"
+     ],
+     "measure": "spectrum",
+     "note": 36,
+     "velocity": 100,
+     "t_on": 24.4,
+     "t_off": 27.4,
+     "t_end": 28.1,
+     "steady": [
+      25.0,
+      27.2
+     ]
+    },
+    {
+     "id": "detnote36--7",
+     "what": "detune -7 at note 36: whether detune is a fixed frequency offset or a fixed ratio",
+     "pins": [
+      "DETUNE_CENTS"
+     ],
+     "measure": "spectrum",
+     "note": 36,
+     "velocity": 100,
+     "t_on": 28.6,
+     "t_off": 31.6,
+     "t_end": 32.3,
+     "steady": [
+      29.2,
+      31.4
+     ]
+    },
+    {
+     "id": "detnote36-7",
+     "what": "detune 7 at note 36: whether detune is a fixed frequency offset or a fixed ratio",
+     "pins": [
+      "DETUNE_CENTS"
+     ],
+     "measure": "spectrum",
+     "note": 36,
+     "velocity": 100,
+     "t_on": 32.8,
+     "t_off": 35.8,
+     "t_end": 36.5,
+     "steady": [
+      33.4,
+      35.6
+     ]
+    },
+    {
+     "id": "detnote36-15",
+     "what": "detune 15 at note 36: whether detune is a fixed frequency offset or a fixed ratio",
+     "pins": [
+      "DETUNE_CENTS"
+     ],
+     "measure": "spectrum",
+     "note": 36,
+     "velocity": 100,
+     "t_on": 37.0,
+     "t_off": 40.0,
+     "t_end": 40.7,
+     "steady": [
+      37.6,
+      39.8
+     ]
+    },
+    {
+     "id": "detnote48--15",
+     "what": "detune -15 at note 48: whether detune is a fixed frequency offset or a fixed ratio",
+     "pins": [
+      "DETUNE_CENTS"
+     ],
+     "measure": "spectrum",
+     "note": 48,
+     "velocity": 100,
+     "t_on": 41.2,
+     "t_off": 44.2,
+     "t_end": 44.9,
+     "steady": [
+      41.8,
+      44.0
+     ]
+    },
+    {
+     "id": "detnote48--7",
+     "what": "detune -7 at note 48: whether detune is a fixed frequency offset or a fixed ratio",
+     "pins": [
+      "DETUNE_CENTS"
+     ],
+     "measure": "spectrum",
+     "note": 48,
+     "velocity": 100,
+     "t_on": 45.4,
+     "t_off": 48.4,
+     "t_end": 49.1,
+     "steady": [
+      46.0,
+      48.2
+     ]
+    },
+    {
+     "id": "detnote48-7",
+     "what": "detune 7 at note 48: whether detune is a fixed frequency offset or a fixed ratio",
+     "pins": [
+      "DETUNE_CENTS"
+     ],
+     "measure": "spectrum",
+     "note": 48,
+     "velocity": 100,
+     "t_on": 49.6,
+     "t_off": 52.6,
+     "t_end": 53.3,
+     "steady": [
+      50.2,
+      52.4
+     ]
+    },
+    {
+     "id": "detnote48-15",
+     "what": "detune 15 at note 48: whether detune is a fixed frequency offset or a fixed ratio",
+     "pins": [
+      "DETUNE_CENTS"
+     ],
+     "measure": "spectrum",
+     "note": 48,
+     "velocity": 100,
+     "t_on": 53.8,
+     "t_off": 56.8,
+     "t_end": 57.5,
+     "steady": [
+      54.4,
+      56.6
+     ]
+    },
+    {
+     "id": "detnote72--15",
+     "what": "detune -15 at note 72: whether detune is a fixed frequency offset or a fixed ratio",
+     "pins": [
+      "DETUNE_CENTS"
+     ],
+     "measure": "spectrum",
+     "note": 72,
+     "velocity": 100,
+     "t_on": 58.0,
+     "t_off": 61.0,
+     "t_end": 61.7,
+     "steady": [
+      58.6,
+      60.8
+     ]
+    },
+    {
+     "id": "detnote72--7",
+     "what": "detune -7 at note 72: whether detune is a fixed frequency offset or a fixed ratio",
+     "pins": [
+      "DETUNE_CENTS"
+     ],
+     "measure": "spectrum",
+     "note": 72,
+     "velocity": 100,
+     "t_on": 62.2,
+     "t_off": 65.2,
+     "t_end": 65.9,
+     "steady": [
+      62.8,
+      65.0
+     ]
+    },
+    {
+     "id": "detnote72-7",
+     "what": "detune 7 at note 72: whether detune is a fixed frequency offset or a fixed ratio",
+     "pins": [
+      "DETUNE_CENTS"
+     ],
+     "measure": "spectrum",
+     "note": 72,
+     "velocity": 100,
+     "t_on": 66.4,
+     "t_off": 69.4,
+     "t_end": 70.1,
+     "steady": [
+      67.0,
+      69.2
+     ]
+    },
+    {
+     "id": "detnote72-15",
+     "what": "detune 15 at note 72: whether detune is a fixed frequency offset or a fixed ratio",
+     "pins": [
+      "DETUNE_CENTS"
+     ],
+     "measure": "spectrum",
+     "note": 72,
+     "velocity": 100,
+     "t_on": 70.6,
+     "t_off": 73.6,
+     "t_end": 74.3,
+     "steady": [
+      71.2,
+      73.4
+     ]
+    },
+    {
+     "id": "detnote84--15",
+     "what": "detune -15 at note 84: whether detune is a fixed frequency offset or a fixed ratio",
+     "pins": [
+      "DETUNE_CENTS"
+     ],
+     "measure": "spectrum",
+     "note": 84,
+     "velocity": 100,
+     "t_on": 74.8,
+     "t_off": 77.8,
+     "t_end": 78.5,
+     "steady": [
+      75.4,
+      77.6
+     ]
+    },
+    {
+     "id": "detnote84--7",
+     "what": "detune -7 at note 84: whether detune is a fixed frequency offset or a fixed ratio",
+     "pins": [
+      "DETUNE_CENTS"
+     ],
+     "measure": "spectrum",
+     "note": 84,
+     "velocity": 100,
+     "t_on": 79.0,
+     "t_off": 82.0,
+     "t_end": 82.7,
+     "steady": [
+      79.6,
+      81.8
+     ]
+    },
+    {
+     "id": "detnote84-7",
+     "what": "detune 7 at note 84: whether detune is a fixed frequency offset or a fixed ratio",
+     "pins": [
+      "DETUNE_CENTS"
+     ],
+     "measure": "spectrum",
+     "note": 84,
+     "velocity": 100,
+     "t_on": 83.2,
+     "t_off": 86.2,
+     "t_end": 86.9,
+     "steady": [
+      83.8,
+      86.0
+     ]
+    },
+    {
+     "id": "detnote84-15",
+     "what": "detune 15 at note 84: whether detune is a fixed frequency offset or a fixed ratio",
+     "pins": [
+      "DETUNE_CENTS"
+     ],
+     "measure": "spectrum",
+     "note": 84,
+     "velocity": 100,
+     "t_on": 87.4,
+     "t_off": 90.4,
+     "t_end": 91.1,
+     "steady": [
+      88.0,
+      90.2
+     ]
+    },
+    {
+     "id": "detnote96--15",
+     "what": "detune -15 at note 96: whether detune is a fixed frequency offset or a fixed ratio",
+     "pins": [
+      "DETUNE_CENTS"
+     ],
+     "measure": "spectrum",
+     "note": 96,
+     "velocity": 100,
+     "t_on": 91.6,
+     "t_off": 94.6,
+     "t_end": 95.3,
+     "steady": [
+      92.2,
+      94.4
+     ]
+    },
+    {
+     "id": "detnote96--7",
+     "what": "detune -7 at note 96: whether detune is a fixed frequency offset or a fixed ratio",
+     "pins": [
+      "DETUNE_CENTS"
+     ],
+     "measure": "spectrum",
+     "note": 96,
+     "velocity": 100,
+     "t_on": 95.8,
+     "t_off": 98.8,
+     "t_end": 99.5,
+     "steady": [
+      96.4,
+      98.6
+     ]
+    },
+    {
+     "id": "detnote96-7",
+     "what": "detune 7 at note 96: whether detune is a fixed frequency offset or a fixed ratio",
+     "pins": [
+      "DETUNE_CENTS"
+     ],
+     "measure": "spectrum",
+     "note": 96,
+     "velocity": 100,
+     "t_on": 100.0,
+     "t_off": 103.0,
+     "t_end": 103.7,
+     "steady": [
+      100.6,
+      102.8
+     ]
+    },
+    {
+     "id": "detnote96-15",
+     "what": "detune 15 at note 96: whether detune is a fixed frequency offset or a fixed ratio",
+     "pins": [
+      "DETUNE_CENTS"
+     ],
+     "measure": "spectrum",
+     "note": 96,
+     "velocity": 100,
+     "t_on": 104.2,
+     "t_off": 107.2,
+     "t_end": 107.9,
+     "steady": [
+      104.8,
+      107.0
+     ]
+    }
+   ],
+   "marker_start": [
+    1.2,
+    1.5,
+    1.8
+   ],
+   "marker_end": [
+    108.4,
+    108.7,
+    109.0
+   ],
+   "duration_s": 110.12,
+   "sha1": "843bdcb4428c443ed4cf16e943f8cc113a15f686",
+   "group": "detune",
+   "group_number": 11,
+   "why": "detune: every step, and whether it is a fixed offset or a fixed ratio",
+   "part": 2,
+   "parts": 2
   }
  ]
 }

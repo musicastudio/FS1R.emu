@@ -561,6 +561,31 @@ def g_effects():
                       [name], click(), perf=p, hold=200, tail=tail, measure="impulse")
 
 
+
+def g_detune():
+    """Detune, every step and across the keyboard.
+
+    07_modulation_2 stepped detune by three and measured note 60 only, and that was enough to show the
+    engine's 2 cents per step is wrong: the hardware runs 1.21 cents per step near zero and 2.7 at the
+    ends, and is not quite symmetric. What it cannot say is what the sixteen steps in between do, and
+    whether the control is a fixed frequency offset or a fixed ratio, which are the same thing at one
+    note and nothing like it two octaves down. A detuned patch beats at the difference between its
+    operators, so a wrong answer is heard as a warble at the wrong rate rather than as a wrong pitch,
+    which is what sent the demo song "Full Tines" out with a vibrato the unit does not have.
+
+    Every step first, then the four steps that matter most across five more notes. Read the frequency
+    off the steady part of each, not off an FFT bin: the tone is stable to a millihertz for two seconds
+    and the whole answer sits inside a couple of cents.
+    """
+    for d in range(-15, 16):
+        yield Seg(f"det-{d}", f"detune {d} at note 60: the cents this step is worth",
+                  ["DETUNE_CENTS"], sine(detune=d), hold=3000, measure="spectrum")
+    for n in (36, 48, 72, 84, 96):
+        for d in (-15, -7, 7, 15):
+            yield Seg(f"detnote{n}-{d}", f"detune {d} at note {n}: whether detune is a fixed frequency "
+                      "offset or a fixed ratio",
+                      ["DETUNE_CENTS"], sine(detune=d), note=n, hold=3000, measure="spectrum")
+
 GROUPS = [
     (1, "reference", "the dB and Hz that everything else is measured against", g_reference),
     (2, "envelope", "the amplitude EG: rates, shape, levels, key scaling", g_eg),
@@ -572,6 +597,7 @@ GROUPS = [
     (8, "panlevel", "pan and the part level path", g_pan),
     (9, "effects", "impulse responses of the three effect blocks (optional)", g_effects),
     (10, "envelope2", "the amplitude EG, second pass: the key code law, the hold, the attack shape", g_eg2),
+    (11, "detune", "detune: every step, and whether it is a fixed offset or a fixed ratio", g_detune),
 ]
 
 

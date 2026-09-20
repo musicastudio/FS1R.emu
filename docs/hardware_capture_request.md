@@ -32,6 +32,14 @@ Your 0918 recording of 02 settled the amplitude EG's rates and then showed that 
 
 Most of it is one question. The chip shortens every EG rate as the note rises, and how much it shortens by is fitted through three notes, which do not sit on a straight line. Twenty of the segments play the same decay at two time-scaling settings across ten notes from the bottom of the keyboard to the top, which settles it outright.
 
+### 2026-09-20: two more, `11_detune`
+
+Your 0918 recording settled detune as well, and the engine had it 65% too wide: the unit runs about 1.21 cents per step near zero rising to 2.7 at the ends, not the flat 2.0 the DX7 lineage suggested. That is fixed. It matters more than a pitch error sounds, because operators detuned against each other beat at the difference between them, so the wrong width is heard as a warble at the wrong rate. Demo song 2 "Full Tines" went out of here with a vibrato your unit does not have, which is how it was found.
+
+`11_detune_1.mid` and `11_detune_2.mid`, 51 segments and under four minutes together, close what the 0918 take could not. It stepped detune by three, so sixteen of the thirty-one settings were never played; and it played note 60 only, which cannot separate a fixed frequency offset from a fixed ratio, the two being the same number at one note and an octave apart four octaves down. File 1 plays every step at note 60 and file 2 plays the four ends at notes 36, 48, 72, 84 and 96.
+
+**If the debug monitor is easier**, `FS1R.unlock/captures/sweep.py detune` is the same measurement as a parameter change with a retrigger, about the same length, and it reads voice byte 7 back off the unit before it records anything so a run that is not landing stops instead of filling a file. Run it as `gate smoke detune` like the others. Either one answers it; no need for both.
+
 **One more, free-form:** a minute or two of you playing a few of your favourite preset performances normally, recorded the same way, with a note of which performances they were. That is the sanity check that the whole engine sounds like the instrument rather than merely measuring correctly.
 
 ## A logic analyzer capture, if you ever have one hooked up

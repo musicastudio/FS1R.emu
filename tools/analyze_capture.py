@@ -296,7 +296,13 @@ def fit_eg_rates(segs):
 
 
 def fit_detune(segs):
-    """Cents per detune step, from the measured frequency of each."""
+    """Cents per detune step, from the measured frequency of each.
+
+    The hardware is a curve and the engine carries that curve, so the straight line this fits is a
+    summary rather than the law: what it is good for is the comparison, since hardware and engine
+    should now return the same slope and the same residual. The curve itself is read off the audio,
+    not off these FFT peaks, which are a bin wide; docs/capture_0918.md.
+    """
     pts = []
     for s in segs:
         if s["id"].startswith("detune-") and s.get("peaks"):

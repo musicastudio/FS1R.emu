@@ -308,7 +308,7 @@ part, sysex layout. Part bank 2..12 = PrA..PrK (PrA and PrB are the native banks
 - Level register step 0.375 dB (LEVTAB is the DX7 0.75 dB curve and the chip gets 2 x LEVTAB), EG level step 1.5 dB.
 - EG timing: rate 0..63 timed like the DX7 EGS (Dexed increments), rate scaling `tscale * (keycode - 80) >> 3`.
 - Per-op pms as the DX7 pitch mod sensitivity curve, ams and fms as linear fractions of the channel words.
-- Feedback `0.5 * 2^(fb - 7)`, modulation index 1 cycle at full level, detune 2 cents per step on non-formant ops.
+- Feedback `0.5 * 2^(fb - 7)`, modulation index 1 cycle at full level. Detune is no longer here: `cal::DETUNE_CENTS` is the curve measured off `07_modulation_2`, 1.21 cents a step near zero and 2.7 at the ends, with the steps in between filled by straight lines until `11_detune` plays them.
 - Frequency EG range +-4 octaves, timed like the amplitude EG.
 - The formant window (bandwidth and skirt), the harmonic forms, the noise formant: patent model, see research.md.
 

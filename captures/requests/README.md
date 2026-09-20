@@ -28,7 +28,9 @@ The recording procedure is in `docs/hardware_capture_request.md`. In short: play
 | `09_effects_2.mid` | 28 | 2.6 | impulse responses of the three effect blocks (optional) |
 | `09_effects_3.mid` | 28 | 2.6 | impulse responses of the three effect blocks (optional) |
 | `10_envelope2.mid` | 28 | 2.8 | the amplitude EG, second pass: the key code law, the hold, the attack shape |
+| `11_detune_1.mid` | 26 | 1.9 | detune: every step, and whether it is a fixed offset or a fixed ratio |
+| `11_detune_2.mid` | 25 | 1.8 | detune: every step, and whether it is a fixed offset or a fixed ratio |
 
-Total 604 segments, 49 minutes.
+Total 655 segments, 53 minutes.
 
 Files are numbered in priority order. 01 to 04 carry most of the value: without 01 nothing else can be read in absolute terms, and 02 to 04 settle the envelope, the modulation index and the formant window, which are the three models the engine leans on hardest.

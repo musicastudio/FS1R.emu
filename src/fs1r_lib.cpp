@@ -56,7 +56,22 @@ static const double LEVEL_DB     = 0.376287;// dB per step of the 8-bit level re
                                             // below -68 dB (see fs1r_capture_session2_results.md) and read high.
 static const double EG_LEVEL_DB  = 1.5;     // dB per step of the 6-bit EG level registers (LEVTAB >> 1)
 static const double CARRIER_DB   = 1.5;     // dB per step of the carrier level correction (voice 0x2D-0x34)
-static const double DETUNE_CENTS = 2.0;     // cents per detune step on non-formant operators
+// Detune in cents for the raw 0..30 byte, 15 = none, on non-formant operators. MEASURED off the eleven
+// detune segments of 07_modulation_2: the hardware is a curve, about 1.21 cents per step near zero
+// rising to 2.7 at the ends, and it is not quite symmetric, +6 and +15 sitting short of their negatives
+// by 0.6 and 0.2 cents in a reading that holds to a millihertz for two seconds. The 2.0 per step this
+// replaces was inferred from the DX7 and detuned every patch that uses the control 65% too far, which
+// is heard as a beat between the operators at nearly twice the rate the unit has. The capture stepped
+// by three, so the steps between two measured points are straight-line fills, and
+// docs/hardware_capture_request.md asks for the ones that are missing.
+static const double DETUNE_CENTS[31] = {
+     -25.621,  -22.964,  -20.307,  -17.650,  -15.615,  -13.579,
+     -11.544,  -10.123,   -8.703,   -7.282,   -6.067,   -4.852,
+      -3.637,   -2.425,   -1.212,    0.000,    1.210,    2.419,
+       3.629,    4.635,    5.642,    6.648,    8.254,    9.861,
+      11.467,   13.469,   15.470,   17.472,   20.263,   23.053,
+      25.844,
+};
 static const double FEEDBACK     = 0.5;     // feedback gain = FEEDBACK * 2^(fb - 7)
 static const double EG_ATTACK_K  = 0.0625;  // rising EG time constant as a fraction of rate_secs. MEASURED:
                                             // the eleven attack-rate segments of 02_envelope_2 fit an
@@ -1520,7 +1535,7 @@ struct Synth {
             else if (v.form == 7) fop = word_hz(C.freqWord[o] + C.fbW[o] + (C.frmtWord[o] - 0x1243) + pmw + (C.regFM * v.fms) / 7);
             else if (!v.fixed) fop = word_hz(C.freqWord[o] + C.regPitch + pmw);
             else fop = word_hz(C.freqWord[o] + C.fbW[o] + pmw + (C.regFM * v.fms) / 7);
-            if (v.form != 7) fop *= pow(2.0, ((v.detune - 15) * cal::DETUNE_CENTS) / 1200.0);       // INFERRED: detune 2 cents per step on non-formant ops
+            if (v.form != 7) fop *= pow(2.0, cal::DETUNE_CENTS[clampi(v.detune, 0, 30)] / 1200.0);
             s.fop = fop;
             s.bw = clampi(C.bwReg[o] + C.vcBw[o][0], 0, 99);                 // register 0x218, the formant's
             s.ratio = v.form == 7 ? 0 : clampi(C.frmtWord[o], 0, 99);         // register 0x230, every other form's
@@ -2048,6 +2063,14 @@ static int selftest(Synth& S) {
         memset(T.perf.c + 0x28, 0, 0x28);
         init_default_voice(V);
     }
+
+    // 5b. the detune curve, against the segments it was measured from (07_modulation_2, note 60)
+    ck("detune centre is none", cal::DETUNE_CENTS[15] == 0.0);
+    ck("detune -15 is the measured -25.6 cents", fabs(cal::DETUNE_CENTS[0] + 25.621) < 0.001);
+    ck("detune +15 is the measured +25.8 cents", fabs(cal::DETUNE_CENTS[30] - 25.844) < 0.001);
+    ck("detune +3 is 1.21 cents a step, not 2", fabs(cal::DETUNE_CENTS[18] - 3.629) < 0.001);
+    for (int i = 1; i < 31; i++)
+        ck("detune rises with the byte", cal::DETUNE_CENTS[i] > cal::DETUNE_CENTS[i - 1]);
 
     // 6. notes still sound and stop
     S.midi_in(0x90, 60, 100);
