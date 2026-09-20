@@ -639,7 +639,10 @@ struct FreqEG {                  // init -> attack level -> 0. The level curve i
         return cur;
     }
 };
-struct WinGen { double w = 1.0, c = 0.0; bool on = false; };
+// A grain carries the level and the carrier frequency it was fired with. Both are latched beside the
+// carrier phase the grain already resets, so a register write lands on the next grain rather than
+// cutting the one in flight. MEASURED 2026-09-20, see op_sample.
+struct WinGen { double w = 1.0, c = 0.0, gain = 0.0, fc = 0.0; bool on = false; };
 struct OpState {
     double phase = 0; WinGen g[2]; int nextGen = 0; double fphase = 0; int halfCount = 0;
     EG eg; FreqEG feg;
@@ -1451,8 +1454,23 @@ struct Synth {
     }
 
     // ---------------------------------------------------------------- chip model (INFERRED beyond the register values)
-    inline double op_sample(OpState& s, const OpV& v, double f0, double fop, int ratio, double pm) {
-        if (v.form == 0) { s.phase += fop / SR; if (s.phase >= 1) s.phase -= 1; return fsin(s.phase + pm); }
+    // `gain` is the operator's own level, and a grain form applies it per grain rather than per sample.
+    // MEASURED 2026-09-20 against the demo recording: Vokodrone's intro is part 4 alone, a vocal Fseq
+    // running at 35.6 Hz, and every frame rewrites all eight formant levels and formant frequencies at
+    // once. Applied per sample those writes cut the grain in flight - the operator output steps from
+    // 0.149 to 0.033 between two samples where a frame drops its level 13 dB - and the render clicks
+    // once per frame. Averaging the 5 kHz-and-up envelope over the 120 frame boundaries in the intro
+    // puts the engine 12.3 dB above its own floor at the boundary and rgwan's recording 1.2 dB above
+    // its own; latching both the level and the carrier frequency at the grain that follows the write
+    // brings the engine to 1.2 dB, the recording's figure to two digits. The grain window is zero at
+    // both ends, so a level that only moves there cannot step the waveform at all.
+    //
+    // Sine operators have no grain and still take their level per sample. Nothing in the capture set
+    // or the demo moves a sine operator's level fast enough to say whether the chip agrees, and the
+    // unvoiced operator has the same question open: its noise level still steps with the frame, which
+    // is the 0.85 dB the intro has left. docs/hardware_capture_request.md, request 12.
+    inline double op_sample(OpState& s, const OpV& v, double f0, double fop, int ratio, double pm, double gain) {
+        if (v.form == 0) { s.phase += fop / SR; if (s.phase >= 1) s.phase -= 1; return gain * fsin(s.phase + pm); }
         double fw, fc, wl;
         if (v.form == 7) { fw = f0; fc = fop; wl = s.wl7; }                                                          // formant: window at the fundamental (INFERRED bw curve)
         // all1/all2/odd1/odd2 are a group that starts at the operator's own frequency, so they are the same
@@ -1486,7 +1504,7 @@ struct Synth {
         wl = std::min(wl, 2.0);
         s.fphase += fw / SR;
         if (s.fphase >= 1) {
-            s.fphase -= 1; WinGen& g = s.g[s.nextGen]; g.on = true; g.w = 0;
+            s.fphase -= 1; WinGen& g = s.g[s.nextGen]; g.on = true; g.w = 0; g.gain = gain; g.fc = fc;
             // The formant restarts its carrier every grain, which is what holds its peak still while the
             // fundamental moves. The odd forms retrigger twice a period, so restarting there would put
             // half a cycle of alternation into the grain train and land the group on the even partials;
@@ -1498,7 +1516,7 @@ struct Synth {
         for (int k = 0; k < 2; k++) {
             WinGen& g = s.g[k]; if (!g.on) continue;
             g.w += winc; if (g.w >= 1) { g.on = false; continue; }
-            y += fwin(v.form == 7, v.skirt, g.w) * fsin(g.c + pm); g.c += fc / SR;
+            y += g.gain * fwin(v.form == 7, v.skirt, g.w) * fsin(g.c + pm); g.c += g.fc / SR;
         }
         if (v.form == 7) { if (cal::FRMT_NORM != 0.0) y *= pow(1.0 / wl, cal::FRMT_NORM); }
         else y *= cal::FORM_LEVEL * 2.0 / wl;    // every form but sine and frmt; a shorter grain carries less
@@ -1560,10 +1578,13 @@ struct Synth {
             if (F == 6) S = 0;
             double egdb = s.eg.tick();
             double y = 0;
-            if (egdb - s.att > -100) {
+            // A silenced operator still runs while a grain it already fired is in flight, so the last
+            // one fades out under its own window instead of being cut.
+            double gain = egdb - s.att > -100 ? db2lin_fast(egdb - s.att) : 0.0;
+            if (gain != 0.0 || s.g[0].on || s.g[1].on) {
                 double fop = s.fop;
                 if (s.feg.stage < 2) fop *= pow(2.0, s.feg.tick() / 12.0);
-                y = op_sample(s, v, C.f0, fop, s.ratio, in * FM_INDEX) * db2lin_fast(egdb - s.att);
+                y = op_sample(s, v, C.f0, fop, s.ratio, in * FM_INDEX, gain);
             }
             Cb = y; if (t0 & 2) H = y; if (t1 & 4) S += y; if (t0 & 4) fbNew = y;
             if (t1 & 1) mix += y * partV;

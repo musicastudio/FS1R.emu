@@ -32,6 +32,20 @@ Your 0918 recording of 02 settled the amplitude EG's rates and then showed that 
 
 Most of it is one question. The chip shortens every EG rate as the note rises, and how much it shortens by is fitted through three notes, which do not sit on a straight line. Twenty of the segments play the same decay at two time-scaling settings across ten notes from the bottom of the keyboard to the top, which settles it outright.
 
+### 2026-09-20: `12_fseqlevel`, one file, 1.3 minutes
+
+You reported that demo song 1 "Vokodrone" clicks all the way through its opening on the engine and does not on your unit. It is the Fseq, and the engine is fixed for the part of it the recording settles; this file is for the part it cannot.
+
+An Fseq frame rewrites all sixteen level registers of a channel at once, and the frames are a vocoder analysis, so adjacent frames sit 13 to 80 dB apart. The CPU writes them raw, so whatever keeps a real unit from clicking its way through an Fseq happens inside the YMP706. Your demo recording says something does: Vokodrone's intro is part 4 alone running a 35.6 Hz Fseq, and averaging the 5 kHz-and-up envelope over its 120 frame boundaries puts your unit 1.2 dB above its own floor at the boundary where the engine sat 12.3 dB above its.
+
+Two models fit. Either the operator carries the level it was fired with, so a write lands on the next grain and the grain window, which is zero at both ends, swallows the step; or the level register itself slews on a time constant. Latching per grain brings the engine to 1.2 dB, your number to two digits, and costs no constant, so that is what ships. A 3 to 5 ms slew fits almost as well and the demo cannot choose, because everything in it runs at one frame rate over a narrow range of notes.
+
+**The lever is the grain rate.** A grain is one period of the fundamental. Per-grain latching gives a transition whose width tracks the note and ignores the frame rate; a slewed register gives one whose width is the same milliseconds whatever the note and whatever the frame rate. `12_fseqlevel.mid` plays one formant operator on preset Fseq 34 "RndArp4" at notes 36, 48, 60, 72, 84 and 96, then the same note 60 at 16, 65 and 176 frames a second. Five octaves and an eleven-fold frame rate separate the two outright.
+
+**The second question is the operators that have no grain.** A sine operator and the unvoiced (noise formant) operator take the same frame level through the same register and neither has a window to hide a step in. If the chip latches per grain they should step where the formant does not. Three segments are the sine and three the noise, at notes 36, 60 and 84. That is the 0.85 dB the intro has left after the fix.
+
+Fourteen segments, 1.3 minutes, recorded exactly like the rest of the set. The whole file is one voice at a time with no effects and no filter, and it peaks around -21 dBFS because the Fseq's own levels are low; do not ride the gain, the analysis is frame-synchronous and reads the transitions off the waveform.
+
 ### 2026-09-20: `11_detune`, recorded and answered the same day
 
 Both files came back, and so did a `sweep.py detune` session, and between them they closed detune outright. It is the EPROM's own key scaled table and the engine reads it now rather than modelling anything: `docs/detune.md`. Nothing further is needed on this one. What follows is the request as it went out.

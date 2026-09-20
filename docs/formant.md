@@ -91,6 +91,31 @@ Each reading was internally consistent and each was wrong. A constant fitted on 
 
 At 1.23 dB the two filter files sit at 0.01 and 0.00 dB in level and 0.76 and 0.24 dB in shape, and `06_filter_2`'s filter EG envelopes come down from 15.68 dB to 5.43 without being touched.
 
+## A grain carries the level it was fired with, 2026-09-20
+
+Demo song 1 "Vokodrone" clicked its way through its own opening, once every 28 ms, where rgwan's recording of the same bytes does not. The intro from 2.0 to 5.5 s is part 4 alone, the vocal patch "ShoobyVoic": eight formant operators, no feedback, no FM, and preset Fseq "L&G MayI" running at 35.6 frames a second. An Fseq frame rewrites all sixteen level registers and all sixteen frequency words of the channel at once, and the frames are a vocoder analysis, so adjacent frames sit 13 to 80 dB apart. `FUN_00012a32` writes them raw, frame level shifted left one, with nothing between one frame and the next.
+
+Applied per sample those writes cut the grain in flight. Operator 1's output stepped from +0.1490 to +0.0332 between two samples at 2.1685 s, and went to zero and back at 2.3348 and 2.4178, both mid-window: a step of a third of the operator's peak with no envelope in front of it, which is the click.
+
+**The measurement.** Take the 5 kHz-and-up envelope, average it over the 120 frame boundaries in the intro and read the peak against each take's own median. The recording is **+1.20 dB** at the boundary, which is nothing. The engine was **+12.3 dB**.
+
+| what the operator applies per sample | boundary peak |
+|---|---|
+| hardware | **+1.20 dB** |
+| level and carrier both, as it was | +12.3 dB |
+| level latched at the grain, carrier per sample | +1.75 dB |
+| **level and carrier both latched at the grain** | **+1.19 dB** |
+
+So a grain carries the level and the carrier frequency it was fired with, beside the carrier phase it already resets, and a register write lands on the grain that follows it. The window is zero at both ends, so a level that only moves there cannot step the waveform at all. It costs no constant and it is not a smoothing filter: at note 52 the grains are 6 ms apart and the level still follows the frame exactly, one frame late at worst.
+
+The figures above are with the unvoiced operators muted, which is why the last row reads 1.19 against the hardware's 1.20. With them in it is 2.05, because the noise operator has no grain and its level still steps. That 0.85 dB is the open half; see below.
+
+## What the demo cannot separate
+
+A level register that slews on a 3 to 5 ms time constant fits the intro nearly as well, +2.1 to +3.0 dB against the grain latch's +2.05 with everything in the path. The demo cannot choose between them because everything in it runs at one Fseq rate over a narrow range of notes.
+
+The lever is the grain rate. A grain is one period of the fundamental, so per-grain latching gives a transition whose width tracks the note and ignores the frame rate, and a slewed register gives one whose width is the same milliseconds whatever the note and whatever the frame rate. `captures/requests/12_fseqlevel.mid` is that experiment: one formant operator on preset Fseq 34 "RndArp4" at six notes over five octaves, then the same note at 16, 65 and 176 frames a second. It also asks the second question, whether a sine operator and the unvoiced operator step where the formant does not, since neither has a window to hide a step in. `docs/hardware_capture_request.md` has the ask.
+
 ## Where it stands
 
 | | before | after |
