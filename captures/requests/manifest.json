@@ -14241,6 +14241,952 @@
    "duration_s": 80.72,
    "sha1": "bce62439f0d5fea40f5c7734aaaba5a43cefc8bb",
    "why": "what the voiced level register does between Fseq frames"
+  },
+  {
+   "file": "15_filter.mid",
+   "segments": [
+    {
+     "id": "filtoff-a",
+     "what": "the source with the part filter switched off: every response below is a ratio to this",
+     "pins": [
+      "filter response"
+     ],
+     "measure": "spectrum",
+     "note": 60,
+     "velocity": 100,
+     "t_on": 4.1,
+     "t_off": 7.1,
+     "t_end": 7.8,
+     "steady": [
+      4.7,
+      6.9
+     ]
+    },
+    {
+     "id": "wcut-0",
+     "what": "LPF24 at cutoff byte 0, resonance 0: where the corner sits and how steep it is",
+     "pins": [
+      "CUT_HZ0",
+      "CUT_OCT"
+     ],
+     "measure": "spectrum",
+     "note": 60,
+     "velocity": 100,
+     "t_on": 9.0,
+     "t_off": 12.0,
+     "t_end": 12.7,
+     "steady": [
+      9.6,
+      11.8
+     ]
+    },
+    {
+     "id": "wcut-8",
+     "what": "LPF24 at cutoff byte 8, resonance 0: where the corner sits and how steep it is",
+     "pins": [
+      "CUT_HZ0",
+      "CUT_OCT"
+     ],
+     "measure": "spectrum",
+     "note": 60,
+     "velocity": 100,
+     "t_on": 13.2,
+     "t_off": 16.2,
+     "t_end": 16.9,
+     "steady": [
+      13.8,
+      16.0
+     ]
+    },
+    {
+     "id": "wcut-16",
+     "what": "LPF24 at cutoff byte 16, resonance 0: where the corner sits and how steep it is",
+     "pins": [
+      "CUT_HZ0",
+      "CUT_OCT"
+     ],
+     "measure": "spectrum",
+     "note": 60,
+     "velocity": 100,
+     "t_on": 17.4,
+     "t_off": 20.4,
+     "t_end": 21.1,
+     "steady": [
+      18.0,
+      20.2
+     ]
+    },
+    {
+     "id": "wcut-24",
+     "what": "LPF24 at cutoff byte 24, resonance 0: where the corner sits and how steep it is",
+     "pins": [
+      "CUT_HZ0",
+      "CUT_OCT"
+     ],
+     "measure": "spectrum",
+     "note": 60,
+     "velocity": 100,
+     "t_on": 21.6,
+     "t_off": 24.6,
+     "t_end": 25.3,
+     "steady": [
+      22.2,
+      24.4
+     ]
+    },
+    {
+     "id": "wcut-32",
+     "what": "LPF24 at cutoff byte 32, resonance 0: where the corner sits and how steep it is",
+     "pins": [
+      "CUT_HZ0",
+      "CUT_OCT"
+     ],
+     "measure": "spectrum",
+     "note": 60,
+     "velocity": 100,
+     "t_on": 25.8,
+     "t_off": 28.8,
+     "t_end": 29.5,
+     "steady": [
+      26.4,
+      28.6
+     ]
+    },
+    {
+     "id": "wcut-40",
+     "what": "LPF24 at cutoff byte 40, resonance 0: where the corner sits and how steep it is",
+     "pins": [
+      "CUT_HZ0",
+      "CUT_OCT"
+     ],
+     "measure": "spectrum",
+     "note": 60,
+     "velocity": 100,
+     "t_on": 30.0,
+     "t_off": 33.0,
+     "t_end": 33.7,
+     "steady": [
+      30.6,
+      32.8
+     ]
+    },
+    {
+     "id": "wcut-48",
+     "what": "LPF24 at cutoff byte 48, resonance 0: where the corner sits and how steep it is",
+     "pins": [
+      "CUT_HZ0",
+      "CUT_OCT"
+     ],
+     "measure": "spectrum",
+     "note": 60,
+     "velocity": 100,
+     "t_on": 34.2,
+     "t_off": 37.2,
+     "t_end": 37.9,
+     "steady": [
+      34.8,
+      37.0
+     ]
+    },
+    {
+     "id": "wcut-56",
+     "what": "LPF24 at cutoff byte 56, resonance 0: where the corner sits and how steep it is",
+     "pins": [
+      "CUT_HZ0",
+      "CUT_OCT"
+     ],
+     "measure": "spectrum",
+     "note": 60,
+     "velocity": 100,
+     "t_on": 38.4,
+     "t_off": 41.4,
+     "t_end": 42.1,
+     "steady": [
+      39.0,
+      41.2
+     ]
+    },
+    {
+     "id": "wcut-64",
+     "what": "LPF24 at cutoff byte 64, resonance 0: where the corner sits and how steep it is",
+     "pins": [
+      "CUT_HZ0",
+      "CUT_OCT"
+     ],
+     "measure": "spectrum",
+     "note": 60,
+     "velocity": 100,
+     "t_on": 42.6,
+     "t_off": 45.6,
+     "t_end": 46.3,
+     "steady": [
+      43.2,
+      45.4
+     ]
+    },
+    {
+     "id": "wcut-72",
+     "what": "LPF24 at cutoff byte 72, resonance 0: where the corner sits and how steep it is",
+     "pins": [
+      "CUT_HZ0",
+      "CUT_OCT"
+     ],
+     "measure": "spectrum",
+     "note": 60,
+     "velocity": 100,
+     "t_on": 46.8,
+     "t_off": 49.8,
+     "t_end": 50.5,
+     "steady": [
+      47.4,
+      49.6
+     ]
+    },
+    {
+     "id": "wcut-80",
+     "what": "LPF24 at cutoff byte 80, resonance 0: where the corner sits and how steep it is",
+     "pins": [
+      "CUT_HZ0",
+      "CUT_OCT"
+     ],
+     "measure": "spectrum",
+     "note": 60,
+     "velocity": 100,
+     "t_on": 51.0,
+     "t_off": 54.0,
+     "t_end": 54.7,
+     "steady": [
+      51.6,
+      53.8
+     ]
+    },
+    {
+     "id": "wcut-88",
+     "what": "LPF24 at cutoff byte 88, resonance 0: where the corner sits and how steep it is",
+     "pins": [
+      "CUT_HZ0",
+      "CUT_OCT"
+     ],
+     "measure": "spectrum",
+     "note": 60,
+     "velocity": 100,
+     "t_on": 55.2,
+     "t_off": 58.2,
+     "t_end": 58.9,
+     "steady": [
+      55.8,
+      58.0
+     ]
+    },
+    {
+     "id": "wcut-96",
+     "what": "LPF24 at cutoff byte 96, resonance 0: where the corner sits and how steep it is",
+     "pins": [
+      "CUT_HZ0",
+      "CUT_OCT"
+     ],
+     "measure": "spectrum",
+     "note": 60,
+     "velocity": 100,
+     "t_on": 59.4,
+     "t_off": 62.4,
+     "t_end": 63.1,
+     "steady": [
+      60.0,
+      62.2
+     ]
+    },
+    {
+     "id": "wcut-104",
+     "what": "LPF24 at cutoff byte 104, resonance 0: where the corner sits and how steep it is",
+     "pins": [
+      "CUT_HZ0",
+      "CUT_OCT"
+     ],
+     "measure": "spectrum",
+     "note": 60,
+     "velocity": 100,
+     "t_on": 63.6,
+     "t_off": 66.6,
+     "t_end": 67.3,
+     "steady": [
+      64.2,
+      66.4
+     ]
+    },
+    {
+     "id": "wcut-112",
+     "what": "LPF24 at cutoff byte 112, resonance 0: where the corner sits and how steep it is",
+     "pins": [
+      "CUT_HZ0",
+      "CUT_OCT"
+     ],
+     "measure": "spectrum",
+     "note": 60,
+     "velocity": 100,
+     "t_on": 67.8,
+     "t_off": 70.8,
+     "t_end": 71.5,
+     "steady": [
+      68.4,
+      70.6
+     ]
+    },
+    {
+     "id": "wcut-120",
+     "what": "LPF24 at cutoff byte 120, resonance 0: where the corner sits and how steep it is",
+     "pins": [
+      "CUT_HZ0",
+      "CUT_OCT"
+     ],
+     "measure": "spectrum",
+     "note": 60,
+     "velocity": 100,
+     "t_on": 72.0,
+     "t_off": 75.0,
+     "t_end": 75.7,
+     "steady": [
+      72.6,
+      74.8
+     ]
+    },
+    {
+     "id": "wreso-0",
+     "what": "LPF24 at cutoff 64, resonance 0: the peak, which nothing has ever seen",
+     "pins": [
+      "LADDER_K",
+      "RESO_COMP"
+     ],
+     "measure": "spectrum",
+     "note": 60,
+     "velocity": 100,
+     "t_on": 76.2,
+     "t_off": 79.2,
+     "t_end": 79.9,
+     "steady": [
+      76.8,
+      79.0
+     ]
+    },
+    {
+     "id": "wreso-10",
+     "what": "LPF24 at cutoff 64, resonance 10: the peak, which nothing has ever seen",
+     "pins": [
+      "LADDER_K",
+      "RESO_COMP"
+     ],
+     "measure": "spectrum",
+     "note": 60,
+     "velocity": 100,
+     "t_on": 80.4,
+     "t_off": 83.4,
+     "t_end": 84.1,
+     "steady": [
+      81.0,
+      83.2
+     ]
+    },
+    {
+     "id": "wreso-20",
+     "what": "LPF24 at cutoff 64, resonance 20: the peak, which nothing has ever seen",
+     "pins": [
+      "LADDER_K",
+      "RESO_COMP"
+     ],
+     "measure": "spectrum",
+     "note": 60,
+     "velocity": 100,
+     "t_on": 84.6,
+     "t_off": 87.6,
+     "t_end": 88.3,
+     "steady": [
+      85.2,
+      87.4
+     ]
+    },
+    {
+     "id": "wreso-30",
+     "what": "LPF24 at cutoff 64, resonance 30: the peak, which nothing has ever seen",
+     "pins": [
+      "LADDER_K",
+      "RESO_COMP"
+     ],
+     "measure": "spectrum",
+     "note": 60,
+     "velocity": 100,
+     "t_on": 88.8,
+     "t_off": 91.8,
+     "t_end": 92.5,
+     "steady": [
+      89.4,
+      91.6
+     ]
+    },
+    {
+     "id": "wreso-40",
+     "what": "LPF24 at cutoff 64, resonance 40: the peak, which nothing has ever seen",
+     "pins": [
+      "LADDER_K",
+      "RESO_COMP"
+     ],
+     "measure": "spectrum",
+     "note": 60,
+     "velocity": 100,
+     "t_on": 93.0,
+     "t_off": 96.0,
+     "t_end": 96.7,
+     "steady": [
+      93.6,
+      95.8
+     ]
+    },
+    {
+     "id": "wreso-50",
+     "what": "LPF24 at cutoff 64, resonance 50: the peak, which nothing has ever seen",
+     "pins": [
+      "LADDER_K",
+      "RESO_COMP"
+     ],
+     "measure": "spectrum",
+     "note": 60,
+     "velocity": 100,
+     "t_on": 97.2,
+     "t_off": 100.2,
+     "t_end": 100.9,
+     "steady": [
+      97.8,
+      100.0
+     ]
+    },
+    {
+     "id": "wreso-60",
+     "what": "LPF24 at cutoff 64, resonance 60: the peak, which nothing has ever seen",
+     "pins": [
+      "LADDER_K",
+      "RESO_COMP"
+     ],
+     "measure": "spectrum",
+     "note": 60,
+     "velocity": 100,
+     "t_on": 101.4,
+     "t_off": 104.4,
+     "t_end": 105.1,
+     "steady": [
+      102.0,
+      104.2
+     ]
+    },
+    {
+     "id": "wreso-70",
+     "what": "LPF24 at cutoff 64, resonance 70: the peak, which nothing has ever seen",
+     "pins": [
+      "LADDER_K",
+      "RESO_COMP"
+     ],
+     "measure": "spectrum",
+     "note": 60,
+     "velocity": 100,
+     "t_on": 105.6,
+     "t_off": 108.6,
+     "t_end": 109.3,
+     "steady": [
+      106.2,
+      108.4
+     ]
+    },
+    {
+     "id": "wreso-80",
+     "what": "LPF24 at cutoff 64, resonance 80: the peak, which nothing has ever seen",
+     "pins": [
+      "LADDER_K",
+      "RESO_COMP"
+     ],
+     "measure": "spectrum",
+     "note": 60,
+     "velocity": 100,
+     "t_on": 109.8,
+     "t_off": 112.8,
+     "t_end": 113.5,
+     "steady": [
+      110.4,
+      112.6
+     ]
+    },
+    {
+     "id": "wreso-90",
+     "what": "LPF24 at cutoff 64, resonance 90: the peak, which nothing has ever seen",
+     "pins": [
+      "LADDER_K",
+      "RESO_COMP"
+     ],
+     "measure": "spectrum",
+     "note": 60,
+     "velocity": 100,
+     "t_on": 114.0,
+     "t_off": 117.0,
+     "t_end": 117.7,
+     "steady": [
+      114.6,
+      116.8
+     ]
+    },
+    {
+     "id": "wreso-100",
+     "what": "LPF24 at cutoff 64, resonance 100: the peak, which nothing has ever seen",
+     "pins": [
+      "LADDER_K",
+      "RESO_COMP"
+     ],
+     "measure": "spectrum",
+     "note": 60,
+     "velocity": 100,
+     "t_on": 118.2,
+     "t_off": 121.2,
+     "t_end": 121.9,
+     "steady": [
+      118.8,
+      121.0
+     ]
+    },
+    {
+     "id": "wreso-cut32-0",
+     "what": "LPF24 at cutoff 32, resonance 0: the same peak an octave and a half down, where the source is denser",
+     "pins": [
+      "LADDER_K"
+     ],
+     "measure": "spectrum",
+     "note": 60,
+     "velocity": 100,
+     "t_on": 122.4,
+     "t_off": 125.4,
+     "t_end": 126.1,
+     "steady": [
+      123.0,
+      125.2
+     ]
+    },
+    {
+     "id": "wreso-cut32-40",
+     "what": "LPF24 at cutoff 32, resonance 40: the same peak an octave and a half down, where the source is denser",
+     "pins": [
+      "LADDER_K"
+     ],
+     "measure": "spectrum",
+     "note": 60,
+     "velocity": 100,
+     "t_on": 126.6,
+     "t_off": 129.6,
+     "t_end": 130.3,
+     "steady": [
+      127.2,
+      129.4
+     ]
+    },
+    {
+     "id": "wreso-cut32-70",
+     "what": "LPF24 at cutoff 32, resonance 70: the same peak an octave and a half down, where the source is denser",
+     "pins": [
+      "LADDER_K"
+     ],
+     "measure": "spectrum",
+     "note": 60,
+     "velocity": 100,
+     "t_on": 130.8,
+     "t_off": 133.8,
+     "t_end": 134.5,
+     "steady": [
+      131.4,
+      133.6
+     ]
+    },
+    {
+     "id": "wreso-cut32-100",
+     "what": "LPF24 at cutoff 32, resonance 100: the same peak an octave and a half down, where the source is denser",
+     "pins": [
+      "LADDER_K"
+     ],
+     "measure": "spectrum",
+     "note": 60,
+     "velocity": 100,
+     "t_on": 135.0,
+     "t_off": 138.0,
+     "t_end": 138.7,
+     "steady": [
+      135.6,
+      137.8
+     ]
+    },
+    {
+     "id": "wtype-LPF24",
+     "what": "LPF24 at cutoff 64, resonance 0: the slope and the shape",
+     "pins": [
+      "filter response"
+     ],
+     "measure": "spectrum",
+     "note": 60,
+     "velocity": 100,
+     "t_on": 139.2,
+     "t_off": 142.2,
+     "t_end": 142.9,
+     "steady": [
+      139.8,
+      142.0
+     ]
+    },
+    {
+     "id": "wtype-LPF18",
+     "what": "LPF18 at cutoff 64, resonance 0: the slope and the shape",
+     "pins": [
+      "filter response"
+     ],
+     "measure": "spectrum",
+     "note": 60,
+     "velocity": 100,
+     "t_on": 143.4,
+     "t_off": 146.4,
+     "t_end": 147.1,
+     "steady": [
+      144.0,
+      146.2
+     ]
+    },
+    {
+     "id": "wtype-LPF12",
+     "what": "LPF12 at cutoff 64, resonance 0: the slope and the shape",
+     "pins": [
+      "filter response"
+     ],
+     "measure": "spectrum",
+     "note": 60,
+     "velocity": 100,
+     "t_on": 147.6,
+     "t_off": 150.6,
+     "t_end": 151.3,
+     "steady": [
+      148.2,
+      150.4
+     ]
+    },
+    {
+     "id": "wtype-HPF",
+     "what": "HPF at cutoff 64, resonance 0: the slope and the shape",
+     "pins": [
+      "filter response"
+     ],
+     "measure": "spectrum",
+     "note": 60,
+     "velocity": 100,
+     "t_on": 151.8,
+     "t_off": 154.8,
+     "t_end": 155.5,
+     "steady": [
+      152.4,
+      154.6
+     ]
+    },
+    {
+     "id": "wtype-BPF",
+     "what": "BPF at cutoff 64, resonance 0: the slope and the shape",
+     "pins": [
+      "filter response"
+     ],
+     "measure": "spectrum",
+     "note": 60,
+     "velocity": 100,
+     "t_on": 156.0,
+     "t_off": 159.0,
+     "t_end": 159.7,
+     "steady": [
+      156.6,
+      158.8
+     ]
+    },
+    {
+     "id": "wtype-BEF",
+     "what": "BEF at cutoff 64, resonance 0: the slope and the shape",
+     "pins": [
+      "filter response"
+     ],
+     "measure": "spectrum",
+     "note": 60,
+     "velocity": 100,
+     "t_on": 160.2,
+     "t_off": 163.2,
+     "t_end": 163.9,
+     "steady": [
+      160.8,
+      163.0
+     ]
+    },
+    {
+     "id": "wtypeq-LPF24",
+     "what": "LPF24 at cutoff 64, resonance 60: the firmware zeroes resonance table B for HPF and BEF, and this is where that shows",
+     "pins": [
+      "RESO_COMP"
+     ],
+     "measure": "spectrum",
+     "note": 60,
+     "velocity": 100,
+     "t_on": 164.4,
+     "t_off": 167.4,
+     "t_end": 168.1,
+     "steady": [
+      165.0,
+      167.2
+     ]
+    },
+    {
+     "id": "wtypeq-LPF18",
+     "what": "LPF18 at cutoff 64, resonance 60: the firmware zeroes resonance table B for HPF and BEF, and this is where that shows",
+     "pins": [
+      "RESO_COMP"
+     ],
+     "measure": "spectrum",
+     "note": 60,
+     "velocity": 100,
+     "t_on": 168.6,
+     "t_off": 171.6,
+     "t_end": 172.3,
+     "steady": [
+      169.2,
+      171.4
+     ]
+    },
+    {
+     "id": "wtypeq-LPF12",
+     "what": "LPF12 at cutoff 64, resonance 60: the firmware zeroes resonance table B for HPF and BEF, and this is where that shows",
+     "pins": [
+      "RESO_COMP"
+     ],
+     "measure": "spectrum",
+     "note": 60,
+     "velocity": 100,
+     "t_on": 172.8,
+     "t_off": 175.8,
+     "t_end": 176.5,
+     "steady": [
+      173.4,
+      175.6
+     ]
+    },
+    {
+     "id": "wtypeq-HPF",
+     "what": "HPF at cutoff 64, resonance 60: the firmware zeroes resonance table B for HPF and BEF, and this is where that shows",
+     "pins": [
+      "RESO_COMP"
+     ],
+     "measure": "spectrum",
+     "note": 60,
+     "velocity": 100,
+     "t_on": 177.0,
+     "t_off": 180.0,
+     "t_end": 180.7,
+     "steady": [
+      177.6,
+      179.8
+     ]
+    },
+    {
+     "id": "wtypeq-BPF",
+     "what": "BPF at cutoff 64, resonance 60: the firmware zeroes resonance table B for HPF and BEF, and this is where that shows",
+     "pins": [
+      "RESO_COMP"
+     ],
+     "measure": "spectrum",
+     "note": 60,
+     "velocity": 100,
+     "t_on": 181.2,
+     "t_off": 184.2,
+     "t_end": 184.9,
+     "steady": [
+      181.8,
+      184.0
+     ]
+    },
+    {
+     "id": "wtypeq-BEF",
+     "what": "BEF at cutoff 64, resonance 60: the firmware zeroes resonance table B for HPF and BEF, and this is where that shows",
+     "pins": [
+      "RESO_COMP"
+     ],
+     "measure": "spectrum",
+     "note": 60,
+     "velocity": 100,
+     "t_on": 185.4,
+     "t_off": 188.4,
+     "t_end": 189.1,
+     "steady": [
+      186.0,
+      188.2
+     ]
+    },
+    {
+     "id": "whpf-cut16",
+     "what": "HPF at cutoff byte 16: whether the corner law is the lowpass's",
+     "pins": [
+      "CUT_OCT"
+     ],
+     "measure": "spectrum",
+     "note": 60,
+     "velocity": 100,
+     "t_on": 189.6,
+     "t_off": 192.6,
+     "t_end": 193.3,
+     "steady": [
+      190.2,
+      192.4
+     ]
+    },
+    {
+     "id": "whpf-cut48",
+     "what": "HPF at cutoff byte 48: whether the corner law is the lowpass's",
+     "pins": [
+      "CUT_OCT"
+     ],
+     "measure": "spectrum",
+     "note": 60,
+     "velocity": 100,
+     "t_on": 193.8,
+     "t_off": 196.8,
+     "t_end": 197.5,
+     "steady": [
+      194.4,
+      196.6
+     ]
+    },
+    {
+     "id": "whpf-cut80",
+     "what": "HPF at cutoff byte 80: whether the corner law is the lowpass's",
+     "pins": [
+      "CUT_OCT"
+     ],
+     "measure": "spectrum",
+     "note": 60,
+     "velocity": 100,
+     "t_on": 198.0,
+     "t_off": 201.0,
+     "t_end": 201.7,
+     "steady": [
+      198.6,
+      200.8
+     ]
+    },
+    {
+     "id": "whpf-cut112",
+     "what": "HPF at cutoff byte 112: whether the corner law is the lowpass's",
+     "pins": [
+      "CUT_OCT"
+     ],
+     "measure": "spectrum",
+     "note": 60,
+     "velocity": 100,
+     "t_on": 202.2,
+     "t_off": 205.2,
+     "t_end": 205.9,
+     "steady": [
+      202.8,
+      205.0
+     ]
+    },
+    {
+     "id": "wbpf-cut16",
+     "what": "BPF at cutoff byte 16: whether the corner law is the lowpass's",
+     "pins": [
+      "CUT_OCT"
+     ],
+     "measure": "spectrum",
+     "note": 60,
+     "velocity": 100,
+     "t_on": 206.4,
+     "t_off": 209.4,
+     "t_end": 210.1,
+     "steady": [
+      207.0,
+      209.2
+     ]
+    },
+    {
+     "id": "wbpf-cut48",
+     "what": "BPF at cutoff byte 48: whether the corner law is the lowpass's",
+     "pins": [
+      "CUT_OCT"
+     ],
+     "measure": "spectrum",
+     "note": 60,
+     "velocity": 100,
+     "t_on": 210.6,
+     "t_off": 213.6,
+     "t_end": 214.3,
+     "steady": [
+      211.2,
+      213.4
+     ]
+    },
+    {
+     "id": "wbpf-cut80",
+     "what": "BPF at cutoff byte 80: whether the corner law is the lowpass's",
+     "pins": [
+      "CUT_OCT"
+     ],
+     "measure": "spectrum",
+     "note": 60,
+     "velocity": 100,
+     "t_on": 214.8,
+     "t_off": 217.8,
+     "t_end": 218.5,
+     "steady": [
+      215.4,
+      217.6
+     ]
+    },
+    {
+     "id": "wbpf-cut112",
+     "what": "BPF at cutoff byte 112: whether the corner law is the lowpass's",
+     "pins": [
+      "CUT_OCT"
+     ],
+     "measure": "spectrum",
+     "note": 60,
+     "velocity": 100,
+     "t_on": 219.0,
+     "t_off": 222.0,
+     "t_end": 222.7,
+     "steady": [
+      219.6,
+      221.8
+     ]
+    },
+    {
+     "id": "filtoff-b",
+     "what": "the source with the filter off again, at the other end of the file: the drift between the two says whether anything moved under the sweep",
+     "pins": [
+      "filter response"
+     ],
+     "measure": "spectrum",
+     "note": 60,
+     "velocity": 100,
+     "t_on": 223.9,
+     "t_off": 226.9,
+     "t_end": 227.6,
+     "steady": [
+      224.5,
+      226.7
+     ]
+    }
+   ],
+   "marker_start": [
+    1.2,
+    1.5,
+    1.8
+   ],
+   "marker_end": [
+    228.8,
+    229.1,
+    229.4
+   ],
+   "duration_s": 230.52,
+   "sha1": "a63264f3d8f2be0a7c35bb48b18e2dd93dd58fcb",
+   "why": "the per-voice filter, against a source that has energy at every frequency"
   }
  ]
 }

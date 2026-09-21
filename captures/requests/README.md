@@ -35,7 +35,8 @@ The recording procedure is in `docs/hardware_capture_request.md`. In short: play
 | `05b_unvoiced2.mid` | 31 | 2.3 | the noise formant at a second fundamental, note 36 |
 | `08b_panlevel_perfpn.mid` | 8 | 0.7 | the performance pan, which 08_panlevel leaves at centre |
 | `12_fseqlevel.mid` | 14 | 1.3 | what the voiced level register does between Fseq frames |
+| `15_filter.mid` | 53 | 3.8 | the per-voice filter, against a source that has energy at every frequency |
 
-Total 797 segments, 64 minutes.
+Total 850 segments, 68 minutes.
 
 Files are numbered in priority order. 01 to 04 carry most of the value: without 01 nothing else can be read in absolute terms, and 02 to 04 settle the envelope, the modulation index and the formant window, which are the three models the engine leans on hardest.
