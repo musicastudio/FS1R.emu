@@ -16,23 +16,23 @@ This project is still in development, still not fully accurate to hardware.
 
 ### FS1R DEMO SONG 2: Full Tines
 
-*** FS1R Hardware Recording ***
+**FS1R Hardware Recording**
 
 https://github.com/user-attachments/assets/fc235492-d053-4abb-af04-8e1041c32d46
 
-*** FSVR ***
+**FSVR**
 
 https://github.com/user-attachments/assets/30774094-75f1-4819-8b73-ce0a620f2f7c
 
 ### FS1R DEMO SONG 1: Vokodrone
 
-*** FS1R Hardware Recording ***
+**FS1R Hardware Recording**
 
 https://github.com/user-attachments/assets/8afa466b-e7c4-4427-a058-392120f1a15d
 
-*** FSVR ***
+**FSVR**
 
-https://github.com/user-attachments/assets/e557f16e-7555-4a9a-a857-891be50bb20b
+https://github.com/user-attachments/assets/43fdbb3e-3b65-424d-8f08-f2e8452ab288
 
 ## Background and History
 
@@ -40,7 +40,7 @@ In 2025 Zhiyuan Wan ([rgwan](https://github.com/rgwan/)) created the **[rgwan/fs
 
 The progress of this work was shared on the [yamahamusicians.com forum](https://yamahamusicians.com/forum/threads/im-trying-to-emulating-an-fs1r.23211/).
 
-Just over a year later in September 2026, James Hansen ([jameshansen](https://github.com/jameshansen/)) created this repository, after analyzing and attempting to create the FS1R in software based on the material in rgwan's repository.
+Just over a year later in September 2026, James Hansen ([jameshansen](https://github.com/jameshansen/)) created this repository, after analyzing and attempting to create the FS1R in software based on the material in rgwan's repository using a custom approach where the firmware files were decompiled with [Ghidra](https://github.com/NationalSecurityAgency/ghidra) into a database that can be read and explored by a coding AI agent.
 
 Today, jameshansen and rgwan are collaborating on this project to improve the accuracy of the engine and bring it as close to the FS1R as possible.
 
