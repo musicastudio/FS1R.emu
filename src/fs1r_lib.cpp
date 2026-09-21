@@ -92,6 +92,8 @@ static const double EG_HOLD_LAG  = 0.0081;  // ... plus this, fixed. MEASURED ov
 static const double FEG_SEMIS    = 48.0;    // frequency EG range at the full register swing of 128 (four octaves).
                                             // The sysex byte reaches the register through FEGLVL, which is measured
 static const double FEG_TIME_K   = 0.3;     // frequency EG time as a fraction of rate_secs
+static const double FEG_STEP_K   = 0.25;    // the filter EG's time constant as a fraction of a full
+                                            // traverse at its own rate. SWEEP
 static const double WIN_SKIRT    = 2.0;     // the grain window is sin^p, p = WIN_SKIRT * step^skirt. The
                                             // skirt is the one shape control all1, all2, odd1 and odd2
                                             // have, voice byte 6 being the formant's bandwidth and
@@ -199,15 +201,18 @@ static const double NOISE_RES_DC[8] = {0, 0, 0, 0, 0.21, 0.46, 0.76, 1.02};
 // at 755 Hz with the byte at 0, where 06_filter_1 takes 14.15 dB off a 32.7 Hz partial there. It could
 // not have been right at both ends either, since -log(1 - a) only spans 14:1 over the whole byte range
 // and the unit spans far more than that. So the corner goes as the byte, MEASURED 2026-09-21.
-static const double CUT_HZ0      = 28.5;    // the corner at cutoff byte 0 ...
-static const double CUT_OCT      = 0.110;   // ... doubling every 9.1 bytes. FITTED over the six cutoff
-                                            // segments of 06_filter_1 that say anything, 0.74 dB rms:
-                                            // -14.15, -6.75, -0.97, +0.40, +0.28 and +0.12 dB off a
-                                            // 32.7 Hz partial at bytes 0, 8, 16, 24, 32 and 40. It puts
-                                            // byte 64 at 3.7 kHz, which is why the three lowpass types
-                                            // measure identical on a 261 Hz tone there, and leaves the
-                                            // top of the range wide open, which is what the unit does.
-static const double CUT_BYTE_MIN = -5.0;    // and the filter EG drives the byte past zero before the chip
+static const double CUT_HZ0      = 17.4;    // the corner at cutoff byte 0 ...
+static const double CUT_OCT      = 1.0 / 12.0;  // ... doubling every twelve bytes, so 0 to 127 spans
+                                            // 10.6 octaves, 17 Hz to 26 kHz. MEASURED off 15_filter,
+                                            // which traces the response instead of sampling it: the
+                                            // half-power point over cutoff bytes 16 to 112 lands on
+                                            // this line to 0.098 octaves rms across thirteen points,
+                                            // 52 Hz at byte 16 through 11.3 kHz at 112. The 28.5 and
+                                            // 0.110 this replaces were fitted on 06_filter_1, whose
+                                            // source is one partial at 32.7 Hz, so only three of its
+                                            // sixteen cutoff segments said anything at all and the
+                                            // corner came out two octaves high at byte 64.
+static const double CUT_BYTE_MIN = 0.0;    // and the filter EG drives the byte past zero before the chip
                                             // stops following it. MEASURED: 14_sens's flteg2 segments dip
                                             // 23 dB on the same partial where byte 0 alone takes off
                                             // 14.15, which is five bytes further down. Where exactly the
@@ -215,14 +220,22 @@ static const double CUT_BYTE_MIN = -5.0;    // and the filter EG drives the byte
 static const double RESO_Q0      = 1.0;     // filter Q at raw resonance 0 (displayed -16) ...
 static const double RESO_PER_OCT = 32.0;    // ... doubling every 32 raw steps, for the HPF/BPF/BEF modes only.
                                             // The three lowpasses go through the ladder below instead.
-static const double LADDER_K     = 2.0;     // ladder feedback when resonance table A reads 1. Four would be
-                                            // the self-oscillation point of a 4-pole ladder; the demo wants a
-                                            // much milder peak than that, which is the same thing the old
-                                            // single-1/Q reading was saying when it needed RESO_PER_OCT = 32.
+static const double LADDER_K     = 3.65;    // ladder feedback when resonance table A reads 1, four being
+                                            // the self-oscillation point of a 4-pole ladder. MEASURED off
+                                            // 15_filter, the first recording that can see resonance at all:
+                                            // the unit lifts its peak 1.20, 3.48, 6.73, 9.46, 11.90, 14.49,
+                                            // 17.50, 18.78, 19.83, 20.49 and 22.18 dB over resonance 0 to
+                                            // 100 at cutoff 64, so it runs right up to the edge. The 2.0
+                                            // this replaces tops out at 8.5 dB and came off the demo, which
+                                            // cannot see a resonance peak either. 3.65 is where the eleven
+                                            // lifts land at 0.45 dB rms with the mean at -0.04, against 0.98
+                                            // at 3.50 and 1.12 at 3.80. See reso_fb for the cube.
 static const double RESO_COMP    = 0.0;     // how much of resonance table B is spent lifting the passband on
-                                            // top of the ladder's own (1 + k) normalisation. The demo says
-                                            // none of it: any broadband lift here shows up directly as a level
-                                            // error on the songs whose patches sit near 0 dB already.
+                                            // top of the ladder's own (1 + k) normalisation. MEASURED as none
+                                            // of it, which the demo had only guessed: 15_filter's passband
+                                            // below the corner reads 0.2, -0.9, 0.0 dB at resonance 0 and
+                                            // 0.0, -0.1, 0.1 at resonance 60, so the octaves the peak does
+                                            // not reach do not move at all.
 static const double FSEQ_DELAY_S = 1.0;     // performance Fseq start delay at its maximum of 99
 static const double VCTRL_FREQ   = 8.0;     // voice Formant/FM control: pitch word units per depth step
 static const double PMS_FRAC[8]  = {0, 0.0264, 0.0534, 0.0889, 0.1612, 0.2769, 0.4967, 1.0};  // per-op pitch mod sensitivity, DX7 curve
@@ -379,7 +392,14 @@ static inline double cut_hz(double c) {
 // The demo settled both scalings, and neither landed on the textbook value. See TODO.md, Tier 4.
 static inline double reso_r(int r) { return pow(2.0, -clampi(r + 16, 0, 116) / 16.0); }  // fltReso = sysex byte - 16, so r+16 is the byte: A[byte] = 1 - 2^(-byte/16), measured on hardware (capture3's convhand)
 static inline double reso_q(int r) { return cal::RESO_Q0 * pow(2.0, clampi(r + 16, 0, 116) / cal::RESO_PER_OCT); }
-static inline double reso_fb(int r) { return cal::LADDER_K * (1.0 - reso_r(r)); }
+// The feedback goes as the CUBE of resonance table A, not as A itself. MEASURED: driving the engine's own
+// ladder with noise gives a k-to-peak-lift map, and pushing 15_filter's eleven measured lifts back through
+// it asks for k = 0.00, 0.91, 1.70, 2.07, 2.46, 2.70, 3.04, 3.13, 3.20, 3.25, 3.37 over resonance 0 to
+// 100. Against table A that is flat in k / A^3 at 3.22 to 3.45 from resonance 20 up, where k / A climbs
+// from 2.15 to 3.39 and k / A^2 from 2.72 to 3.42. The cube is empirical, and the CPU side is not in
+// question: the 2026-09-19 register retake matched table A to the integer, so this is what the chip makes
+// of a number we know it is sent.
+static inline double reso_fb(int r) { double a = 1.0 - reso_r(r); return cal::LADDER_K * a * a * a; }
 static inline double reso_comp(int type, int r) {
     if (type == 3 || type == 5) return 0.0;                 // the firmware zeroes table B for HPF and BEF
     double x = reso_r(r); return cal::RESO_COMP * std::max(0.0, 0.5 - 2 * x * x);
@@ -454,7 +474,7 @@ struct VFilter {
 struct StepEG {
     double cur = 0, target = 0, k = 1; int stage = 9; double L[4] = {}; int R[4] = {};
     void start(const double* lv, const int* rt) { for (int i = 0; i < 4; i++) { L[i] = lv[i]; R[i] = rt[i]; } cur = L[3]; go(0); }
-    void go(int s) { stage = s; target = L[s]; k = 1.0 - exp(-1.0 / (rate_secs(clampi(R[s], 0, 63)) * 0.25 * TICK_HZ + 1)); }
+    void go(int s) { stage = s; target = L[s]; k = 1.0 - exp(-1.0 / (rate_secs(clampi(R[s], 0, 63)) * cal::FEG_STEP_K * TICK_HZ + 1)); }
     void release() { go(3); }
     inline double tick() {
         if (stage > 3) return cur;
