@@ -18,7 +18,7 @@ https://github.com/user-attachments/assets/1261aa38-1618-4524-8296-f5b9f0c4131b
 
 [Download](https://raw.githubusercontent.com/musicastudio/FSVR/main/captures/fs1r_demo01_hardware.mp4) if the player does not load.
 
-**FS1R demo song "Vokodrone" on FSVR v0.3.5**
+**FS1R demo song "Vokodrone" on FSVR v0.4.0**
 
 https://github.com/user-attachments/assets/344fa64c-4c79-4513-9388-a0d28e15c197
 
@@ -32,7 +32,7 @@ https://github.com/user-attachments/assets/344fa64c-4c79-4513-9388-a0d28e15c197
 
 [Download](https://raw.githubusercontent.com/musicastudio/FSVR/main/captures/fs1r_demo02_hardware.mp4) if the player does not load.
 
-**FS1R demo song "Full Tines" on FSVR v0.3.5**
+**FS1R demo song "Full Tines" on FSVR v0.4.0**
 
 <!-- Same again for captures/fs1r_demo02_engine.mp4. -->
 

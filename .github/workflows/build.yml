@@ -28,7 +28,7 @@ jobs:
         if: matrix.os == 'windows-latest'
         uses: actions/upload-artifact@v4
         with:
-          name: fs1r_emu-console-windows
+          name: FSVR-console-windows
           path: bin/fs1r_emu.exe
           if-no-files-found: error
 
@@ -61,7 +61,7 @@ jobs:
         run: cmake --build build/plugin --config Release
       - uses: actions/upload-artifact@v4
         with:
-          name: fs1r_emu-plugin-${{ matrix.name }}
+          name: FSVR-plugin-${{ matrix.name }}
           path: bin
           if-no-files-found: error
 

@@ -1,6 +1,6 @@
 # Licence and provenance
 
-FS1R.emu is licensed under the **GNU General Public License version 3** (see `LICENSE`). GPL-3 matches
+FSVR is licensed under the **GNU General Public License version 3** (see `LICENSE`). GPL-3 matches
 what gearmulator uses and satisfies JUCE's GPL terms, which is what lets the plugin link JUCE without a
 commercial licence.
 
@@ -36,7 +36,8 @@ dump to use `-r`, `tools/extract_*.py` or the plugin's EPROM button.
 tables in `plugin/parameterDescriptions_fs1r.json` are derived from them.
 
 **The panel artwork** in `plugin/fs1r_panel.svg` is the front panel figure from page 14 of the FS1R
-owner's manual (Yamaha, 1998), converted to vectors. It is Yamaha's drawing, redistributed here for
+owner's manual (Yamaha, 1998), converted to vectors, with the FS1R logo on it replaced by this
+project's own FSVR wordmark (`docs/fsvr.svg`). It is Yamaha's drawing, redistributed here for
 the same reason as the parameter tables: the plugin is a controller for a specific piece of hardware
 and is not useful if it does not look like one. Not ours to license.
 

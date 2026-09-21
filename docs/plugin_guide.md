@@ -1,4 +1,4 @@
-# FS1R.emu plugin guide
+# FSVR plugin guide
 
 The plugin is a controller for the engine, not a second synthesiser. Everything you move becomes a
 sysex parameter change into `fs1r::Device`, the engine echoes it back, and the echo is what moves the
@@ -22,7 +22,7 @@ engine library, the console and the self checks, and needs no submodules.
 driver's own period, 10 ms on most machines, and that is the only entry in the buffer size list.
 **Windows Audio (Exclusive Mode)** and **DirectSound** let you choose the size: exclusive mode takes
 the device away from every other program while the standalone runs, DirectSound adds some latency of
-its own. The choice is remembered in `%APPDATA%\FS1R.emu\FS1R.settings`.
+its own. The choice is remembered in `%APPDATA%\FSVR\FSVR.settings`.
 
 ## Voices
 
@@ -73,10 +73,12 @@ Loading one only changes where they are read from.
 
 ## The panel
 
-The panel is page 14 of the owner's manual, with live controls placed over the drawing. Two departures
-from the hardware: the volume knob sits midway between the panel's left edge and the display rather
-than hard against the edge, and the BANK/PGM# strip shows the bank while the cursor is on it and the
-program number the rest of the time, because there is only room for three characters under that label.
+The panel is page 14 of the owner's manual, with live controls placed over the drawing. Three departures
+from the hardware: the logo reads FSVR, in the manual drawing's own letters with a V drawn to match the
+1 it replaces (`docs/fsvr.svg`, dropped in by `tools/make_panel_svg.py`); the volume knob sits midway
+between the panel's left edge and the display rather than hard against the edge; and the BANK/PGM# strip
+shows the bank while the cursor is on it and the program number the rest of the time, because there is
+only room for three characters under that label.
 
 The four controller knobs are the selected part's own ATTACK, RELEASE, FORMANT and FM parameters, so
 they follow the part: switching part or loading a performance moves them.

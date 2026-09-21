@@ -3,11 +3,12 @@
 #   cmake --build build/cmake --config Release
 # Needs the submodules: git submodule update --init --recursive
 juce_add_plugin(fs1r_plugin
-    PRODUCT_NAME "FS1R.emu"
+    PRODUCT_NAME "FSVR"
     VERSION ${PROJECT_VERSION}
     COMPANY_NAME "Musica.Studio"
+    BUNDLE_ID "studio.musica.fsvr"          # said outright, or JUCE builds it from the target name
     PLUGIN_MANUFACTURER_CODE Msst
-    PLUGIN_CODE Fs1r
+    PLUGIN_CODE Fsvr
     FORMATS VST3 Standalone
     IS_SYNTH TRUE
     NEEDS_MIDI_INPUT TRUE
@@ -65,6 +66,6 @@ target_link_libraries(fs1r_plugin PRIVATE
 # CLAP through clap-juce-extensions, which reuses the same target.
 if(TARGET clap_juce_extensions)
     clap_juce_extensions_plugin(TARGET fs1r_plugin
-        CLAP_ID "studio.musica.fs1r-emu"
+        CLAP_ID "studio.musica.fsvr"
         CLAP_FEATURES instrument synthesizer "FM" stereo)
 endif()

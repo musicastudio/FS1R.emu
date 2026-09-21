@@ -46,7 +46,7 @@ EXE = ROOT / "bin" / ("fs1r_emu.exe" if sys.platform == "win32" else "fs1r_emu")
 RENDER = ROOT / "bin" / ("render_capture.exe" if sys.platform == "win32" else "render_capture")
 DEMO = HERE / "demo"
 RECORDING = HERE / "FS1R DEMO.flac"
-LABEL = {False: "FS1R.emu engine", True: "FS1R hardware (digital out)"}
+LABEL = {False: "FSVR engine", True: "FS1R hardware (digital out)"}
 # drawtext asks fontconfig for the font, and fontconfig is not set up on every machine that has an
 # ffmpeg. Where it comes back empty, hand drawtext a file instead. $FS1R_DEMO_FONT wins if it is set,
 # and matplotlib's own DejaVu is the last resort on a container with no system fonts at all.
