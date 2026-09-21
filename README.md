@@ -1,10 +1,10 @@
-# FS1R.emu
+# FSVR
 
-![The FS1R.emu standalone running](docs/standalone.png)
+![The FSVR standalone running](docs/standalone.png)
 
-The Yamaha FS1R as a plugin and a console synth: its firmware logic rewritten in C++ from the decompiled ROM, four parts, 32 channels, the filter, both LFOs, pan, the three effect blocks, performances and Fseq playback. VST3, CLAP and standalone, with the front panel as the GUI.
+FSVR, Formant Synthesizer Virtual Rack, is a software reconstruction of the Yamaha FS1R as a plugin and a console synth: its firmware logic rewritten in C++ from the decompiled ROM, four parts, 32 channels, the filter, both LFOs, pan, the three effect blocks, performances and Fseq playback. VST3, CLAP and standalone, with the front panel as the GUI.
 
-Download the latest build: **https://github.com/musicastudio/FS1R.emu/releases/latest** (no installer, no dependencies).
+Download the latest build: **https://github.com/musicastudio/FSVR/releases/latest** (no installer, no dependencies).
 
 Licensed GPL-3, see `LICENSE` and `NOTICE.md`.
 
@@ -16,13 +16,13 @@ This project is still in development, still not fully accurate to hardware.
 
 https://github.com/user-attachments/assets/1261aa38-1618-4524-8296-f5b9f0c4131b
 
-[Download](https://raw.githubusercontent.com/musicastudio/FS1R.emu/main/captures/fs1r_demo01_hardware.mp4) if the player does not load.
+[Download](https://raw.githubusercontent.com/musicastudio/FSVR/main/captures/fs1r_demo01_hardware.mp4) if the player does not load.
 
-**FS1R demo song "Vokodrone" on FS1R.emu v0.3.5**
+**FS1R demo song "Vokodrone" on FSVR v0.3.5**
 
 https://github.com/user-attachments/assets/344fa64c-4c79-4513-9388-a0d28e15c197
 
-[Download](https://raw.githubusercontent.com/musicastudio/FS1R.emu/main/captures/fs1r_demo01_engine.mp4) if the player does not load.
+[Download](https://raw.githubusercontent.com/musicastudio/FSVR/main/captures/fs1r_demo01_engine.mp4) if the player does not load.
 
 **FS1R demo song "Full Tines" from real hardware (courtesy of rgwan)**
 
@@ -30,13 +30,13 @@ https://github.com/user-attachments/assets/344fa64c-4c79-4513-9388-a0d28e15c197
      drag captures/fs1r_demo02_hardware.mp4 into a comment box on GitHub and paste the URL it gives
      back on the line below, the way the two Vokodrone clips above were done. -->
 
-[Download](https://raw.githubusercontent.com/musicastudio/FS1R.emu/main/captures/fs1r_demo02_hardware.mp4) if the player does not load.
+[Download](https://raw.githubusercontent.com/musicastudio/FSVR/main/captures/fs1r_demo02_hardware.mp4) if the player does not load.
 
-**FS1R demo song "Full Tines" on FS1R.emu v0.3.5**
+**FS1R demo song "Full Tines" on FSVR v0.3.5**
 
 <!-- Same again for captures/fs1r_demo02_engine.mp4. -->
 
-[Download](https://raw.githubusercontent.com/musicastudio/FS1R.emu/main/captures/fs1r_demo02_engine.mp4) if the player does not load.
+[Download](https://raw.githubusercontent.com/musicastudio/FSVR/main/captures/fs1r_demo02_engine.mp4) if the player does not load.
 
 Both Full Tines clips carry the same +10 dB, so the level between them is the unit's against ours. The four-second gap at the end is gone: the chip's EG key rate scaling was wrong by 11 to 16 chip steps at every note, always too fast, so the low notes released long before the unit's. It is measured now, the engine's last note stops 0.7 s before the unit's rather than four seconds, and the song's envelope correlation went from 0.838 to 0.976. `docs/aeg.md` is the working. The remaining level difference, about 6 dB and down from 13 as the filter loop's insertion loss has been re-measured twice, is the recording rather than the engine: it is one take through whatever gain rgwan's converter sat at, where the capture set came off the digital tap. `TODO.md` under Tier 4.
 
