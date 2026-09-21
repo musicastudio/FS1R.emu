@@ -32,7 +32,7 @@ https://github.com/user-attachments/assets/8afa466b-e7c4-4427-a058-392120f1a15d
 
 **FSVR**
 
-https://github.com/user-attachments/assets/e557f16e-7555-4a9a-a857-891be50bb20b
+https://github.com/user-attachments/assets/43fdbb3e-3b65-424d-8f08-f2e8452ab288
 
 ## Background and History
 
