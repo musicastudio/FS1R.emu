@@ -16,21 +16,21 @@ This project is still in development, still not fully accurate to hardware.
 
 ### FS1R DEMO SONG 2: Full Tines
 
-*** FS1R Hardware Recording ***
+**FS1R Hardware Recording**
 
 https://github.com/user-attachments/assets/fc235492-d053-4abb-af04-8e1041c32d46
 
-*** FSVR ***
+**FSVR**
 
 https://github.com/user-attachments/assets/30774094-75f1-4819-8b73-ce0a620f2f7c
 
 ### FS1R DEMO SONG 1: Vokodrone
 
-*** FS1R Hardware Recording ***
+**FS1R Hardware Recording**
 
 https://github.com/user-attachments/assets/8afa466b-e7c4-4427-a058-392120f1a15d
 
-*** FSVR ***
+**FSVR**
 
 https://github.com/user-attachments/assets/e557f16e-7555-4a9a-a857-891be50bb20b
 
