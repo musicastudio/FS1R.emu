@@ -92,8 +92,16 @@ static const double EG_HOLD_LAG  = 0.0081;  // ... plus this, fixed. MEASURED ov
 static const double FEG_SEMIS    = 48.0;    // frequency EG range at the full register swing of 128 (four octaves).
                                             // The sysex byte reaches the register through FEGLVL, which is measured
 static const double FEG_TIME_K   = 0.3;     // frequency EG time as a fraction of rate_secs
-static const double FEG_STEP_K   = 0.25;    // the filter EG's time constant as a fraction of a full
-                                            // traverse at its own rate. SWEEP
+static const double FEG_STEP_K   = 0.09;    // the filter EG's time constant as a fraction of a full
+                                            // traverse at its own rate. MEASURED off 14_sens and
+                                            // 06_filter_2, the only recordings that sweep a filter EG:
+                                            // at the 0.25 this replaces, a decay at time 60 has not
+                                            // recovered by the end of a four second note where the unit
+                                            // is back in its passband inside a second. The envelope error
+                                            // over 06_filter_2's four segments bottoms at 2.68 dB here
+                                            // against 6.31 at 0.25, and it is flat from 0.06 to 0.12, so
+                                            // the last digit is not measured. The amplitude EG's own
+                                            // rising constant is a sixteenth, which is the same order.
 static const double WIN_SKIRT    = 2.0;     // the grain window is sin^p, p = WIN_SKIRT * step^skirt. The
                                             // skirt is the one shape control all1, all2, odd1 and odd2
                                             // have, voice byte 6 being the formant's bandwidth and
