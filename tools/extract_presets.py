@@ -17,7 +17,7 @@ ROM layout (CPU view, i.e. byte pairs swapped from the raw dump):
              else does. INTERNAL is the user's battery-backed bank, so it is not in the image.
   0x283000    80 x 6432 bytes: preset Fseq 11-90, a 32-byte header and 128 50-byte frames
   0x300A00    10 x 25632 bytes: preset Fseq 1-10, the same header and 512 frames
-  0x230091  1152 x 155 bytes: DX7 VCED voice with the 10-char name moved to the front (9 banks, PrC..PrK)
+  0x230000  1152 x 155 bytes: DX7 VCED voice (9 banks, PrC..PrK)
   0x25C280   256 x 608 bytes: native FS1R voice, identical to the sysex bulk layout (2 banks, PrA, PrB)
 
 The bank order is the manual's, page 21: PRESET A and B are the FS1R's own voices, PRESET C through K
@@ -34,7 +34,7 @@ ROOT = Path(__file__).resolve().parents[1]
 ROM = ROOT.parent / "FS1R_DISASM" / "roms" / "fs1r_v120_eprom_cpuview.bin"
 OUT = ROOT / "presets"
 BASE = 0x200000
-DX7_AT, DX7_N = 0x230091 - BASE, 1152
+DX7_AT, DX7_N = 0x230000 - BASE, 1152
 NAT_AT, NAT_N = 0x25C280 - BASE, 256
 PERF_AT, PERF_N = 0x20A000 - BASE, 384
 FSEQ_LONG_AT, FSEQ_LONG_N = 0x300A00 - BASE, 10       # 512 frames each
@@ -74,8 +74,8 @@ def main():
         rows.append(("native", i, name, v[0x0E], v[0x2C] + 1, str(p.relative_to(ROOT))))
     for i in range(DX7_N):
         r = rom[DX7_AT + i * 155: DX7_AT + (i + 1) * 155]
-        name = r[:10].decode("latin1")
-        vced = r[10:] + r[:10]          # DX7 VCED order: 6 ops, common, then name
+        name = r[145:155].decode("latin1")
+        vced = r          # DX7 VCED order: 6 ops, common, then name
         p = OUT / "dx7" / f"{i:03d}_{safe(name)}.syx"
         p.write_bytes(dx7_vced(vced))
         rows.append(("dx7", i, name, "", vced[134] + 1, str(p.relative_to(ROOT))))
