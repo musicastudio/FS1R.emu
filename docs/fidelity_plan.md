@@ -1,0 +1,165 @@
+# Matching the engine to the hardware: what is still open, and what closes it
+
+Written 2026-09-21 against every recording and register session in hand: rgwan's 0918 take of the 21 frozen request files, the 0919 `05b`, `08b` and `10_envelope2` takes, the 0920 `11_detune` and `12_fseqlevel` takes, both register sessions, and `captures/FS1R DEMO.flac`. Everything below is measured off those unless it says otherwise. The numbers come from `python tools/analyze_capture.py captures/hardware/*.wav --compare` run today against the current build.
+
+Three of those takes were not in the comparison at all. `05b_unvoiced2`, `08b_panlevel_perfpn` and `12_fseqlevel` have their own generators, and those generators never wrote a manifest row, so `analyze_capture.py` could not see them and each needed a bespoke reader. `tools/make_capture_0921.py` merges the rows now, after checking that each generator still reproduces its `.mid` byte for byte, which is what says a row describes the take that was played. All three round-trip, and the first thing that fell out is item 6 below.
+
+## Where the engine stands, file by file
+
+Level is the median absolute difference over a file's segments; shape is the mean rms over the octave bands with each segment's own level divided out; envelope is the mean rms between the two aligned curves.
+
+| file | level | shape | envelope | reading |
+|---|---|---|---|---|
+| `01_reference_1` / `_2` | 0.05 / 0.05 | 0.21 | | the dB and Hz scale is settled |
+| `02_envelope_1` / `_2` / `_3` | 0.20 / 0.06 / 0.35 | | 0.64 / 0.43 / 0.64 | the amplitude EG is settled |
+| `03_fm_1` / `_2` | 0.05 / 0.05 | 0.19 / 0.44 | | the modulation index is settled |
+| `04_formant_1` | 0.06 | 0.77 | | the window law is settled |
+| `04_formant_2` | 0.29 | **2.52** | | the formant's skirt family, item 8 |
+| `04_formant_3` | 0.29 | 0.73 | | the resonant forms are settled |
+| `05_unvoiced_1` | **7.40** | **3.77** | | the noise formant, item 1 |
+| `05_unvoiced_2` | **2.86** | **6.36** | | the noise formant, item 1 |
+| `05b_unvoiced2` | **7.13** | **4.06** | | the same at note 36, newly readable |
+| `06_filter_1` | 0.01 | 0.76 | | the filter response is settled |
+| `06_filter_2` | 0.00 | 0.24 | **5.43** | the filter EG does nothing, item 4 |
+| `07_modulation_1` | 0.05 | | **2.27** | AM sensitivity, item 5 |
+| `07_modulation_2` | 0.05 | | 0.81 | the LFO and the frequency EG are settled |
+| `08_panlevel_1` | 0.20 | 1.71 | | the pan law is settled |
+| `08_panlevel_2` | 0.36 | **5.03** | | the balance segments, items 1 and 2 |
+| `08b_panlevel_perfpn` | 0.22 | | | the performance pan is settled, newly readable |
+| `09_effects_1` / `_2` / `_3` | 15.97 / 32.71 / 28.93 | | 17.58 / 16.60 / 12.76 | **not a measurement**, item 3 |
+| `10_envelope2` | 0.47 | | 0.81 | settled, with a scoring artifact, item 9 |
+| `11_detune_1` / `_2` | 0.05 / 0.18 | 0.23 | | detune is settled |
+| `12_fseqlevel` | **52.44** | | **33.56** | the engine render is silent, item 6 |
+
+Eleven of the twenty-four frozen files agree with the unit to a quarter of a decibel and their shapes and envelopes with them. What is left is concentrated in five places, and two of those are not calibration at all.
+
+## 1. The noise formant is the largest real gap, and most of its law is now measured
+
+Eighty-one segments over three files, 7.1 to 7.4 dB of level error and 3.8 to 6.4 dB of shape error, and the model behind them is a reading of the patent with no measurement anywhere in it: a cascade of `1 + skirt` one-poles whose cutoff spans nine octaves from 20 Hz, ring modulated up to the centre, with a level term that holds the RMS constant.
+
+Reading the two bandwidth sweeps together settles five things, and none of them needs another recording.
+
+**The width is linear in the bandwidth byte, not exponential.** Half-power full width against the byte, pooling the note 60 and note 36 sweeps at a 1 kHz centre and skirt 0, over the range where the band still clears DC:
+
+| bandwidth | 4 | 8 | 12 | 16 | 20 | 24 | 28 | 32 | 40 | 44 |
+|---|---|---|---|---|---|---|---|---|---|---|
+| width, Hz | 105 | 205 | 349 | 517 | 687 | 778 | 1027 | 1133 | 1449 | 1647 |
+
+That is 38.6 Hz per byte through the origin, flat in the residual, with no trend in `log2` of it. The engine's `NOISE_BASE_HZ * 2^(byte / 127 * NOISE_OCT)` gives 20 Hz at byte 0 and 10 kHz at the top and is the wrong shape everywhere.
+
+**It is an absolute frequency.** The fundamental moves two octaves between the two sweeps and the width does not move: 108 against 102 at byte 4, 1509 against 1389 at byte 40, 1781 against 1819 at byte 64. So the noise formant's bandwidth is a width in hertz, exactly as the formant window's turned out to be, and for the same reason nothing before this could see it: every unvoiced segment ever recorded sat at one centre.
+
+**The level goes as the reciprocal of the width.** Over the unfolded range the width grows 11.45 dB and the total falls 5.88 dB at note 36, and 11.9 against 5.8 at note 60, so total power is proportional to `1 / width` to within a fiftieth. The engine's `nscale` puts the output RMS at `a^(1 - 2 * NOISE_BW_POW)` and `NOISE_BW_POW` is 0.5, which is flat, which is what the engine does. **`NOISE_BW_POW` is 1.0**, measured at two fundamentals over ten bandwidths each. The demo said moving it was worth less than a decibel; the demo was the wrong instrument, since its vocal patches sit at two bandwidths and its effects are in the path.
+
+**The skirt widens the band. The engine narrows it.** Hardware half-power width at a 1 kHz centre, bandwidth 40, against skirt:
+
+| skirt | 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 |
+|---|---|---|---|---|---|---|---|---|
+| hardware, Hz | 1570 | 1887 | 2060 | 2496 | 2719 | 3308 | 3920 | 4673 |
+| engine, Hz | 940 | 448 | 387 | 305 | 275 | 252 | 246 | 243 |
+
+The engine's `stages = 1 + skirt` cascade is backwards. Whatever the chip does, opening the skirt lowers the slope rather than raising it, and it costs level the same way the voiced skirt does, 38.75 to 42.91 dB over the range.
+
+**The unvoiced resonance is a threshold, not a ramp.** Bytes 0 to 3 give the same spectrum to the byte, byte 4 narrows it, and 5, 6 and 7 are a pure tone at the centre with the noise under it, rising 40.31 to 43.67 dB. The engine's `+ u.res / 7.0` DC term has the tone dominating from byte 2 and adds 8 dB over the range where the unit adds 4.
+
+**Bandwidth 0 is not bandwidth 4.** The unit reads 32 dB below `ubw-4` at note 60 and is at the digital floor at note 36. The engine sounds normally at both.
+
+**What still needs hardware here.** Every recorded unvoiced segment puts the band at a 1 kHz centre, and from bandwidth 40 up the band's lower edge is at DC: both sweeps stop widening at about 1750 Hz and both plateau in level at the same bandwidth, which is a band folding on itself and not a law. So the top half of the bandwidth range, the clamp, and the level law above it are all read through a fold. `13_unvoiced3` in the capture request puts the centre at 8 kHz, where nothing folds until the band is 16 kHz wide, and repeats the skirt and resonance sweeps there.
+
+**Expected gain.** The linear width law, `NOISE_BW_POW` 1.0 and the skirt's direction are worth most of the 7.4 dB level and 3.8 dB shape on `05_unvoiced_1`, the 4.06 on `05b`, and the `umode-*` and `ures-*` segments of `05_unvoiced_2`. It is also what demo songs 8 and 15 have been waiting for, both of them vocal patches on eight unvoiced operators at bandwidth 7 or 8, both 10 to 20 dB quiet.
+
+## 2. The voiced operator loses 3.01 dB when its unvoiced half is switched on
+
+This is an engine defect, not a constant, and it has been hiding inside a file that reads 0.36 dB overall.
+
+`08_panlevel_2`'s balance segments play one voice with a 261.6 Hz voiced carrier and a 1 kHz noise band, so the two halves are separable in one spectrum. Power in the 240 to 290 Hz band, which is the carrier alone:
+
+| balance | 0 | 16 | 32 | 48 | 64 | 80 | 96 | 112 |
+|---|---|---|---|---|---|---|---|---|
+| hardware | 48.92 | 48.92 | 48.94 | 48.92 | 48.93 | 42.07 | 34.38 | 28.32 |
+| engine | 45.86 | 45.86 | 45.86 | 45.86 | 45.87 | 39.09 | 32.32 | 25.19 |
+
+The taper is right on both sides and the offset is flat. The same carrier at the same level in the same algorithm, in `01_reference_1`'s `ratio-note60` and `level-99`, reads **48.92 on the unit and 48.87 in the engine** in the same band, so the scale is not in question. The only thing that changes between the two patches is that the balance voice sets the operator's unvoiced half to level 99: the voiced bytes are identical, the performance is `init_performance` in both, and `set_uop` writes a disjoint block at operator offset +35.
+
+So the unit's voiced operator is untouched by its unvoiced neighbour and the engine's drops 3.01 dB, which is eight steps of `LEVEL_DB` to two decimal places. The noise half is 2.8 to 4.4 dB low in the same segments, and part of that is item 1, but the voiced 3.01 is separable and exact.
+
+Worth finding before anything else in this list is fitted, for the reason `docs/formant.md` gives about `FLT_LOSS`: a constant fitted against a patch carrying an unexplained 3 dB absorbs it. `08_panlevel_2`'s 5.03 dB of shape error is partly this and partly item 1, and neither can be read until it is gone.
+
+## 3. The effects comparison is not a measurement
+
+`09_effects_1` to `_3` read 16 to 33 dB and none of those numbers means anything. The three request files were regenerated on 2026-09-20 with `FX_DEFAULTS`, the factory parameter sets for the twenty-odd types no preset performance uses, and the recording is rgwan's from 2026-09-18, which went out with zeroed blocks for those types. The comparison is a new MIDI file against an old take.
+
+Nothing here is modelling work. Re-record the three files as they stand and the numbers become readable for the first time. Until then the demo's own band error carries an effect model nobody has checked against an impulse response, and `tools/demo_probe.py`'s median of about 6 dB has that inside it.
+
+## 4. The engine's filter EG never reaches the filter
+
+`06_filter_2` matches the unit to 0.00 dB in level and 0.24 dB in shape, and then its four filter EG envelopes read 5.43 dB. Reading the envelopes directly rather than through the level metric says why. Peak to trough over each four second note, 20 ms hop:
+
+| segment | hardware | engine |
+|---|---|---|
+| `flteg-d127-t20` | 1.84 dB | 1.77 dB |
+| `flteg-d127-t60` | 1.84 dB | 1.77 dB |
+| `flteg-d0-t20` | **14.93 dB** | 1.77 dB |
+| `flteg-d1-t20` | **14.12 dB** | 1.77 dB |
+
+The engine's four envelopes are identical to a hundredth of a decibel, and 1.77 dB is what the amplitude EG alone does on that patch. So the filter EG is not merely mis-scaled, it does not move the corner at all, at any depth or any time. The unit sweeps 14 to 15 dB at depth bytes 0 and 1 and holds still at 127, which is the patch behaving: the voice starts at cutoff byte 40 with EG level 4 at 0 and level 1 at 100, so a negative depth drives the corner down through the comb and a positive one opens it above everything the source has.
+
+That the engine's filter response itself is right makes this narrower than it looks. `06_filter_1`'s twenty static cutoff and resonance segments sit at 0.76 dB of shape error, so the coefficient reading and the ladder are close; it is the path from the EG to the coefficient that is dead. The firmware side of it is the open Tier 0 line, since the cutoff conversion is only called when a parameter changes, and the 0919 register retake answers where the EG runs: nothing in the coefficient region moves while a filter EG sweeps, and the staged cutoff word matches `0xC0D + 0xA9 * cut` to the integer, so VOP3-1 runs the EG itself off the shape the CPU hands it.
+
+Four segments is not enough to fit a chip-side EG against. `14_sens` gives it ten, a depth sweep at six settings and a time sweep at four, on the same source and the same probe performance `06_filter` uses.
+
+## 5. AM sensitivity, and a stale note about it
+
+`docs/capture_0918.md` says "AM sensitivity is roughly twice as deep as the engine makes it", the hardware losing 11.29 dB over the sweep against the engine's 4.89. That reading predates both the analyzer's pan correction and the `LEVEL_DB` change and it now points the wrong way. Measured off the two envelopes today, 5 ms hop, the modulation depth as the 5th to 95th percentile spread in dB:
+
+| ams | 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 |
+|---|---|---|---|---|---|---|---|---|
+| hardware | 0.98 | 6.39 | 11.24 | 20.44 | 24.45 | 29.48 | 34.16 | 38.89 |
+| engine | 0.98 | 7.20 | 14.15 | 21.33 | 28.57 | 34.52 | 40.56 | 47.21 |
+
+The mean level falls 14.38 dB on the unit over the sweep and 16.31 in the engine. Both are linear in `ams` to within the scatter, so the engine's `regAM * LEVEL_DB * ams / 7` has the right shape and is about 18 % too deep. That is one number, except that the whole sweep sits at LFO amplitude depth 99 and one value of a variable is what the formant window's two wrong answers were both built on. `14_sens` repeats it at three depths.
+
+## 6. `12_fseqlevel`'s engine render is silent where the unit sounds
+
+Newly readable, and it disagrees with what `docs/formant.md` records for the same file. Segment rms, hardware against the render in `captures/engine/`:
+
+| segment | `frmt-36` | `frmt-48` | `frmt-60` | `frmt-72` | `frmt-84` | `frmt-96` |
+|---|---|---|---|---|---|---|
+| hardware | −46.4 | −43.9 | −41.1 | −40.8 | −41.4 | −41.7 |
+| engine | −97.5 | −95.0 | −95.0 | −100.8 | −106.9 | −105.6 |
+
+The alignment is not the problem: the markers are found, the take is 1.12 s short at the head and the offset absorbs it, and the unit reads sensible levels through the same row. `formant.md` reports 6.3 dB of band error over this file after the ratio-operator clamp, and a render that is 50 to 65 dB quiet on six of its fourteen segments cannot be the render that produced it. Re-render and re-read before trusting either number. This is the same failure that `captures/demo/render` had on 2026-09-19, where fourteen stale files described a build that no longer existed.
+
+## 7. The spectral skirt's "1" forms, and all1/all2's geometry
+
+Both are fully recorded in `docs/skirt.md` and neither needs hardware.
+
+`all1`, `odd1` and `res1` are no `sin^p` window at any exponent: fitting one freely leaves 6 to 17 dB against 0.01 dB for their partners, and the measured spectra show a narrow core that stops changing above skirt 4 sitting on a pedestal that keeps rising. The engine gives them their partners' law and is 10 to 14 dB out. Every line amplitude of all six forms over all eight skirts is tabulated in that document, so this is a modelling problem with its data already paid for.
+
+`all1` and `all2`'s geometry is the larger of the two. The engine builds them as two overlapping grains under a carrier on the fundamental, which is exactly right at skirt 0 and 36 to 66 dB out by skirt 7, where the engine's group slides off the fundamental and the unit's stays on it. It moves both members of the pair the same way, so it is the construction and not the exponent.
+
+## 8. The formant's window family
+
+`04_formant_2` sits at 2.52 dB of shape error and no exponent of any `sin^p` window gets it below about 2.6, which the fit establishes by trying the whole range. The formant is the only form whose window length is a parameter rather than one or two grain periods, and a window generator with a fixed number of steps stretched over a variable time would behave differently. That is the lead and it is written here as one. Data recorded; no hardware needed.
+
+## 9. Two scoring faults worth fixing while the numbers are being read
+
+**Silent segments score as a 30 dB disagreement.** `10_envelope2`'s `hold-50` and `hold-70` report −29.02 and −34.99 dB, and both are silence: the unit is at bit-exact zero, −144 dB, and the engine at −115 and −109. The analyzer already skips a pair that are both at their own floors, but a float render's floor and a 24-bit capture's floor are 30 dB apart. An absolute threshold, anything under about −100 dB on both sides, removes two of the three worst segments in that file.
+
+**The manifest loses its side files.** `make_capture_set.py` rewrites `manifest.json` from its own file list, so every re-run drops whatever `make_capture_unvoiced2.py`, `make_capture_perpan.py` and `make_capture_fseqlevel.py` added. That is why three recordings sat outside the comparison for two days and each grew a bespoke reader. `tools/make_capture_0921.py` puts the rows back and verifies each `.mid` regenerates byte for byte first; the durable fix is for the main generator to merge rather than replace.
+
+## What to do, in order
+
+Nothing in 1 to 3 waits on anything else.
+
+1. **Find the 3.01 dB** (item 2). One evening, no hardware, and it has to be first because everything downstream of it gets fitted through it.
+2. **Re-record `09_effects_1` to `_3`** (item 3). Eight minutes of rgwan's time, and it is the only thing between us and an impulse response of every effect block.
+3. **Rewrite the noise formant** (item 1) against the two sweeps in hand: linear width, `NOISE_BW_POW` 1.0, the skirt reversed, the resonance threshold, bandwidth 0 silent. Then read `13_unvoiced3` when it arrives for the clamp and the top half of the range.
+4. **Re-render `12_fseqlevel`** and re-read it (item 6), which also says whether `formant.md`'s 6.3 dB still holds.
+5. **Reconnect the filter EG** (item 4), which is a dead path rather than a constant, and read `14_sens` for the chip-side law once it arrives. AM sensitivity (item 5) comes with the same file.
+6. **The "1" forms and all1/all2's geometry** (item 7), off `docs/skirt.md`'s tables.
+7. **The formant's window family** (item 8), which is the last thing in the voiced chain and the hardest.
+
+Two register runs on the `FS1R.unlock` rig are worth a few minutes each and neither is on the critical path. `sweep.py skirt` wants a rerun for the formant form alone, which recorded silence last time from a ratio-mode patch and is fixed. `sweep.py filtcoef` through the pair write would take `LADDER_K`, `CUT_COEF_FS` and `RESO_COMP` off the INFERRED list, though `06_filter_1`'s 0.76 dB of shape error says the ladder reading is already close.
+
+The capture request is `docs/capture_request_0921.md`.
