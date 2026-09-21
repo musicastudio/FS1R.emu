@@ -17,6 +17,9 @@ set(FS1R_BIN ${CMAKE_CURRENT_SOURCE_DIR}/bin)
 
 add_library(fs1rLib STATIC src/fs1r_lib.cpp)
 target_include_directories(fs1rLib PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src)
+# The plugin formats are shared modules, and a Linux .so will not link a static library whose objects
+# are not position independent. Windows and macOS do not care either way.
+set_target_properties(fs1rLib PROPERTIES POSITION_INDEPENDENT_CODE TRUE)
 if(MSVC)
   target_compile_options(fs1rLib PRIVATE /W3)
 else()
