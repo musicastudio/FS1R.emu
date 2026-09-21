@@ -4,8 +4,9 @@
     python tools/render_song.py                    01_Vokodrone, the usual baseline
     python tools/render_song.py "04 Fat Line"      any song, by name or number
     python tools/render_song.py 9 --out mine.wav   somewhere of your choosing
+    python tools/render_song.py "captures/demo_nofilterfx/04_Fat Line.mid"    a song from another folder
 
-Writes captures/demo/baseline/<song> <commit>.wav unless --out says otherwise, so two renders
+Writes <song folder>/baseline/<song> <commit>.wav unless --out says otherwise, so two renders
 from different builds sit next to each other and say which is which. Warns if the engine binary
 is older than the source, since a baseline off a stale build is worse than none.
 
@@ -23,6 +24,8 @@ SONGS = ROOT / "captures/demo"
 
 
 def find_song(name):
+    if name.lower().endswith(".mid") and Path(name).exists():
+        return Path(name)                               # any file, such as captures/demo_nofilterfx/
     mids = sorted(SONGS.glob("[0-9]*.mid"))
     if not mids:
         sys.exit("no demo songs in %s: run tools/extract_demo.py first" % SONGS)
@@ -69,7 +72,7 @@ def main():
     if newest > EXE.stat().st_mtime:
         print("warning: src/ is newer than the engine binary, run build.bat for a current baseline")
     mid = find_song(a.song)
-    out = Path(a.out) if a.out else ROOT / "captures/demo/baseline" / ("%s %s.wav" % (mid.stem, commit()))
+    out = Path(a.out) if a.out else mid.parent / "baseline" / ("%s %s.wav" % (mid.stem, commit()))
     out.parent.mkdir(parents=True, exist_ok=True)
 
     cmd = [str(EXE)]
