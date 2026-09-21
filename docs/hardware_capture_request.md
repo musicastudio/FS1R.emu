@@ -46,6 +46,18 @@ Two models fit. Either the operator carries the level it was fired with, so a wr
 
 Fourteen segments, 1.3 minutes, recorded exactly like the rest of the set. The whole file is one voice at a time with no effects and no filter, and it peaks around -21 dBFS because the Fseq's own levels are low; do not ride the gain, the analysis is frame-synchronous and reads the transitions off the waveform.
 
+### 2026-09-21: `12_fseqlevel` take 2 answered it
+
+Recorded and read. All fourteen segments play, and between them they settle the question the file was built for and one nobody had asked.
+
+**The level register glides, it does not latch to the grain.** A latched level scores 10.6 dB of octave band error over the eight formant segments, worse than the 9.7 dB of no smoothing at all, because at a low fundamental the grain is tens of milliseconds and a 15 ms frame cannot wait for it. A one pole glide bottoms at **1.6 ms** and 4.74 dB, and still holds Vokodrone's frame boundary to 2.7 dB against your 1.2. One mechanism and one constant for both recordings. The carrier frequency stays latched to the grain, which is the carrier phase reset the chip already does.
+
+**A ratio operator handed an Fseq frequency runs off the end of the register.** Your three sine segments are one line at 23982 Hz at notes 36, 60 and 84 alike, which is pitch word 32767 to a tenth. The frame's word goes into the operator's own frequency register and the channel pitch is still added on top, so the sum saturates at every note. The engine was singing at 275 Hz. Fixed, and those segments go from 42 dB of band error to 5.
+
+Over the whole file the engine goes from 17.6 dB of mean band error to 6.3. The hardware capture set does not move by a single digit, since nothing in it changes a level fast enough to tell, and the demo holds at 6.69 dB with its envelope correlation unchanged.
+
+What the file leaves open is in `docs/formant.md`: the unvoiced operator sits 11 to 12 dB dark above 640 Hz at every note, which is the noise formant's bandwidth law and what `05_unvoiced` is for; and the 16 frames a second segment is 17 dB bright from 1 to 5 kHz, which no level setting touches. **Neither needs a recording from you right now.** If there is ever a take 3 of this file, the one thing worth changing is performance byte 0x23 to 1, so the note sets the fundamental on its own instead of the Fseq's pitch track swinging it over eight octaves.
+
 **The first take was spoiled and the file is regenerated, so please record it once more.** You reported eleven of the fourteen segments silent and the other three a steady noise, and you were reading the unit correctly. The performance the file sent left the Fseq loop start and loop end both at frame 0, and a zero length loop does not play: FUN_0001A894 wraps to the loop start and clears the run flags when the two points are the same step, so the sequence advanced once and held frame 0 for the whole note. Frame 0 of "RndArp4" has its voiced track fully attenuated and its unvoiced track near full level, which is exactly the digital silence and the steady noise you heard. The file now sets the loop to the whole sequence.
 
 Your take earned its keep anyway. The engine played that same file, because it fell back to the Fseq header's own loop points whenever the performance's two were equal, and nothing in the firmware does that. Eight factory performances set them equal on purpose, "Zap !" at 127 and "Replicant" at 94, and the engine was looping all eight where the unit holds one frame. That is fixed, and the engine now renders your first take's silence.

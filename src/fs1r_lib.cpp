@@ -180,6 +180,14 @@ static const double PMS_FRAC[8]  = {0, 0.0264, 0.0534, 0.0889, 0.1612, 0.2769, 0
 // docs/capture_0918.md the working.
 static const double OUT_GAIN     = 0.14992; // fixed gain between the summed bus and the digital tap. Nine
                                             // single-operator segments agree to 0.005 dB.
+static const double LEVEL_SLEW_MS= 1.6;     // the voiced level register does not step, it glides, one pole with
+                                            // this time constant. MEASURED 2026-09-21 off 12_fseqlevel, whose
+                                            // Fseq rewrites the level thirty to eighty dB at a time: the octave
+                                            // band error over its eight formant segments bottoms at 4.74 dB
+                                            // here, against 9.7 for a register that steps and 10.6 for one
+                                            // latched to the grain. Flat between 1.2 and 2.0, so the last digit
+                                            // is not measured. The unvoiced level is not slewed, see
+                                            // render_chan. docs/formant.md.
 static const double CHAN_CLIP    = 1.1919;  // the channel accumulator saturates here, hard and memoryless,
                                             // before the filter loop. stack-4 and stack-8 are driven 4x and
                                             // 8x past one carrier and recover the same ceiling to five places.
@@ -252,7 +260,12 @@ static inline int vel_att(int b, int vel) {
     return std::min(255, (15 - 2 * s) + ((s * 32 * t) >> 8));
 }
 static inline double db2lin(double db) { return db <= -150 ? 0.0 : pow(10.0, db / 20.0); }
-static inline double word_hz(int w) { return 440.0 * pow(2.0, (w - 26861) / 1024.0); }   // 1024 units per octave
+// One pole per sample coefficient for the voiced level register, cal::LEVEL_SLEW_MS as a rate.
+static const double LEVEL_SLEW_K = 1.0 - exp(-1.0 / (cal::LEVEL_SLEW_MS * 0.001 * SR));
+// 1024 units per octave, and the word is a 16 bit register that saturates rather than wrapping.
+// MEASURED 2026-09-21 off 12_fseqlevel: a ratio operator driven by an Fseq lands past the ceiling at
+// every note and the unit answers with one line at 23982 Hz, which is word 32767 to a tenth.
+static inline double word_hz(int w) { return 440.0 * pow(2.0, (std::clamp(w, 0, 0x7FFF) - 26861) / 1024.0); }
 
 // ------------------------------------------------------------------------------------------ tables (chip side)
 static float g_sin[4097];
@@ -639,15 +652,15 @@ struct FreqEG {                  // init -> attack level -> 0. The level curve i
         return cur;
     }
 };
-// A grain carries the level and the carrier frequency it was fired with. Both are latched beside the
-// carrier phase the grain already resets, so a register write lands on the next grain rather than
-// cutting the one in flight. MEASURED 2026-09-20, see op_sample.
-struct WinGen { double w = 1.0, c = 0.0, gain = 0.0, fc = 0.0; bool on = false; };
+// A grain runs at the carrier frequency it was fired with, latched beside the carrier phase the grain
+// already resets. The level is not latched with it, it follows cal::LEVEL_SLEW_MS. MEASURED 2026-09-20
+// and 2026-09-21, see op_sample.
+struct WinGen { double w = 1.0, c = 0.0, fc = 0.0; bool on = false; };
 struct OpState {
     double phase = 0; WinGen g[2]; int nextGen = 0; double fphase = 0; int halfCount = 0;
     EG eg; FreqEG feg;
     EG ueg; FreqEG ufeg; double nphase = 0; double lp[8] = {}; uint32_t rng = 0x12345678;
-    double att = 0, fop = 0, wl7 = 1, uatt = 0, nf = 0, na = 1, nscale = 0; int bw = 0, ratio = 0;   // refresh_ctl
+    double att = 0, attS = 0, fop = 0, wl7 = 1, uatt = 0, nf = 0, na = 1, nscale = 0; int bw = 0, ratio = 0;   // refresh_ctl
 };
 struct Chan {
     bool active = false; int part = 0, note = 0, vel = 0; bool held = false, sustained = false; uint32_t age = 0;
@@ -870,6 +883,7 @@ struct Synth {
             s.ueg.start(C.uegL[o], C.uegR[o], C.uegHold[o], eg_ratescale(u.tscale, C.regC0));
             s.ufeg.start(u.fegInit, u.fegAtt, u.fegAttT, u.fegDecT);
             s.rng = 0x9E3779B9u * (o + 1) ^ clock; if (!s.rng) s.rng = 1;
+            s.attS = -1e9;                    // the level glide starts at the new note's own level
         }
         start_filter(C, pt, vel);
     }
@@ -1462,21 +1476,24 @@ struct Synth {
     }
 
     // ---------------------------------------------------------------- chip model (INFERRED beyond the register values)
-    // `gain` is the operator's own level, and a grain form applies it per grain rather than per sample.
-    // MEASURED 2026-09-20 against the demo recording: Vokodrone's intro is part 4 alone, a vocal Fseq
-    // running at 35.6 Hz, and every frame rewrites all eight formant levels and formant frequencies at
-    // once. Applied per sample those writes cut the grain in flight - the operator output steps from
-    // 0.149 to 0.033 between two samples where a frame drops its level 13 dB - and the render clicks
-    // once per frame. Averaging the 5 kHz-and-up envelope over the 120 frame boundaries in the intro
-    // puts the engine 12.3 dB above its own floor at the boundary and rgwan's recording 1.2 dB above
-    // its own; latching both the level and the carrier frequency at the grain that follows the write
-    // brings the engine to 1.2 dB, the recording's figure to two digits. The grain window is zero at
-    // both ends, so a level that only moves there cannot step the waveform at all.
+    // A grain runs at the carrier frequency it was fired with. The chip resets the carrier phase at every
+    // grain, and the frequency it then runs at is the one latched with that reset, so a write lands on the
+    // grain after it rather than bending the one in flight.
     //
-    // Sine operators have no grain and still take their level per sample. Nothing in the capture set
-    // or the demo moves a sine operator's level fast enough to say whether the chip agrees, and the
-    // unvoiced operator has the same question open: its noise level still steps with the frame, which
-    // is the 0.85 dB the intro has left. docs/hardware_capture_request.md, request 12.
+    // `gain` is the operator's level and it is not latched here: it arrives already slewed, one pole at
+    // cal::LEVEL_SLEW_MS. MEASURED 2026-09-20 and 2026-09-21 against two recordings that disagree with
+    // each other unless the smoothing is a fixed time. Vokodrone's intro is part 4 alone under a 35.6 Hz
+    // Fseq, and a level applied per sample cut the grain in flight there, stepping the operator output
+    // from 0.149 to 0.033 between two samples: 12.3 dB of click above its own floor at the frame
+    // boundary where rgwan's recording has 1.2. Latching the level to the grain fixed that and went too
+    // far. 12_fseqlevel drives one formant operator with an Fseq over five octaves and three frame
+    // rates, and a latched level is 10.6 dB of octave band error against the unit, worse than the 9.7
+    // of no smoothing at all: at a low fundamental the grain is tens of milliseconds and the level
+    // cannot wait that long. A 1.6 ms glide is 4.74 dB, and still holds Vokodrone's boundary to 2.7 dB.
+    //
+    // The unvoiced operator's level is left stepping. Its own segments in the same file sit 15 to 26 dB
+    // dark above 640 Hz before any smoothing is applied, which is the noise formant's bandwidth law and
+    // not this, so they cannot judge a glide; slewing it there only makes them darker.
     inline double op_sample(OpState& s, const OpV& v, double f0, double fop, int ratio, double pm, double gain) {
         if (v.form == 0) { s.phase += fop / SR; if (s.phase >= 1) s.phase -= 1; return gain * fsin(s.phase + pm); }
         double fw, fc, wl;
@@ -1512,7 +1529,7 @@ struct Synth {
         wl = std::min(wl, 2.0);
         s.fphase += fw / SR;
         if (s.fphase >= 1) {
-            s.fphase -= 1; WinGen& g = s.g[s.nextGen]; g.on = true; g.w = 0; g.gain = gain; g.fc = fc;
+            s.fphase -= 1; WinGen& g = s.g[s.nextGen]; g.on = true; g.w = 0; g.fc = fc;
             // The formant restarts its carrier every grain, which is what holds its peak still while the
             // fundamental moves. The odd forms retrigger twice a period, so restarting there would put
             // half a cycle of alternation into the grain train and land the group on the even partials;
@@ -1524,7 +1541,7 @@ struct Synth {
         for (int k = 0; k < 2; k++) {
             WinGen& g = s.g[k]; if (!g.on) continue;
             g.w += winc; if (g.w >= 1) { g.on = false; continue; }
-            y += g.gain * fwin(v.form == 7, v.skirt, g.w) * fsin(g.c + pm); g.c += g.fc / SR;
+            y += gain * fwin(v.form == 7, v.skirt, g.w) * fsin(g.c + pm); g.c += g.fc / SR;
         }
         if (v.form == 7) { if (cal::FRMT_NORM != 0.0) y *= pow(1.0 / wl, cal::FRMT_NORM); }
         else y *= cal::FORM_LEVEL * 2.0 / wl;    // every form but sine and frmt; a shorter grain carries less
@@ -1550,7 +1567,14 @@ struct Synth {
             // word offset on the chip, and the formant branch already carries it inside frmtWord.
             int det = v.form == 7 ? 0 : C.detW[o];
             double fop;
-            if (fs && C.fseqOp[o]) fop = word_hz(C.fqWord[o] + pmw + det);
+            // A frame's frequency word goes into the operator's own frequency register, it does not stand
+            // in for the whole register chain. A ratio operator still has the channel pitch added on top,
+            // which is what the format means for one: the word is an absolute formant centre, so a ratio
+            // operator handed one runs off the end of the register. MEASURED 2026-09-21: 12_fseqlevel's
+            // three sine segments sum to 39632..45056 at notes 36, 60 and 84 and the unit gives the same
+            // 23982 Hz line in all three, the saturated word, where the engine read the frame word alone
+            // and sang at 275 Hz. Formant and fixed operators take the word as it stands.
+            if (fs && C.fseqOp[o]) fop = word_hz(C.fqWord[o] + pmw + det + (v.form != 7 && !v.fixed ? C.regPitch : 0));
             else if (v.form == 7) fop = word_hz(C.freqWord[o] + C.fbW[o] + (C.frmtWord[o] - 0x1243) + pmw + (C.regFM * v.fms) / 7);
             else if (!v.fixed) fop = word_hz(C.freqWord[o] + C.regPitch + pmw + det);
             else fop = word_hz(C.freqWord[o] + C.fbW[o] + pmw + det + (C.regFM * v.fms) / 7);
@@ -1586,9 +1610,11 @@ struct Synth {
             if (F == 6) S = 0;
             double egdb = s.eg.tick();
             double y = 0;
-            // A silenced operator still runs while a grain it already fired is in flight, so the last
-            // one fades out under its own window instead of being cut.
-            double gain = egdb - s.att > -100 ? db2lin_fast(egdb - s.att) : 0.0;
+            // The level register glides rather than stepping, so a frame write reaches the output over
+            // about a millisecond instead of cutting the waveform. A silenced operator still runs while a
+            // grain it already fired is in flight, so the last one fades out under its own window.
+            if (s.attS < -1e8) s.attS = s.att; else s.attS += (s.att - s.attS) * LEVEL_SLEW_K;
+            double gain = egdb - s.attS > -100 ? db2lin_fast(egdb - s.attS) : 0.0;
             if (gain != 0.0 || s.g[0].on || s.g[1].on) {
                 double fop = s.fop;
                 if (s.feg.stage < 2) fop *= pow(2.0, s.feg.tick() / 12.0);

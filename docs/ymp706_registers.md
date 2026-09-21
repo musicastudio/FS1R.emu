@@ -291,7 +291,11 @@ each tick by 25, 50, 100, 200 or 400 for speed words 0 to 4, so the five setting
 100..5000; 100 % with adjust 64 gives 7.9 ms per frame). Tempo velocity: `ratio -= (ratio - 100) * sens * (127 - v') /
 7 / 127`. Frames are 50 bytes: pitch hi/lo, 8 voiced formant frequency hi, 8 lo, 8 voiced levels, 8 unvoiced hi, 8 lo,
 8 unvoiced levels; words are `hi * 256 + lo * 2`. An operator with its Fseq switch on reads track `fseqtrk` of the
-frame instead of its own frequency and level. The fundamental follows `framePitch - (NOTETAB[noteAssign] + 0x1243) +
+frame instead of its own frequency and level. The frame's word lands in the operator's own frequency register and no
+further: an operator that is neither a formant nor fixed still has the channel pitch added on top, and since the frame
+carries an absolute formant centre the sum runs past the end of the 16 bit register. MEASURED 2026-09-21 off
+`12_fseqlevel`, whose sine segments sum to 39632..45056 at notes 36, 60 and 84 and come back from the unit as one line
+at 23982 Hz in all three, the saturated word to a tenth. The word saturates, it does not wrap. The fundamental follows `framePitch - (NOTETAB[noteAssign] + 0x1243) +
 (tuning - 63)` unless the performance's formant pitch mode is 1; FUN_000127FC confirms that expression
 to the constant. Nothing shifts the frame's own formant frequencies, which is the point of the format:
 the formants stay where the sequence put them while the fundamental follows the key. Loop start/end and start offset come from the

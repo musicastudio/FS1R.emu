@@ -91,30 +91,45 @@ Each reading was internally consistent and each was wrong. A constant fitted on 
 
 At 1.23 dB the two filter files sit at 0.01 and 0.00 dB in level and 0.76 and 0.24 dB in shape, and `06_filter_2`'s filter EG envelopes come down from 15.68 dB to 5.43 without being touched.
 
-## A grain carries the level it was fired with, 2026-09-20
+## The level register glides, 2026-09-20 and 2026-09-21
 
 Demo song 1 "Vokodrone" clicked its way through its own opening, once every 28 ms, where rgwan's recording of the same bytes does not. The intro from 2.0 to 5.5 s is part 4 alone, the vocal patch "ShoobyVoic": eight formant operators, no feedback, no FM, and preset Fseq "L&G MayI" running at 35.6 frames a second. An Fseq frame rewrites all sixteen level registers and all sixteen frequency words of the channel at once, and the frames are a vocoder analysis, so adjacent frames sit 13 to 80 dB apart. `FUN_00012a32` writes them raw, frame level shifted left one, with nothing between one frame and the next.
 
 Applied per sample those writes cut the grain in flight. Operator 1's output stepped from +0.1490 to +0.0332 between two samples at 2.1685 s, and went to zero and back at 2.3348 and 2.4178, both mid-window: a step of a third of the operator's peak with no envelope in front of it, which is the click.
 
-**The measurement.** Take the 5 kHz-and-up envelope, average it over the 120 frame boundaries in the intro and read the peak against each take's own median. The recording is **+1.20 dB** at the boundary, which is nothing. The engine was **+12.3 dB**.
+**The first measurement.** Take the 5 kHz-and-up envelope, average it over the 120 frame boundaries in the intro and read the peak against each take's own median. The recording is **+1.20 dB** at the boundary, which is nothing. The engine was **+12.3 dB**. Latching the level and the carrier frequency to the grain that follows the write brought it to +1.19 with the unvoiced operators muted, and that is what shipped on 2026-09-20.
 
-| what the operator applies per sample | boundary peak |
-|---|---|
-| hardware | **+1.20 dB** |
-| level and carrier both, as it was | +12.3 dB |
-| level latched at the grain, carrier per sample | +1.75 dB |
-| **level and carrier both latched at the grain** | **+1.19 dB** |
+**It was too slow, and `12_fseqlevel` says so.** That file drives one formant operator from preset Fseq 34 "RndArp4" at six notes over five octaves and then at 16, 65 and 176 frames a second, which is a far harder case than the demo: the frames are 15 ms and the grain at a low fundamental is tens of milliseconds, so a level latched to the grain arrives one or two frames late. Mean octave band error against the unit over the eight formant segments:
 
-So a grain carries the level and the carrier frequency it was fired with, beside the carrier phase it already resets, and a register write lands on the grain that follows it. The window is zero at both ends, so a level that only moves there cannot step the waveform at all. It costs no constant and it is not a smoothing filter: at note 52 the grains are 6 ms apart and the level still follows the frame exactly, one frame late at worst.
+| what the level does between frames | 12_fseqlevel | Vokodrone boundary |
+|---|---|---|
+| hardware | 0 | **+1.20 dB** |
+| steps, as it did before any of this | 9.7 dB | +12.3 dB |
+| latched to the grain | 10.6 dB | +2.05 dB |
+| glides, 0.5 ms | 5.8 dB | |
+| glides, 1.2 ms | 4.8 dB | |
+| **glides, 1.6 ms** | **4.74 dB** | **+2.71 dB** |
+| glides, 3 ms | 5.3 dB | +2.95 dB |
+| glides, 6 ms | 6.8 dB | |
 
-The figures above are with the unvoiced operators muted, which is why the last row reads 1.19 against the hardware's 1.20. With them in it is 2.05, because the noise operator has no grain and its level still steps. That 0.85 dB is the open half; see below.
+A latched level is worse than no smoothing at all on the file built to measure it, and a glide beats both while still holding the demo's frame boundary. It is one mechanism and one constant, `cal::LEVEL_SLEW_MS`, where the latch needed the grain to be the right length and it is not. The minimum is flat from 1.2 to 2.0 ms, so the last digit is not measured. The carrier frequency stays latched to the grain, which is the same statement as the carrier phase reset the chip already does, and it is worth 0.4 dB on the demo boundary.
 
-## What the demo cannot separate
+The glide starts at the new note's own level rather than gliding from the last note's, or it rounds every attack. With that, the whole hardware capture set is unchanged to every digit: nothing in it moves a level fast enough to tell.
 
-A level register that slews on a 3 to 5 ms time constant fits the intro nearly as well, +2.1 to +3.0 dB against the grain latch's +2.05 with everything in the path. The demo cannot choose between them because everything in it runs at one Fseq rate over a narrow range of notes.
+## A ratio operator handed an Fseq frequency runs off the end of the register, 2026-09-21
 
-The lever is the grain rate. A grain is one period of the fundamental, so per-grain latching gives a transition whose width tracks the note and ignores the frame rate, and a slewed register gives one whose width is the same milliseconds whatever the note and whatever the frame rate. `captures/requests/12_fseqlevel.mid` is that experiment: one formant operator on preset Fseq 34 "RndArp4" at six notes over five octaves, then the same note at 16, 65 and 176 frames a second. It also asks the second question, whether a sine operator and the unvoiced operator step where the formant does not, since neither has a window to hide a step in. `docs/hardware_capture_request.md` has the ask.
+`12_fseqlevel`'s three sine segments came back from the unit as one line at **23982 Hz** at notes 36, 60 and 84 alike, which is pitch word 32767 to a tenth. The engine sang at 275 Hz.
+
+A frame's frequency word goes into the operator's own frequency register and does not stand in for the whole register chain, so a ratio operator still has the channel pitch added on top. The word is an absolute formant centre, around 26566 here, and the channel pitch is another 15742 to 19524, so the sum is 39632 to 45056 at every frame of every one of the three notes and the 16 bit register saturates. That is why all three notes give the same line. `word_hz` clamps now, and the Fseq branch adds the channel pitch for an operator that is neither a formant nor fixed. Those three segments go from 42 dB of band error to 5, and the residual is a flat offset on an inaudible tone.
+
+An Fseq switch on a ratio operator is a nonsense patch and the unit's answer is Nyquist. It is in the file because a sine operator has no grain to hide a level step in, which was the second question the file asked; the answer is that it never gets to sing.
+
+## What `12_fseqlevel` leaves open
+
+* **The unvoiced operator**, 11 to 12 dB dark above 640 Hz at all three notes, and the same before and after any of this. That is the noise formant's own bandwidth law, the `NOISE_*` constants that `05_unvoiced` is for, and it swamps anything the file could say about the unvoiced level register. Slewing that one only makes it darker, so it is left stepping.
+* **Sixteen frames a second**, `frmt-rate200`, 17 dB bright from 1 to 5 kHz and flat below. No slew setting touches it, so it is not the level path. Nothing else in the set holds one formant frame for 63 ms.
+* **The file's own lever was blunted.** `init_performance` leaves formant pitch mode at 0, so the Fseq's pitch track drives the fundamental over 8.6 octaves and the note I chose only shifts it. The note was meant to set the grain rate on its own. It still separated the models, since the frame rate varies too, but a rerun with performance byte 0x23 at 1 would read cleaner.
+
 
 ## Where it stands
 
