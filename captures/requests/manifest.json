@@ -1,5 +1,5 @@
 {
- "generated": "2026-09-20",
+ "generated": "2026-09-21",
  "engine_rate_hz": 48000,
  "marker_hz": 1002.134,
  "note": "Times are seconds from the start of the MIDI file. Align a recording with the three marker bursts at each end, then read the segment times off this manifest.",
@@ -12688,7 +12688,8 @@
     235.0
    ],
    "duration_s": 236.12,
-   "sha1": "0cc1dd27151baf9f9f7941e3a80134b4c983e920"
+   "sha1": "0cc1dd27151baf9f9f7941e3a80134b4c983e920",
+   "why": "the noise formant at an 8 kHz centre, where the band does not fold at DC"
   },
   {
    "file": "14_sens.mid",
@@ -13283,7 +13284,8 @@
     182.2
    ],
    "duration_s": 183.32,
-   "sha1": "005af0a758589ae0fcfcac3e0f58c1a7341dc631"
+   "sha1": "005af0a758589ae0fcfcac3e0f58c1a7341dc631",
+   "why": "the filter EG over six depths, and AM sensitivity at three LFO depths"
   },
   {
    "file": "05b_unvoiced2.mid",
@@ -13827,7 +13829,8 @@
     134.2
    ],
    "duration_s": 135.32,
-   "sha1": "d76e4ac60a54bf618e6417c6392a7f283684d9f6"
+   "sha1": "d76e4ac60a54bf618e6417c6392a7f283684d9f6",
+   "why": "the noise formant at a second fundamental, note 36"
   },
   {
    "file": "08b_panlevel_perfpn.mid",
@@ -13980,7 +13983,8 @@
     39.9
    ],
    "duration_s": 41.02,
-   "sha1": "646bf8d080bb7746fccd0d599eeecfab01477836"
+   "sha1": "646bf8d080bb7746fccd0d599eeecfab01477836",
+   "why": "the performance pan, which 08_panlevel leaves at centre"
   },
   {
    "file": "12_fseqlevel.mid",
@@ -14235,7 +14239,8 @@
     79.6
    ],
    "duration_s": 80.72,
-   "sha1": "bce62439f0d5fea40f5c7734aaaba5a43cefc8bb"
+   "sha1": "bce62439f0d5fea40f5c7734aaaba5a43cefc8bb",
+   "why": "what the voiced level register does between Fseq frames"
   }
  ]
 }

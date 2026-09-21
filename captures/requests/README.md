@@ -30,7 +30,12 @@ The recording procedure is in `docs/hardware_capture_request.md`. In short: play
 | `10_envelope2.mid` | 28 | 2.8 | the amplitude EG, second pass: the key code law, the hold, the attack shape |
 | `11_detune_1.mid` | 26 | 1.9 | detune: every step, and whether it is a fixed offset or a fixed ratio |
 | `11_detune_2.mid` | 25 | 1.8 | detune: every step, and whether it is a fixed offset or a fixed ratio |
+| `13_unvoiced3.mid` | 55 | 3.9 | the noise formant at an 8 kHz centre, where the band does not fold at DC |
+| `14_sens.mid` | 34 | 3.1 | the filter EG over six depths, and AM sensitivity at three LFO depths |
+| `05b_unvoiced2.mid` | 31 | 2.3 | the noise formant at a second fundamental, note 36 |
+| `08b_panlevel_perfpn.mid` | 8 | 0.7 | the performance pan, which 08_panlevel leaves at centre |
+| `12_fseqlevel.mid` | 14 | 1.3 | what the voiced level register does between Fseq frames |
 
-Total 655 segments, 53 minutes.
+Total 797 segments, 64 minutes.
 
 Files are numbered in priority order. 01 to 04 carry most of the value: without 01 nothing else can be read in absolute terms, and 02 to 04 settle the envelope, the modulation index and the formant window, which are the three models the engine leans on hardest.

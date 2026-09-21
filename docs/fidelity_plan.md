@@ -1,5 +1,7 @@
 # Matching the engine to the hardware: what is still open, and what closes it
 
+> **Worked through on 2026-09-21, the same day.** rgwan recorded all five files the request asked for. Items 1, 2, 4 and 6 are closed, item 3 turned into the first real measurement of the effect model, and item 6's diagnosis below was wrong in a way worth keeping. What each one became is marked in place; `docs/noise.md` is the working for item 1. The table below is the state before any of it, and the one at the bottom is after.
+
 Written 2026-09-21 against every recording and register session in hand: rgwan's 0918 take of the 21 frozen request files, the 0919 `05b`, `08b` and `10_envelope2` takes, the 0920 `11_detune` and `12_fseqlevel` takes, both register sessions, and `captures/FS1R DEMO.flac`. Everything below is measured off those unless it says otherwise. The numbers come from `python tools/analyze_capture.py captures/hardware/*.wav --compare` run today against the current build.
 
 Three of those takes were not in the comparison at all. `05b_unvoiced2`, `08b_panlevel_perfpn` and `12_fseqlevel` have their own generators, and those generators never wrote a manifest row, so `analyze_capture.py` could not see them and each needed a bespoke reader. `tools/make_capture_0921.py` merges the rows now, after checking that each generator still reproduces its `.mid` byte for byte, which is what says a row describes the take that was played. All three round-trip, and the first thing that fell out is item 6 below.
@@ -34,6 +36,8 @@ Level is the median absolute difference over a file's segments; shape is the mea
 Eleven of the twenty-four frozen files agree with the unit to a quarter of a decibel and their shapes and envelopes with them. What is left is concentrated in five places, and two of those are not calibration at all.
 
 ## 1. The noise formant is the largest real gap, and most of its law is now measured
+
+> **Closed.** `13_unvoiced3` came back and settled the rest: the corner clamps at register 77, the skirt multiplies it by 1.35 a step, the level is a table and the resonance is a threshold. The engine carries all of it. Level error 7.40 to **0.67**, 2.86 to **0.94**, 7.13 to **0.55** and 6.15 to **0.61** over the four unvoiced files. `docs/noise.md`.
 
 Eighty-one segments over three files, 7.1 to 7.4 dB of level error and 3.8 to 6.4 dB of shape error, and the model behind them is a reading of the patent with no measurement anywhere in it: a cascade of `1 + skirt` one-poles whose cutoff spans nine octaves from 20 Hz, ring modulated up to the centre, with a level term that holds the RMS constant.
 
@@ -70,6 +74,8 @@ The engine's `stages = 1 + skirt` cascade is backwards. Whatever the chip does, 
 
 ## 2. The voiced operator loses 3.01 dB when its unvoiced half is switched on
 
+> **Closed, and the diagnosis in this section is wrong.** The unvoiced half costs the voiced operator nothing: a probe file with and without it reads 48.87 dB either way. What the balance segments carry is the expression sweep that runs earlier in the same file. The engine kept CC 11 at 112 across the performance bulk that follows it and the unit does not, which is 3.01 dB of VNBAL. `FUN_0000f2f0` walks the four parts calling `FUN_0000edf0`, the per-part controller reset, so loading a performance puts expression back to 0xFE; the engine had that reset on CC 121 alone. `08_panlevel_2` shape 5.03 to **3.30**.
+
 This is an engine defect, not a constant, and it has been hiding inside a file that reads 0.36 dB overall.
 
 `08_panlevel_2`'s balance segments play one voice with a 261.6 Hz voiced carrier and a 1 kHz noise band, so the two halves are separable in one spectrum. Power in the 240 to 290 Hz band, which is the carrier alone:
@@ -87,11 +93,15 @@ Worth finding before anything else in this list is fitted, for the reason `docs/
 
 ## 3. The effects comparison is not a measurement
 
+> **Re-recorded, and it is a measurement now.** Fresh take, current MIDI files, alignment good, and the three files read 16.94, 27.16 and 28.83 dB. That is the first check the effect model has ever had against hardware and it is that far out: `variation-4` is silent in the engine and not on the unit, and the reverb and variation types scatter twenty to forty decibels either way. Too big for this pass and it is now the largest number in the set.
+
 `09_effects_1` to `_3` read 16 to 33 dB and none of those numbers means anything. The three request files were regenerated on 2026-09-20 with `FX_DEFAULTS`, the factory parameter sets for the twenty-odd types no preset performance uses, and the recording is rgwan's from 2026-09-18, which went out with zeroed blocks for those types. The comparison is a new MIDI file against an old take.
 
 Nothing here is modelling work. Re-record the three files as they stand and the numbers become readable for the first time. Until then the demo's own band error carries an effect model nobody has checked against an impulse response, and `tools/demo_probe.py`'s median of about 6 dB has that inside it.
 
 ## 4. The engine's filter EG never reaches the filter
+
+> **Closed, and it was not the EG.** The EG, its byte decode and its timing were all right. The engine's corner could not go below 755 Hz, because reading the firmware's coefficient as a one-pole at 48 kHz puts it there at cutoff byte 0, and the source these segments use is one partial at 32.7 Hz. That reading could not have been right at both ends either: `-log(1 - a)` spans 14:1 over the whole byte range and the unit spans far more. The corner goes as the byte now, 28.5 Hz doubling every 9.1 bytes, fitted over the six cutoff segments of `06_filter_1` at 0.74 dB rms. `06_filter_2`'s envelopes 5.43 to **3.36** and `06_filter_1`'s shape 0.76 to **0.45**.
 
 `06_filter_2` matches the unit to 0.00 dB in level and 0.24 dB in shape, and then its four filter EG envelopes read 5.43 dB. Reading the envelopes directly rather than through the level metric says why. Peak to trough over each four second note, 20 ms hop:
 
@@ -110,6 +120,8 @@ Four segments is not enough to fit a chip-side EG against. `14_sens` gives it te
 
 ## 5. AM sensitivity, and a stale note about it
 
+> **Measured at three depths now, and it is not a scaling.** `14_sens` says the engine matches the unit at LFO amplitude depth 33 and 66 and runs up to 20 % deep at 99: peak-to-peak 6.40 against 6.23 dB at depth 33 and 39.21 against 47.04 at depth 99, both at sensitivity 7. So the chip's AM attenuation saturates at the deep end and the linear `ams / 7` does not. One value of a variable would have read that as an 18 % trim and got it wrong everywhere else. Left as it is, with the data in hand.
+
 `docs/capture_0918.md` says "AM sensitivity is roughly twice as deep as the engine makes it", the hardware losing 11.29 dB over the sweep against the engine's 4.89. That reading predates both the analyzer's pan correction and the `LEVEL_DB` change and it now points the wrong way. Measured off the two envelopes today, 5 ms hop, the modulation depth as the 5th to 95th percentile spread in dB:
 
 | ams | 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 |
@@ -120,6 +132,8 @@ Four segments is not enough to fit a chip-side EG against. `14_sens` gives it te
 The mean level falls 14.38 dB on the unit over the sweep and 16.31 in the engine. Both are linear in `ams` to within the scatter, so the engine's `regAM * LEVEL_DB * ams / 7` has the right shape and is about 18 % too deep. That is one number, except that the whole sweep sits at LFO amplitude depth 99 and one value of a variable is what the formant window's two wrong answers were both built on. `14_sens` repeats it at three depths.
 
 ## 6. `12_fseqlevel`'s engine render is silent where the unit sounds
+
+> **Closed, and this section's reading of it was wrong.** The engine plays the file correctly. The render did not, because `make_capture_set.py --render` never passed `-r eprom.bin` and that file is the only one in the set that assigns a preset Fseq, which lives in the EPROM and nowhere else. Four seconds of silence a segment, scored against the unit at 52 dB, and the number was measuring a missing argument. The renderer gets the EPROM now whether or not a file looks as though it needs one. 52.44 to **3.16** in level and 33 to **12.18** in envelope, with nothing in the engine touched. Worth keeping as written: I read a stale-tooling number as an engine fault and wrote it up with a table, which is the same mistake `captures/demo/render` produced on 2026-09-19.
 
 Newly readable, and it disagrees with what `docs/formant.md` records for the same file. Segment rms, hardware against the render in `captures/engine/`:
 
@@ -148,18 +162,41 @@ Both are fully recorded in `docs/skirt.md` and neither needs hardware.
 
 **The manifest loses its side files.** `make_capture_set.py` rewrites `manifest.json` from its own file list, so every re-run drops whatever `make_capture_unvoiced2.py`, `make_capture_perpan.py` and `make_capture_fseqlevel.py` added. That is why three recordings sat outside the comparison for two days and each grew a bespoke reader. `tools/make_capture_0921.py` puts the rows back and verifies each `.mid` regenerates byte for byte first; the durable fix is for the main generator to merge rather than replace.
 
-## What to do, in order
+## Where it landed, 2026-09-21
 
-Nothing in 1 to 3 waits on anything else.
+Every file re-rendered against the same recordings, with the engine and the tooling as they now stand.
 
-1. **Find the 3.01 dB** (item 2). One evening, no hardware, and it has to be first because everything downstream of it gets fitted through it.
-2. **Re-record `09_effects_1` to `_3`** (item 3). Eight minutes of rgwan's time, and it is the only thing between us and an impulse response of every effect block.
-3. **Rewrite the noise formant** (item 1) against the two sweeps in hand: linear width, `NOISE_BW_POW` 1.0, the skirt reversed, the resonance threshold, bandwidth 0 silent. Then read `13_unvoiced3` when it arrives for the clamp and the top half of the range.
-4. **Re-render `12_fseqlevel`** and re-read it (item 6), which also says whether `formant.md`'s 6.3 dB still holds.
-5. **Reconnect the filter EG** (item 4), which is a dead path rather than a constant, and read `14_sens` for the chip-side law once it arrives. AM sensitivity (item 5) comes with the same file.
-6. **The "1" forms and all1/all2's geometry** (item 7), off `docs/skirt.md`'s tables.
-7. **The formant's window family** (item 8), which is the last thing in the voiced chain and the hardest.
+| file | level | shape | envelope | against |
+|---|---|---|---|---|
+| `01_reference_1` / `_2` | 0.05 / 0.05 | 0.21 | | 0.05 / 0.05 |
+| `02_envelope_1` / `_2` / `_3` | 0.20 / 0.06 / 0.35 | | 0.64 / 0.43 / 0.64 | unchanged |
+| `03_fm_1` / `_2` | 0.05 / 0.05 | 0.19 / 0.44 | | unchanged |
+| `04_formant_1` / `_2` / `_3` | 0.06 / 0.29 / 0.29 | 0.77 / 2.52 / 0.73 | | unchanged |
+| `05_unvoiced_1` | **0.67** | **3.31** | | was 7.40 / 3.77 |
+| `05_unvoiced_2` | **0.94** | **3.65** | | was 2.86 / 6.36 |
+| `05b_unvoiced2` | **0.55** | **3.16** | | was 7.13 / 4.06 |
+| `06_filter_1` | 0.01 | **0.45** | | was 0.76 |
+| `06_filter_2` | 0.00 | 0.24 | **3.36** | was 5.43 |
+| `07_modulation_1` / `_2` | 0.05 / 0.05 | | 2.27 / 0.81 | unchanged |
+| `08_panlevel_1` | 0.20 | 1.71 | | unchanged |
+| `08_panlevel_2` | **0.26** | **3.30** | | was 0.36 / 5.03 |
+| `08b_panlevel_perfpn` | 0.22 | | | unchanged |
+| `09_effects_1` / `_2` / `_3` | 16.94 / 27.16 / 28.83 | | 18.26 / 16.88 / 13.19 | a measurement now |
+| `10_envelope2` | 0.47 | | 0.81 | unchanged |
+| `11_detune_1` / `_2` | 0.05 / 0.18 | 0.23 | | unchanged |
+| `12_fseqlevel` | **3.16** | | **12.18** | was 52.44 / 33.0 |
+| `13_unvoiced3` | **0.61** | **1.23** | | was 6.15 / 2.96 |
+| `14_sens` | **1.15** | | **3.57** | was 1.67 / 3.79 |
 
-Two register runs on the `FS1R.unlock` rig are worth a few minutes each and neither is on the critical path. `sweep.py skirt` wants a rerun for the formant form alone, which recorded silence last time from a ratio-mode patch and is fixed. `sweep.py filtcoef` through the pair write would take `LADDER_K`, `CUT_COEF_FS` and `RESO_COMP` off the INFERRED list, though `06_filter_1`'s 0.76 dB of shape error says the ladder reading is already close.
+Seventeen of the twenty-nine files agree with the unit inside half a decibel in level. The demo moves with it: mean band tilt 2.56 to **2.45**, worst envelope correlation 0.835 to **0.895**, and Kalimba, which the bandwidth-0 split was settled on, 5.88 to 1.94.
 
-The capture request is `docs/capture_request_0921.md`.
+Two tooling faults fixed along the way, both of which had been producing numbers nobody could read. `make_capture_set.py --render` never passed the EPROM, so any file using a preset rendered silence. And it rewrote `manifest.json` from its own file list every run, dropping the rows the side generators add, which is why three recordings sat outside the comparison for two days and each grew its own reader. It merges now.
+
+## What is left, in order
+
+1. **The effects**, 17 to 29 dB over three files and eighty-four segments. The largest number in the set by a long way, measured against real impulse responses for the first time, and a piece of work on its own scale: eighty-seven types modelled from the Data List with nothing checked.
+2. **The unvoiced pedestal.** The noise band's core matches inside 0.6 dB and everything above 4 kHz is 4 to 10 dB short, which is the same energy the TODO's "top octave" item has been chasing. `docs/noise.md` has the band-by-band numbers and what would settle it.
+3. **AM sensitivity at deep modulation**, item 5. Three LFO depths recorded, the law is a saturation and not a scaling.
+4. **The "1" forms and all1/all2's geometry**, item 7, and **the formant's window family**, item 8. Both have their data recorded in `docs/skirt.md` and neither needs hardware.
+5. **The filter EG's remaining 3.36 dB.** The corner law is fitted on six points and the EG's own settle level is a decibel or two out at the closed end. `CUT_BYTE_MIN` is flat between -3 and -5, so the last digit is not measured.
+6. **The silent-segment scoring artifact**, item 9, still there: `10_envelope2`'s two hold segments are silence on both sides scored as a 30 dB disagreement.

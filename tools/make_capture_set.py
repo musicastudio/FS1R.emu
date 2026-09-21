@@ -43,6 +43,7 @@ OUT = ROOT / "captures/requests"
 ENGINE_OUT = ROOT / "captures/engine"
 EXE = ROOT / "bin/fs1r_emu.exe"
 RENDER = ROOT / ("bin/render_capture.exe" if os.name == "nt" else "bin/render_capture")
+EPROM = ROOT.parent / "FS1R_DISASM/roms/fs1r_v120_eprom_cpuview.bin"
 
 MAX_SEG = 36              # segments per file, so no file runs much past four minutes
 SETTLE_PERF = 700         # ms after a performance bulk: it reloads all four parts
@@ -460,7 +461,7 @@ def rom_effect_blocks():
     """The 112-byte effect block of every ROM performance, indexed by the type byte of each slot. A type
     driven with all-zero parameters is not that type at all: a delay with a time of zero feeds back on
     itself in one sample. These are factory parameter sets, so hardware and engine hear the same thing."""
-    rom = ROOT.parent / "FS1R_DISASM/roms/fs1r_v120_eprom_cpuview.bin"
+    rom = EPROM
     out = {}
     if not rom.exists():
         return out
@@ -683,7 +684,16 @@ def main():
             manifest["files"].append(entry)
             total += entry["duration_s"]
             print(f"{stem}.mid  {len(part):3d} segments  {entry['duration_s'] / 60:5.1f} min")
-    (OUT / "manifest.json").write_text(json.dumps(manifest, indent=1))
+    # Side files (05b, 08b, 12, 13, 14) have their own generators and their own manifest rows. This
+    # used to rewrite the manifest from its own list alone, so every run dropped them and the analyzer
+    # stopped seeing three recordings that were sitting on disk. Keep whatever is already there.
+    mpath = OUT / "manifest.json"
+    if mpath.exists():
+        mine = {f["file"] for f in manifest["files"]}
+        for f in json.loads(mpath.read_text()).get("files", []):
+            if f["file"] not in mine:
+                manifest["files"].append(f)
+    mpath.write_text(json.dumps(manifest, indent=1))
     write_readme(manifest)
     print(f"\n{len(manifest['files'])} files, {sum(len(f['segments']) for f in manifest['files'])} segments, "
           f"{total / 60:.0f} minutes of playback")
@@ -691,8 +701,16 @@ def main():
         ENGINE_OUT.mkdir(parents=True, exist_ok=True)
         # render_capture is the portable one and writes 32-bit float, so the render carries no
         # quantisation floor of its own against a 24-bit capture. Fall back to the console on Windows.
+        # The EPROM goes in whether or not a file looks as though it needs one. 12_fseqlevel assigns a
+        # preset Fseq, which lives in the ROM and nowhere else, so without it that file renders four
+        # seconds of silence per segment and scores 52 dB against the unit: the render was measuring a
+        # missing argument. Every other file sends its own bulks and does not care either way.
+        rom = ["-r", str(EPROM)] if EPROM.exists() else []
+        if not rom:
+            print(f"warning: {EPROM} is missing, so any file using a preset voice, performance or Fseq "
+                  f"will render silent")
         if RENDER.exists():
-            cmd = lambda mid, wav: [str(RENDER), "-f", "-d", "1", str(wav), str(mid)]
+            cmd = lambda mid, wav: [str(RENDER)] + rom + ["-f", "-d", "1", str(wav), str(mid)]
         elif EXE.exists():
             cmd = lambda mid, wav: [str(EXE), "-smf", str(mid), "-w", str(wav), "-d", "1"]
         else:
@@ -716,7 +734,8 @@ def write_readme(manifest):
         "|---|---|---|---|",
     ]
     for f in manifest["files"]:
-        lines.append(f"| `{f['file']}` | {len(f['segments'])} | {f['duration_s'] / 60:.1f} | {f['why']} |")
+        why = f.get("why", "an additive follow-up file, written by its own generator in tools/")
+        lines.append(f"| `{f['file']}` | {len(f['segments'])} | {f['duration_s'] / 60:.1f} | {why} |")
     lines += ["",
               f"Total {sum(len(f['segments']) for f in manifest['files'])} segments, "
               f"{sum(f['duration_s'] for f in manifest['files']) / 60:.0f} minutes.",

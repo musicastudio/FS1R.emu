@@ -144,23 +144,74 @@ static const double FRMT_WL_MAX  = 2.0;     // and the window never runs longer 
 static const double FRMT_NORM    = 0.0;     // how a formant's level follows its window length: 0 leaves the
                                             // window's peak at 1, so a wide bandwidth is quiet; 1 holds the
                                             // spectral peak instead, which is what a FOF generator does
-static const double NOISE_BASE_HZ= 20.0;    // unvoiced bandwidth 0 lands here ...
-static const double NOISE_OCT    = 9.0;     // ... and 0..127 spans this many octaves
-static const double NOISE_BW_POW = 0.5;     // noise level vs bandwidth: 0.5 holds the RMS constant, higher
-                                            // makes a narrow band louder, as a resonator driven by a pulse
-                                            // train would be. The level is held fixed at NOISE_BW_REF.
-                                            // Measured off the 05b take at note 36: the old 0.5 left the demo
-                                            // too quiet across the sweep where the hardware reads flat.
-static const double NOISE_BW_REF = 0.007;   // the one-pole coefficient at bandwidth 20, roughly 54 Hz
-static const double NOISE_LEVEL  = 0.836;   // unvoiced level hand, linear gain = 10^(-1.56/20). The 05b take at
-                                            // note 36 put the engine 1.56 dB loud across the ubw sweep with
-                                            // the rest of the law unchanged; this centres it. (measured)
+// The noise formant, MEASURED 2026-09-21 off 13_unvoiced3, which puts the band at an 8 kHz centre so
+// nothing folds at DC, plus 05_unvoiced at note 60 and 05b_unvoiced2 at note 36. docs/noise.md is the
+// working. The band is two one-poles ring modulated up to the centre, and all three laws below are read
+// rather than modelled: the cutoff is linear in the bandwidth register and clamps, the skirt multiplies
+// that cutoff rather than adding poles, and the level is a table.
+static const double NOISE_BW_HZ  = 17.0;    // the one-pole corner, Hz per bandwidth register step.
+                                            // MEASURED: fitting a two-pole band to each of the twenty-five
+                                            // bandwidths recovers a corner that is flat in fc/register at
+                                            // 16.7 to 17.9 over registers 10 to 41, so it is a straight
+                                            // line through the origin. The exponential over nine octaves
+                                            // this replaces gave 20 Hz at register 0 and 10 kHz at the top
+                                            // and was the wrong shape everywhere.
+static const int    NOISE_BW_CLAMP = 77;    // ... and the register stops there. MEASURED: every spectrum
+                                            // from sysex bandwidth 60 up is the same band at the same
+                                            // level, 29.6 to 29.75 dB over ten settings, with the same
+                                            // width. Sysex 60 is register 77.
+static const double NOISE_SKIRT  = 1.35;    // what one step of the unvoiced skirt multiplies the corner
+                                            // by. MEASURED: at bandwidth 20 the fitted corner goes 418,
+                                            // 553, 690, 951, 1235, 1736, 2442, 3367 Hz over the eight
+                                            // settings, which is 8.06 over seven steps. The engine had
+                                            // stages = 1 + skirt, a cascade that made the band NARROWER
+                                            // as the skirt opened where the unit makes it wider.
+static const double NOISE_SKIRT_LVL = 5.5;  // and one skirt step is worth this many registers OFF the
+                                            // level table's index. MEASURED: at register 77 the skirt
+                                            // lifts the level 29.94 to 42.19 dB over its eight settings,
+                                            // each step reading like a register 5 to 6 lower, while at
+                                            // register 25 the table is already flat and the skirt does
+                                            // nothing to the level at all, which is what the unit does.
+static const double NOISE_LEVEL  = 1.0;     // overall trim on the table below
+// Output level in dB against the bandwidth register, on a five-register grid, MEASURED off the same
+// sweep with the band's own RMS normalised out. It is flat to the tenth of a decibel from register 5 to
+// 20, then falls fifteen decibels and stops. Nothing analytic fits both ends, so this is the measurement.
+static const double NOISE_LVL_DB[17] = {-0.40, -0.30, -0.07, 0.00, -0.36, -1.11, -1.77, -2.60, -3.46,
+                                        -4.48, -5.79, -7.33, -9.06, -11.25, -13.41, -14.78, -15.15};
+static const double NOISE_BW0_DB = -19.9;   // register 0 is off the table's shape entirely: the unit puts
+                                            // the noise twenty decibels under the flat region there,
+                                            // where the engine used to sound a full band. It applies to
+                                            // the noise alone; NOISE_RES_DC's carrier keeps the table's
+                                            // own level, which the demo settles and the capture set
+                                            // cannot see. See render_chan.
+// The unvoiced resonance adds a carrier beside the band, and it is a threshold rather than a ramp.
+// MEASURED: settings 0 to 3 give the same spectrum to the byte, 4 narrows it, and 5, 6 and 7 are a tone
+// with the noise under it, the total rising 0.8, 2.0 and 3.1 dB over setting 0. Reading those rises as
+// 1 + d^2 against a band normalised to unit RMS gives d. The engine's res / 7 ramp had the tone taking
+// over from setting 2 and added 12 dB across the range where the unit adds 3.
+static const double NOISE_RES_DC[8] = {0, 0, 0, 0, 0.21, 0.46, 0.76, 1.02};
 // The filter is not the YMP706's: it runs on VOP3-1 and the CPU hands it coefficients, so these come
 // from the firmware's own conversions (FUN_0000C36C, FUN_0000C3D0) and only the chip's reading of them
 // is a guess. docs/ymp706_registers.md, "The per-voice filter".
-static const double CUT_COEF0    = 0xC0D / 32768.0;   // coefficient at cutoff byte 0 ...
-static const double CUT_COEF_STEP= 0xA9 / 32768.0;    // ... plus this per step, capped at 0x6000
-static const double CUT_COEF_FS  = 48000.0;           // INFERRED: read as a one-pole a = 1 - e^(-2 pi f / fs)
+// The CPU stages 0xC0D + 0xA9 * cutoff into VOP3-1's coefficient memory, confirmed to the integer by the
+// 2026-09-19 register retake. What the chip makes of that word is the model, and reading it as a one-pole
+// coefficient at 48 kHz was wrong by a factor of twenty-five at the bottom of the range: it put the corner
+// at 755 Hz with the byte at 0, where 06_filter_1 takes 14.15 dB off a 32.7 Hz partial there. It could
+// not have been right at both ends either, since -log(1 - a) only spans 14:1 over the whole byte range
+// and the unit spans far more than that. So the corner goes as the byte, MEASURED 2026-09-21.
+static const double CUT_HZ0      = 28.5;    // the corner at cutoff byte 0 ...
+static const double CUT_OCT      = 0.110;   // ... doubling every 9.1 bytes. FITTED over the six cutoff
+                                            // segments of 06_filter_1 that say anything, 0.74 dB rms:
+                                            // -14.15, -6.75, -0.97, +0.40, +0.28 and +0.12 dB off a
+                                            // 32.7 Hz partial at bytes 0, 8, 16, 24, 32 and 40. It puts
+                                            // byte 64 at 3.7 kHz, which is why the three lowpass types
+                                            // measure identical on a 261 Hz tone there, and leaves the
+                                            // top of the range wide open, which is what the unit does.
+static const double CUT_BYTE_MIN = -5.0;    // and the filter EG drives the byte past zero before the chip
+                                            // stops following it. MEASURED: 14_sens's flteg2 segments dip
+                                            // 23 dB on the same partial where byte 0 alone takes off
+                                            // 14.15, which is five bytes further down. Where exactly the
+                                            // chip stops is one number off one measurement.
 static const double RESO_Q0      = 1.0;     // filter Q at raw resonance 0 (displayed -16) ...
 static const double RESO_PER_OCT = 32.0;    // ... doubling every 32 raw steps, for the HPF/BPF/BEF modes only.
                                             // The three lowpasses go through the ladder below instead.
@@ -229,6 +280,15 @@ static inline int eg_keyoff(int c0) {
     if (i >= 9) return EG_KEYOFF[9];
     int a = EG_KEYOFF[i], b = EG_KEYOFF[i + 1];
     return a + ((b - a) * ((c0 - 77) & 3) + 2) / 4;
+}
+// The unvoiced level table, five registers a step, linearly between its samples. The skirt takes whole
+// registers off the index before it gets here, which is how one table carries both sweeps.
+static inline double noise_level_db(double idx) {
+    if (idx <= 0) return cal::NOISE_LVL_DB[0];
+    double x = idx / 5.0; int i = (int)x;
+    if (i >= 16) return cal::NOISE_LVL_DB[16];
+    double f = x - i;
+    return cal::NOISE_LVL_DB[i] + (cal::NOISE_LVL_DB[i + 1] - cal::NOISE_LVL_DB[i]) * f;
 }
 static inline int eg_ratescale(int tscale, int c0) {
     int x = (tscale & 7) * eg_keyoff(c0);
@@ -308,8 +368,7 @@ static inline double rate_secs(int q) { q = clampi(q, 0, 63); return pow(2.0, 26
 // one-pole's a = 1 - e^(-2 pi f / fs) puts byte 0 at 755 Hz and byte 127 at 10.6 kHz. The formula is
 // the firmware's; the reading is INFERRED and is what a recording would calibrate.
 static inline double cut_hz(double c) {
-    double a = cal::CUT_COEF0 + cal::CUT_COEF_STEP * clampi((int)c, 0, 127);
-    return -log(1.0 - std::min(a, 0.999)) * cal::CUT_COEF_FS / (2 * PI);
+    return cal::CUT_HZ0 * pow(2.0, cal::CUT_OCT * std::clamp(c, cal::CUT_BYTE_MIN, 127.0));
 }
 // FUN_0000C3D0 sends TWO resonance coefficients per channel, not one. Table 0x374B24 is
 // A = 1 - 2^(-raw/16) = 1 - r, and 0x374C24 is B = max(0, 0.5 - 2r^2), quadratic in the same damping and
@@ -574,6 +633,12 @@ struct Part {
     // controller state (MIDI)
     int bend = 0;            // (msb - 64) * 16, the firmware keeps the MSB only
     int expr = 254;          // DAT_010297fa
+    // FUN_0000edf0, the per-part controller reset: expression back to 0xFE, bend and every controller
+    // source to zero. Reset All Controllers runs it, and so does loading a performance, which walks the
+    // four parts calling it (FUN_0000f2f0). MEASURED on the unit the same way: 08_panlevel_2 sweeps
+    // expression down to 112 and then sends a performance bulk, and every balance segment after it reads
+    // full level on the hardware where the engine stayed 3.01 dB down for the rest of the file.
+    void reset_ctl();
     // Controller sources in the firmware's own bit order (FUN_000191C0): KN1-4, MC1, MC2, PB, CAT,
     // PAT, FC, BC, MC3, MW, MC4. The knobs and MIDI controls are stored bipolar as (v - 64) * 2, the
     // physical controllers as the raw value, so the range is -128..127 either way.
@@ -583,6 +648,9 @@ struct Part {
     bool sustain = false;
     int rcv() const { return p[4]; }
 };
+inline void Part::reset_ctl() {
+    bend = 0; expr = 254; memset(src, 0, sizeof src); sustain = false; rpnM = rpnL = 127;
+}
 struct Perf {
     uint8_t c[80]; uint8_t fx[112]; Part part[4];
     char name[13];
@@ -660,7 +728,7 @@ struct OpState {
     double phase = 0; WinGen g[2]; int nextGen = 0; double fphase = 0; int halfCount = 0;
     EG eg; FreqEG feg;
     EG ueg; FreqEG ufeg; double nphase = 0; double lp[8] = {}; uint32_t rng = 0x12345678;
-    double att = 0, attS = 0, fop = 0, wl7 = 1, uatt = 0, nf = 0, na = 1, nscale = 0; int bw = 0, ratio = 0;   // refresh_ctl
+    double att = 0, attS = 0, fop = 0, wl7 = 1, uatt = 0, nf = 0, na = 1, nscale = 0, nres = 0; int bw = 0, ratio = 0;   // refresh_ctl
 };
 struct Chan {
     bool active = false; int part = 0, note = 0, vel = 0; bool held = false, sustained = false; uint32_t age = 0;
@@ -1389,7 +1457,7 @@ struct Synth {
         case 100: pt.rpnL = v; pt.nrpnSel = false; break;
         case 101: pt.rpnM = v; pt.nrpnSel = false; break;
         case 120: all_off(); break;
-        case 121: pt.bend = 0; pt.expr = 254; memset(pt.src, 0, sizeof pt.src); pt.sustain = false; pt.rpnM = pt.rpnL = 127; break;
+        case 121: pt.reset_ctl(); break;
         case 123: all_release(); break;
         case 126: pt.p[5] = 0; break;
         case 127: pt.p[5] = 1; break;
@@ -1592,10 +1660,25 @@ struct Synth {
             else if (u.mode) nf = C.f0;
             else nf = word_hz(C.ufreqWord[o] + C.ufbW[o] + (C.regFM * u.fms) / 7 + C.vcFreq[o][1]);
             s.nf = nf * pow(2.0, u.transpose / 12.0);
-            double fcut = cal::NOISE_BASE_HZ * pow(2.0, clampi(C.ubwReg[o] + C.vcBw[o][1], 0, 127) / 127.0 * cal::NOISE_OCT);  // INFERRED noise formant model, see docs
+            // MEASURED noise formant, docs/noise.md. The corner is linear in the bandwidth register and
+            // clamps; the skirt multiplies the corner instead of adding poles; the level is a table.
+            int ureg = std::min(clampi(C.ubwReg[o] + C.vcBw[o][1], 0, 127), cal::NOISE_BW_CLAMP);
+            double fcut = cal::NOISE_BW_HZ * std::max(ureg, 1) * pow(cal::NOISE_SKIRT, u.skirt);
             s.na = 1.0 - exp(-2 * PI * fcut / SR);
-            s.nscale = sqrt(1.0 + u.skirt) * 0.5 * sqrt(2.0 / cal::NOISE_BW_REF) * cal::NOISE_LEVEL
-                     * pow(cal::NOISE_BW_REF / s.na, cal::NOISE_BW_POW);
+            // Two one-poles in series on white noise have variance a^4 (1 + p^2) / (1 - p^2)^3 with
+            // p = 1 - a, so dividing by its root leaves the band at unit RMS and the table below reads
+            // straight off the recording in dB.
+            double p1 = 1.0 - s.na, q = 1.0 - p1 * p1;
+            double var = s.na * s.na * s.na * s.na * (1.0 + p1 * p1) / (q * q * q);
+            // Bandwidth register 0 silences the noise and leaves the resonance carrier alone. The
+            // capture set cannot see the split, since every segment it has at bandwidth 0 is at
+            // resonance 0 too, and the demo settles it: Kalimba runs two unvoiced operators at
+            // bandwidth 0 with resonance 5 and 7, and taking the carrier down with the noise costs it
+            // 3.9 dB of band tilt where leaving it alone costs nothing anywhere else.
+            double tab = cal::NOISE_LEVEL * db2lin(noise_level_db(ureg - cal::NOISE_SKIRT_LVL * u.skirt));
+            double lvl = ureg == 0 ? tab * db2lin(cal::NOISE_BW0_DB) : tab;
+            s.nscale = var > 0 ? lvl / sqrt(var) : 0.0;
+            s.nres   = tab * cal::NOISE_RES_DC[u.res & 7];
         }
     }
     inline void render_chan(Chan& C, double& outL, double& outR) {
@@ -1630,9 +1713,8 @@ struct Synth {
                 if (s.ufeg.stage < 2) nf *= pow(2.0, s.ufeg.tick() / 12.0);
                 s.rng ^= s.rng << 13; s.rng ^= s.rng >> 17; s.rng ^= s.rng << 5;
                 double nz = ((int32_t)s.rng) * (1.0 / 2147483648.0);
-                int stages = 1 + u.skirt;
-                for (int k = 0; k < stages; k++) { s.lp[k] += (nz - s.lp[k]) * s.na; nz = s.lp[k]; }
-                nz = nz * s.nscale + u.res / 7.0;
+                s.lp[0] += (nz - s.lp[0]) * s.na; s.lp[1] += (s.lp[0] - s.lp[1]) * s.na;
+                nz = s.lp[1] * s.nscale + s.nres;
                 s.nphase += nf / SR; if (s.nphase >= 1) s.nphase -= 1;
                 mix += nz * fsin(s.nphase) * db2lin_fast(uegdb - s.uatt) * partU;
             }
@@ -1752,7 +1834,7 @@ static void perf_from_bytes(Synth& S, const Rom* R, const uint8_t* d) {
     Perf& P = S.perf;
     memcpy(P.c, d, 80); memcpy(P.fx, d + 80, 112);
     for (int i = 0; i < 4; i++) {
-        Part& pt = P.part[i]; memcpy(pt.p, d + 192 + 52 * i, 52); pt.nheld = 0; pt.lastPitch = -1;
+        Part& pt = P.part[i]; memcpy(pt.p, d + 192 + 52 * i, 52); pt.nheld = 0; pt.lastPitch = -1; pt.reset_ctl();
         if (R && R->ok && pt.p[1]) rom_voice(*R, bank_voice_index(pt.p[1], pt.p[2]), pt.voice);
     }
     memcpy(P.name, P.c, 12); P.name[12] = 0;

@@ -101,6 +101,16 @@ SIDE = [("make_capture_unvoiced2", "05b_unvoiced2.mid"),
         ("make_capture_perpan", "08b_panlevel_perfpn.mid"),
         ("make_capture_fseqlevel", "12_fseqlevel.mid")]
 
+# what each side file is for, since make_capture_set.py's README table wants a line per file and these
+# rows come from generators that never wrote one
+WHY = {
+    "05b_unvoiced2.mid": "the noise formant at a second fundamental, note 36",
+    "08b_panlevel_perfpn.mid": "the performance pan, which 08_panlevel leaves at centre",
+    "12_fseqlevel.mid": "what the voiced level register does between Fseq frames",
+    "13_unvoiced3.mid": "the noise formant at an 8 kHz centre, where the band does not fold at DC",
+    "14_sens.mid": "the filter EG over six depths, and AM sensitivity at three LFO depths",
+}
+
 
 def side_entries(outdir):
     """The manifest rows for the three side files already recorded. Each generator rebuilds its own .mid
@@ -158,6 +168,8 @@ def main():
 
     # the three side files already recorded, whose rows make_capture_set.py has never written
     entries += side_entries(outdir)
+    for e in entries:
+        e.setdefault("why", WHY.get(e["file"], "an additive follow-up file"))
     added = merge_manifest(outdir, entries)
     print(f"manifest: {len(added)} rows written ({', '.join(e['file'] for e in added) or 'none'})")
 
