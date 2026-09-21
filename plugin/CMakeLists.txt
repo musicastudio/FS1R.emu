@@ -7,6 +7,7 @@ juce_add_plugin(fs1r_plugin
     VERSION ${PROJECT_VERSION}
     COMPANY_NAME "Musica.Studio"
     BUNDLE_ID "studio.musica.fsvr"          # said outright, or JUCE builds it from the target name
+    ICON_BIG "${PROJECT_SOURCE_DIR}/icon.png"   # juceaide turns it into the exe's icon and the bundle's
     PLUGIN_MANUFACTURER_CODE Msst
     PLUGIN_CODE Fsvr
     FORMATS VST3 Standalone
