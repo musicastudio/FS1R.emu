@@ -139,6 +139,6 @@ editor drives it.
 The CPU side is the firmware: velocity curves, level key scaling, pitch and portamento, the pitch EG,
 LFO1 and LFO2, part levels, mono handling, performances, Fseq playback, pan. The tone generator and the
 effect DSP are models, because no register documentation or instruction set exists for either chip;
-every constant that models them is gathered in `namespace cal` in `src/fs1r_lib.cpp`, so calibrating
+every constant that models them is gathered in `src/fs1r/chips/cal.h`, so calibrating
 against a recording of real hardware is one table edit. `docs/ymp706_registers.md` marks which is which
 line by line.

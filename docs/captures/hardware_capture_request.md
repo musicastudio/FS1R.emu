@@ -6,7 +6,7 @@ For Zhiyuan Wan (rgwan), who offered to record bit-exact signals off his unit an
 
 The engine reproduces the firmware's own logic: the note-on path, the tick pipeline, the parameter conversions and the tables all come out of the decompiled ROM, so a patch is interpreted the way the hardware interprets it. That part is settled, and the firmware cannot settle any more of it.
 
-What the firmware never says is what the YMP706 does with the register values it is handed. Nothing in the ROM says how many dB a level step is, how long a rate takes, what shape an envelope traverses, what a bandwidth of 40 does to a formant, or what the filter's cutoff byte means in Hz. Those are modelled from the DX7 lineage and from Yamaha's formant patent, and every one of them is a guess that happens to sound plausible. They are collected in one place, `namespace cal` in `src/fs1r_lib.cpp`, so that calibrating against a recording is a table edit rather than a rewrite.
+What the firmware never says is what the YMP706 does with the register values it is handed. Nothing in the ROM says how many dB a level step is, how long a rate takes, what shape an envelope traverses, what a bandwidth of 40 does to a formant, or what the filter's cutoff byte means in Hz. Those are modelled from the DX7 lineage and from Yamaha's formant patent, and every one of them is a guess that happens to sound plausible. They are collected in one place, `src/fs1r/chips/cal.h`, so that calibrating against a recording is a table edit rather than a rewrite.
 
 A recording of the right test tones turns each of those guesses into a measurement. That is the whole ask.
 

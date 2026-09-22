@@ -5,7 +5,7 @@ What is known about the FS1R, what is modelled, and what nobody knows. This file
 Three words carry every claim below.
 
 - **KNOWN** is read from the firmware, its tables or the board. It needs no calibration and a disagreement with the hardware is a bug.
-- **INFERRED** is modelled, because the two custom chips have no public documentation. Every inferred constant lives in one place, `namespace cal` in `src/fs1r_lib.cpp`, so calibrating against a recording is a table edit rather than a hunt through the engine.
+- **INFERRED** is modelled, because the two custom chips have no public documentation. Every inferred constant lives in one place, `src/fs1r/chips/cal.h`, so calibrating against a recording is a table edit rather than a hunt through the engine.
 - **UNKNOWN** is what no file, photo or recording tells us yet.
 
 Moving a thing from INFERRED to KNOWN is the work. [docs/findings.md](docs/findings.md) records each move and the evidence that made it. [docs/fidelity_plan.md](docs/fidelity_plan.md) ranks what is still open by how far off it is.
@@ -46,7 +46,7 @@ The top octave is the largest remaining gap, and the effects are the largest sin
 
 ## Open work
 
-The board is the live list. Until it exists, this is it.
+Grouped by what blocks each item rather than by subsystem. This file is the list of record. The maintainers mirror it on a private project board, which follows this file rather than the other way round, so a change belongs here first.
 
 **Ready, needs no hardware**
 

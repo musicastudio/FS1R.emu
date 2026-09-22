@@ -62,11 +62,15 @@ bin/fs1r_emu.exe -w before.wav -n 60 -d 3
 
 ## Finding work
 
+[STATUS.md](STATUS.md)'s "Open work" section is the list, and it is grouped by what actually blocks each item rather than by subsystem: what anyone can start today, what is waiting on a hardware session, what is open research, and what is parked. Start there.
+
+The maintainers mirror the same list on a private project board. If you are outside the org you cannot see it, and you are not missing anything: STATUS.md is the copy that is kept current, and the board follows it.
+
+Reported bugs are ordinary issues and are separate from the fidelity work:
+
 ```bash
 gh issue list -R musicastudio/FSVR
 ```
-
-STATUS.md's "Open work" section groups the same items by what actually blocks them: what anyone can start today, what is waiting on a hardware session, what is open research, and what is parked.
 
 ## What you cannot see
 

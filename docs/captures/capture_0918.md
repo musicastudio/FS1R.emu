@@ -1,6 +1,6 @@
 # What rgwan's capture measured
 
-Zhiyuan Wan recorded the whole capture set off his FS1R's digital output board and sent it on 2026-09-18 as `captures/FS1R_capture_request_0918.flac`. This is the working behind the constants it moved. The per-segment numbers are in `captures/analysis/`, and `namespace cal` in `src/fs1r_lib.cpp` names this file against the three constants that are no longer inferred.
+Zhiyuan Wan recorded the whole capture set off his FS1R's digital output board and sent it on 2026-09-18 as `captures/FS1R_capture_request_0918.flac`. This is the working behind the constants it moved. The per-segment numbers are in `captures/analysis/`, and `src/fs1r/chips/cal.h` names this file against the three constants that are no longer inferred.
 
 ## What arrived
 
