@@ -32,21 +32,21 @@ set_target_properties(fs1r_plugin PROPERTIES
 # sequences, packed out of presets/ by tools/make_presets_blob.py so the plugin browses and loads all
 # of them with no EPROM image. Committed, for the same reason as the panel.
 juce_add_binary_data(fs1r_plugin_data SOURCES
-    parameterDescriptions_fs1r.json
-    fs1r_panel.svg
-    fs1r_presets.syx
-    fs1r_presets.csv
-    fs1r_performances.syx
-    fs1r_fseqs.syx)
+    generated/parameterDescriptions_fs1r.json
+    generated/fs1r_panel.svg
+    generated/fs1r_presets.syx
+    generated/fs1r_presets.csv
+    generated/fs1r_performances.syx
+    generated/fs1r_fseqs.syx)
 set_target_properties(fs1r_plugin_data PROPERTIES POSITION_INDEPENDENT_CODE TRUE)
 
 target_sources(fs1r_plugin PRIVATE
     PluginProcessor.cpp
-    PluginEditor.cpp
-    PanelView.cpp
-    EditorPages.cpp
-    ParameterDescriptions.cpp
-    PatchManager.cpp)
+    gui/PluginEditor.cpp
+    gui/PanelView.cpp
+    gui/EditorPages.cpp
+    patch/ParameterDescriptions.cpp
+    patch/PatchManager.cpp)
 
 target_compile_definitions(fs1r_plugin PUBLIC
     JUCE_WEB_BROWSER=0

@@ -13,7 +13,7 @@ The one thing that does not carry over is the logo: the panel the plugin shows i
 FS1R wordmark is swapped for the FSVR one from docs/fsvr.svg, which is the same four letters with the
 manual's own F, S and R and a V drawn to match. That file is the wordmark; nothing is redrawn here.
 
-Writes plugin/fs1r_panel.svg, which is committed so the build needs no Python.
+Writes plugin/generated/fs1r_panel.svg, which is committed so the build needs no Python.
 """
 import re
 import sys
@@ -22,7 +22,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 SRC = ROOT / "docs" / "FS1R-front-panel-p14-ny.svg"
 LOGO = ROOT / "docs" / "fsvr.svg"
-DST = ROOT / "plugin" / "fs1r_panel.svg"
+DST = ROOT / "plugin" / "generated" / "fs1r_panel.svg"
 # The 1 and the R in the drawing. The V takes the 1's path and the R moves right by what the wider
 # letter costs, which docs/fsvr.svg carries as the R's own translate. F and S are already right.
 ONE, ARR = "path9570", "path9568"

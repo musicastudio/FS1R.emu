@@ -48,7 +48,7 @@ def records(rom, base, n):
 
 def code_fields(table, count):
     """(label, midi) for every entry of one Field table in plugin/PanelView.cpp, in order."""
-    src = (ROOT / "plugin" / "PanelView.cpp").read_text(encoding="utf-8")
+    src = (ROOT / "plugin" / "gui" / "PanelView.cpp").read_text(encoding="utf-8")
     block = re.search(r"const Field " + table + r"\[" + count + r"\] = \{(.*?)\n\};", src, re.S)
     if not block:
         sys.exit(f"check_interface: no {table} table in plugin/PanelView.cpp")

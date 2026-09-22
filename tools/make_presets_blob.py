@@ -18,8 +18,8 @@ The 384 performances and the 90 preset Fseqs are packed the same way, one stream
 own index. Neither needs a name index: a performance dump carries its 12-character name and its
 category in its own data, and an Fseq dump carries its 8-character name in its header.
 
-Writes plugin/fs1r_presets.syx, plugin/fs1r_presets.csv, plugin/fs1r_performances.syx and
-plugin/fs1r_fseqs.syx, all committed so the build needs no Python.
+Writes plugin/generated/fs1r_presets.syx, plugin/generated/fs1r_presets.csv, plugin/generated/fs1r_performances.syx and
+plugin/generated/fs1r_fseqs.syx, all committed so the build needs no Python.
 """
 import csv
 import sys
@@ -27,10 +27,10 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 INDEX = ROOT / "presets" / "index.csv"
-OUT_SYX = ROOT / "plugin" / "fs1r_presets.syx"
-OUT_CSV = ROOT / "plugin" / "fs1r_presets.csv"
-OUT_PERF = ROOT / "plugin" / "fs1r_performances.syx"
-OUT_FSEQ = ROOT / "plugin" / "fs1r_fseqs.syx"
+OUT_SYX = ROOT / "plugin" / "generated" / "fs1r_presets.syx"
+OUT_CSV = ROOT / "plugin" / "generated" / "fs1r_presets.csv"
+OUT_PERF = ROOT / "plugin" / "generated" / "fs1r_performances.syx"
+OUT_FSEQ = ROOT / "plugin" / "generated" / "fs1r_fseqs.syx"
 
 
 def to_part_relative(dump: bytes) -> bytes:

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Generate plugin/parameterDescriptions_fs1r.json from the Data List MIDI tables.
+"""Generate plugin/generated/parameterDescriptions_fs1r.json from the Data List MIDI tables.
 
     python tools/gen_parameters.py
 
@@ -17,7 +17,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 DOC = ROOT / "docs/FS1R_DataList_text.txt"
-OUT = ROOT / "plugin/parameterDescriptions_fs1r.json"
+OUT = ROOT / "plugin/generated/parameterDescriptions_fs1r.json"
 RANGE = r"[0-9A-F]{2}(?:-[0-9A-F]{2})?"
 ROW = re.compile(r"^([0-9A-F]{2})\s+(" + RANGE + r"(?:[,/]\s*" + RANGE + r")*)\s+(.+?)\s*$")
 

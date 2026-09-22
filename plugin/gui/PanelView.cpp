@@ -1,5 +1,5 @@
 #include "PanelView.h"
-#include "PluginProcessor.h"
+#include "../PluginProcessor.h"
 #include "BinaryData.h"
 
 namespace fs1rplug {

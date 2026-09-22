@@ -3,12 +3,12 @@
 
     python tools/check_presets.py
 
-plugin/fs1r_presets.syx is the 1408 factory voices as one sysex stream, and the plugin picks the n-th
+plugin/generated/fs1r_presets.syx is the 1408 factory voices as one sysex stream, and the plugin picks the n-th
 dump out of it by the same flat voice number the engine uses. Nothing in the build ties the blob to
-plugin/fs1r_presets.csv, so this reads both back: the dump count, every checksum, that the n-th dump is
+plugin/generated/fs1r_presets.csv, so this reads both back: the dump count, every checksum, that the n-th dump is
 a voice the loader will actually find, and that the names in the n-th dump match the n-th index row.
 
-plugin/fs1r_performances.syx and plugin/fs1r_fseqs.syx carry their own names, so those are checked for
+plugin/generated/fs1r_performances.syx and plugin/generated/fs1r_fseqs.syx carry their own names, so those are checked for
 count, checksum and shape, plus the three performance bank boundaries against the Data List's own
 lists, and that every Fseq's frame count agrees with its length. An Fseq bulk's byte count cannot
 express a 512 frame dump, which is exactly why the header is what says how long it is.
@@ -19,10 +19,10 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
-SYX = ROOT / "plugin" / "fs1r_presets.syx"
-CSV = ROOT / "plugin" / "fs1r_presets.csv"
-PERF = ROOT / "plugin" / "fs1r_performances.syx"
-FSEQ = ROOT / "plugin" / "fs1r_fseqs.syx"
+SYX = ROOT / "plugin" / "generated" / "fs1r_presets.syx"
+CSV = ROOT / "plugin" / "generated" / "fs1r_presets.csv"
+PERF = ROOT / "plugin" / "generated" / "fs1r_performances.syx"
+FSEQ = ROOT / "plugin" / "generated" / "fs1r_fseqs.syx"
 NATIVE = 256           # voices 0..255 are native dumps, the rest DX7 VCED
 # The first name of each preset performance bank, from the Data List's own performance lists, and the
 # last name in the table. Banks A, B, C in order; Preset C is the one the manual describes as the G50

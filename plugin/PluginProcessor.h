@@ -13,8 +13,8 @@
 #include <unordered_map>
 #include <vector>
 #include "fs1r.h"
-#include "ParameterDescriptions.h"
-#include "PatchManager.h"
+#include "patch/ParameterDescriptions.h"
+#include "patch/PatchManager.h"
 
 namespace fs1rplug {
 

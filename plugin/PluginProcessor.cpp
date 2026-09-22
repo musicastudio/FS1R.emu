@@ -1,5 +1,5 @@
 #include "PluginProcessor.h"
-#include "PluginEditor.h"
+#include "gui/PluginEditor.h"
 #include "BinaryData.h"
 
 namespace fs1rplug {

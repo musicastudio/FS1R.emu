@@ -3,7 +3,7 @@
 
     python tools/check_panel.py
 
-The plugin draws the front panel from plugin/fs1r_panel.svg and places every live control over it by
+The plugin draws the front panel from plugin/generated/fs1r_panel.svg and places every live control over it by
 hand, in the drawing's own user units. Nothing in the build ties the two together, so if the drawing
 is edited - a button nudged, the display resized - the controls silently stop lining up. This reads
 the shapes back out of the SVG and compares them with the constants in the art namespace.
@@ -15,8 +15,8 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
-SVG = ROOT / "plugin" / "fs1r_panel.svg"
-CPP = ROOT / "plugin" / "PanelView.cpp"
+SVG = ROOT / "plugin" / "generated" / "fs1r_panel.svg"
+CPP = ROOT / "plugin" / "gui" / "PanelView.cpp"
 # User units. The drawing's button and LED grids are not quite regular - the artist placed them by
 # eye - and PanelView.cpp models each as one row and column spacing, so allow the tenth of a unit
 # that costs. At the size the panel is drawn that is a quarter of a pixel.
