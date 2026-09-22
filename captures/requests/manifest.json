@@ -15187,6 +15187,1796 @@
    "duration_s": 230.52,
    "sha1": "a63264f3d8f2be0a7c35bb48b18e2dd93dd58fcb",
    "why": "the per-voice filter, against a source that has energy at every frequency"
+  },
+  {
+   "file": "16_velocity_1.mid",
+   "segments": [
+    {
+     "id": "vel-s-7-v1",
+     "what": "one fixed 2 kHz carrier at velocity 1, amplitude velocity sensitivity -7: the level against velocity for this sensitivity, and the fixed offset each sensitivity carries at full velocity",
+     "pins": [
+      "vel_att"
+     ],
+     "measure": "steady",
+     "note": 60,
+     "velocity": 1,
+     "t_on": 4.1,
+     "t_off": 5.6,
+     "t_end": 6.1,
+     "steady": [
+      4.7,
+      5.4
+     ]
+    },
+    {
+     "id": "vel-s-7-v16",
+     "what": "one fixed 2 kHz carrier at velocity 16, amplitude velocity sensitivity -7: the level against velocity for this sensitivity, and the fixed offset each sensitivity carries at full velocity",
+     "pins": [
+      "vel_att"
+     ],
+     "measure": "steady",
+     "note": 60,
+     "velocity": 16,
+     "t_on": 6.6,
+     "t_off": 8.1,
+     "t_end": 8.6,
+     "steady": [
+      7.2,
+      7.9
+     ]
+    },
+    {
+     "id": "vel-s-7-v32",
+     "what": "one fixed 2 kHz carrier at velocity 32, amplitude velocity sensitivity -7: the level against velocity for this sensitivity, and the fixed offset each sensitivity carries at full velocity",
+     "pins": [
+      "vel_att"
+     ],
+     "measure": "steady",
+     "note": 60,
+     "velocity": 32,
+     "t_on": 9.1,
+     "t_off": 10.6,
+     "t_end": 11.1,
+     "steady": [
+      9.7,
+      10.4
+     ]
+    },
+    {
+     "id": "vel-s-7-v48",
+     "what": "one fixed 2 kHz carrier at velocity 48, amplitude velocity sensitivity -7: the level against velocity for this sensitivity, and the fixed offset each sensitivity carries at full velocity",
+     "pins": [
+      "vel_att"
+     ],
+     "measure": "steady",
+     "note": 60,
+     "velocity": 48,
+     "t_on": 11.6,
+     "t_off": 13.1,
+     "t_end": 13.6,
+     "steady": [
+      12.2,
+      12.9
+     ]
+    },
+    {
+     "id": "vel-s-7-v64",
+     "what": "one fixed 2 kHz carrier at velocity 64, amplitude velocity sensitivity -7: the level against velocity for this sensitivity, and the fixed offset each sensitivity carries at full velocity",
+     "pins": [
+      "vel_att"
+     ],
+     "measure": "steady",
+     "note": 60,
+     "velocity": 64,
+     "t_on": 14.1,
+     "t_off": 15.6,
+     "t_end": 16.1,
+     "steady": [
+      14.7,
+      15.4
+     ]
+    },
+    {
+     "id": "vel-s-7-v80",
+     "what": "one fixed 2 kHz carrier at velocity 80, amplitude velocity sensitivity -7: the level against velocity for this sensitivity, and the fixed offset each sensitivity carries at full velocity",
+     "pins": [
+      "vel_att"
+     ],
+     "measure": "steady",
+     "note": 60,
+     "velocity": 80,
+     "t_on": 16.6,
+     "t_off": 18.1,
+     "t_end": 18.6,
+     "steady": [
+      17.2,
+      17.9
+     ]
+    },
+    {
+     "id": "vel-s-7-v96",
+     "what": "one fixed 2 kHz carrier at velocity 96, amplitude velocity sensitivity -7: the level against velocity for this sensitivity, and the fixed offset each sensitivity carries at full velocity",
+     "pins": [
+      "vel_att"
+     ],
+     "measure": "steady",
+     "note": 60,
+     "velocity": 96,
+     "t_on": 19.1,
+     "t_off": 20.6,
+     "t_end": 21.1,
+     "steady": [
+      19.7,
+      20.4
+     ]
+    },
+    {
+     "id": "vel-s-7-v112",
+     "what": "one fixed 2 kHz carrier at velocity 112, amplitude velocity sensitivity -7: the level against velocity for this sensitivity, and the fixed offset each sensitivity carries at full velocity",
+     "pins": [
+      "vel_att"
+     ],
+     "measure": "steady",
+     "note": 60,
+     "velocity": 112,
+     "t_on": 21.6,
+     "t_off": 23.1,
+     "t_end": 23.6,
+     "steady": [
+      22.2,
+      22.9
+     ]
+    },
+    {
+     "id": "vel-s-7-v127",
+     "what": "one fixed 2 kHz carrier at velocity 127, amplitude velocity sensitivity -7: the level against velocity for this sensitivity, and the fixed offset each sensitivity carries at full velocity",
+     "pins": [
+      "vel_att"
+     ],
+     "measure": "steady",
+     "note": 60,
+     "velocity": 127,
+     "t_on": 24.1,
+     "t_off": 25.6,
+     "t_end": 26.1,
+     "steady": [
+      24.7,
+      25.4
+     ]
+    },
+    {
+     "id": "vel-s-3-v1",
+     "what": "one fixed 2 kHz carrier at velocity 1, amplitude velocity sensitivity -3: the level against velocity for this sensitivity, and the fixed offset each sensitivity carries at full velocity",
+     "pins": [
+      "vel_att"
+     ],
+     "measure": "steady",
+     "note": 60,
+     "velocity": 1,
+     "t_on": 26.6,
+     "t_off": 28.1,
+     "t_end": 28.6,
+     "steady": [
+      27.2,
+      27.9
+     ]
+    },
+    {
+     "id": "vel-s-3-v16",
+     "what": "one fixed 2 kHz carrier at velocity 16, amplitude velocity sensitivity -3: the level against velocity for this sensitivity, and the fixed offset each sensitivity carries at full velocity",
+     "pins": [
+      "vel_att"
+     ],
+     "measure": "steady",
+     "note": 60,
+     "velocity": 16,
+     "t_on": 29.1,
+     "t_off": 30.6,
+     "t_end": 31.1,
+     "steady": [
+      29.7,
+      30.4
+     ]
+    },
+    {
+     "id": "vel-s-3-v32",
+     "what": "one fixed 2 kHz carrier at velocity 32, amplitude velocity sensitivity -3: the level against velocity for this sensitivity, and the fixed offset each sensitivity carries at full velocity",
+     "pins": [
+      "vel_att"
+     ],
+     "measure": "steady",
+     "note": 60,
+     "velocity": 32,
+     "t_on": 31.6,
+     "t_off": 33.1,
+     "t_end": 33.6,
+     "steady": [
+      32.2,
+      32.9
+     ]
+    },
+    {
+     "id": "vel-s-3-v48",
+     "what": "one fixed 2 kHz carrier at velocity 48, amplitude velocity sensitivity -3: the level against velocity for this sensitivity, and the fixed offset each sensitivity carries at full velocity",
+     "pins": [
+      "vel_att"
+     ],
+     "measure": "steady",
+     "note": 60,
+     "velocity": 48,
+     "t_on": 34.1,
+     "t_off": 35.6,
+     "t_end": 36.1,
+     "steady": [
+      34.7,
+      35.4
+     ]
+    },
+    {
+     "id": "vel-s-3-v64",
+     "what": "one fixed 2 kHz carrier at velocity 64, amplitude velocity sensitivity -3: the level against velocity for this sensitivity, and the fixed offset each sensitivity carries at full velocity",
+     "pins": [
+      "vel_att"
+     ],
+     "measure": "steady",
+     "note": 60,
+     "velocity": 64,
+     "t_on": 36.6,
+     "t_off": 38.1,
+     "t_end": 38.6,
+     "steady": [
+      37.2,
+      37.9
+     ]
+    },
+    {
+     "id": "vel-s-3-v80",
+     "what": "one fixed 2 kHz carrier at velocity 80, amplitude velocity sensitivity -3: the level against velocity for this sensitivity, and the fixed offset each sensitivity carries at full velocity",
+     "pins": [
+      "vel_att"
+     ],
+     "measure": "steady",
+     "note": 60,
+     "velocity": 80,
+     "t_on": 39.1,
+     "t_off": 40.6,
+     "t_end": 41.1,
+     "steady": [
+      39.7,
+      40.4
+     ]
+    },
+    {
+     "id": "vel-s-3-v96",
+     "what": "one fixed 2 kHz carrier at velocity 96, amplitude velocity sensitivity -3: the level against velocity for this sensitivity, and the fixed offset each sensitivity carries at full velocity",
+     "pins": [
+      "vel_att"
+     ],
+     "measure": "steady",
+     "note": 60,
+     "velocity": 96,
+     "t_on": 41.6,
+     "t_off": 43.1,
+     "t_end": 43.6,
+     "steady": [
+      42.2,
+      42.9
+     ]
+    },
+    {
+     "id": "vel-s-3-v112",
+     "what": "one fixed 2 kHz carrier at velocity 112, amplitude velocity sensitivity -3: the level against velocity for this sensitivity, and the fixed offset each sensitivity carries at full velocity",
+     "pins": [
+      "vel_att"
+     ],
+     "measure": "steady",
+     "note": 60,
+     "velocity": 112,
+     "t_on": 44.1,
+     "t_off": 45.6,
+     "t_end": 46.1,
+     "steady": [
+      44.7,
+      45.4
+     ]
+    },
+    {
+     "id": "vel-s-3-v127",
+     "what": "one fixed 2 kHz carrier at velocity 127, amplitude velocity sensitivity -3: the level against velocity for this sensitivity, and the fixed offset each sensitivity carries at full velocity",
+     "pins": [
+      "vel_att"
+     ],
+     "measure": "steady",
+     "note": 60,
+     "velocity": 127,
+     "t_on": 46.6,
+     "t_off": 48.1,
+     "t_end": 48.6,
+     "steady": [
+      47.2,
+      47.9
+     ]
+    },
+    {
+     "id": "vel-s0-v1",
+     "what": "one fixed 2 kHz carrier at velocity 1, amplitude velocity sensitivity +0: the level against velocity for this sensitivity, and the fixed offset each sensitivity carries at full velocity",
+     "pins": [
+      "vel_att"
+     ],
+     "measure": "steady",
+     "note": 60,
+     "velocity": 1,
+     "t_on": 49.1,
+     "t_off": 50.6,
+     "t_end": 51.1,
+     "steady": [
+      49.7,
+      50.4
+     ]
+    },
+    {
+     "id": "vel-s0-v16",
+     "what": "one fixed 2 kHz carrier at velocity 16, amplitude velocity sensitivity +0: the level against velocity for this sensitivity, and the fixed offset each sensitivity carries at full velocity",
+     "pins": [
+      "vel_att"
+     ],
+     "measure": "steady",
+     "note": 60,
+     "velocity": 16,
+     "t_on": 51.6,
+     "t_off": 53.1,
+     "t_end": 53.6,
+     "steady": [
+      52.2,
+      52.9
+     ]
+    },
+    {
+     "id": "vel-s0-v32",
+     "what": "one fixed 2 kHz carrier at velocity 32, amplitude velocity sensitivity +0: the level against velocity for this sensitivity, and the fixed offset each sensitivity carries at full velocity",
+     "pins": [
+      "vel_att"
+     ],
+     "measure": "steady",
+     "note": 60,
+     "velocity": 32,
+     "t_on": 54.1,
+     "t_off": 55.6,
+     "t_end": 56.1,
+     "steady": [
+      54.7,
+      55.4
+     ]
+    },
+    {
+     "id": "vel-s0-v48",
+     "what": "one fixed 2 kHz carrier at velocity 48, amplitude velocity sensitivity +0: the level against velocity for this sensitivity, and the fixed offset each sensitivity carries at full velocity",
+     "pins": [
+      "vel_att"
+     ],
+     "measure": "steady",
+     "note": 60,
+     "velocity": 48,
+     "t_on": 56.6,
+     "t_off": 58.1,
+     "t_end": 58.6,
+     "steady": [
+      57.2,
+      57.9
+     ]
+    },
+    {
+     "id": "vel-s0-v64",
+     "what": "one fixed 2 kHz carrier at velocity 64, amplitude velocity sensitivity +0: the level against velocity for this sensitivity, and the fixed offset each sensitivity carries at full velocity",
+     "pins": [
+      "vel_att"
+     ],
+     "measure": "steady",
+     "note": 60,
+     "velocity": 64,
+     "t_on": 59.1,
+     "t_off": 60.6,
+     "t_end": 61.1,
+     "steady": [
+      59.7,
+      60.4
+     ]
+    },
+    {
+     "id": "vel-s0-v80",
+     "what": "one fixed 2 kHz carrier at velocity 80, amplitude velocity sensitivity +0: the level against velocity for this sensitivity, and the fixed offset each sensitivity carries at full velocity",
+     "pins": [
+      "vel_att"
+     ],
+     "measure": "steady",
+     "note": 60,
+     "velocity": 80,
+     "t_on": 61.6,
+     "t_off": 63.1,
+     "t_end": 63.6,
+     "steady": [
+      62.2,
+      62.9
+     ]
+    },
+    {
+     "id": "vel-s0-v96",
+     "what": "one fixed 2 kHz carrier at velocity 96, amplitude velocity sensitivity +0: the level against velocity for this sensitivity, and the fixed offset each sensitivity carries at full velocity",
+     "pins": [
+      "vel_att"
+     ],
+     "measure": "steady",
+     "note": 60,
+     "velocity": 96,
+     "t_on": 64.1,
+     "t_off": 65.6,
+     "t_end": 66.1,
+     "steady": [
+      64.7,
+      65.4
+     ]
+    },
+    {
+     "id": "vel-s0-v112",
+     "what": "one fixed 2 kHz carrier at velocity 112, amplitude velocity sensitivity +0: the level against velocity for this sensitivity, and the fixed offset each sensitivity carries at full velocity",
+     "pins": [
+      "vel_att"
+     ],
+     "measure": "steady",
+     "note": 60,
+     "velocity": 112,
+     "t_on": 66.6,
+     "t_off": 68.1,
+     "t_end": 68.6,
+     "steady": [
+      67.2,
+      67.9
+     ]
+    },
+    {
+     "id": "vel-s0-v127",
+     "what": "one fixed 2 kHz carrier at velocity 127, amplitude velocity sensitivity +0: the level against velocity for this sensitivity, and the fixed offset each sensitivity carries at full velocity",
+     "pins": [
+      "vel_att"
+     ],
+     "measure": "steady",
+     "note": 60,
+     "velocity": 127,
+     "t_on": 69.1,
+     "t_off": 70.6,
+     "t_end": 71.1,
+     "steady": [
+      69.7,
+      70.4
+     ]
+    },
+    {
+     "id": "vel-s2-v1",
+     "what": "one fixed 2 kHz carrier at velocity 1, amplitude velocity sensitivity +2: the level against velocity for this sensitivity, and the fixed offset each sensitivity carries at full velocity",
+     "pins": [
+      "vel_att"
+     ],
+     "measure": "steady",
+     "note": 60,
+     "velocity": 1,
+     "t_on": 71.6,
+     "t_off": 73.1,
+     "t_end": 73.6,
+     "steady": [
+      72.2,
+      72.9
+     ]
+    },
+    {
+     "id": "vel-s2-v16",
+     "what": "one fixed 2 kHz carrier at velocity 16, amplitude velocity sensitivity +2: the level against velocity for this sensitivity, and the fixed offset each sensitivity carries at full velocity",
+     "pins": [
+      "vel_att"
+     ],
+     "measure": "steady",
+     "note": 60,
+     "velocity": 16,
+     "t_on": 74.1,
+     "t_off": 75.6,
+     "t_end": 76.1,
+     "steady": [
+      74.7,
+      75.4
+     ]
+    },
+    {
+     "id": "vel-s2-v32",
+     "what": "one fixed 2 kHz carrier at velocity 32, amplitude velocity sensitivity +2: the level against velocity for this sensitivity, and the fixed offset each sensitivity carries at full velocity",
+     "pins": [
+      "vel_att"
+     ],
+     "measure": "steady",
+     "note": 60,
+     "velocity": 32,
+     "t_on": 76.6,
+     "t_off": 78.1,
+     "t_end": 78.6,
+     "steady": [
+      77.2,
+      77.9
+     ]
+    },
+    {
+     "id": "vel-s2-v48",
+     "what": "one fixed 2 kHz carrier at velocity 48, amplitude velocity sensitivity +2: the level against velocity for this sensitivity, and the fixed offset each sensitivity carries at full velocity",
+     "pins": [
+      "vel_att"
+     ],
+     "measure": "steady",
+     "note": 60,
+     "velocity": 48,
+     "t_on": 79.1,
+     "t_off": 80.6,
+     "t_end": 81.1,
+     "steady": [
+      79.7,
+      80.4
+     ]
+    },
+    {
+     "id": "vel-s2-v64",
+     "what": "one fixed 2 kHz carrier at velocity 64, amplitude velocity sensitivity +2: the level against velocity for this sensitivity, and the fixed offset each sensitivity carries at full velocity",
+     "pins": [
+      "vel_att"
+     ],
+     "measure": "steady",
+     "note": 60,
+     "velocity": 64,
+     "t_on": 81.6,
+     "t_off": 83.1,
+     "t_end": 83.6,
+     "steady": [
+      82.2,
+      82.9
+     ]
+    }
+   ],
+   "marker_start": [
+    1.2,
+    1.5,
+    1.8
+   ],
+   "marker_end": [
+    84.8,
+    85.1,
+    85.4
+   ],
+   "duration_s": 86.52,
+   "sha1": "a0e9c66f95c9db0405d9b936bb4784bf833bd92c",
+   "why": "the velocity law, seven sensitivities by nine velocities, first half"
+  },
+  {
+   "file": "16_velocity_2.mid",
+   "segments": [
+    {
+     "id": "vel-s2-v80",
+     "what": "one fixed 2 kHz carrier at velocity 80, amplitude velocity sensitivity +2: the level against velocity for this sensitivity, and the fixed offset each sensitivity carries at full velocity",
+     "pins": [
+      "vel_att"
+     ],
+     "measure": "steady",
+     "note": 60,
+     "velocity": 80,
+     "t_on": 4.1,
+     "t_off": 5.6,
+     "t_end": 6.1,
+     "steady": [
+      4.7,
+      5.4
+     ]
+    },
+    {
+     "id": "vel-s2-v96",
+     "what": "one fixed 2 kHz carrier at velocity 96, amplitude velocity sensitivity +2: the level against velocity for this sensitivity, and the fixed offset each sensitivity carries at full velocity",
+     "pins": [
+      "vel_att"
+     ],
+     "measure": "steady",
+     "note": 60,
+     "velocity": 96,
+     "t_on": 6.6,
+     "t_off": 8.1,
+     "t_end": 8.6,
+     "steady": [
+      7.2,
+      7.9
+     ]
+    },
+    {
+     "id": "vel-s2-v112",
+     "what": "one fixed 2 kHz carrier at velocity 112, amplitude velocity sensitivity +2: the level against velocity for this sensitivity, and the fixed offset each sensitivity carries at full velocity",
+     "pins": [
+      "vel_att"
+     ],
+     "measure": "steady",
+     "note": 60,
+     "velocity": 112,
+     "t_on": 9.1,
+     "t_off": 10.6,
+     "t_end": 11.1,
+     "steady": [
+      9.7,
+      10.4
+     ]
+    },
+    {
+     "id": "vel-s2-v127",
+     "what": "one fixed 2 kHz carrier at velocity 127, amplitude velocity sensitivity +2: the level against velocity for this sensitivity, and the fixed offset each sensitivity carries at full velocity",
+     "pins": [
+      "vel_att"
+     ],
+     "measure": "steady",
+     "note": 60,
+     "velocity": 127,
+     "t_on": 11.6,
+     "t_off": 13.1,
+     "t_end": 13.6,
+     "steady": [
+      12.2,
+      12.9
+     ]
+    },
+    {
+     "id": "vel-s3-v1",
+     "what": "one fixed 2 kHz carrier at velocity 1, amplitude velocity sensitivity +3: the level against velocity for this sensitivity, and the fixed offset each sensitivity carries at full velocity",
+     "pins": [
+      "vel_att"
+     ],
+     "measure": "steady",
+     "note": 60,
+     "velocity": 1,
+     "t_on": 14.1,
+     "t_off": 15.6,
+     "t_end": 16.1,
+     "steady": [
+      14.7,
+      15.4
+     ]
+    },
+    {
+     "id": "vel-s3-v16",
+     "what": "one fixed 2 kHz carrier at velocity 16, amplitude velocity sensitivity +3: the level against velocity for this sensitivity, and the fixed offset each sensitivity carries at full velocity",
+     "pins": [
+      "vel_att"
+     ],
+     "measure": "steady",
+     "note": 60,
+     "velocity": 16,
+     "t_on": 16.6,
+     "t_off": 18.1,
+     "t_end": 18.6,
+     "steady": [
+      17.2,
+      17.9
+     ]
+    },
+    {
+     "id": "vel-s3-v32",
+     "what": "one fixed 2 kHz carrier at velocity 32, amplitude velocity sensitivity +3: the level against velocity for this sensitivity, and the fixed offset each sensitivity carries at full velocity",
+     "pins": [
+      "vel_att"
+     ],
+     "measure": "steady",
+     "note": 60,
+     "velocity": 32,
+     "t_on": 19.1,
+     "t_off": 20.6,
+     "t_end": 21.1,
+     "steady": [
+      19.7,
+      20.4
+     ]
+    },
+    {
+     "id": "vel-s3-v48",
+     "what": "one fixed 2 kHz carrier at velocity 48, amplitude velocity sensitivity +3: the level against velocity for this sensitivity, and the fixed offset each sensitivity carries at full velocity",
+     "pins": [
+      "vel_att"
+     ],
+     "measure": "steady",
+     "note": 60,
+     "velocity": 48,
+     "t_on": 21.6,
+     "t_off": 23.1,
+     "t_end": 23.6,
+     "steady": [
+      22.2,
+      22.9
+     ]
+    },
+    {
+     "id": "vel-s3-v64",
+     "what": "one fixed 2 kHz carrier at velocity 64, amplitude velocity sensitivity +3: the level against velocity for this sensitivity, and the fixed offset each sensitivity carries at full velocity",
+     "pins": [
+      "vel_att"
+     ],
+     "measure": "steady",
+     "note": 60,
+     "velocity": 64,
+     "t_on": 24.1,
+     "t_off": 25.6,
+     "t_end": 26.1,
+     "steady": [
+      24.7,
+      25.4
+     ]
+    },
+    {
+     "id": "vel-s3-v80",
+     "what": "one fixed 2 kHz carrier at velocity 80, amplitude velocity sensitivity +3: the level against velocity for this sensitivity, and the fixed offset each sensitivity carries at full velocity",
+     "pins": [
+      "vel_att"
+     ],
+     "measure": "steady",
+     "note": 60,
+     "velocity": 80,
+     "t_on": 26.6,
+     "t_off": 28.1,
+     "t_end": 28.6,
+     "steady": [
+      27.2,
+      27.9
+     ]
+    },
+    {
+     "id": "vel-s3-v96",
+     "what": "one fixed 2 kHz carrier at velocity 96, amplitude velocity sensitivity +3: the level against velocity for this sensitivity, and the fixed offset each sensitivity carries at full velocity",
+     "pins": [
+      "vel_att"
+     ],
+     "measure": "steady",
+     "note": 60,
+     "velocity": 96,
+     "t_on": 29.1,
+     "t_off": 30.6,
+     "t_end": 31.1,
+     "steady": [
+      29.7,
+      30.4
+     ]
+    },
+    {
+     "id": "vel-s3-v112",
+     "what": "one fixed 2 kHz carrier at velocity 112, amplitude velocity sensitivity +3: the level against velocity for this sensitivity, and the fixed offset each sensitivity carries at full velocity",
+     "pins": [
+      "vel_att"
+     ],
+     "measure": "steady",
+     "note": 60,
+     "velocity": 112,
+     "t_on": 31.6,
+     "t_off": 33.1,
+     "t_end": 33.6,
+     "steady": [
+      32.2,
+      32.9
+     ]
+    },
+    {
+     "id": "vel-s3-v127",
+     "what": "one fixed 2 kHz carrier at velocity 127, amplitude velocity sensitivity +3: the level against velocity for this sensitivity, and the fixed offset each sensitivity carries at full velocity",
+     "pins": [
+      "vel_att"
+     ],
+     "measure": "steady",
+     "note": 60,
+     "velocity": 127,
+     "t_on": 34.1,
+     "t_off": 35.6,
+     "t_end": 36.1,
+     "steady": [
+      34.7,
+      35.4
+     ]
+    },
+    {
+     "id": "vel-s5-v1",
+     "what": "one fixed 2 kHz carrier at velocity 1, amplitude velocity sensitivity +5: the level against velocity for this sensitivity, and the fixed offset each sensitivity carries at full velocity",
+     "pins": [
+      "vel_att"
+     ],
+     "measure": "steady",
+     "note": 60,
+     "velocity": 1,
+     "t_on": 36.6,
+     "t_off": 38.1,
+     "t_end": 38.6,
+     "steady": [
+      37.2,
+      37.9
+     ]
+    },
+    {
+     "id": "vel-s5-v16",
+     "what": "one fixed 2 kHz carrier at velocity 16, amplitude velocity sensitivity +5: the level against velocity for this sensitivity, and the fixed offset each sensitivity carries at full velocity",
+     "pins": [
+      "vel_att"
+     ],
+     "measure": "steady",
+     "note": 60,
+     "velocity": 16,
+     "t_on": 39.1,
+     "t_off": 40.6,
+     "t_end": 41.1,
+     "steady": [
+      39.7,
+      40.4
+     ]
+    },
+    {
+     "id": "vel-s5-v32",
+     "what": "one fixed 2 kHz carrier at velocity 32, amplitude velocity sensitivity +5: the level against velocity for this sensitivity, and the fixed offset each sensitivity carries at full velocity",
+     "pins": [
+      "vel_att"
+     ],
+     "measure": "steady",
+     "note": 60,
+     "velocity": 32,
+     "t_on": 41.6,
+     "t_off": 43.1,
+     "t_end": 43.6,
+     "steady": [
+      42.2,
+      42.9
+     ]
+    },
+    {
+     "id": "vel-s5-v48",
+     "what": "one fixed 2 kHz carrier at velocity 48, amplitude velocity sensitivity +5: the level against velocity for this sensitivity, and the fixed offset each sensitivity carries at full velocity",
+     "pins": [
+      "vel_att"
+     ],
+     "measure": "steady",
+     "note": 60,
+     "velocity": 48,
+     "t_on": 44.1,
+     "t_off": 45.6,
+     "t_end": 46.1,
+     "steady": [
+      44.7,
+      45.4
+     ]
+    },
+    {
+     "id": "vel-s5-v64",
+     "what": "one fixed 2 kHz carrier at velocity 64, amplitude velocity sensitivity +5: the level against velocity for this sensitivity, and the fixed offset each sensitivity carries at full velocity",
+     "pins": [
+      "vel_att"
+     ],
+     "measure": "steady",
+     "note": 60,
+     "velocity": 64,
+     "t_on": 46.6,
+     "t_off": 48.1,
+     "t_end": 48.6,
+     "steady": [
+      47.2,
+      47.9
+     ]
+    },
+    {
+     "id": "vel-s5-v80",
+     "what": "one fixed 2 kHz carrier at velocity 80, amplitude velocity sensitivity +5: the level against velocity for this sensitivity, and the fixed offset each sensitivity carries at full velocity",
+     "pins": [
+      "vel_att"
+     ],
+     "measure": "steady",
+     "note": 60,
+     "velocity": 80,
+     "t_on": 49.1,
+     "t_off": 50.6,
+     "t_end": 51.1,
+     "steady": [
+      49.7,
+      50.4
+     ]
+    },
+    {
+     "id": "vel-s5-v96",
+     "what": "one fixed 2 kHz carrier at velocity 96, amplitude velocity sensitivity +5: the level against velocity for this sensitivity, and the fixed offset each sensitivity carries at full velocity",
+     "pins": [
+      "vel_att"
+     ],
+     "measure": "steady",
+     "note": 60,
+     "velocity": 96,
+     "t_on": 51.6,
+     "t_off": 53.1,
+     "t_end": 53.6,
+     "steady": [
+      52.2,
+      52.9
+     ]
+    },
+    {
+     "id": "vel-s5-v112",
+     "what": "one fixed 2 kHz carrier at velocity 112, amplitude velocity sensitivity +5: the level against velocity for this sensitivity, and the fixed offset each sensitivity carries at full velocity",
+     "pins": [
+      "vel_att"
+     ],
+     "measure": "steady",
+     "note": 60,
+     "velocity": 112,
+     "t_on": 54.1,
+     "t_off": 55.6,
+     "t_end": 56.1,
+     "steady": [
+      54.7,
+      55.4
+     ]
+    },
+    {
+     "id": "vel-s5-v127",
+     "what": "one fixed 2 kHz carrier at velocity 127, amplitude velocity sensitivity +5: the level against velocity for this sensitivity, and the fixed offset each sensitivity carries at full velocity",
+     "pins": [
+      "vel_att"
+     ],
+     "measure": "steady",
+     "note": 60,
+     "velocity": 127,
+     "t_on": 56.6,
+     "t_off": 58.1,
+     "t_end": 58.6,
+     "steady": [
+      57.2,
+      57.9
+     ]
+    },
+    {
+     "id": "vel-s7-v1",
+     "what": "one fixed 2 kHz carrier at velocity 1, amplitude velocity sensitivity +7: the level against velocity for this sensitivity, and the fixed offset each sensitivity carries at full velocity",
+     "pins": [
+      "vel_att"
+     ],
+     "measure": "steady",
+     "note": 60,
+     "velocity": 1,
+     "t_on": 59.1,
+     "t_off": 60.6,
+     "t_end": 61.1,
+     "steady": [
+      59.7,
+      60.4
+     ]
+    },
+    {
+     "id": "vel-s7-v16",
+     "what": "one fixed 2 kHz carrier at velocity 16, amplitude velocity sensitivity +7: the level against velocity for this sensitivity, and the fixed offset each sensitivity carries at full velocity",
+     "pins": [
+      "vel_att"
+     ],
+     "measure": "steady",
+     "note": 60,
+     "velocity": 16,
+     "t_on": 61.6,
+     "t_off": 63.1,
+     "t_end": 63.6,
+     "steady": [
+      62.2,
+      62.9
+     ]
+    },
+    {
+     "id": "vel-s7-v32",
+     "what": "one fixed 2 kHz carrier at velocity 32, amplitude velocity sensitivity +7: the level against velocity for this sensitivity, and the fixed offset each sensitivity carries at full velocity",
+     "pins": [
+      "vel_att"
+     ],
+     "measure": "steady",
+     "note": 60,
+     "velocity": 32,
+     "t_on": 64.1,
+     "t_off": 65.6,
+     "t_end": 66.1,
+     "steady": [
+      64.7,
+      65.4
+     ]
+    },
+    {
+     "id": "vel-s7-v48",
+     "what": "one fixed 2 kHz carrier at velocity 48, amplitude velocity sensitivity +7: the level against velocity for this sensitivity, and the fixed offset each sensitivity carries at full velocity",
+     "pins": [
+      "vel_att"
+     ],
+     "measure": "steady",
+     "note": 60,
+     "velocity": 48,
+     "t_on": 66.6,
+     "t_off": 68.1,
+     "t_end": 68.6,
+     "steady": [
+      67.2,
+      67.9
+     ]
+    },
+    {
+     "id": "vel-s7-v64",
+     "what": "one fixed 2 kHz carrier at velocity 64, amplitude velocity sensitivity +7: the level against velocity for this sensitivity, and the fixed offset each sensitivity carries at full velocity",
+     "pins": [
+      "vel_att"
+     ],
+     "measure": "steady",
+     "note": 60,
+     "velocity": 64,
+     "t_on": 69.1,
+     "t_off": 70.6,
+     "t_end": 71.1,
+     "steady": [
+      69.7,
+      70.4
+     ]
+    },
+    {
+     "id": "vel-s7-v80",
+     "what": "one fixed 2 kHz carrier at velocity 80, amplitude velocity sensitivity +7: the level against velocity for this sensitivity, and the fixed offset each sensitivity carries at full velocity",
+     "pins": [
+      "vel_att"
+     ],
+     "measure": "steady",
+     "note": 60,
+     "velocity": 80,
+     "t_on": 71.6,
+     "t_off": 73.1,
+     "t_end": 73.6,
+     "steady": [
+      72.2,
+      72.9
+     ]
+    },
+    {
+     "id": "vel-s7-v96",
+     "what": "one fixed 2 kHz carrier at velocity 96, amplitude velocity sensitivity +7: the level against velocity for this sensitivity, and the fixed offset each sensitivity carries at full velocity",
+     "pins": [
+      "vel_att"
+     ],
+     "measure": "steady",
+     "note": 60,
+     "velocity": 96,
+     "t_on": 74.1,
+     "t_off": 75.6,
+     "t_end": 76.1,
+     "steady": [
+      74.7,
+      75.4
+     ]
+    },
+    {
+     "id": "vel-s7-v112",
+     "what": "one fixed 2 kHz carrier at velocity 112, amplitude velocity sensitivity +7: the level against velocity for this sensitivity, and the fixed offset each sensitivity carries at full velocity",
+     "pins": [
+      "vel_att"
+     ],
+     "measure": "steady",
+     "note": 60,
+     "velocity": 112,
+     "t_on": 76.6,
+     "t_off": 78.1,
+     "t_end": 78.6,
+     "steady": [
+      77.2,
+      77.9
+     ]
+    },
+    {
+     "id": "vel-s7-v127",
+     "what": "one fixed 2 kHz carrier at velocity 127, amplitude velocity sensitivity +7: the level against velocity for this sensitivity, and the fixed offset each sensitivity carries at full velocity",
+     "pins": [
+      "vel_att"
+     ],
+     "measure": "steady",
+     "note": 60,
+     "velocity": 127,
+     "t_on": 79.1,
+     "t_off": 80.6,
+     "t_end": 81.1,
+     "steady": [
+      79.7,
+      80.4
+     ]
+    }
+   ],
+   "marker_start": [
+    1.2,
+    1.5,
+    1.8
+   ],
+   "marker_end": [
+    82.3,
+    82.6,
+    82.9
+   ],
+   "duration_s": 84.02,
+   "sha1": "4d20282a3d51b324b32c9ef21b3554b16ab647cd",
+   "why": "the velocity law, second half"
+  },
+  {
+   "file": "17_egdecay.mid",
+   "segments": [
+    {
+     "id": "decayto-95",
+     "what": "decay at chip rate 24 from full to EG level 95 and hold there: whether the fall is a straight line in dB that stops at the target, or an approach that slows into it",
+     "pins": [
+      "EG decay shape"
+     ],
+     "measure": "envelope",
+     "note": 60,
+     "velocity": 100,
+     "t_on": 4.1,
+     "t_off": 8.1,
+     "t_end": 8.5,
+     "steady": [
+      4.7,
+      7.9
+     ]
+    },
+    {
+     "id": "decayto-90",
+     "what": "decay at chip rate 24 from full to EG level 90 and hold there: whether the fall is a straight line in dB that stops at the target, or an approach that slows into it",
+     "pins": [
+      "EG decay shape"
+     ],
+     "measure": "envelope",
+     "note": 60,
+     "velocity": 100,
+     "t_on": 9.0,
+     "t_off": 13.0,
+     "t_end": 13.4,
+     "steady": [
+      9.6,
+      12.8
+     ]
+    },
+    {
+     "id": "decayto-80",
+     "what": "decay at chip rate 24 from full to EG level 80 and hold there: whether the fall is a straight line in dB that stops at the target, or an approach that slows into it",
+     "pins": [
+      "EG decay shape"
+     ],
+     "measure": "envelope",
+     "note": 60,
+     "velocity": 100,
+     "t_on": 13.9,
+     "t_off": 17.9,
+     "t_end": 18.3,
+     "steady": [
+      14.5,
+      17.7
+     ]
+    },
+    {
+     "id": "decayto-70",
+     "what": "decay at chip rate 24 from full to EG level 70 and hold there: whether the fall is a straight line in dB that stops at the target, or an approach that slows into it",
+     "pins": [
+      "EG decay shape"
+     ],
+     "measure": "envelope",
+     "note": 60,
+     "velocity": 100,
+     "t_on": 18.8,
+     "t_off": 22.8,
+     "t_end": 23.2,
+     "steady": [
+      19.4,
+      22.6
+     ]
+    },
+    {
+     "id": "decayto-50",
+     "what": "decay at chip rate 24 from full to EG level 50 and hold there: whether the fall is a straight line in dB that stops at the target, or an approach that slows into it",
+     "pins": [
+      "EG decay shape"
+     ],
+     "measure": "envelope",
+     "note": 60,
+     "velocity": 100,
+     "t_on": 23.7,
+     "t_off": 27.7,
+     "t_end": 28.1,
+     "steady": [
+      24.3,
+      27.5
+     ]
+    },
+    {
+     "id": "decayto-30",
+     "what": "decay at chip rate 24 from full to EG level 30 and hold there: whether the fall is a straight line in dB that stops at the target, or an approach that slows into it",
+     "pins": [
+      "EG decay shape"
+     ],
+     "measure": "envelope",
+     "note": 60,
+     "velocity": 100,
+     "t_on": 28.6,
+     "t_off": 32.6,
+     "t_end": 33.0,
+     "steady": [
+      29.2,
+      32.4
+     ]
+    },
+    {
+     "id": "decayto-90-r40",
+     "what": "the same decay to level 90 at chip rate 40, where a straight line reaches it in a few hundred milliseconds",
+     "pins": [
+      "EG decay shape"
+     ],
+     "measure": "envelope",
+     "note": 60,
+     "velocity": 100,
+     "t_on": 33.5,
+     "t_off": 36.5,
+     "t_end": 36.9,
+     "steady": [
+      34.1,
+      36.3
+     ]
+    },
+    {
+     "id": "decayto-70-r40",
+     "what": "the same decay to level 70 at chip rate 40, where a straight line reaches it in a few hundred milliseconds",
+     "pins": [
+      "EG decay shape"
+     ],
+     "measure": "envelope",
+     "note": 60,
+     "velocity": 100,
+     "t_on": 37.4,
+     "t_off": 40.4,
+     "t_end": 40.8,
+     "steady": [
+      38.0,
+      40.2
+     ]
+    },
+    {
+     "id": "decay-2stage",
+     "what": "full to 80 and then to silence, both at chip rate 30: the join between two decay segments",
+     "pins": [
+      "EG decay shape"
+     ],
+     "measure": "envelope",
+     "note": 60,
+     "velocity": 100,
+     "t_on": 41.3,
+     "t_off": 47.3,
+     "t_end": 47.7,
+     "steady": [
+      41.9,
+      47.1
+     ]
+    },
+    {
+     "id": "decay-snare",
+     "what": "the snare carrier's own envelope, 99 to 76 at rate 40 then to silence at rate 40, on a plain carrier: the shape the drum's 143 Hz line follows",
+     "pins": [
+      "EG decay shape"
+     ],
+     "measure": "envelope",
+     "note": 60,
+     "velocity": 100,
+     "t_on": 48.2,
+     "t_off": 50.2,
+     "t_end": 50.6,
+     "steady": [
+      48.8,
+      50.0
+     ]
+    }
+   ],
+   "marker_start": [
+    1.2,
+    1.5,
+    1.8
+   ],
+   "marker_end": [
+    51.8,
+    52.1,
+    52.4
+   ],
+   "duration_s": 53.52,
+   "sha1": "ff9b6b0d42a001a14aaa77f3c1229ea24c348b54",
+   "why": "the shape of an EG decay that stops at a level rather than at silence"
+  },
+  {
+   "file": "18_fmchain.mid",
+   "segments": [
+    {
+     "id": "chain2-70",
+     "what": "one modulator at level 70 on the carrier, algorithm 2: the reference 03_fm already measured, in this algorithm",
+     "pins": [
+      "FM_INDEX"
+     ],
+     "measure": "spectrum",
+     "note": 60,
+     "velocity": 100,
+     "t_on": 4.1,
+     "t_off": 6.6,
+     "t_end": 7.3,
+     "steady": [
+      4.7,
+      6.4
+     ]
+    },
+    {
+     "id": "chain2-80",
+     "what": "one modulator at level 80 on the carrier, algorithm 2: the reference 03_fm already measured, in this algorithm",
+     "pins": [
+      "FM_INDEX"
+     ],
+     "measure": "spectrum",
+     "note": 60,
+     "velocity": 100,
+     "t_on": 7.8,
+     "t_off": 10.3,
+     "t_end": 11.0,
+     "steady": [
+      8.4,
+      10.1
+     ]
+    },
+    {
+     "id": "chain2-90",
+     "what": "one modulator at level 90 on the carrier, algorithm 2: the reference 03_fm already measured, in this algorithm",
+     "pins": [
+      "FM_INDEX"
+     ],
+     "measure": "spectrum",
+     "note": 60,
+     "velocity": 100,
+     "t_on": 11.5,
+     "t_off": 14.0,
+     "t_end": 14.7,
+     "steady": [
+      12.1,
+      13.8
+     ]
+    },
+    {
+     "id": "chain3-60",
+     "what": "a modulator at level 80 on a modulator at level 60 on the carrier: whether the second link carries the same index as the first",
+     "pins": [
+      "FM_INDEX"
+     ],
+     "measure": "spectrum",
+     "note": 60,
+     "velocity": 100,
+     "t_on": 15.2,
+     "t_off": 17.7,
+     "t_end": 18.4,
+     "steady": [
+      15.8,
+      17.5
+     ]
+    },
+    {
+     "id": "chain3-70",
+     "what": "a modulator at level 80 on a modulator at level 70 on the carrier: whether the second link carries the same index as the first",
+     "pins": [
+      "FM_INDEX"
+     ],
+     "measure": "spectrum",
+     "note": 60,
+     "velocity": 100,
+     "t_on": 18.9,
+     "t_off": 21.4,
+     "t_end": 22.1,
+     "steady": [
+      19.5,
+      21.2
+     ]
+    },
+    {
+     "id": "chain3-80",
+     "what": "a modulator at level 80 on a modulator at level 80 on the carrier: whether the second link carries the same index as the first",
+     "pins": [
+      "FM_INDEX"
+     ],
+     "measure": "spectrum",
+     "note": 60,
+     "velocity": 100,
+     "t_on": 22.6,
+     "t_off": 25.1,
+     "t_end": 25.8,
+     "steady": [
+      23.2,
+      24.9
+     ]
+    },
+    {
+     "id": "chain3-90",
+     "what": "a modulator at level 80 on a modulator at level 90 on the carrier: whether the second link carries the same index as the first",
+     "pins": [
+      "FM_INDEX"
+     ],
+     "measure": "spectrum",
+     "note": 60,
+     "velocity": 100,
+     "t_on": 26.3,
+     "t_off": 28.8,
+     "t_end": 29.5,
+     "steady": [
+      26.9,
+      28.6
+     ]
+    },
+    {
+     "id": "chain4-70",
+     "what": "three modulators deep, the top one at level 70, the two below at 80",
+     "pins": [
+      "FM_INDEX"
+     ],
+     "measure": "spectrum",
+     "note": 60,
+     "velocity": 100,
+     "t_on": 30.0,
+     "t_off": 32.5,
+     "t_end": 33.2,
+     "steady": [
+      30.6,
+      32.3
+     ]
+    },
+    {
+     "id": "chain4-90",
+     "what": "three modulators deep, the top one at level 90, the two below at 80",
+     "pins": [
+      "FM_INDEX"
+     ],
+     "measure": "spectrum",
+     "note": 60,
+     "velocity": 100,
+     "t_on": 33.7,
+     "t_off": 36.2,
+     "t_end": 36.9,
+     "steady": [
+      34.3,
+      36.0
+     ]
+    },
+    {
+     "id": "chain3r2-70",
+     "what": "the three-operator chain with the top modulator at coarse 2 and level 70: the second link at a different ratio",
+     "pins": [
+      "FM_INDEX"
+     ],
+     "measure": "spectrum",
+     "note": 60,
+     "velocity": 100,
+     "t_on": 37.4,
+     "t_off": 39.9,
+     "t_end": 40.6,
+     "steady": [
+      38.0,
+      39.7
+     ]
+    },
+    {
+     "id": "chain3r2-90",
+     "what": "the three-operator chain with the top modulator at coarse 2 and level 90: the second link at a different ratio",
+     "pins": [
+      "FM_INDEX"
+     ],
+     "measure": "spectrum",
+     "note": 60,
+     "velocity": 100,
+     "t_on": 41.1,
+     "t_off": 43.6,
+     "t_end": 44.3,
+     "steady": [
+      41.7,
+      43.4
+     ]
+    }
+   ],
+   "marker_start": [
+    1.2,
+    1.5,
+    1.8
+   ],
+   "marker_end": [
+    45.5,
+    45.8,
+    46.1
+   ],
+   "duration_s": 47.22,
+   "sha1": "f91ac187c20a1dbf49fe42e17aba46b82252d33e",
+   "why": "the modulation index on the second and third links of a chain"
+  },
+  {
+   "file": "19_drums.mid",
+   "segments": [
+    {
+     "id": "drum-n41-v44",
+     "what": "DemoDrums, the demo's own voice, note 41 at velocity 44, alone: the hit the song plays, with nothing else sounding",
+     "pins": [
+      "drum hit"
+     ],
+     "measure": "impulse",
+     "note": 41,
+     "velocity": 44,
+     "t_on": 4.1,
+     "t_off": 4.2,
+     "t_end": 5.3,
+     "steady": [
+      4.7,
+      4.0
+     ]
+    },
+    {
+     "id": "drum-n41-v72",
+     "what": "DemoDrums, the demo's own voice, note 41 at velocity 72, alone: the hit the song plays, with nothing else sounding",
+     "pins": [
+      "drum hit"
+     ],
+     "measure": "impulse",
+     "note": 41,
+     "velocity": 72,
+     "t_on": 5.8,
+     "t_off": 5.9,
+     "t_end": 7.0,
+     "steady": [
+      6.4,
+      5.7
+     ]
+    },
+    {
+     "id": "drum-n41-v100",
+     "what": "DemoDrums, the demo's own voice, note 41 at velocity 100, alone: the hit the song plays, with nothing else sounding",
+     "pins": [
+      "drum hit"
+     ],
+     "measure": "impulse",
+     "note": 41,
+     "velocity": 100,
+     "t_on": 7.5,
+     "t_off": 7.6,
+     "t_end": 8.7,
+     "steady": [
+      8.1,
+      7.4
+     ]
+    },
+    {
+     "id": "drum-n41-v127",
+     "what": "DemoDrums, the demo's own voice, note 41 at velocity 127, alone: the hit the song plays, with nothing else sounding",
+     "pins": [
+      "drum hit"
+     ],
+     "measure": "impulse",
+     "note": 41,
+     "velocity": 127,
+     "t_on": 9.2,
+     "t_off": 9.3,
+     "t_end": 10.4,
+     "steady": [
+      9.8,
+      9.1
+     ]
+    },
+    {
+     "id": "drum-n60-v44",
+     "what": "DemoDrums, the demo's own voice, note 60 at velocity 44, alone: the hit the song plays, with nothing else sounding",
+     "pins": [
+      "drum hit"
+     ],
+     "measure": "impulse",
+     "note": 60,
+     "velocity": 44,
+     "t_on": 10.9,
+     "t_off": 11.0,
+     "t_end": 12.1,
+     "steady": [
+      11.5,
+      10.8
+     ]
+    },
+    {
+     "id": "drum-n60-v72",
+     "what": "DemoDrums, the demo's own voice, note 60 at velocity 72, alone: the hit the song plays, with nothing else sounding",
+     "pins": [
+      "drum hit"
+     ],
+     "measure": "impulse",
+     "note": 60,
+     "velocity": 72,
+     "t_on": 12.6,
+     "t_off": 12.7,
+     "t_end": 13.8,
+     "steady": [
+      13.2,
+      12.5
+     ]
+    },
+    {
+     "id": "drum-n60-v100",
+     "what": "DemoDrums, the demo's own voice, note 60 at velocity 100, alone: the hit the song plays, with nothing else sounding",
+     "pins": [
+      "drum hit"
+     ],
+     "measure": "impulse",
+     "note": 60,
+     "velocity": 100,
+     "t_on": 14.3,
+     "t_off": 14.4,
+     "t_end": 15.5,
+     "steady": [
+      14.9,
+      14.2
+     ]
+    },
+    {
+     "id": "drum-n60-v127",
+     "what": "DemoDrums, the demo's own voice, note 60 at velocity 127, alone: the hit the song plays, with nothing else sounding",
+     "pins": [
+      "drum hit"
+     ],
+     "measure": "impulse",
+     "note": 60,
+     "velocity": 127,
+     "t_on": 16.0,
+     "t_off": 16.1,
+     "t_end": 17.2,
+     "steady": [
+      16.6,
+      15.9
+     ]
+    },
+    {
+     "id": "drum-n91-v44",
+     "what": "DemoDrums, the demo's own voice, note 91 at velocity 44, alone: the hit the song plays, with nothing else sounding",
+     "pins": [
+      "drum hit"
+     ],
+     "measure": "impulse",
+     "note": 91,
+     "velocity": 44,
+     "t_on": 17.7,
+     "t_off": 17.8,
+     "t_end": 18.9,
+     "steady": [
+      18.3,
+      17.6
+     ]
+    },
+    {
+     "id": "drum-n91-v72",
+     "what": "DemoDrums, the demo's own voice, note 91 at velocity 72, alone: the hit the song plays, with nothing else sounding",
+     "pins": [
+      "drum hit"
+     ],
+     "measure": "impulse",
+     "note": 91,
+     "velocity": 72,
+     "t_on": 19.4,
+     "t_off": 19.5,
+     "t_end": 20.6,
+     "steady": [
+      20.0,
+      19.3
+     ]
+    },
+    {
+     "id": "drum-n91-v100",
+     "what": "DemoDrums, the demo's own voice, note 91 at velocity 100, alone: the hit the song plays, with nothing else sounding",
+     "pins": [
+      "drum hit"
+     ],
+     "measure": "impulse",
+     "note": 91,
+     "velocity": 100,
+     "t_on": 21.1,
+     "t_off": 21.2,
+     "t_end": 22.3,
+     "steady": [
+      21.7,
+      21.0
+     ]
+    },
+    {
+     "id": "drum-n91-v127",
+     "what": "DemoDrums, the demo's own voice, note 91 at velocity 127, alone: the hit the song plays, with nothing else sounding",
+     "pins": [
+      "drum hit"
+     ],
+     "measure": "impulse",
+     "note": 91,
+     "velocity": 127,
+     "t_on": 22.8,
+     "t_off": 22.9,
+     "t_end": 24.0,
+     "steady": [
+      23.4,
+      22.7
+     ]
+    },
+    {
+     "id": "drumnoise-off-n41",
+     "what": "the same hit at note 41, velocity 72, with every unvoiced operator silenced: the tonal half alone",
+     "pins": [
+      "drum hit"
+     ],
+     "measure": "impulse",
+     "note": 41,
+     "velocity": 72,
+     "t_on": 24.5,
+     "t_off": 24.6,
+     "t_end": 25.7,
+     "steady": [
+      25.1,
+      24.4
+     ]
+    },
+    {
+     "id": "drumvoiced-off-n41",
+     "what": "the same hit with every voiced operator silenced: the noise half alone",
+     "pins": [
+      "drum hit"
+     ],
+     "measure": "impulse",
+     "note": 41,
+     "velocity": 72,
+     "t_on": 26.2,
+     "t_off": 26.3,
+     "t_end": 27.4,
+     "steady": [
+      26.8,
+      26.1
+     ]
+    },
+    {
+     "id": "drumnoise-off-n60",
+     "what": "the same hit at note 60, velocity 127, with every unvoiced operator silenced: the tonal half alone",
+     "pins": [
+      "drum hit"
+     ],
+     "measure": "impulse",
+     "note": 60,
+     "velocity": 127,
+     "t_on": 27.9,
+     "t_off": 28.0,
+     "t_end": 29.1,
+     "steady": [
+      28.5,
+      27.8
+     ]
+    },
+    {
+     "id": "drumvoiced-off-n60",
+     "what": "the same hit with every voiced operator silenced: the noise half alone",
+     "pins": [
+      "drum hit"
+     ],
+     "measure": "impulse",
+     "note": 60,
+     "velocity": 127,
+     "t_on": 29.6,
+     "t_off": 29.7,
+     "t_end": 30.8,
+     "steady": [
+      30.2,
+      29.5
+     ]
+    }
+   ],
+   "marker_start": [
+    1.2,
+    1.5,
+    1.8
+   ],
+   "marker_end": [
+    32.0,
+    32.3,
+    32.6
+   ],
+   "duration_s": 33.72,
+   "sha1": "0e880e7da2a0c5fe9d77ae86be81d7b5e04547c4",
+   "why": "the demo's drum voice one hit at a time, to hold the three files above against"
   }
  ]
 }

@@ -44,8 +44,11 @@ ROOT = HERE.parent
 ROM = ROOT.parent / "FS1R_DISASM" / "roms" / "fs1r_v120_eprom_cpuview.bin"
 EXE = ROOT / "bin" / ("fs1r_emu.exe" if sys.platform == "win32" else "fs1r_emu")
 RENDER = ROOT / "bin" / ("render_capture.exe" if sys.platform == "win32" else "render_capture")
-DEMO = HERE / "demo"
-RECORDING = HERE / "FS1R DEMO.flac"
+# The script moved from captures/ to tools/ when the tree was sorted; the songs, the recording and the
+# clips stayed where captures/README.md says they live.
+DEMO = ROOT / "captures" / "demo"
+RECORDING = ROOT / "captures" / "raw" / "FS1R DEMO.flac"
+MEDIA = ROOT / "docs" / "media"
 LABEL = {False: "FSVR engine", True: "FS1R hardware (digital out)"}
 # drawtext asks fontconfig for the font, and fontconfig is not set up on every machine that has an
 # ffmpeg. Where it comes back empty, hand drawtext a file instead. $FS1R_DEMO_FONT wins if it is set,
@@ -183,7 +186,7 @@ def main():
         run([sys.executable, ROOT / "tools" / "extract_demo.py", args.rom], "extract_demo.py")
     mid = song_mid(args.song)
     stem = "fs1r_demo%02d_%s" % (args.song, "hardware" if args.hardware else "engine")
-    mp4, ogg = HERE / (stem + ".mp4"), HERE / (stem + ".ogg")
+    mp4, ogg = MEDIA / (stem + ".mp4"), MEDIA / (stem + ".ogg")
 
     # The hardware cut stays out of captures/demo/render: check_demo.py globs every wav in there as
     # an engine render, and a cut of the recording sitting among them would score itself.
@@ -193,7 +196,7 @@ def main():
         print("cutting %s out of %s" % (mid.stem, RECORDING.name))
         print("  matched at r %.3f" % cut_hardware(render, args.song, wav))
     else:
-        wav = HERE / "demo" / "render" / (mid.stem + ".wav")
+        wav = DEMO / "render" / (mid.stem + ".wav")
         print(render_to(render, mid, wav).strip())
 
     # The render carries the song's events plus the two-second tail -d asks for. Taking the tail off

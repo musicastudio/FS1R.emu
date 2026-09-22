@@ -14,7 +14,7 @@ Moving a thing from INFERRED to KNOWN is the work. [docs/findings.md](docs/findi
 
 Against rgwan's digital recording of the built-in demo, which the unit plays from its own EPROM so the same byte stream drives both: envelope correlation 0.819 to 0.992, median 0.978. Mean band tilt 2.52 dB, and per band from 40 Hz to 10 kHz, 2.4, 1.5, 1.3, 1.6, 1.2, 1.5, 2.0, 4.0 and 7.2 dB. The engine sits about 6 dB under the unit on the demo, median over the fifteen songs.
 
-The top octave is the largest remaining gap, and the effects are the largest single number in the set at 17 to 29 dB over eighty-four segments.
+Against rgwan's 2026-09-22 take of the same demo with the effects and the filter stripped, the engine sits 2.8 dB under the unit in the median band, flat across the octaves: four songs at zero, Ana-Unison at -8. The effects are the largest single number in the set at 17 to 29 dB over eighty-four segments.
 
 ## KNOWN
 
@@ -33,7 +33,7 @@ The top octave is the largest remaining gap, and the effects are the largest sin
 - **YMP706 EG shape and rate scaling.** Measured 2026-09-19 off four envelope recordings: the rate law, the 1.5 dB level step and the 1.5 dB carrier correction step all stand, and the 8-bit level register is 0.376287 dB, a halving every sixteen steps. The attack's shape, its floor, the hold's length and the key rate scaling were all wrong and are now measured. `docs/aeg.md` is the working. What is left is the key code law between its ten measured points, three semitones apart, and the hold's fixed 8 ms lag, whose six-millisecond scatter is the 192.3 Hz tick rather than the chip. Both want register 0xC0 driven directly.
 - **Modulation and sensitivity.** Per-op pitch and frequency modulation sensitivity scaling; feedback `0.5 * 2^(fb - 7)`. The modulation index is measured, 3.369 cycles at full level, off two sideband sweeps and confirmed by `03_fm`'s own spectra. Amplitude sensitivity is measured and disagrees with the model. Detune is settled and needs no constant at all: it is the EPROM's own key scaled `FRMDET`, measured over six octaves, and the engine reads the table rather than modelling it. See `docs/captures/capture_0918.md` and `docs/detune.md`.
 - **Frequency EG range and timing.**
-- **The formant window** (bandwidth and skirt) and the harmonic forms `all/odd/res`. Patent model, `docs/research.md` section 4. The noise formant chain came off this list on 2026-09-21: `13_unvoiced3` puts the band at an 8 kHz centre where it does not fold at DC, and the corner, its clamp, the skirt, the level and the resonance are all measured. `docs/noise.md`.
+- **The formant window** (bandwidth and skirt) and the harmonic forms `all/odd/res`. Patent model, `docs/research.md` section 4. The noise formant chain came off this list on 2026-09-21 and was re-read on 2026-09-22: two digital one-poles with different coefficients, both measured against the register and the skirt on two files at three centres, the second pole's floor being what had read as a pedestal, and a two-sample mean on the unvoiced output. The resonance carrier's law against the register is the one thing left in it. `docs/noise.md`.
 - **The per-voice filter's response.** The CPU side is read from the firmware, including the cutoff and both resonance conversions, so what is left is how VOP3-1 reads a coefficient. Measured 2026-09-21 by `15_filter`, the first recording with a source that can see a filter: the corner is `17.4 * 2^(byte / 12)`, 0.098 octaves rms over thirteen points, where the one-pole reading of the coefficient had put byte 64 at 3751 Hz against the unit's 713. The resonance runs to a 19.9 dB peak where the engine topped out at 8.5, and the feedback goes as the cube of resonance table A. `RESO_COMP` is measured at zero rather than guessed. The three lowpasses are taps off one 4-pole ladder, and HPF, BPF and BEF a 2-pole state-variable filter, which is what the unit measures: 24, 18 and 12 dB per octave on the lowpasses and 12 on the HPF, to a decibel. `docs/filter.md`.
 - **The effect algorithms**, still modelled from the Data List. `09_effects` puts that at 17 to 29 dB, the largest single gap in the set.
 
@@ -51,7 +51,8 @@ Grouped by what blocks each item rather than by subsystem. This file is the list
 **Ready, needs no hardware**
 
 - The effects against hardware, 17 to 29 dB over three files and eighty-four segments. The largest number in the set
-- The unvoiced pedestal: the noise band's core matches inside 0.6 dB and everything above 4 kHz is 4 to 10 dB short. Same energy as the top-octave gap
+- The drum's tonal half, 2 to 3 dB hot on every hit and 4 dB in its carriers' band, with the modulation shallower than the unit's in the first 6 ms. Three things it needs are unmeasured, and `tools/make_capture_tonal.py` writes the files: the velocity law per sensitivity, a decay to a level that is not silence, and a modulator on a modulator
+- The bass part's formants at fundamentals of 80 to 120 Hz, an octave out either side: the formant window family, at a note the capture set never played
 - AM sensitivity at deep modulation. Three LFO depths recorded, the law is a saturation and not a scaling
 - The "1" forms and all1/all2's geometry, data already recorded in `docs/skirt.md`
 - The formant's window family, same data

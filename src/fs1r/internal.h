@@ -42,14 +42,34 @@ static inline int eg_keyoff(int c0) {
     int a = EG_KEYOFF[i], b = EG_KEYOFF[i + 1];
     return a + ((b - a) * ((c0 - 77) & 3) + 2) / 4;
 }
-// The unvoiced level table, five registers a step, linearly between its samples. The skirt takes whole
-// registers off the index before it gets here, which is how one table carries both sweeps.
-static inline double noise_level_db(double idx) {
-    if (idx <= 0) return cal::NOISE_LVL_DB[0];
-    double x = idx / 5.0; int i = (int)x;
-    if (i >= 16) return cal::NOISE_LVL_DB[16];
-    double f = x - i;
-    return cal::NOISE_LVL_DB[i] + (cal::NOISE_LVL_DB[i + 1] - cal::NOISE_LVL_DB[i]) * f;
+// The noise band's two coefficients and its peak gain against the bandwidth register and the skirt,
+// read off cal.h's tables: piecewise linear in the register, and the skirt a per-step multiplier that
+// is itself interpolated across the three registers it was measured at.
+struct NoiseBand { double a1, a2, gdb; };
+static inline NoiseBand noise_band(int reg, int skirt) {
+    reg = clampi(reg, 0, cal::NOISE_BW_CLAMP);
+    int i = 0; while (i < 14 && cal::NOISE_REG[i + 1] <= reg) i++;
+    double f = (double)(reg - cal::NOISE_REG[i]) / (cal::NOISE_REG[i + 1] - cal::NOISE_REG[i]);
+    NoiseBand b = {cal::NOISE_A1[i] + (cal::NOISE_A1[i + 1] - cal::NOISE_A1[i]) * f,
+                   cal::NOISE_A2[i] + (cal::NOISE_A2[i + 1] - cal::NOISE_A2[i]) * f,
+                   cal::NOISE_G_DB[i] + (cal::NOISE_G_DB[i + 1] - cal::NOISE_G_DB[i]) * f};
+    if (skirt > 0) {
+        double r = std::clamp((double)reg, cal::NOISE_SK_REG[0], cal::NOISE_SK_REG[2]);
+        int k = r < cal::NOISE_SK_REG[1] ? 0 : 1;
+        double g = (r - cal::NOISE_SK_REG[k]) / (cal::NOISE_SK_REG[k + 1] - cal::NOISE_SK_REG[k]);
+        double m1 = cal::NOISE_SK_M1[k] + (cal::NOISE_SK_M1[k + 1] - cal::NOISE_SK_M1[k]) * g;
+        double m2 = cal::NOISE_SK_M2[k] + (cal::NOISE_SK_M2[k + 1] - cal::NOISE_SK_M2[k]) * g;
+        double dg = cal::NOISE_SK_DG[k] + (cal::NOISE_SK_DG[k + 1] - cal::NOISE_SK_DG[k]) * g;
+        b.a1 = std::min(1.0, b.a1 * pow(m1, skirt)); b.a2 = std::min(1.0, b.a2 * pow(m2, skirt)); b.gdb += dg * skirt;
+    }
+    return b;
+}
+// Variance of two one-poles in series, each with unit DC gain, driven by unit variance white noise.
+static inline double noise_band_var(double a1, double a2) {
+    double p1 = 1 - a1, p2 = 1 - a2;
+    if (std::abs(p1 - p2) < 1e-6) { double q = 1 - p1 * p1; return a1 * a1 * a1 * a1 * (1 + p1 * p1) / (q * q * q); }
+    double s = p1 * p1 / (1 - p1 * p1) + p2 * p2 / (1 - p2 * p2) - 2 * p1 * p2 / (1 - p1 * p2);
+    return a1 * a1 * a2 * a2 / ((p1 - p2) * (p1 - p2)) * s;
 }
 static inline int eg_ratescale(int tscale, int c0) {
     int x = (tscale & 7) * eg_keyoff(c0);
@@ -282,7 +302,7 @@ struct OpState {
     double phase = 0; WinGen g[2]; int nextGen = 0; double fphase = 0; int halfCount = 0;
     EG eg; FreqEG feg;
     EG ueg; FreqEG ufeg; double nphase = 0; double lp[8] = {}; uint32_t rng = 0x12345678;
-    double att = 0, attS = 0, fop = 0, wl7 = 1, uatt = 0, nf = 0, na = 1, nscale = 0, nres = 0; int bw = 0, ratio = 0;   // refresh_ctl
+    double att = 0, attS = 0, fop = 0, wl7 = 1, uatt = 0, nf = 0, na = 1, na2 = 1, nscale = 0, nres = 0, uprev = 0; int bw = 0, ratio = 0;   // refresh_ctl
 };
 struct Chan {
     bool active = false; int part = 0, note = 0, vel = 0; bool held = false, sustained = false; uint32_t age = 0;

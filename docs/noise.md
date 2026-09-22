@@ -86,3 +86,38 @@ python tools/make_capture_0921.py
 python tools/make_capture_set.py --render
 python tools/analyze_capture.py captures/hardware/13_unvoiced3.wav --compare
 ```
+
+## 2026-09-22, the pedestal is the second pole, and the noise is averaged two samples at a time
+
+The 2026-09-21 reading above put two identical one-poles on the band and left a wideband pedestal it could not model. Refitting every hardware segment with the two poles free settles it: the band is two digital one-poles in series whose coefficients are **not the same**, and the pedestal is the second pole's own floor. A digital one-pole at coefficient `a` passes `(a / (2 - a))^2` of everything at Nyquist, which is white, sits at the same level whichever centre the band is moved to, and rises with the register twelve decibels an octave, all three of which the pedestal does.
+
+Fitting `a1`, `a2` and a peak gain to each spectrum, ring modulated to the centre and multiplied by the roll-off below, over 200 Hz to 23 kHz:
+
+| register | 5 | 10 | 15 | 20 | 25 | 30 | 36 | 41 | 46 | 51 | 56 | 61 | 67 | 72 | 77 |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| `a1` | .0030 | .0066 | .0095 | .0154 | .0236 | .0272 | .0348 | .0353 | .0399 | .0479 | .0520 | .0571 | .0566 | .0615 | .0605 |
+| `a2` | .071 | .080 | .097 | .106 | .114 | .136 | .161 | .203 | .241 | .285 | .372 | .453 | .690 | .880 | .973 |
+| peak, dB | -8.2 | -10.4 | -11.7 | -14.1 | -16.4 | -17.7 | -19.7 | -20.8 | -22.5 | -24.6 | -26.7 | -29.0 | -31.9 | -34.4 | -35.3 |
+| rms, dB | 0.90 | 0.77 | 0.78 | 0.86 | 0.75 | 0.78 | 0.74 | 0.75 | 0.77 | 0.69 | 0.80 | 0.64 | 0.66 | 0.67 | 0.65 |
+
+Three things fall out of the numbers. The first pole is linear in the register to about 55 and then stops. The second doubles every sixteen registers from 25 up, `2^((reg - 25) / 16)`, until it reaches 1 at the clamp, which is where the band becomes one pole wide and the "pedestal" reaches the core. And the peak falls one `LEVEL_DB` per register, -0.376 dB, from register 25 to 77 to the decibel, so the level table of 2026-09-21 was this line seen through the width.
+
+**It is the same band at every centre.** The 1 kHz take gives `a1` .0162, .0361 and .0628 at registers 20, 41 and 77 against .0154, .0353 and .0605 here, `a2` .106, .207 and .994 against .106, .203 and .973, and the peak -14.2, -20.9 and -35.7 against -14.1, -20.8 and -35.3. The 4 kHz and 8 kHz centres at register 51, skirt 2 agree to 6 % and 0.4 dB. That is two files, three centres and two dates, so the coefficients are measured rather than fitted.
+
+**The skirt is two controls, not a register shift.** At register 25 a skirt step multiplies `a1` by 1.20 and `a2` by 1.285 and takes 0.84 dB off the peak, which is the "5.5 registers a step" of the earlier reading. At register 77 `a2` is already 1 and the skirt multiplies `a1` by 1.40 a step with the peak flat. At 51 it is 1.315 and 1.135. The engine carries the three slices and interpolates between them.
+
+**The noise is averaged two samples at a time.** On every wideband segment the unit's noise is flat to 8 kHz and then falls 2.8, 6.8, 13 and 27 dB at 12, 16, 20 and 23 kHz against a white band. The same curve comes off `15_filter`'s source at a 1 kHz centre and `13_unvoiced3`'s at 8 kHz, so it is after the ring modulator, and `01_reference`'s fixed sines read the same level at 22 kHz as at 55 Hz, so it is the unvoiced path alone. A two-sample mean, `cos^2` of half the angular frequency with its null at Nyquist, lands on it at 0.8 dB rms over forty bins. Computing the band at 24 kHz and holding it was tried and is wrong: it folds the 8 kHz band onto 16 kHz at -6 dB, and the unit has nothing there.
+
+Where it stands, band shape as rms over sixth-octave bands from 100 Hz within 40 dB of the peak, which is the metric `tools/analyze_capture.py`'s does not use: its sixth-octave bands below 100 Hz hold one or two FFT bins each and sit at the recording's floor, and on these files they carry most of its number.
+
+| file | shape before | shape after | level scatter before | after |
+|---|---|---|---|---|
+| `05_unvoiced_1` | 2.65 | **1.19** | 0.40 | 0.18 |
+| `05_unvoiced_2` | 1.42 | **0.70** | 0.23 | 0.19 |
+| `05b_unvoiced2` | 2.91 | **1.55** | 0.57 | 0.14 |
+| `13_unvoiced3` | 2.23 | **0.61** | 0.23 | 0.17 |
+| `15_filter`, source | 2.16 | **0.52** | 0.04 | 0.03 |
+
+The resonance carrier's table was read against a band whose RMS the engine had at `1 / sqrt(3)` of what it assumed, the uniform noise it ran on; the noise source is unit variance now and the table is scaled by `sqrt(3)`, which keeps the three recordings and Kalimba where they were. The tone still scatters 3 dB between the two takes in opposite directions at settings 5 and 7, so its law against the register is not read.
+
+Reproducing this: `python tools/fit_noise_band.py` prints the table above off `captures/hardware/`.

@@ -115,25 +115,21 @@ void Synth::refresh_ctl(Chan& C) {
         else if (u.mode) nf = C.f0;
         else nf = word_hz(C.ufreqWord[o] + C.ufbW[o] + (C.regFM * u.fms) / 7 + C.vcFreq[o][1]);
         s.nf = nf * pow(2.0, u.transpose / 12.0);
-        // MEASURED noise formant, docs/noise.md. The corner is linear in the bandwidth register and
-        // clamps; the skirt multiplies the corner instead of adding poles; the level is a table.
-        int ureg = std::min(clampi(C.ubwReg[o] + C.vcBw[o][1], 0, 127), cal::NOISE_BW_CLAMP);
-        double fcut = cal::NOISE_BW_HZ * std::max(ureg, 1) * pow(cal::NOISE_SKIRT, u.skirt);
-        s.na = 1.0 - exp(-2 * PI * fcut / SR);
-        // Two one-poles in series on white noise have variance a^4 (1 + p^2) / (1 - p^2)^3 with
-        // p = 1 - a, so dividing by its root leaves the band at unit RMS and the table below reads
-        // straight off the recording in dB.
-        double p1 = 1.0 - s.na, q = 1.0 - p1 * p1;
-        double var = s.na * s.na * s.na * s.na * (1.0 + p1 * p1) / (q * q * q);
-        // Bandwidth register 0 silences the noise and leaves the resonance carrier alone. The
-        // capture set cannot see the split, since every segment it has at bandwidth 0 is at
-        // resonance 0 too, and the demo settles it: Kalimba runs two unvoiced operators at
-        // bandwidth 0 with resonance 5 and 7, and taking the carrier down with the noise costs it
-        // 3.9 dB of band tilt where leaving it alone costs nothing anywhere else.
-        double tab = cal::NOISE_LEVEL * db2lin(noise_level_db(ureg - cal::NOISE_SKIRT_LVL * u.skirt));
-        double lvl = ureg == 0 ? tab * db2lin(cal::NOISE_BW0_DB) : tab;
-        s.nscale = var > 0 ? lvl / sqrt(var) : 0.0;
-        s.nres   = tab * cal::NOISE_RES_DC[u.res & 7];
+        // MEASURED noise formant, docs/noise.md and cal.h: two unequal digital one-poles on white noise,
+        // their coefficients and the band's peak gain read off the tables against the register and the
+        // skirt. The gain is the band's PEAK, not its RMS, which is what the fit measured; the RMS follows
+        // from the coefficients and is what the resonance carrier is set against.
+        int ureg = clampi(C.ubwReg[o] + C.vcBw[o][1], 0, 127);
+        NoiseBand nb = noise_band(ureg, u.skirt);
+        s.na = nb.a1; s.na2 = nb.a2;
+        s.nscale = db2lin(nb.gdb + cal::NOISE_LEVEL_DB);
+        // Bandwidth register 0 silences the noise and leaves the resonance carrier alone. The capture set
+        // cannot see the split, since every segment it has at bandwidth 0 is at resonance 0 too, and the
+        // demo settles it: Kalimba runs two unvoiced operators at bandwidth 0 with resonance 5 and 7, and
+        // taking the carrier down with the noise costs it 3.9 dB of band tilt where leaving it alone costs
+        // nothing anywhere else. So the carrier is set against the band the register would give at 5.
+        NoiseBand nc = ureg == 0 ? noise_band(5, u.skirt) : nb;
+        s.nres = db2lin(nc.gdb + cal::NOISE_LEVEL_DB) * sqrt(noise_band_var(nc.a1, nc.a2)) * cal::NOISE_RES_DC[u.res & 7];
     }
 }
 
@@ -168,11 +164,16 @@ void Synth::render_chan(Chan& C, double& outL, double& outR) {
             double nf = s.nf;
             if (s.ufeg.stage < 2) nf *= pow(2.0, s.ufeg.tick() / 12.0);
             s.rng ^= s.rng << 13; s.rng ^= s.rng >> 17; s.rng ^= s.rng << 5;
-            double nz = ((int32_t)s.rng) * (1.0 / 2147483648.0);
-            s.lp[0] += (nz - s.lp[0]) * s.na; s.lp[1] += (s.lp[0] - s.lp[1]) * s.na;
+            // Uniform in [-1, 1) scaled to unit variance, so the tables in cal.h read in the band's own RMS.
+            double nz = ((int32_t)s.rng) * (1.7320508 / 2147483648.0);
+            s.lp[0] += (nz - s.lp[0]) * s.na; s.lp[1] += (s.lp[0] - s.lp[1]) * s.na2;
             nz = s.lp[1] * s.nscale + s.nres;
             s.nphase += nf / SR; if (s.nphase >= 1) s.nphase -= 1;
-            mix += nz * fsin(s.nphase) * db2lin_fast(uegdb - s.uatt) * partU;
+            // The unvoiced output is the mean of this sample and the last, see cal.h: the unit's noise
+            // falls off above 8 kHz on a cos^2 that no voiced operator shows, whichever centre it is at.
+            double u1 = nz * fsin(s.nphase);
+            mix += 0.5 * (u1 + s.uprev) * db2lin_fast(uegdb - s.uatt) * partU;
+            s.uprev = u1;
         }
     }
     C.fbBus = (fbNew + C.fbPrev) * 0.5; C.fbPrev = fbNew;
