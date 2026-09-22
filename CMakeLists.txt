@@ -51,7 +51,7 @@ if(FS1R_BUILD_PLUGIN)
 endif()
 
 if(WIN32)
-  add_executable(fs1r_emu src/fs1r_console.cpp)
+  add_executable(fs1r_emu src/console/main.cpp)
   target_link_libraries(fs1r_emu PRIVATE fs1rLib winmm)
   set_target_properties(fs1r_emu PROPERTIES RUNTIME_OUTPUT_DIRECTORY "$<1:${FS1R_BIN}>")
   add_test(NAME engine COMMAND fs1r_emu -selftest)

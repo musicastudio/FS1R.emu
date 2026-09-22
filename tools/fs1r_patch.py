@@ -62,20 +62,20 @@ def time_for_rate(r):
 
 
 def load_tables():
-    """The EPROM conversion tables as Python lists, straight out of src/fs1r_rom_tables.h."""
+    """The EPROM conversion tables as Python lists, straight out of src/fs1r/firmware/tables.h."""
     import re
     from pathlib import Path
-    txt = (Path(__file__).resolve().parents[1] / "src/fs1r_rom_tables.h").read_text()
+    txt = (Path(__file__).resolve().parents[1] / "src/fs1r/firmware/tables.h").read_text()
     return {m.group(1): [int(x) for x in m.group(2).replace("\n", "").split(",") if x.strip()]
             for m in re.finditer(r"(\w+)\[\d+\] = \{(.*?)\};", txt, re.S)}
 
 
 def algorithm(index):
-    """One algorithm from src/fs1r_algorithms.h as eight dicts: where the operator takes its input and
+    """One algorithm from src/fs1r/firmware/algorithms.h as eight dicts: where the operator takes its input and
     whether it reaches the mix. Lets a test patch assert its routing instead of assuming it."""
     import re
     from pathlib import Path
-    txt = (Path(__file__).resolve().parents[1] / "src/fs1r_algorithms.h").read_text()
+    txt = (Path(__file__).resolve().parents[1] / "src/fs1r/firmware/algorithms.h").read_text()
     rows = re.findall(r"\{((?:0x[0-9a-f]{2},?\s*){16})\}", txt)
     b = [int(x, 16) for x in rows[index].replace("\n", "").split(",") if x.strip()]
     inputs = {0: "none", 1: "none", 3: "feedback", 4: "chain", 5: "held", 6: "sum"}

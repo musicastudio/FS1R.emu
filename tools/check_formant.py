@@ -23,7 +23,7 @@ import numpy as np
 ROOT = Path(__file__).resolve().parents[1]
 EXE = ROOT / "bin/fs1r_emu.exe"
 OUT = ROOT / "build"
-TABLES = ROOT / "src/fs1r_rom_tables.h"
+TABLES = ROOT / "src/fs1r/firmware/tables.h"
 
 
 def load_tables():

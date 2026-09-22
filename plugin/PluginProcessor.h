@@ -12,7 +12,7 @@
 #include <memory>
 #include <unordered_map>
 #include <vector>
-#include "fs1r_lib.h"
+#include "fs1r.h"
 #include "ParameterDescriptions.h"
 #include "PatchManager.h"
 

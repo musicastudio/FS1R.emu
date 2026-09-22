@@ -1,4 +1,4 @@
-// fs1r_effects.h - the FS1R's reverb, variation and insertion blocks plus the master EQ.
+// fs1r/chips/vop3_effects.h - the FS1R's reverb, variation and insertion blocks plus the master EQ.
 //
 // The algorithms themselves are VOP3 (YSS236) microcode in the EPROM and nobody has decoded that
 // instruction set, so every algorithm below is a model of the behaviour documented in the Effect

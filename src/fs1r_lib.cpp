@@ -1,16 +1,16 @@
 // fs1r_lib.cpp - the FS1R engine: everything the firmware does between MIDI and the tone generator
 // registers, plus a model of what the two custom chips do with those registers.
 //
-// Reproduced from the v1.20 firmware with its own ROM tables (src/fs1r_rom_tables.h): velocity curves
+// Reproduced from the v1.20 firmware with its own ROM tables (src/fs1r/firmware/tables.h): velocity curves
 // and attenuation, level key scaling, pitch (note table, detune, tune, bend, portamento), the software
 // pitch EG and LFO1 on their 192.3 Hz tick, part levels, mono/poly note handling, performances, Fseq
 // playback, the whole sysex parameter map. What the YMP706 tone generator and the YSS236 effect DSP do
 // with those register values is in no file, so the conversions marked INFERRED follow the DX7 (same
 // design lineage), the formant synthesis patent and the Data List; they are gathered in namespace cal.
 //
-// No Windows, no host, no GUI. src/fs1r_console.cpp is the test console on top of this.
+// No Windows, no host, no GUI. src/console/main.cpp is the test console on top of this.
 #define _CRT_SECURE_NO_WARNINGS
-#include "fs1r_lib.h"
+#include "fs1r.h"
 #include <algorithm>
 #include <cmath>
 #include <cstdint>
@@ -19,267 +19,12 @@
 #include <mutex>
 #include <string>
 #include <vector>
-#include "fs1r_algorithms.h"
-#include "fs1r_rom_tables.h"
+#include "fs1r/firmware/algorithms.h"
+#include "fs1r/firmware/tables.h"
+#include "fs1r/hardware.h"
+#include "fs1r/chips/cal.h"
+#include "fsvr/tuning.h"
 
-static const int SR = 48000;   // the hardware rate; fs1r::Device resamples to the host
-static const int NCHAN = 32;
-static const double PI = 3.14159265358979323846;
-static const double CPU_HZ = 28000000.0;         // SCI BRR 27 gives exactly 31250 baud at 28 MHz
-static const double TICK_HZ = CPU_HZ / 16.0 / 9099.0;   // MTU2 TGRA compare every 0x238B counts at clock/16 -> 192.3 Hz LFO/PEG/portamento tick
-
-// ------------------------------------------------------------------------------------------ INFERRED calibration
-// Everything the two custom chips do that no file documents. Most are models from the DX7 lineage, the
-// formant patent (docs/US5610354...) or the Data List. A few carry "(demo)": those are fitted to rgwan's
-// recording of the built-in demo, which is real hardware but a coarse reference, fifteen songs of mixed
-// patches with their effects in the path. The capture set (STATUS.md, open work) is what settles any of them
-// properly. They all live here so calibrating against a recording is one table edit rather than a hunt
-// through the engine. Names match STATUS.md's INFERRED list.
-namespace cal {
-static const double FM_INDEX     = 3.369;   // cycles of phase deviation at full modulator level. MEASURED: two
-                                            // sweeps of algorithm 8's modulator level register, 2026-09-19, whose
-                                            // sidebands give 21.139 and 21.205 radians at register 0 over 25 and
-                                            // 24 fitted steps, 3.3644 and 3.3749 cycles. The 4.0 this replaces
-                                            // came off the first of those two takes read one step early: the
-                                            // analyzer anchored the sweep on where the tone starts, and the rig
-                                            // brings its note up 1.55 s before the first step writes anything, so
-                                            // every spectrum was scored against its neighbour's register value.
-                                            // The error is exactly one step of the sweep, 10^(4*LEVEL_DB/20) =
-                                            // 1.1887, and 25.116/1.1887 is 21.13. FS1R.unlock's sweep_check.py
-                                            // anchors on the ladder's first step now and both takes agree.
-static const double LEVEL_DB     = 0.376287;// dB per step of the 8-bit level registers (LEVTAB doubled). MEASURED:
-                                            // the same sweep's sideband ladder reads 0.3761 with a 0.005 dB residual
-                                            // over 36 dB, and its own level ladder reads 0.3767 over the top 21 dB.
-                                            // Both land on 20*log10(2)/16, a halving every sixteen steps, which is
-                                            // what a binary attenuator does. The 0.3795 this replaces came off the
-                                            // 0918 recording, where the fit ran into the output path's own droop
-                                            // below -68 dB (see fs1r_capture_session2_results.md) and read high.
-static const double EG_LEVEL_DB  = 1.5;     // dB per step of the 6-bit EG level registers (LEVTAB >> 1)
-static const double CARRIER_DB   = 1.5;     // dB per step of the carrier level correction (voice 0x2D-0x34)
-static const double FEEDBACK     = 0.5;     // feedback gain = FEEDBACK * 2^(fb - 7)
-static const double EG_ATTACK_K  = 0.0625;  // rising EG time constant as a fraction of rate_secs. MEASURED:
-                                            // the eleven attack-rate segments of 02_envelope_2 fit an
-                                            // exponential in dB with tau/rate_secs = 0.0615 over rates 36 to 44,
-                                            // where the 1 ms envelope resolves the whole rise. 1/16 is also what
-                                            // the DX7 EGS does, its attack increment being (17 - level/2^24) times
-                                            // the decay's, so the constant and the lineage agree. The 0.25 this
-                                            // replaces left a rate-24 attack 45 dB below the unit's after 400 ms.
-static const double EG_OVERSHOOT = 3.9;     // dB past the TOP OF THE SCALE that a rising EG aims at, not past
-                                            // its own target: 10_envelope2's attackto-70 climbs to a target 21 dB
-                                            // down at the same speed a climb to full does, which only an approach
-                                            // aimed at the top and clamped at the target can do. The DX7's EGS is
-                                            // the same shape, its rising increment being (17 - level/2^24) where
-                                            // 16 is full scale. MEASURED 3.94 with the floor below free and
-                                            // EG_ATTACK_K pinned at 1/16, 0.85 dB rms over 780 envelope points of
-                                            // ten segments that reach three different targets from three levels.
-static const double EG_ATTACK_FLOOR = -54.5;// dB the EG jumps to when a segment starts rising from below it.
-                                            // MEASURED: attackfrom-20 starts its rise at L4 = 58.5 dB down and the
-                                            // unit is at 52.7 dB one millisecond in, where attackfrom-50 starts at
-                                            // 36 dB down and stays there, so the floor is a jump the chip takes
-                                            // from anywhere below it and not merely where a rise from silence
-                                            // begins. The DX7 does the same with a jump target of 1716 of 4096,
-                                            // which is 55.8 dB below full.
-static const double EG_HOLD_FRAC = 0.5;     // the hold segment as a fraction of a full traverse at the hold rate.
-static const double EG_HOLD_LAG  = 0.0081;  // ... plus this, fixed. MEASURED over seven hold settings from 19 ms
-                                            // to 3.65 s: a free fit of both terms over the five slowest lands on
-                                            // 0.4998 of a traverse, so the fraction is exactly a half, and the
-                                            // lag is then the mean of what the seven leave over. It scatters by
-                                            // about six milliseconds either way, which is two note-ons quantised
-                                            // to the 192.3 Hz tick and is as well as a recording can place it.
-                                            // Any pure fraction of rate_secs misses the fastest holds by 80 %.
-                                            // Hold register 0x3F means no hold at all, which is why the firmware
-                                            // leaves that one value alone.
-static const double FEG_SEMIS    = 48.0;    // frequency EG range at the full register swing of 128 (four octaves).
-                                            // The sysex byte reaches the register through FEGLVL, which is measured
-static const double FEG_TIME_K   = 0.3;     // frequency EG time as a fraction of rate_secs
-static const double FEG_STEP_K   = 0.09;    // the filter EG's time constant as a fraction of a full
-                                            // traverse at its own rate. MEASURED off 14_sens and
-                                            // 06_filter_2, the only recordings that sweep a filter EG:
-                                            // at the 0.25 this replaces, a decay at time 60 has not
-                                            // recovered by the end of a four second note where the unit
-                                            // is back in its passband inside a second. The envelope error
-                                            // over 06_filter_2's four segments bottoms at 2.68 dB here
-                                            // against 6.31 at 0.25, and it is flat from 0.06 to 0.12, so
-                                            // the last digit is not measured. The amplitude EG's own
-                                            // rising constant is a sixteenth, which is the same order.
-static const double WIN_SKIRT    = 2.0;     // the grain window is sin^p, p = WIN_SKIRT * step^skirt. The
-                                            // skirt is the one shape control all1, all2, odd1 and odd2
-                                            // have, voice byte 6 being the formant's bandwidth and
-                                            // res1/res2's resonance, which those four do not read.
-                                            // MEASURED: skirt 0 is sin^2 on every form, which puts the
-                                            // two partials either side of a one-period grain 6.02 dB
-                                            // down, exactly as the unit does on res1, res2, odd1 and odd2
-static const double WIN_SKIRT_STEP = 2.0;   // what the skirt multiplies p by, per step, on all/odd/res.
-                                            // MEASURED on odd2 and res2, whose grain is one period long
-                                            // under a carrier at an integer multiple of the grain rate,
-                                            // so their line amplitudes are the window's own Fourier
-                                            // coefficients: p = 2, 4, 8, 16, 32, 64, 128 reproduces them
-                                            // to 0.01 dB at skirt 1 and 0.7 dB at skirt 6. all1, odd1 and
-                                            // res1 take the same law here and are still 10 to 14 dB out,
-                                            // which is what the pairs differ by and is not yet modelled
-static const double WIN_SKIRT_FRMT = 1.4142136;  // the same per step for the formant, sqrt(2) rather than
-                                            // 2. FITTED against 04_formant_2's sixteen segments at two
-                                            // bandwidths; INFERRED as a law, since the fit is per skirt
-                                            // and only its slope is closed-form. The family itself is
-                                            // still wrong there: no exponent of any sin^p gets the
-                                            // formant's skirt closer than 2.6 dB of band shape
-static const double FORM_LEVEL   = 0.520;   // what a grain train is worth on every form but the formant,
-                                            // against a grain sum normalised by its own window length.
-                                            // MEASURED: it puts all1, all2, odd1, odd2 and both resonant
-                                            // forms within 0.14 dB of the unit at once, which the ad-hoc
-                                            // root-of-the-grain-rate factor it replaces could not. The
-                                            // 3.5 dB between the all forms and the odd ones is not a
-                                            // constant at all: it falls out of the odd forms retriggering
-                                            // twice a period under a window half as long. docs/formant.md.
-static const double FRMT_BW_HZ0  = 3.1;     // the formant window's bandwidth in Hz at byte 0 ...
-static const double FRMT_BW_DB   = 8.0;     // ... doubling every FRMT_BW_DB steps, so the window lasts
-                                            // 1 / (FRMT_BW_HZ0 * 2^(bw / FRMT_BW_DB)) seconds.
-                                            //
-                                            // MEASURED, and the units are the finding. The window is a
-                                            // fixed TIME, not a fixed number of periods of the fundamental:
-                                            // sweeping the bandwidth at note 36 and at note 60 gives groups
-                                            // of the same width in Hz, 573 against 559 at byte 56 and 4278
-                                            // against 4172 at byte 88, while their widths in partials differ by
-                                            // the four the two fundamentals differ by. Which is what a
-                                            // bandwidth ought to be, and is not what this engine did: it
-                                            // held the window at a fixed fraction of the period, so fitting
-                                            // it against note 60 gave a knee at byte 44 and against note 36
-                                            // a knee at 27, the same law read in the wrong units twice.
-                                            // docs/formant.md.
-static const double FRMT_WL_MAX  = 2.0;     // and the window never runs longer than this many periods,
-                                            // which is two grains overlapping and is what the engine has
-                                            // slots for. Below the bandwidth where it binds the group is
-                                            // narrower than one partial at either note recorded, so no
-                                            // measurement here can see it and the clamp is INFERRED.
-static const double FRMT_NORM    = 0.0;     // how a formant's level follows its window length: 0 leaves the
-                                            // window's peak at 1, so a wide bandwidth is quiet; 1 holds the
-                                            // spectral peak instead, which is what a FOF generator does
-// The noise formant, MEASURED 2026-09-21 off 13_unvoiced3, which puts the band at an 8 kHz centre so
-// nothing folds at DC, plus 05_unvoiced at note 60 and 05b_unvoiced2 at note 36. docs/noise.md is the
-// working. The band is two one-poles ring modulated up to the centre, and all three laws below are read
-// rather than modelled: the cutoff is linear in the bandwidth register and clamps, the skirt multiplies
-// that cutoff rather than adding poles, and the level is a table.
-static const double NOISE_BW_HZ  = 17.0;    // the one-pole corner, Hz per bandwidth register step.
-                                            // MEASURED: fitting a two-pole band to each of the twenty-five
-                                            // bandwidths recovers a corner that is flat in fc/register at
-                                            // 16.7 to 17.9 over registers 10 to 41, so it is a straight
-                                            // line through the origin. The exponential over nine octaves
-                                            // this replaces gave 20 Hz at register 0 and 10 kHz at the top
-                                            // and was the wrong shape everywhere.
-static const int    NOISE_BW_CLAMP = 77;    // ... and the register stops there. MEASURED: every spectrum
-                                            // from sysex bandwidth 60 up is the same band at the same
-                                            // level, 29.6 to 29.75 dB over ten settings, with the same
-                                            // width. Sysex 60 is register 77.
-static const double NOISE_SKIRT  = 1.35;    // what one step of the unvoiced skirt multiplies the corner
-                                            // by. MEASURED: at bandwidth 20 the fitted corner goes 418,
-                                            // 553, 690, 951, 1235, 1736, 2442, 3367 Hz over the eight
-                                            // settings, which is 8.06 over seven steps. The engine had
-                                            // stages = 1 + skirt, a cascade that made the band NARROWER
-                                            // as the skirt opened where the unit makes it wider.
-static const double NOISE_SKIRT_LVL = 5.5;  // and one skirt step is worth this many registers OFF the
-                                            // level table's index. MEASURED: at register 77 the skirt
-                                            // lifts the level 29.94 to 42.19 dB over its eight settings,
-                                            // each step reading like a register 5 to 6 lower, while at
-                                            // register 25 the table is already flat and the skirt does
-                                            // nothing to the level at all, which is what the unit does.
-static const double NOISE_LEVEL  = 1.0;     // overall trim on the table below
-// Output level in dB against the bandwidth register, on a five-register grid, MEASURED off the same
-// sweep with the band's own RMS normalised out. It is flat to the tenth of a decibel from register 5 to
-// 20, then falls fifteen decibels and stops. Nothing analytic fits both ends, so this is the measurement.
-static const double NOISE_LVL_DB[17] = {-0.40, -0.30, -0.07, 0.00, -0.36, -1.11, -1.77, -2.60, -3.46,
-                                        -4.48, -5.79, -7.33, -9.06, -11.25, -13.41, -14.78, -15.15};
-static const double NOISE_BW0_DB = -19.9;   // register 0 is off the table's shape entirely: the unit puts
-                                            // the noise twenty decibels under the flat region there,
-                                            // where the engine used to sound a full band. It applies to
-                                            // the noise alone; NOISE_RES_DC's carrier keeps the table's
-                                            // own level, which the demo settles and the capture set
-                                            // cannot see. See render_chan.
-// The unvoiced resonance adds a carrier beside the band, and it is a threshold rather than a ramp.
-// MEASURED: settings 0 to 3 give the same spectrum to the byte, 4 narrows it, and 5, 6 and 7 are a tone
-// with the noise under it, the total rising 0.8, 2.0 and 3.1 dB over setting 0. Reading those rises as
-// 1 + d^2 against a band normalised to unit RMS gives d. The engine's res / 7 ramp had the tone taking
-// over from setting 2 and added 12 dB across the range where the unit adds 3.
-static const double NOISE_RES_DC[8] = {0, 0, 0, 0, 0.21, 0.46, 0.76, 1.02};
-// The filter is not the YMP706's: it runs on VOP3-1 and the CPU hands it coefficients, so these come
-// from the firmware's own conversions (FUN_0000C36C, FUN_0000C3D0) and only the chip's reading of them
-// is a guess. docs/ymp706_registers.md, "The per-voice filter".
-// The CPU stages 0xC0D + 0xA9 * cutoff into VOP3-1's coefficient memory, confirmed to the integer by the
-// 2026-09-19 register retake. What the chip makes of that word is the model, and reading it as a one-pole
-// coefficient at 48 kHz was wrong by a factor of twenty-five at the bottom of the range: it put the corner
-// at 755 Hz with the byte at 0, where 06_filter_1 takes 14.15 dB off a 32.7 Hz partial there. It could
-// not have been right at both ends either, since -log(1 - a) only spans 14:1 over the whole byte range
-// and the unit spans far more than that. So the corner goes as the byte, MEASURED 2026-09-21.
-static const double CUT_HZ0      = 17.4;    // the corner at cutoff byte 0 ...
-static const double CUT_OCT      = 1.0 / 12.0;  // ... doubling every twelve bytes, so 0 to 127 spans
-                                            // 10.6 octaves, 17 Hz to 26 kHz. MEASURED off 15_filter,
-                                            // which traces the response instead of sampling it: the
-                                            // half-power point over cutoff bytes 16 to 112 lands on
-                                            // this line to 0.098 octaves rms across thirteen points,
-                                            // 52 Hz at byte 16 through 11.3 kHz at 112. The 28.5 and
-                                            // 0.110 this replaces were fitted on 06_filter_1, whose
-                                            // source is one partial at 32.7 Hz, so only three of its
-                                            // sixteen cutoff segments said anything at all and the
-                                            // corner came out two octaves high at byte 64.
-static const double CUT_BYTE_MIN = 0.0;    // and the filter EG drives the byte past zero before the chip
-                                            // stops following it. MEASURED: 14_sens's flteg2 segments dip
-                                            // 23 dB on the same partial where byte 0 alone takes off
-                                            // 14.15, which is five bytes further down. Where exactly the
-                                            // chip stops is one number off one measurement.
-static const double RESO_Q0      = 1.0;     // filter Q at raw resonance 0 (displayed -16) ...
-static const double RESO_PER_OCT = 32.0;    // ... doubling every 32 raw steps, for the HPF/BPF/BEF modes only.
-                                            // The three lowpasses go through the ladder below instead.
-static const double LADDER_K     = 3.65;    // ladder feedback when resonance table A reads 1, four being
-                                            // the self-oscillation point of a 4-pole ladder. MEASURED off
-                                            // 15_filter, the first recording that can see resonance at all:
-                                            // the unit lifts its peak 1.20, 3.48, 6.73, 9.46, 11.90, 14.49,
-                                            // 17.50, 18.78, 19.83, 20.49 and 22.18 dB over resonance 0 to
-                                            // 100 at cutoff 64, so it runs right up to the edge. The 2.0
-                                            // this replaces tops out at 8.5 dB and came off the demo, which
-                                            // cannot see a resonance peak either. 3.65 is where the eleven
-                                            // lifts land at 0.45 dB rms with the mean at -0.04, against 0.98
-                                            // at 3.50 and 1.12 at 3.80. See reso_fb for the cube.
-static const double RESO_COMP    = 0.0;     // how much of resonance table B is spent lifting the passband on
-                                            // top of the ladder's own (1 + k) normalisation. MEASURED as none
-                                            // of it, which the demo had only guessed: 15_filter's passband
-                                            // below the corner reads 0.2, -0.9, 0.0 dB at resonance 0 and
-                                            // 0.0, -0.1, 0.1 at resonance 60, so the octaves the peak does
-                                            // not reach do not move at all.
-static const double FSEQ_DELAY_S = 1.0;     // performance Fseq start delay at its maximum of 99
-static const double VCTRL_FREQ   = 8.0;     // voice Formant/FM control: pitch word units per depth step
-static const double PMS_FRAC[8]  = {0, 0.0264, 0.0534, 0.0889, 0.1612, 0.2769, 0.4967, 1.0};  // per-op pitch mod sensitivity, DX7 curve
-// The output path, MEASURED from rgwan's recording of the whole capture set on 2026-09-18. These three
-// are no longer inferred: they come off the digital tap itself. captures/analysis/ holds the numbers and
-// docs/capture_0918.md the working.
-static const double OUT_GAIN     = 0.14992; // fixed gain between the summed bus and the digital tap. Nine
-                                            // single-operator segments agree to 0.005 dB.
-static const double LEVEL_SLEW_MS= 1.6;     // the voiced level register does not step, it glides, one pole with
-                                            // this time constant. MEASURED 2026-09-21 off 12_fseqlevel, whose
-                                            // Fseq rewrites the level thirty to eighty dB at a time: the octave
-                                            // band error over its eight formant segments bottoms at 4.74 dB
-                                            // here, against 9.7 for a register that steps and 10.6 for one
-                                            // latched to the grain. Flat between 1.2 and 2.0, so the last digit
-                                            // is not measured. The unvoiced level is not slewed, see
-                                            // render_chan. docs/formant.md.
-static const double CHAN_CLIP    = 1.1919;  // the channel accumulator saturates here, hard and memoryless,
-                                            // before the filter loop. stack-4 and stack-8 are driven 4x and
-                                            // 8x past one carrier and recover the same ceiling to five places.
-static const double FLT_LOSS     = 0.8681;  // flat 1.23 dB the VOP3-1 filter loop costs, constant to 0.02 dB
-                                            // across every type, every resonance from 0 to 100, every input
-                                            // gain and every cutoff from 48 up. The 0.3190 this replaces read
-                                            // 9.93 dB off the same recording on 2026-09-18, because both
-                                            // filter files play at note 24 and every request file leaves the
-                                            // performance's pan scaling at its extreme, so the segments are
-                                            // panned hard and were being measured on the left channel alone
-                                            // while the engine's own pan law was 28 % shy. Two errors that
-                                            // cancelled; docs/aeg.md, "The pan was in front of everything".
-                                            // Re-derived again on 2026-09-19: both filter files drive the
-                                            // loop with an all1 operator, and the engine was giving that a
-                                            // whole harmonic series the unit does not produce, so the loss
-                                            // had been absorbing the spectral form's error too. 9.93, then
-                                            // 5.69, now 1.23 dB. docs/formant.md.
-}
-using cal::FM_INDEX;
-using cal::LEVEL_DB;
 
 // ------------------------------------------------------------------------------------------ firmware helpers
 static inline int clampi(int v, int lo, int hi) { return v < lo ? lo : v > hi ? hi : v; }
@@ -382,7 +127,7 @@ static inline double db2lin_fast(double db) {
 // exact inverse of the DX7's (R*41)>>6, and its DX7 converter uses T = 99 - R, so the chip is assumed to time its EG like the
 // DX7 EGS: increment (4 + (q & 3)) << (q >> 2) per 64 samples on a 2^28 = 96 dB scale (Dexed). 6.6 ms at 63, 380 s at 0.
 static inline double rate_secs(int q) { q = clampi(q, 0, 63); return pow(2.0, 26 - (q >> 2)) / (4 + (q & 3)) / SR; }
-#include "fs1r_effects.h"
+#include "fs1r/chips/vop3_effects.h"
 
 // FUN_0000C36C: the cutoff byte reaches VOP3-1 as a coefficient, 0xC0D + 0xA9 per step capped at
 // 0x6000, so it is linear in the coefficient rather than in octaves. Reading that coefficient as a
@@ -1520,7 +1265,7 @@ struct Synth {
     void sense_tick(double dt) { if (senseTimer > 0 && (senseTimer -= dt) <= 0) { senseTimer = 0; all_off(); } }
 
     // ---------------------------------------------------------------- sysex out (dump and parameter replies)
-    void push_sysex(std::vector<uint8_t>& m) { if (outQ.size() < 64) outQ.push_back(m); }
+    void push_sysex(std::vector<uint8_t>& m) { if ((int)outQ.size() < tuning::MIDI_OUT_QUEUE) outQ.push_back(m); }
     void push_bulk(int ah, int am, int al, const uint8_t* d, int n) {
         std::vector<uint8_t> m{0xF0, 0x43, (uint8_t)(devNumber() & 0x0F), 0x5E,
                                (uint8_t)(n >> 7 & 0x7F), (uint8_t)(n & 0x7F),
@@ -1643,12 +1388,11 @@ struct Synth {
         else y *= cal::FORM_LEVEL * 2.0 / wl;    // every form but sine and frmt; a shorter grain carries less
         return y;
     }
-    // Every CTL samples: the per-operator frequency and level maths. Its inputs only move on the 192 Hz
-    // register tick and the voice parameters, and doing it per sample (a dozen pow() calls per operator)
-    // was the whole CPU bill. The one input that moves every sample, an operator's own pitch EG, stays in
-    // the sample loop while it runs: its integral is the phase. ponytail: 16 samples is 0.33 ms, finer
-    // than the tick itself.
-    static const int CTL = 16;
+    // The per-operator frequency and level maths runs every tuning::CTL_DECIMATION samples rather than
+    // every sample. Its inputs only move on the 192 Hz register tick and the voice parameters, and doing
+    // it per sample (a dozen pow() calls per operator) was the whole CPU bill. The one input that moves
+    // every sample, an operator's own pitch EG, stays in the sample loop while it runs: its integral is
+    // the phase. The rate itself is ours, not the hardware's, so it lives in fsvr/tuning.h.
     void refresh_ctl(Chan& C) {
         const Part& pt = perf.part[C.part]; const Voice& V = pt.voice; const unsigned char* alg = FS1R_ALG[V.alg];
         bool fs = fseq_on(C.part);
@@ -1710,7 +1454,7 @@ struct Synth {
         }
     }
     inline void render_chan(Chan& C, double& outL, double& outR) {
-        if (C.ctlLeft-- <= 0) { C.ctlLeft = CTL - 1; refresh_ctl(C); }
+        if (C.ctlLeft-- <= 0) { C.ctlLeft = tuning::CTL_DECIMATION - 1; refresh_ctl(C); }
         const Voice& V = perf.part[C.part].voice; const unsigned char* alg = FS1R_ALG[V.alg];
         double partV = C.partV, partU = C.partU;
         double Cb = 0, H = 0, S = 0, fbNew = 0, mix = 0;

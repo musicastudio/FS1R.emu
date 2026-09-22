@@ -1,4 +1,4 @@
-// fs1r_lib.h - the FS1R engine as a device: audio out, MIDI in, MIDI out, state as sysex.
+// fs1r.h - the FS1R engine as a device: audio out, MIDI in, MIDI out, state as sysex.
 //
 // Nothing here knows about Windows, a host, or a GUI. The plugin layer never reads engine internals: it
 // moves parameter values in and out as sysex exactly as a hardware editor would, and learns the state

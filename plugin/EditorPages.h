@@ -14,7 +14,7 @@ namespace fs1rplug {
 
 class Processor;
 
-// The 88 algorithms drawn from the connection table in src/fs1r_algorithms.h: eight operator boxes,
+// The 88 algorithms drawn from the connection table in src/fs1r/firmware/algorithms.h: eight operator boxes,
 // the chain, held and sum buses between them, the feedback loop and which operators reach the output.
 class AlgorithmView : public juce::Component {
 public:

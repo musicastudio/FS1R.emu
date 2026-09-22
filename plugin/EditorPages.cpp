@@ -1,6 +1,6 @@
 #include "EditorPages.h"
 #include "PluginProcessor.h"
-#include "fs1r_algorithms.h"
+#include "fs1r/firmware/algorithms.h"
 
 namespace fs1rplug {
 

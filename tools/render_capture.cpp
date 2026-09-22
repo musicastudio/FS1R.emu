@@ -9,8 +9,8 @@
 #include <cstdlib>
 #include <cstring>
 #include <string>
-#include "fs1r_lib.h"
-#include "fs1r_smf.h"
+#include "fs1r.h"
+#include "fsvr/smf.h"
 
 int main(int argc, char** argv) {
     const char* rom = nullptr;

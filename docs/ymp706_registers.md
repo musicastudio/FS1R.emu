@@ -36,7 +36,7 @@ is firmware behaviour.
 | 0xFA/0xFB | chip | channel bit mask written at note off (release: EG stage 4) |
 | 0xFC/0xFD | chip | channel bit mask written at the start of note on, init 0xFFFF (damp / restart) |
 | 0x100-0x1C8 | same as 0x00-0xC8 for the unvoiced operators | image +0xC0..+0x13F, 0x148 level, 0x190/0x198 frequency |
-| 0x200/0x208 | channel, op | 16-bit algorithm word (`src/fs1r_algorithms.h`) with carrier level correction 0..15 in bits 4-7 of the low byte |
+| 0x200/0x208 | channel, op | 16-bit algorithm word (`src/fs1r/firmware/algorithms.h`) with carrier level correction 0..15 in bits 4-7 of the low byte |
 | 0x210 | channel, op | form (bits 0-2), skirt (3-5), fixed (6) |
 | 0x218 | channel, op | voiced bandwidth `clamp(bw + ctrl * BWBIAS[bias], 0, 99)`, bit 7 passed through |
 | 0x220 | channel, op | pitch mod sense 0..7 |
@@ -401,7 +401,7 @@ arrive over VOP3-1's register block at 0x800200 rather than this bus. Those are 
 address is confirmed: rgwan read the CS2 decode off the schematic on 2026-09-16 and A9 = 1 selects VOP3-1. What the chip does
 with a coefficient is still the model. `docs/research.md` 2.0.1 has the wiring and section 8 the addressing.
 
-## ROM tables (generated into src/fs1r_rom_tables.h by tools/extract_tables.py)
+## ROM tables (generated into src/fs1r/firmware/tables.h by tools/extract_tables.py)
 
 PANL 0x35C0EB, PANR 0x35C16B, LEVTAB 0x35B4A8, FEGLVL 0x35B2E0, PEGLVL 0x35B50C, PEGTIME 0x35B5D6, VELW 0x35BA1E, VELCURVE 0x35B99E, VELCURVES 0x35B71E, EGBIAS
 0x35CD24, KSEXP 0x35C3EB, KSLIN 0x35C413, KEYFACT 0x35C43B, NOTETAB 0x35B346, COARSE 0x35BC32, FINE 0x35BC72, TRANS

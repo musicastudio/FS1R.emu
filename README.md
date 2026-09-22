@@ -73,7 +73,7 @@ The practical result is that patches, performances and Fseqs load and play with 
 
 - **YSS236-F / VOP3-1, the per-voice filter**, at 0x800200. **CPU side read, response fitted.** Yamaha's VOP3 is the same programmable DSP that is the synthesis engine of the AN1x, AN200 and PLG150-AN; the FS1R has two, and this one sits in a channel-level loop off both tone generators. The CPU's whole side of it is read out of the firmware: sixteen filter channels mapped to parts, a dirty flag per parameter group, and closed-form conversions for cutoff, resonance, type and input gain. The response is the model, and the coefficient is not a one-pole, measured 2026-09-21: the corner goes as the byte, 28.5 Hz doubling every 9.1 bytes, fitted over six segments. `cal` runs the three lowpasses as one 4-pole ladder with resonance table A scaling the feedback, and HPF, BPF and BEF are separate chip modes that keep a 2-pole SVF reading. The filter EG runs on the chip rather than being streamed by the CPU, which is why `06_filter_2` still carries 3.36 dB of envelope error. `tools/extract_vop3.py` has the microcode out into `docs/vop3/`, register by register, but the instruction set is undecoded.
 
-- **YSS236-F / VOP3-2, the effects**, at 0x800000. **Parameter encoding read, algorithms modelled. The largest gap in the engine.** Reverb (17 types), variation (29), insertion (41) and the master EQ in the XG topology, with the part dry and send levels and the insertion switch, in `src/fs1r_effects.h`. The parameter *encoding* is read rather than guessed, recovered out of the 360 preset performances and matching every documented default. The 87 algorithms themselves are modelled from the Data List, and were measured against real impulse responses for the first time on 2026-09-21, at 16.9, 27.2 and 28.8 dB over eighty-four segments, in a set where most files agree with the unit inside half a decibel. `tools/extract_vop3_2.py` has that chip's two images out into `docs/vop3_2/`. Decoding the VOP3 instruction set is the only route to bit-exact effects and a bit-exact filter; it is open research on the scale of a full DSP core, and the modelled effects ship regardless.
+- **YSS236-F / VOP3-2, the effects**, at 0x800000. **Parameter encoding read, algorithms modelled. The largest gap in the engine.** Reverb (17 types), variation (29), insertion (41) and the master EQ in the XG topology, with the part dry and send levels and the insertion switch, in `src/fs1r/chips/vop3_effects.h`. The parameter *encoding* is read rather than guessed, recovered out of the 360 preset performances and matching every documented default. The 87 algorithms themselves are modelled from the Data List, and were measured against real impulse responses for the first time on 2026-09-21, at 16.9, 27.2 and 28.8 dB over eighty-four segments, in a set where most files agree with the unit inside half a decibel. `tools/extract_vop3_2.py` has that chip's two images out into `docs/vop3_2/`. Decoding the VOP3 instruction set is the only route to bit-exact effects and a bit-exact filter; it is open research on the scale of a full DSP core, and the modelled effects ship regardless.
 
 - **The board around them.** Read. One 24.576 MHz crystal runs the audio side and the main Sanyo LC78834M DAC is the I2S master at exactly 48 kHz, so the engine runs at 48 kHz whatever the host rate and resamples on the way out. The recording tap is that DAC's I2S input, after both DSPs and before the analogue volume pot, which is what makes a recording's absolute level comparable. The output path's fixed gain, the hard clip on the channel accumulator and the filter loop's insertion loss are all numbers off that tap. `docs/research.md` 2.0.1 and section 8 have the clocking and the CS2 decode.
 
@@ -168,11 +168,11 @@ python tools/regress.py                 # the whole fixed preset list against th
 **Engine.** No Windows, no host, no GUI. This is what the plugin links.
 
 - `src/fs1r_lib.{h,cpp}` the engine behind `fs1r::Device`, with `namespace cal` at the top of the .cpp holding every modelled constant in one place
-- `src/fs1r_effects.h` the reverb, variation and insertion blocks and the master EQ
-- `src/fs1r_rom_tables.h` conversion tables pulled from the EPROM by `tools/extract_tables.py`
-- `src/fs1r_algorithms.h` the 88-algorithm routing table from the EPROM
-- `src/fs1r_smf.h` Standard MIDI File reading for the offline render paths
-- `src/fs1r_console.cpp` the test console: WinMM MIDI in and out, waveOut, offline render
+- `src/fs1r/chips/vop3_effects.h` the reverb, variation and insertion blocks and the master EQ
+- `src/fs1r/firmware/tables.h` conversion tables pulled from the EPROM by `tools/extract_tables.py`
+- `src/fs1r/firmware/algorithms.h` the 88-algorithm routing table from the EPROM
+- `src/fsvr/smf.h` Standard MIDI File reading for the offline render paths
+- `src/console/main.cpp` the test console: WinMM MIDI in and out, waveOut, offline render
 
 **Plugin.** The JUCE layer, which never models synthesis; it moves parameter values in and out of the engine as sysex, exactly as a hardware editor would.
 

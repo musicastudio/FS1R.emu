@@ -158,13 +158,13 @@ Two roads, and the plan uses both:
   formula: `docs/ymp706_registers.md`.
 - Two YMP706 chips (0xC00000 and 0xC00400), 16 channels each, channel select at 0x3FF/0x7FF, PBUSY polled on port A
   before every byte. Per-operator registers are 8-byte stripes, 16-bit values are hi at reg and lo at reg+8.
-- The 88-algorithm table is at EPROM 0x37C0DC (`src/fs1r_algorithms.h`), decoded as a bus model. Algorithms 9-40 are
+- The 88-algorithm table is at EPROM 0x37C0DC (`src/fs1r/firmware/algorithms.h`), decoded as a bus model. Algorithms 9-40 are
   DX7 algorithms 1-32.
 - Frequency words are log2 pitch, 1024 per octave, 440 Hz at 26861. Ratio mode adds the channel pitch inside the
   chip; fixed and formant frequencies are absolute with CPU-side key tracking and velocity.
 - The CPU does far more than expected: the pitch EG, LFO1, portamento, bend, velocity, key scaling, EG bias, part
   levels and Fseq frame stepping are all software, refreshed into the chip on a 192.3 Hz timer (MTU2). Their tables
-  are extracted into `src/fs1r_rom_tables.h`. CPU clock 28 MHz (SCI divisor 27 = 31250 baud).
+  are extracted into `src/fs1r/firmware/tables.h`. CPU clock 28 MHz (SCI divisor 27 = 31250 baud).
 - Chip-side only: EG timing and shapes, dB per level step, per-op modulation sensitivity scaling, the formant window
   and noise formant, the filter, effects. Those are modelled with DX7 and patent priors and marked INFERRED.
 

@@ -16,7 +16,7 @@
 #pragma once
 #include <juce_core/juce_core.h>
 #include <vector>
-#include "fs1r_lib.h"
+#include "fs1r.h"
 
 namespace fs1rplug {
 

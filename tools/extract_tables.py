@@ -1,4 +1,4 @@
-# Pull the CPU-side conversion tables out of the v1.20 EPROM image into src/fs1r_rom_tables.h.
+# Pull the CPU-side conversion tables out of the v1.20 EPROM image into src/fs1r/firmware/tables.h.
 #   python tools/extract_tables.py
 import struct
 from pathlib import Path
@@ -39,5 +39,5 @@ for name, ct, vals, cm in tables:
     out.append(f"// {cm}")
     rows = [", ".join(str(v) for v in vals[i:i + 16]) for i in range(0, len(vals), 16)]
     out.append(f"static const {ct} {name}[{len(vals)}] = {{\n    " + ",\n    ".join(rows) + "\n};")
-(ROOT / "src/fs1r_rom_tables.h").write_text("\n".join(out) + "\n")
+(ROOT / "src/fs1r/firmware/tables.h").write_text("\n".join(out) + "\n")
 print("wrote", len(tables), "tables")

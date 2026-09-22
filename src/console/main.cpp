@@ -1,4 +1,4 @@
-// fs1r_console.cpp - the test console on top of fs1r_lib: WinMM MIDI in and out, waveOut, offline render.
+// console/main.cpp - the test console on top of fs1r_lib: WinMM MIDI in and out, waveOut, offline render.
 //
 //   fs1r_emu.exe -l                                   list MIDI ports
 //   fs1r_emu.exe -selftest                            run the engine self check
@@ -20,8 +20,8 @@
 #include <mutex>
 #include <string>
 #include <vector>
-#include "fs1r_lib.h"
-#include "fs1r_smf.h"
+#include "fs1r.h"
+#include "fsvr/smf.h"
 
 using fs1r_smf::write_wav;
 using fs1r_smf::render_smf;

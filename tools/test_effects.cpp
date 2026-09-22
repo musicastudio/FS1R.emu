@@ -1,4 +1,4 @@
-// Self-check for src/fs1r_effects.h: parameter decoding against the Effect Parameter List defaults, and
+// Self-check for src/fs1r/chips/vop3_effects.h: parameter decoding against the Effect Parameter List defaults, and
 // an impulse through every effect type to catch silence, blow-ups and NaNs.
 //   build.bat tools\test_effects.cpp /Fe:build\test_effects.exe && build\test_effects.exe
 #include <cassert>
@@ -7,7 +7,7 @@
 #include <algorithm>
 static inline int clampi(int v, int lo, int hi) { return v < lo ? lo : v > hi ? hi : v; }
 static const double PI = 3.14159265358979323846;
-#include "../src/fs1r_effects.h"
+#include "fs1r/chips/vop3_effects.h"
 
 static int fails = 0;
 static void near(const char* what, double got, double want, double tol) {
