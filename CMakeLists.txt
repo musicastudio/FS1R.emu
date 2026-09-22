@@ -5,7 +5,7 @@
 # build.bat is the quick MSVC path; this file is for clang, CI, and the JUCE plugin layer later.
 #   cmake -B build/cmake -S . && cmake --build build/cmake --config Release && ctest --test-dir build/cmake
 cmake_minimum_required(VERSION 3.16)
-project(fsvr VERSION 0.4.0 LANGUAGES C CXX)
+project(fsvr VERSION 0.4.1 LANGUAGES C CXX)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
