@@ -5,6 +5,16 @@
 # build.bat is the quick MSVC path; this file is for clang, CI, and the JUCE plugin layer later.
 #   cmake -B build/cmake -S . && cmake --build build/cmake --config Release && ctest --test-dir build/cmake
 cmake_minimum_required(VERSION 3.16)
+# macOS builds are universal, arm64 and x86_64 in one binary, so the same artifact runs on Apple silicon
+# and on Intel Macs. The GitHub runner is Apple silicon and a plain build there is arm64 only, which is
+# what issue #3 reported: "this application is not supported on this Mac". Both must be set before
+# project(), and either can still be overridden on the command line.
+if(APPLE AND NOT CMAKE_OSX_ARCHITECTURES)
+  set(CMAKE_OSX_ARCHITECTURES "arm64;x86_64" CACHE STRING "Build architectures for macOS" FORCE)
+endif()
+if(APPLE AND NOT CMAKE_OSX_DEPLOYMENT_TARGET)
+  set(CMAKE_OSX_DEPLOYMENT_TARGET "10.13" CACHE STRING "Minimum macOS version" FORCE)
+endif()
 project(fsvr VERSION 0.4.1 LANGUAGES C CXX)
 
 set(CMAKE_CXX_STANDARD 17)
