@@ -91,7 +91,7 @@ All read from the firmware and its tables, and all finished.
 
 Against rgwan's digital recording of the built-in demo, which the unit plays from its own EPROM so the same byte stream drives both: median envelope correlation 0.978, worst 0.894, mean band tilt 2.8 dB. Against the 29 frozen capture files, seventeen agree with the unit inside half a decibel of level.
 
-What is left, worst first: the effects, the unvoiced pedestal above 4 kHz, AM sensitivity at deep modulation, the `all1`/`all2` grain geometry and the formant's window family, and the last decibel of the filter EG. [docs/fidelity_plan.md](docs/fidelity_plan.md) ranks them with the numbers and says which are modelling work with their data already recorded and which are waiting on hardware. [TODO.md](TODO.md) is the full task list and opens with the KNOWN / INFERRED / UNKNOWN lists. Tiers 0 to 3 and 5 are done, so the engine, the library and console split, the plugin in all three formats, the front panel GUI, the licence and CI are all in, and Tier 4 is fidelity and verification.
+What is left, worst first: the effects, the unvoiced pedestal above 4 kHz, AM sensitivity at deep modulation, the `all1`/`all2` grain geometry and the formant's window family, and the last decibel of the filter EG. [docs/fidelity_plan.md](docs/fidelity_plan.md) ranks them with the numbers and says which are modelling work with their data already recorded and which are waiting on hardware. [STATUS.md](STATUS.md) carries the KNOWN / INFERRED / UNKNOWN lists and the open work. Tiers 0 to 3 and 5 are done, so the engine, the library and console split, the plugin in all three formats, the front panel GUI, the licence and CI are all in, and Tier 4 is fidelity and verification.
 
 ## Build and run
 
@@ -215,4 +215,5 @@ python tools/regress.py                 # the whole fixed preset list against th
 - `docs/midi_dispatch.md` how a Note On, a Control Change and both aftertouches get from the SCI0 interrupt to the tone generator; `interface_from_firmware.md` the panel's cursor stops and controller set, read out of the EPROM's own screen tables
 - `docs/vop3_microcode.md`, `vop3_2_microcode.md` and `vop3_pinout.md` the VOP3 reference
 - [docs/plugin_guide.md](docs/plugin_guide.md) the plugin user guide. The Data List and owner's manual text and the formant patent are here too.
-- [TODO.md](TODO.md) the full task list, opening with the KNOWN / INFERRED / UNKNOWN lists
+- [STATUS.md](STATUS.md) what is known, what is modelled and what nobody knows, with the open work at the end
+- [docs/findings.md](docs/findings.md) the research log, newest first, and the evidence behind each constant

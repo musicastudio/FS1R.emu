@@ -88,7 +88,7 @@ Four captures would be plenty: boot to first sound, one note on a plain sine pat
 
 ## Questions about the hardware, answered
 
-Zhiyuan answered 1 to 5 on 2026-09-15 and 6 and 7 on 2026-09-16. They are folded into `docs/research.md` sections 2 and 8 and the KNOWN list in `TODO.md`; what is still open is at the end.
+Zhiyuan answered 1 to 5 on 2026-09-15 and 6 and 7 on 2026-09-16. They are folded into `docs/research.md` sections 2 and 8 and the KNOWN list in `STATUS.md`; what is still open is at the end.
 
 1. **The tap sits after both effect DSPs and before the master volume**, which is an analogue pot. It is taken from the main DAC's I2S input, so a recording is exactly what the effect DSP hands the converter and does not depend on where the volume knob sits. Every file in `captures/requests/` therefore runs through the effect DSP, which is why all three effect blocks are set to No Effect and the master EQ flat. Any fixed gain or truncation left in that path shows up as one constant offset that the reference file measures.
 2. **One 24.576 MHz crystal clocks the whole audio side.** The main LC78834 is the I2S master at 512 Fs, so exactly 48 kHz, and it generates BCLK and LRCLK for the slave DAC, both VOP3s and both YMP706s. The tone generators are locked to the same word clock, so the engine's 48 kHz is the hardware's own rate.

@@ -56,7 +56,7 @@ def main():
     byteTab = list(rd(rom, 0x375C1A, steps))        # written to register 0xC
     busVals = list(rd(rom, 0x37861A, 15))           # written to register 0x16, one per bus
     typeBlock = list(rd(rom, 0x374F2E, 16))         # filter channel -> program block, FUN_0000D050
-    patchTab = list(rd(rom, 0x378629, 0x13))        # the per-type patch table the TODO names
+    patchTab = list(rd(rom, 0x378629, 0x13))        # the per-type patch table STATUS.md names
 
     for v, w in progWords.items():
         (BIN / f"program_{v}.bin").write_bytes(struct.pack(">%dH" % len(w), *w))

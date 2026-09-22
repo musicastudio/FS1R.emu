@@ -62,7 +62,7 @@ The cost of getting it wrong is a beat rate, not a pitch. Demo song 2 "Full Tine
 
 ## The effects files
 
-`09_effects_*` cannot be read yet, for the reason already in TODO. The tool sends a whole 112-byte effect block per segment, and for the types no preset performance uses there is no factory block, so the parameters go out as zeros on the hardware and in the engine alike. Those segments measure the request, not the unit. The file is worth keeping because the hardware's real impulse responses are in it once the segments are rebuilt from the Effect Parameter List defaults.
+`09_effects_*` cannot be read yet, for the reason already in STATUS.md. The tool sends a whole 112-byte effect block per segment, and for the types no preset performance uses there is no factory block, so the parameters go out as zeros on the hardware and in the engine alike. Those segments measure the request, not the unit. The file is worth keeping because the hardware's real impulse responses are in it once the segments are rebuilt from the Effect Parameter List defaults.
 
 ## Reproducing this
 

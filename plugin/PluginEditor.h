@@ -1,7 +1,7 @@
 // PluginEditor - the FS1R panel reproduced across the top, expanded editor pages under it.
 //
 // The panel alone cannot reach 900 parameters comfortably, so the hardware sits above and the pages
-// carry the rest, switched with tabs, exactly as tier 3 of the TODO describes. The panel's own mode
+// carry the rest, switched with tabs, exactly as the panel section of STATUS.md describes. The panel's own mode
 // buttons select the page, the way pressing EDIT [VOICE] takes you to the operator pages on a real
 // unit.
 #pragma once

@@ -32,9 +32,9 @@ static const double TICK_HZ = CPU_HZ / 16.0 / 9099.0;   // MTU2 TGRA compare eve
 // Everything the two custom chips do that no file documents. Most are models from the DX7 lineage, the
 // formant patent (docs/US5610354...) or the Data List. A few carry "(demo)": those are fitted to rgwan's
 // recording of the built-in demo, which is real hardware but a coarse reference, fifteen songs of mixed
-// patches with their effects in the path. The capture set (TODO tier 4) is what settles any of them
+// patches with their effects in the path. The capture set (STATUS.md, open work) is what settles any of them
 // properly. They all live here so calibrating against a recording is one table edit rather than a hunt
-// through the engine. Names match the TODO's "confirm the INFERRED constants".
+// through the engine. Names match STATUS.md's INFERRED list.
 namespace cal {
 static const double FM_INDEX     = 3.369;   // cycles of phase deviation at full modulator level. MEASURED: two
                                             // sweeps of algorithm 8's modulator level register, 2026-09-19, whose
@@ -397,7 +397,7 @@ static inline double cut_hz(double c) {
 // ladder with feedback and passband compensation, which is also what FUN_0000CA44's per-type input scaler
 // (0x40 vs 0x7F) and +-0x4000 tap mix want. Reading A alone as 1/Q is what forced RESO_PER_OCT to 32.
 // INFERRED is what the two become: A scales the ladder's feedback and B is available as passband lift.
-// The demo settled both scalings, and neither landed on the textbook value. See TODO.md, Tier 4.
+// The demo settled both scalings, and neither landed on the textbook value. See docs/findings.md, the 2026-09-19 ladder entry.
 static inline double reso_r(int r) { return pow(2.0, -clampi(r + 16, 0, 116) / 16.0); }  // fltReso = sysex byte - 16, so r+16 is the byte: A[byte] = 1 - 2^(-byte/16), measured on hardware (capture3's convhand)
 static inline double reso_q(int r) { return cal::RESO_Q0 * pow(2.0, clampi(r + 16, 0, 116) / cal::RESO_PER_OCT); }
 // The feedback goes as the CUBE of resonance table A, not as A itself. MEASURED: driving the engine's own

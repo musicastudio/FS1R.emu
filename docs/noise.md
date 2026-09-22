@@ -77,7 +77,7 @@ The level is settled. What is left is band shape at a 1 kHz centre, 3.2 to 3.7 d
 |---|---|---|---|---|---|---|---|
 | dB | -1.81 | -1.66 | +0.52 | +0.01 | -0.57 | +4.22 | +10.08 |
 
-The core matches inside 0.6 dB and everything above 4 kHz is short. The width measurements say the same thing from the other side: the half-power width saturates near 1500 Hz while the twenty-decibel width keeps opening past 9 kHz, which is a narrow core on a broad pedestal and not any `1/(1 + (f/fc)^2)^N`. That is the same energy the TODO's "top octave" item has been chasing, and a file that sweeps the bandwidth at an 8 kHz centre with the analysis reaching to Nyquist is what would model it.
+The core matches inside 0.6 dB and everything above 4 kHz is short. The width measurements say the same thing from the other side: the half-power width saturates near 1500 Hz while the twenty-decibel width keeps opening past 9 kHz, which is a narrow core on a broad pedestal and not any `1/(1 + (f/fc)^2)^N`. That is the same energy STATUS.md's "top octave" item has been chasing, and a file that sweeps the bandwidth at an 8 kHz centre with the analysis reaching to Nyquist is what would model it.
 
 ## Reproducing this
 
