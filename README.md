@@ -165,13 +165,31 @@ python tools/regress.py                 # the whole fixed preset list against th
 
 ## Repo Layout
 
-**Engine.** No Windows, no host, no GUI. This is what the plugin links.
+**Engine.** No Windows, no host, no GUI. This is what the plugin links. The tree says where a claim comes from, which is the thing to know before changing anything in it.
 
-- `src/fs1r_lib.{h,cpp}` the engine behind `fs1r::Device`, with `namespace cal` at the top of the .cpp holding every modelled constant in one place
-- `src/fs1r/chips/vop3_effects.h` the reverb, variation and insertion blocks and the master EQ
-- `src/fs1r/firmware/tables.h` conversion tables pulled from the EPROM by `tools/extract_tables.py`
-- `src/fs1r/firmware/algorithms.h` the 88-algorithm routing table from the EPROM
-- `src/fsvr/smf.h` Standard MIDI File reading for the offline render paths
+- `src/fs1r.h` the public header, `fs1r::Device`. The only one the plugin includes
+- `src/fs1r/hardware.h` the FS1R's own numbers, read off the board. Facts, never tuned
+- `src/fs1r/internal.h` the engine's shared declarations, including `struct Synth`
+
+`src/fs1r/firmware/` is **KNOWN**, rewritten from the disassembly, and every claim in it cites a `FUN_` address. A disagreement with a real unit is a bug here, not a calibration.
+
+- `patch.cpp` voice, performance and part data as the firmware decodes it, with the DX7 conversion
+- `controllers.cpp` the eight controller sets, the three scalers and the 48 destinations
+- `notes.cpp` note on and off, operator setup, pitch, portamento, and the 192.3 Hz tick
+- `fseq.cpp` formant sequence playback; `midi.cpp` MIDI in and sysex in and out; `rom.cpp` EPROM and sysex loading
+- `tables.h` the EPROM's conversion tables, by `tools/extract_tables.py`; `algorithms.h` the 88-algorithm routing table
+
+`src/fs1r/chips/` is **INFERRED**, because neither custom chip has public register documentation. These are claims about the hardware, changed by measuring against a recording and never by taste.
+
+- `cal.h` the calibration surface, every modelled constant in one place
+- `ymp706.cpp` the tone generator: operators, envelopes, the formant window, and the render path
+- `vop3_filter.h` VOP3-1's filter; `vop3_effects.h` VOP3-2's reverb, variation, insertion and master EQ
+
+`src/fsvr/` is **ours**. Nothing in the hardware corresponds to any of it.
+
+- `tuning.h` cost knobs, the control-rate decimation and the queue cap. Changing one must not change the output
+- `device.cpp` `fs1r::Device`, host-rate resampling and state as bulk dumps
+- `smf.h` Standard MIDI File reading; `selftest.cpp` the engine self check
 - `src/console/main.cpp` the test console: WinMM MIDI in and out, waveOut, offline render
 
 **Plugin.** The JUCE layer, which never models synthesis; it moves parameter values in and out of the engine as sysex, exactly as a hardware editor would.

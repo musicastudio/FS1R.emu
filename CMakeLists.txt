@@ -15,7 +15,16 @@ endif()
 # Everything meant to be run lands in bin/: the console here, the plugin formats under bin/<Format>/.
 set(FS1R_BIN ${CMAKE_CURRENT_SOURCE_DIR}/bin)
 
-add_library(fs1rLib STATIC src/fs1r_lib.cpp)
+add_library(fs1rLib STATIC
+    src/fs1r/chips/ymp706.cpp
+    src/fs1r/firmware/controllers.cpp
+    src/fs1r/firmware/fseq.cpp
+    src/fs1r/firmware/midi.cpp
+    src/fs1r/firmware/notes.cpp
+    src/fs1r/firmware/patch.cpp
+    src/fs1r/firmware/rom.cpp
+    src/fsvr/device.cpp
+    src/fsvr/selftest.cpp)
 target_include_directories(fs1rLib PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src)
 # The plugin formats are shared modules, and a Linux .so will not link a static library whose objects
 # are not position independent. Windows and macOS do not care either way.
