@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """Rebuild a README clip pair, `fs1r_demoNN_engine.mp4`/`.ogg` and `fs1r_demoNN_hardware.mp4`.
 
-    python captures/fs1r_demo_clip.py                          # song 1, the engine clip
-    python captures/fs1r_demo_clip.py --song 2 --len 19.5       # song 2, engine
-    python captures/fs1r_demo_clip.py --song 2 --len 19.5 --hardware   # its counterpart
+    python tools/fs1r_demo_clip.py                          # song 1, the engine clip
+    python tools/fs1r_demo_clip.py --song 2 --len 19.5       # song 2, engine
+    python tools/fs1r_demo_clip.py --song 2 --len 19.5 --hardware   # its counterpart
 
 One demo song out of the EPROM, through the current build, encoded next to the same song cut out of
 rgwan's recording of the real unit. Rerun it after anything that changes the sound and the README's

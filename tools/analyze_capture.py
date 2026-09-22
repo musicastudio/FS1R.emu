@@ -198,7 +198,7 @@ def unpan(w):
 
     It matters because every request file leaves the performance's PAN SCALING byte at 0, which is the
     extreme, so any segment played away from C3 is panned. Measuring the left channel alone read that as
-    a level difference: `docs/capture_0918.md`'s "level varies with note ... by 14.6 dB on the hardware
+    a level difference: `docs/captures/capture_0918.md`'s "level varies with note ... by 14.6 dB on the hardware
     and 9.1 dB in the engine" is this and nothing else.
     """
     if w.ndim < 2 or w.shape[1] < 2:
@@ -301,7 +301,7 @@ def fit_detune(segs):
     The hardware is a curve and the engine carries that curve, so the straight line this fits is a
     summary rather than the law: what it is good for is the comparison, since hardware and engine
     should now return the same slope and the same residual. The curve itself is read off the audio,
-    not off these FFT peaks, which are a bin wide; docs/capture_0918.md.
+    not off these FFT peaks, which are a bin wide; docs/captures/capture_0918.md.
     """
     pts = []
     for s in segs:

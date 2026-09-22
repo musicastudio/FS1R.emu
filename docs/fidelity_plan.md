@@ -122,7 +122,7 @@ Four segments is not enough to fit a chip-side EG against. `14_sens` gives it te
 
 > **Measured at three depths now, and it is not a scaling.** `14_sens` says the engine matches the unit at LFO amplitude depth 33 and 66 and runs up to 20 % deep at 99: peak-to-peak 6.40 against 6.23 dB at depth 33 and 39.21 against 47.04 at depth 99, both at sensitivity 7. So the chip's AM attenuation saturates at the deep end and the linear `ams / 7` does not. One value of a variable would have read that as an 18 % trim and got it wrong everywhere else. Left as it is, with the data in hand.
 
-`docs/capture_0918.md` says "AM sensitivity is roughly twice as deep as the engine makes it", the hardware losing 11.29 dB over the sweep against the engine's 4.89. That reading predates both the analyzer's pan correction and the `LEVEL_DB` change and it now points the wrong way. Measured off the two envelopes today, 5 ms hop, the modulation depth as the 5th to 95th percentile spread in dB:
+`docs/captures/capture_0918.md` says "AM sensitivity is roughly twice as deep as the engine makes it", the hardware losing 11.29 dB over the sweep against the engine's 4.89. That reading predates both the analyzer's pan correction and the `LEVEL_DB` change and it now points the wrong way. Measured off the two envelopes today, 5 ms hop, the modulation depth as the 5th to 95th percentile spread in dB:
 
 | ams | 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 |
 |---|---|---|---|---|---|---|---|---|

@@ -8,6 +8,7 @@ captures/engine/
 captures/hardware/
 captures/analysis/
 captures/demo/render/
+captures/raw/
 *.flac
 __pycache__/
 

@@ -37,7 +37,7 @@ Conclusion: the reverse engineering that exists covers booting, flashing and rep
 
 ### 2.0.1 Audio path on the board (rgwan, 2026-09-15)
 
-Reference designators and wiring from the FS1R service manual, read out by rgwan in answer to `docs/hardware_capture_request.md`.
+Reference designators and wiring from the FS1R service manual, read out by rgwan in answer to `docs/captures/hardware_capture_request.md`.
 
 ```
 FS1A (IC10) --- DOUT0/1, SOUT0/1 (dry + send) ---> FS1B (IC11) DIN0/1, SIN0/1
