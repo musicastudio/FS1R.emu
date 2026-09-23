@@ -125,7 +125,7 @@ bool Device::loadSyx(const uint8_t* d, size_t len, int pick, int part) {
 }
 
 const char* Device::performanceName() const { return p->s.perf.name; }
-const char* Device::voiceName(int part) const { return p->s.perf.part[clampi(part, 0, 3)].voice.name; }
+const char* Device::voiceName(int part) const { auto& pt = p->s.perf.part[clampi(part, 0, 3)]; return pt.p[1] == 0 ? "off" : pt.voice.name; }   // the panel shows "off" for a part with no bank
 int Device::algorithm(int part) const { return p->s.perf.part[clampi(part, 0, 3)].voice.alg; }
 bool Device::partActive(int part) const { return p->s.perf.part[clampi(part, 0, 3)].rcv() != 0x7F; }
 const char* Device::fseqName() const { return p->s.fseq.valid ? p->s.fseq.name : ""; }

@@ -8,6 +8,17 @@ Entries that have a dedicated working document (`aeg.md`, `skirt.md`, `noise.md`
 
 ---
 
+## 2026-09-23, a part whose voice bank is off receives nothing
+
+rgwan: A011 Sho plays parts 1 and 2 on the unit and all four in FSVR, with parts 3 and 4 sounding
+their InitEP voices. The performance's parts 3 and 4 have Voice Bank = off (part byte 1 = 0) and
+part 4 a receive channel of 16 (byte 4 = 0x10, "pfm"). The engine took the receive channel as the
+whole of whether a part listens, and loaded whatever voice was in the part's buffer. The owner's
+manual, page 63: "When Voice Bank = off no MIDI data will be received for the corresponding part."
+`Part::rcv()` now reads as off when the bank is off, which is the one place `part_listens` and
+`partActive` both go through; the panel shows "off" for the voice. Seven of the 384 ROM performances
+have a part like this: Sho, Replicant, SuperPad, Strat 7II, Ice Score, Angel Bells, Ensemble.
+
 ## 2026-09-23, the filter EG's rate law off the CPU's own stage word: exponential, doubling every 15.5 rate words
 
 `fs1r_capture_session3.py flteg` rerun after the gate fix, twelve notes, the CPU's stage word at

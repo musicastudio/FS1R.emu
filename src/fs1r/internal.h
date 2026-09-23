@@ -241,7 +241,7 @@ struct Part {
     int held[32]; int nheld = 0; int lastPitch = -1;   // mono handling and portamento start
     int rpnM = 127, rpnL = 127; bool nrpnSel = false;   // RPN / NRPN selection state
     bool sustain = false;
-    int rcv() const { return p[4]; }
+    int rcv() const { return p[1] == 0 ? 0x7F : p[4]; }   // Voice Bank "off" (byte 1) receives nothing, whatever the channel (owner's manual p.63)
 };
 struct Perf {
     uint8_t c[80]; uint8_t fx[112]; Part part[4];

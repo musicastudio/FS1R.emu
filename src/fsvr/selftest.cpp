@@ -309,6 +309,9 @@ int selftest(Synth& S) {
         ck("filter EG time 60 vs 20: 2^(40/15.5) = 6x per 15 words... 15x over 40 (flteg 0.81 vs 0.052 s)", ns > 12 * nf && ns < 18 * nf);
     }
 
+    // A part whose voice bank is off receives nothing even with a receive channel (A011 Sho, parts 3 and 4).
+    { S.perf.part[1].p[1] = 0; S.perf.part[1].p[4] = 0x10; ck("bank off silences the part", !S.part_listens(1, 0)); S.perf.part[1].p[1] = 2; ck("bank on hears it again", S.part_listens(1, 0)); }
+
     return g_fails ? 1 : 0;
 }
 
