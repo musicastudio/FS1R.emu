@@ -88,11 +88,11 @@ static const double FEG_RATE_K   = 0.67;    // GUESS, not measured. The filter E
                                             // the CPU's own stage word through a note, which gives the time per
                                             // word and whether the chip is exponential or a ramp. Placeholder shape
                                             // and value from two points of 14_sens (times 20 and 60).
-static const double FEG_DEPTH_BYTES = 96.0; // GUESS, not measured. Cutoff bytes the filter EG moves the corner at full
-                                            // depth (64) and full level (256); the CPU ships 0x120 * depth and the
-                                            // chip's scale of that against the EG level is inside VOP3-1. 14_sens's
-                                            // depth sweep saturates at byte 0 at every depth from 16 up, so it only
-                                            // bounds this; one recording with the cutoff parked at 96 settles it.
+static const double FEG_DEPTH_BYTES = 110.0;// MEASURED, 20_fltmod 2026-09-23: cutoff bytes the filter EG moves the corner
+                                            // at full depth (64) and full level (256). Six held-level segments at
+                                            // cutoff 96 put the corner 13.1, 25.5 and 52 bytes down for depth words
+                                            // -8, -16 and -32 at level 250, and 52 down for level -128 at depth 63:
+                                            // linear in both, 1.15x the 96 guessed from 14_sens's saturated sweep.
 static const double WIN_SKIRT    = 2.0;     // the grain window is sin^p, p = WIN_SKIRT * step^skirt. The
                                             // skirt is the one shape control all1, all2, odd1 and odd2
                                             // have, voice byte 6 being the formant's bandwidth and
@@ -242,10 +242,13 @@ static const double RESO_COMP    = 0.0;     // how much of resonance table B is 
                                             // below the corner reads 0.2, -0.9, 0.0 dB at resonance 0 and
                                             // 0.0, -0.1, 0.1 at resonance 60, so the octaves the peak does
                                             // not reach do not move at all.
-static const double LFO2_INC_K   = 1.0;     // GUESS, not measured. LFO2 runs on VOP3-1 off the LFO2SPD word (FUN_0000C130);
-                                            // this is how many 16-bit phase units per 192 Hz tick one unit of the
-                                            // word is worth. fs1r_capture_session3 `lfo2` in FS1R.unlock reads the rate off the
-                                            // chip's own cutoff word.
+static const double LFO2_INC_K   = 3000.0 / 192.3;  // MEASURED, 20_fltmod 2026-09-23: LFO2 runs on VOP3-1 off the
+                                            // LFO2SPD word (FUN_0000C130) as a 16-bit phase stepped once every 16
+                                            // frames, 48000 / 16 = 3000 Hz, so the rate is word * 3000 / 65536 Hz:
+                                            // words 20, 40, 60, 104, 232 read 0.95, 1.91, 2.70, 4.76, 10.64 Hz, all
+                                            // within 4% of that. ponytail: speed 127 (word 556) reads 43.2 Hz where
+                                            // this gives 25.4, one point above word 232 and unexplained; a speed
+                                            // sweep from 100 to 127 would say where the law bends.
 static const double PMS_FRAC[8]  = {0, 0.0264, 0.0534, 0.0889, 0.1612, 0.2769, 0.4967, 1.0};  // per-op pitch mod sensitivity, DX7 curve
 // The output path, MEASURED from rgwan's recording of the whole capture set on 2026-09-18. These three
 // are no longer inferred: they come off the digital tap itself. captures/analysis/ holds the numbers and

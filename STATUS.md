@@ -51,7 +51,7 @@ Grouped by what blocks each item rather than by subsystem. This file is the list
 **Ready, needs no hardware**
 
 - The effects against hardware, 17 to 29 dB over three files and eighty-four segments. The largest number in the set
-- The drum's tonal half, 2 to 3 dB hot on every hit and 4 dB in its carriers' band, with the modulation shallower than the unit's in the first 6 ms. Three things it needs are unmeasured, the velocity law per sensitivity, a decay to a level that is not silence, and a modulator on a modulator; the files are written and FS1R.unlock `fs1r_capture_session3.py record` plays them
+- The drum at note 41: 2.6 to 3 dB quiet, its voiced half decaying 10 dB further than the unit's by 300 ms where note 60 tracks to the decibel. The velocity law, the decay-to-level and the modulator chain are all measured inside 0.1 dB now (`16_velocity`, `17_egdecay`, `18_fmchain`), so the suspect is the key-code table's interpolation between its measured points 85 and 89 (findings 2026-09-23)
 - The bass part's formants at fundamentals of 80 to 120 Hz, an octave out either side: the formant window family, at a note the capture set never played
 - The "1" forms and all1/all2's geometry, data already recorded in `docs/skirt.md`
 - The formant's window family, same data
@@ -59,7 +59,7 @@ Grouped by what blocks each item rather than by subsystem. This file is the list
 
 **Blocked on a hardware session**
 
-- The chip's reading of the filter EG rate word, its depth scale, and LFO2's rate: `FEG_RATE_K`, `FEG_DEPTH_BYTES`, `LFO2_INC_K` in `cal.h`, all guesses. FS1R.unlock `fs1r_capture_session3.py`, `flteg` / `lfo2` and the `20_fltmod` take (findings 2026-09-23)
+- The chip's reading of the filter EG rate word, `FEG_RATE_K`, a guess: FS1R.unlock `fs1r_capture_session3.py flteg` stopped on a parameter-request address error on 2026-09-23, fixed, wants a rerun. `FEG_DEPTH_BYTES` and `LFO2_INC_K` are measured off `20_fltmod`
 - Whether the chip latches per grain or slews the level register on a 3 to 5 ms constant. The lever is the grain rate
 - The per-channel arrays at 0x0103B384 and 0x01044C, which the voice image does not carry
 - The effects, against a register session rather than against the Data List

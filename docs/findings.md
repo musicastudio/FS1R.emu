@@ -8,6 +8,40 @@ Entries that have a dedicated working document (`aeg.md`, `skirt.md`, `noise.md`
 
 ---
 
+## 2026-09-23, session 3's take: the filter EG depth and LFO2's rate measured, three files already inside 0.1 dB
+
+rgwan ran `fs1r_capture_session3.py` and recorded the six outstanding request files as one take
+(`FS1R.unlock/captures/2026-09-23/16_vel_to_20_flt.flac`). `tools/split_take.py` cuts a take like that
+into one WAV per file by each file's own marker bursts; all six landed with their spans to the hop.
+
+**Three of the six needed nothing.** `16_velocity_1/2` (63 segments, the velocity law at seven amplitude
+sensitivities) sit at 0.06 dB median level error, so `vel_att` as read from the firmware is the chip's.
+`17_egdecay` (a decay to a level that is not silence) 0.09 dB level, 0.43 dB envelope. `18_fmchain`
+(the second and third links of a modulator chain) 0.05 dB level, 0.15 dB shape: every link carries the
+same index. The drum's tonal half was not any of those.
+
+**The filter EG depth scale is 110 cutoff bytes** at full depth and full level (`cal::FEG_DEPTH_BYTES`,
+was a 96 guess). Six held-level segments at cutoff 96: the corner reads 13.1, 25.5 and 52 bytes down
+for depth words -8, -16 and -32 at level 250, and 52 down for level -128 at depth 63, so the shift is
+linear in both and 1.15x what 96 gave. Per octave band the closed corners now sit within 2 dB of the
+unit's down to its own -72 dB leakage floor. `06_filter_2` envelopes 2.47 to **2.38**.
+
+**LFO2 is a 16-bit phase stepped at 3000 Hz.** Six speeds; the modulation fundamental off the envelope
+spectrum is 0.95, 1.91, 2.70, 4.76, 10.64 Hz for `LFO2SPD` words 20, 40, 60, 104, 232, which is
+`word * 3000 / 65536` within 4% at every one, 3000 being 48 kHz / 16, one step per 16 frames.
+`cal::LFO2_INC_K` carries it; the engine's guess had been 192.3 Hz ticks, six times slow. Speed 127
+(word 556) reads 43.2 Hz where the law gives 25.4, and is left unexplained: it is one point, past the
+table's last measured step, and a sweep over 100 to 127 would say whether the word or the chip bends
+there. `20_fltmod`'s LFO envelopes 19.5 to 9.2 dB; what is left in them is the waveform's shape against
+the analyzer's alignment, not the rate.
+
+**The drum, `19_drums`.** Note 60 hits match to 1 dB at every velocity and the noise-off / voiced-off
+halves separately. Note 41 is 2.6 to 3.0 dB quiet in the engine at every velocity, and the envelope
+says why: its voiced half decays about 10 dB further than the unit's by 300 ms while note 60's tracks
+the unit to the decibel. Note 41 is key code 86, between the measured 85 and 89 of the key-code table
+in `aeg.md`, so the interpolation there is the suspect, and `10_envelope2`'s `tkey` grid at one note
+per octave never played it. Open.
+
 ## 2026-09-23, AM sensitivity: the chip's AM word is seven bits, and the sensitivity weights are eighths
 
 Off `14_sens` as recorded, no new take. The CPU's AM word is `EGBIAS[amd * (127 - lfo) >> 8]`, 0 to 255,
