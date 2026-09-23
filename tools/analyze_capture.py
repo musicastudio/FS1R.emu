@@ -352,10 +352,11 @@ def analyze(wav, manifest, tables, label):
 
 
 # The engine renders digital silence as exactly zero and the hardware's digital output does too, but a
-# 24-bit capture floors at -144.5 dB where a float render floors at -200. Comparing those two straight
-# scores a segment that is silent on both as a 55 dB disagreement, which then swamps the median. Anything
-# under this is silence on either side and the comparison skips it.
-SILENT_DB = -120.0
+# 24-bit capture floors at -144.5 dB where a float render's residue (an EG run to its -200 dB floor
+# through a dithered output stage) sits at -105 to -115. Comparing those two straight scores a segment that
+# is silent on both as a 30 to 55 dB disagreement, which then swamps the median. Anything under this is
+# silence on either side and the comparison skips it; -100 is 70 dB under any segment that plays.
+SILENT_DB = -100.0
 
 
 # An envelope segment's rms_db is one 100 ms window just after the attack, which says nothing about the

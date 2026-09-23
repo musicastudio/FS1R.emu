@@ -449,7 +449,9 @@ struct Synth {
     // plays out the rest; round ping-pongs between them (owner's manual page 34).
     void fseq_step();
     void fseq_tick(double dt);
-    // 24 ppqn in; the speed word 0..4 selects 1/4, 1/2, 1/1, 2/1, 4/1 frames per clock (INFERRED rate).
+    // 24 ppqn in; the speed word 0..4 selects 1/4, 1/2, 1/1, 2/1, 4/1 frames per clock. KNOWN: FUN_0001ACB6 takes the
+    // clocks since the last frame (0x01029206, bumped per 0xF8 in FUN_0002F760) times 100, shifts >>2, >>1, x1, x2, x4
+    // by the word, and divides by 100 for the frames to step.
     void midi_clock();
 
     // ---------------------------------------------------------------- tick: LFO, PEG, portamento, register refresh

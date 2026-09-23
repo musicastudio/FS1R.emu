@@ -72,7 +72,7 @@ void Synth::fseq_tick(double dt) {
 
 void Synth::midi_clock() {
     if (!fseqRun || !fseqClock || !fseq.valid || fseqDelay > 0 || (perf.c[0x21] & 3) == 1) return;
-    static const double rate[5] = {0.25, 0.5, 1.0, 2.0, 4.0};
+    static const double rate[5] = {0.25, 0.5, 1.0, 2.0, 4.0};   // FUN_0001ACB6, see internal.h
     fseqClockAcc += rate[clampi(perf.c[0x18] << 7 | perf.c[0x19], 0, 4)];
     while (fseqClockAcc >= 1.0) { fseqClockAcc -= 1.0; fseq_step(); }
 }

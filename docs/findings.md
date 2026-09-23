@@ -32,6 +32,15 @@ is 1.8 dB at sensitivities 1 and 2 at depth 99, where the unit modulates a littl
 `127 / 8` and `127 / 4` allow, inside the estimator's smear on a trough that steep. `07_modulation_1`
 envelopes 2.27 to **2.21**, `14_sens` 3.28 to **3.24** (its number is the filter EG's).
 
+**Three small ones off the same pass.** The feedback gain: `03_fm_2`'s six clean feedback levels put
+the second harmonic a steady 0.5 dB under the unit, so `cal::FEEDBACK` is 0.53, and levels 1 to 6 now
+land to 0.1 dB. The Fseq MIDI-clock rate table was marked inferred and is the firmware's:
+`FUN_0001ACB6` scales the clocks since the last frame by 1/4, 1/2, 1, 2, 4 for speed words 0 to 4.
+And the analyzer's silent-segment fault: a float render's residue after an EG has run to its floor sits
+at -105 to -115 dB through the output stage, above the -120 gate, so `hold-50`/`hold-70` in
+`10_envelope2` and `hold-60`/`hold-80` in `02_envelope_3` scored 30 to 38 dB of disagreement on
+silence. `SILENT_DB` is -100, 70 dB under anything that plays; those four rows are gone.
+
 ## 2026-09-23, the firmware audit: the filter EG is the CPU's, LFO2 and the Fseq delay were not what the engine had
 
 A pass over the engine against the flash with Ghidra's decompiler, readonly-folding the EPROM so the

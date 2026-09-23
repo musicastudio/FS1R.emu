@@ -43,7 +43,8 @@ static const double LEVEL_DB     = 0.376287;// dB per step of the 8-bit level re
                                             // below -68 dB (see fs1r_capture_session2_results.md) and read high.
 static const double EG_LEVEL_DB  = 1.5;     // dB per step of the 6-bit EG level registers (LEVTAB >> 1)
 static const double CARRIER_DB   = 1.5;     // dB per step of the carrier level correction (voice 0x2D-0x34)
-static const double FEEDBACK     = 0.5;     // feedback gain = FEEDBACK * 2^(fb - 7)
+static const double FEEDBACK     = 0.53;    // feedback gain = FEEDBACK * 2^(fb - 7). MEASURED: 03_fm_2 feedback-1..6, the
+                                            // second harmonic sat a steady 0.5 dB under the unit at 0.5
 static const double EG_ATTACK_K  = 0.0625;  // rising EG time constant as a fraction of rate_secs. MEASURED:
                                             // the eleven attack-rate segments of 02_envelope_2 fit an
                                             // exponential in dB with tau/rate_secs = 0.0615 over rates 36 to 44,

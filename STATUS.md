@@ -55,7 +55,6 @@ Grouped by what blocks each item rather than by subsystem. This file is the list
 - The bass part's formants at fundamentals of 80 to 120 Hz, an octave out either side: the formant window family, at a note the capture set never played
 - The "1" forms and all1/all2's geometry, data already recorded in `docs/skirt.md`
 - The formant's window family, same data
-- The silent-segment scoring artifact: `10_envelope2`'s two hold segments are silence on both sides scored as a 30 dB disagreement
 - The constants that rest on one dataset. Score spectrum shape and envelope shape as well as level, and read every width in hertz as well as in partials
 
 **Blocked on a hardware session**
