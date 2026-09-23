@@ -23,6 +23,11 @@
 
 // ------------------------------------------------------------------------------------------ firmware helpers
 static inline int clampi(int v, int lo, int hi) { return v < lo ? lo : v > hi ? hi : v; }
+// The chip's LFO amplitude modulation, measured off 14_sens (three LFO depths by eight sensitivities):
+// the channel AM word is 7 bits, so it floors at 127 steps (48 dB) where the CPU can send 255, and the
+// per-operator sensitivity weights it {0,1,2,4,5,6,7,8}/8, not k/7. docs/findings.md 2026-09-23.
+static const int AMS_W[8] = {0, 1, 2, 4, 5, 6, 7, 8};
+static inline double am_att(int regAM, int ams) { return std::min(regAM, 127) * LEVEL_DB * AMS_W[ams & 7] / 8.0; }
 static inline int eb86(int v) { return std::min(255, (((v & 0xFF) << 1) * 0xA5) >> 7); }   // 0..99 -> 0..127
 static inline int eb70(int v) { return (((v & 0xFF) << 1) * 0xA5) >> 8; }                   // 0..99 -> 0..127 (bandwidth)
 static inline int egrate(int t) { return ((99 - clampi(t, 0, 99)) * 0xA4) >> 8; }          // EG time -> chip rate 0..63

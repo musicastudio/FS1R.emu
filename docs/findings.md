@@ -8,6 +8,30 @@ Entries that have a dedicated working document (`aeg.md`, `skirt.md`, `noise.md`
 
 ---
 
+## 2026-09-23, AM sensitivity: the chip's AM word is seven bits, and the sensitivity weights are eighths
+
+Off `14_sens` as recorded, no new take. The CPU's AM word is `EGBIAS[amd * (127 - lfo) >> 8]`, 0 to 255,
+and the engine applied it as `regAM * LEVEL_DB * ams / 7`, which is why it matched the unit at LFO
+depths 33 and 66 (swings of 18 and 49 steps) and ran 20% deep at 99 (a swing of 224). Per-cycle
+peak-to-trough on both sides through the same 2 ms estimator, in dB, eight sensitivities:
+
+| depth | | ams 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 |
+|---|---|---|---|---|---|---|---|---|---|
+| 33 | unit | 0.4 | 1.2 | 2.0 | 3.5 | 4.2 | 5.1 | 5.9 | 6.7 |
+| 66 | unit | 0.4 | 2.6 | 4.6 | 9.1 | 11.3 | 13.5 | 15.8 | 18.1 |
+| 99 | unit | 0.4 | 7.8 | 13.8 | 23.6 | 29.6 | 35.5 | 40.9 | 46.1 |
+| 99 | engine, `ams / 7` | 0.4 | 6.9 | 13.7 | 20.6 | 27.5 | 34.3 | 41.2 | 48.0 |
+| 99 | engine, now | 0.4 | 6.0 | 11.9 | 23.8 | 29.7 | 35.6 | 41.6 | 47.6 |
+
+Two things fall out. The 66 row divided by its 49-step swing is 1, 2, 4, 5, 6, 7, 8 eighths to the
+step, not sevenths: the sensitivity is a 3-bit shift-and-add, {0, 1, 2, 4, 5, 6, 7, 8} / 8, and the
+jump from 2 to 3 (4.6 to 9.1 dB) is the unit's, not noise. And the 99 row tops out at 46 dB where
+224 steps would be 85: the chip's AM word is seven bits, 127 steps, 47.8 dB, and the CPU's 8-bit
+table runs off the end of it. `am_att()` in `internal.h`; the linear `ams / 7` is gone. What is left
+is 1.8 dB at sensitivities 1 and 2 at depth 99, where the unit modulates a little deeper than
+`127 / 8` and `127 / 4` allow, inside the estimator's smear on a trough that steep. `07_modulation_1`
+envelopes 2.27 to **2.21**, `14_sens` 3.28 to **3.24** (its number is the filter EG's).
+
 ## 2026-09-23, the firmware audit: the filter EG is the CPU's, LFO2 and the Fseq delay were not what the engine had
 
 A pass over the engine against the flash with Ghidra's decompiler, readonly-folding the EPROM so the

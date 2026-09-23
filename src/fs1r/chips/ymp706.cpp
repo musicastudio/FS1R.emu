@@ -83,7 +83,7 @@ void Synth::refresh_ctl(Chan& C) {
     C.fbGain = V.fb ? cal::FEEDBACK * pow(2.0, V.fb - 7) : 0.0;    // INFERRED feedback scale
     for (int o = 0; o < 8; o++) {
         OpState& s = C.op[o]; const OpV& v = V.v[o]; const OpU& u = V.u[o];
-        s.att = C.regLevel[o] * LEVEL_DB + C.regAM * LEVEL_DB * v.ams / 7.0;   // INFERRED: ams scales the channel AM attenuation linearly
+        s.att = C.regLevel[o] * LEVEL_DB + am_att(C.regAM, v.ams);
         if (alg[2 * o + 1] & 1) s.att += cal::CARRIER_DB * V.corr[o];         // carrier level correction (bits in the 0x200 word), 1.5 dB steps INFERRED
         int pmw = (int)(C.regPM * cal::PMS_FRAC[v.pms]) + C.vcFreq[o][0];
         // The detune word goes into the frequency word rather than onto the result: it is a pitch
@@ -106,7 +106,7 @@ void Synth::refresh_ctl(Chan& C) {
         s.ratio = v.form == 7 ? 0 : clampi(C.frmtWord[o], 0, 99);         // register 0x230, every other form's
         s.wl7 = std::min(cal::FRMT_WL_MAX, C.f0 / (cal::FRMT_BW_HZ0 * pow(2.0, s.bw / cal::FRMT_BW_DB)));
         // unvoiced (noise formant) operator
-        s.uatt = C.regULevel[o] * LEVEL_DB + C.regAM * LEVEL_DB * u.ams / 7.0;
+        s.uatt = C.regULevel[o] * LEVEL_DB + am_att(C.regAM, u.ams);
         double nf;
         if (fs && C.fseqUOp[o]) nf = word_hz(C.fquWord[o]);
         else if (u.mode == 2 && v.form == 7) nf = word_hz(C.freqWord[o] + (C.frmtWord[o] - 0x1243));

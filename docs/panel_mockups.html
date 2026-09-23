@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>FSVR Panel Mockups</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0f1114; --card:#16191d; --line:#262b31; --ink:#e7ecf1; --dim:#8b949e; --accent:#7fd4ff;
+}
+:root:not([data-theme="light"]) { }
+@media (prefers-color-scheme: light){
+  :root:not([data-theme="dark"]){ --bg:#eceef1; --card:#ffffff; --line:#d8dde3; --ink:#161a1f; --dim:#5b646e; --accent:#0a6ea8; }
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:Inter,"Segoe UI",system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+header{padding:32px 16px 8px;max-width:1280px;margin:0 auto}
+h1{font-size:22px;font-weight:700;margin:0 0 6px;letter-spacing:-.01em}
+header p{margin:0;color:var(--dim);font-size:14px;line-height:1.5;max-width:70ch}
+main{max-width:1280px;margin:0 auto;padding:16px}
+section{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:18px 16px 22px;margin:22px 0}
+.hd{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;margin-bottom:4px}
+.hd h2{font-size:16px;font-weight:600;margin:0}
+.hd .tag{font-size:11px;letter-spacing:.09em;text-transform:uppercase;color:var(--accent);border:1px solid currentColor;border-radius:999px;padding:2px 8px}
+.note{color:var(--dim);font-size:13px;line-height:1.55;margin:0 0 16px;max-width:78ch}
+.stage{overflow-x:auto;padding:14px 0 6px}
+.stage svg{display:block;width:100%;min-width:900px;height:auto}
+ul{margin:14px 0 0;padding-left:18px;color:var(--dim);font-size:13px;line-height:1.7}
+ul b{color:var(--ink);font-weight:600}
+footer{max-width:1280px;margin:0 auto;padding:8px 16px 48px;color:var(--dim);font-size:12.5px;line-height:1.6}
+@media (max-width:640px){header{padding:24px 16px 4px}main{padding:8px}section{padding:14px 12px 18px}}
+</style>
+</head>
+<body>
+<header>
+  <h1>FSVR front panel &mdash; three redesigns</h1>
+  <p>Same control geometry as <code>PanelView.cpp</code> (artwork units, 394.11 &times; 47.64), all components drawn new: cast/brushed metal face, backlit glowing LCD, moulded black plastic pots, black button caps and translucent grey lenses that glow when lit. PLAY is shown lit, the knob-mode LED is shown lit on the lower strip.</p>
+</header>
+<main id="out"></main>
+<footer>Geometry is read from <code>plugin/PanelView.cpp</code> <code>namespace art</code>, so a chosen look maps 1:1 onto the existing JUCE control placement.</footer>
+
+<script>
+const W = 394.11, H = 47.64;
+const G = {
+  lcd:  {x:38.04, y:9.07, w:96.16, h:29.71},
+  vol:  {cx:19.02, cy:21.65, r:6.14},
+  knob: {cy:24.19, r:8.62, cx:[275.09,307.08,339.06,371.05]},
+  led:  {r:2.70, cx:[166.61,176.88], cy:[15.55,26.90,38.24]},
+  btn:  {r:2.90, cx:[193.86,204.65,215.45], cy:[15.53,26.89,38.27]},
+  km:   {cx:253.59, r:2.16, cy:[13.39,35.00]}
+};
+const DOT = G.lcd.w/120, ROW = G.lcd.h/37, CH = DOT*6;   // 120x37 dots, 6x8 cell
+const col = n => G.lcd.x + n*CH;
+const row = n => G.lcd.y + n*ROW;
+
+const esc = s => s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+
+/* ---------- shared part drawing ---------- */
+
+function pot(t, cx, cy, r, ang){
+  const k = t.id, rad = (ang-90)*Math.PI/180;
+  let ticks = '';
+  for(let i=0;i<11;i++){
+    const a = (-240 + i*30)*Math.PI/180, r0 = r*1.16, r1 = r*1.30;
+    ticks += `<line x1="${(cx+Math.cos(a)*r0).toFixed(2)}" y1="${(cy+Math.sin(a)*r0).toFixed(2)}" x2="${(cx+Math.cos(a)*r1).toFixed(2)}" y2="${(cy+Math.sin(a)*r1).toFixed(2)}" stroke="${t.silkDim}" stroke-width=".28" stroke-linecap="round" opacity=".85"/>`;
+  }
+  let knurl = '';
+  const n = t.ribs || 44;
+  for(let i=0;i<n;i++){
+    const a = i*2*Math.PI/n;
+    knurl += `<line x1="${(cx+Math.cos(a)*r*0.845).toFixed(2)}" y1="${(cy+Math.sin(a)*r*0.845).toFixed(2)}" x2="${(cx+Math.cos(a)*r*0.985).toFixed(2)}" y2="${(cy+Math.sin(a)*r*0.985).toFixed(2)}" stroke="#ffffff" stroke-width="${(r*0.055).toFixed(3)}" opacity=".10"/>`;
+  }
+  return `
+  <g>
+    <ellipse cx="${cx}" cy="${cy+r*0.16}" rx="${r*1.08}" ry="${r*0.95}" fill="#000" opacity=".45" filter="url(#soft-${k})"/>
+    <circle cx="${cx}" cy="${cy}" r="${r*1.05}" fill="url(#potbase-${k})"/>
+    <circle cx="${cx}" cy="${cy}" r="${r}" fill="url(#potside-${k})"/>
+    ${knurl}
+    <circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="#000" stroke-width=".22" opacity=".8"/>
+    <circle cx="${cx}" cy="${cy}" r="${r*0.80}" fill="url(#pottop-${k})"/>
+    <circle cx="${cx}" cy="${cy}" r="${r*0.80}" fill="none" stroke="#fff" stroke-width=".22" opacity=".14"/>
+    <path d="M ${cx-r*0.70} ${cy-r*0.30} A ${r*0.76} ${r*0.76} 0 0 1 ${cx-r*0.10} ${cy-r*0.75}" fill="none" stroke="#fff" stroke-width="${r*0.10}" opacity=".30" filter="url(#soft-${k})" stroke-linecap="round"/>
+    <circle cx="${cx}" cy="${cy}" r="${r*0.22}" fill="url(#potdimple-${k})"/>
+    <g transform="rotate(${ang} ${cx} ${cy})">
+      <line x1="${cx}" y1="${cy-r*0.24}" x2="${cx}" y2="${cy-r*0.93}" stroke="#000" stroke-width="${r*0.20}" opacity=".55" stroke-linecap="round"/>
+      <line x1="${cx}" y1="${cy-r*0.26}" x2="${cx}" y2="${cy-r*0.90}" stroke="${t.pointer}" stroke-width="${r*0.12}" stroke-linecap="round"/>
+    </g>
+    ${ticks}
+  </g>`;
+}
+
+function button(t, cx, cy, r){
+  const k = t.id;
+  return `
+  <g>
+    <circle cx="${cx}" cy="${cy}" r="${r*1.34}" fill="url(#well-${k})"/>
+    <circle cx="${cx}" cy="${cy}" r="${r*1.34}" fill="none" stroke="#000" stroke-width=".20" opacity=".55"/>
+    <ellipse cx="${cx}" cy="${cy+r*0.22}" rx="${r*1.02}" ry="${r*0.92}" fill="#000" opacity=".5" filter="url(#soft-${k})"/>
+    <circle cx="${cx}" cy="${cy}" r="${r}" fill="url(#cap-${k})"/>
+    <path d="M ${cx-r*0.78} ${cy-r*0.30} A ${r*0.84} ${r*0.84} 0 0 1 ${cx+r*0.30} ${cy-r*0.80}" fill="none" stroke="#fff" stroke-width="${r*0.14}" opacity=".26" stroke-linecap="round"/>
+    <circle cx="${cx}" cy="${cy}" r="${r*0.62}" fill="url(#capface-${k})"/>
+  </g>`;
+}
+
+function lamp(t, cx, cy, r, on, colour){
+  const k = t.id;
+  const off = `
+    <circle cx="${cx}" cy="${cy}" r="${r*1.30}" fill="url(#well-${k})"/>
+    <circle cx="${cx}" cy="${cy}" r="${r}" fill="url(#lens-${k})"/>
+    <circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="#000" stroke-width=".18" opacity=".45"/>
+    <ellipse cx="${cx-r*0.30}" cy="${cy-r*0.34}" rx="${r*0.40}" ry="${r*0.28}" fill="#fff" opacity=".55"/>`;
+  if(!on) return `<g>${off}</g>`;
+  return `
+  <g>
+    <circle cx="${cx}" cy="${cy}" r="${r*1.30}" fill="url(#well-${k})"/>
+    <circle cx="${cx}" cy="${cy}" r="${r*2.7}" fill="${colour}" opacity=".40" filter="url(#bloom-${k})"/>
+    <circle cx="${cx}" cy="${cy}" r="${r}" fill="${colour}"/>
+    <circle cx="${cx}" cy="${cy}" r="${r*0.58}" fill="#fff" opacity=".78" filter="url(#soft-${k})"/>
+    <circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="#000" stroke-width=".16" opacity=".35"/>
+    <ellipse cx="${cx-r*0.30}" cy="${cy-r*0.34}" rx="${r*0.36}" ry="${r*0.24}" fill="#fff" opacity=".8"/>
+  </g>`;
+}
+
+function chip(t, cx, cy, w, h, label, size){
+  return `<g>
+    <rect x="${(cx-w/2).toFixed(2)}" y="${(cy-h/2).toFixed(2)}" width="${w}" height="${h}" rx="${(h*0.22).toFixed(2)}" fill="${t.accent}"/>
+    <rect x="${(cx-w/2).toFixed(2)}" y="${(cy-h/2).toFixed(2)}" width="${w}" height="${h}" rx="${(h*0.22).toFixed(2)}" fill="none" stroke="#000" stroke-width=".14" opacity=".3"/>
+    <text x="${cx}" y="${(cy+size*0.35).toFixed(2)}" font-size="${size}" fill="${t.accentInk}" text-anchor="middle" font-weight="600" letter-spacing=".04">${esc(label)}</text>
+  </g>`;
+}
+
+function silk(t, x, y, s, str, anchor){
+  return `<text x="${x}" y="${y}" font-size="${s}" fill="${t.silk}" text-anchor="${anchor||'middle'}" font-weight="600" letter-spacing=".06">${esc(str)}</text>`;
+}
+
+/* ---------- the LCD ---------- */
+
+function lcd(t){
+  const k = t.id, L = G.lcd, fs = CH/0.6;                  // monospace advance = 0.6em
+  const y1 = row(8), y2 = row(17), y3 = row(31.4);
+  const invX = col(7.6), invW = CH*3.9;
+  let icons = '';
+  for(let i=0;i<3;i++) icons += `<rect x="${(col(13.2)+i*0).toFixed(2)}" y="${row(25+i*2.4).toFixed(2)}" width="${(CH*2.2).toFixed(2)}" height="${(ROW*1.5).toFixed(2)}" fill="${t.px}"/>`;
+  return `
+  <g>
+    <rect x="${L.x-2.2}" y="${L.y-2.2}" width="${L.w+4.4}" height="${L.h+4.4}" rx="1.6" fill="url(#bezel-${k})"/>
+    <rect x="${L.x-2.2}" y="${L.y-2.2}" width="${L.w+4.4}" height="${L.h+4.4}" rx="1.6" fill="none" stroke="#000" stroke-width=".3" opacity=".6"/>
+    <rect x="${L.x-1.5}" y="${L.y-1.5}" width="${L.w+3}" height="${L.h+3}" rx=".8" fill="#0a0c08"/>
+    <rect x="${L.x-5}" y="${L.y-5}" width="${L.w+10}" height="${L.h+10}" rx="3" fill="${t.glow}" opacity="${t.glowAmt}" filter="url(#bloom-${k})" style="mix-blend-mode:screen"/>
+    <rect x="${L.x}" y="${L.y}" width="${L.w}" height="${L.h}" fill="url(#glass-${k})"/>
+    <g font-family="Consolas,'DejaVu Sans Mono',Menlo,monospace" font-size="${fs.toFixed(2)}" fill="${t.px}" xml:space="preserve">
+      <text x="${col(0.5)}" y="${y1.toFixed(2)}">C052 Ensemble</text>
+      <text x="${col(2.5)}" y="${y2.toFixed(2)}">Perform</text>
+      <text x="${col(9.5)}" y="${y2.toFixed(2)}">PrC</text>
+      <text x="${col(13.5)}" y="${y2.toFixed(2)}">052</text>
+      <path d="M ${col(9.0)} ${(y2-ROW*5).toFixed(2)} l ${(CH*0.45).toFixed(2)} ${(ROW*2.2).toFixed(2)} l ${(-CH*0.45).toFixed(2)} ${(ROW*2.2).toFixed(2)} z" fill="${t.px}"/>
+      <path d="M ${col(13.0)} ${(y2-ROW*5).toFixed(2)} l ${(CH*0.45).toFixed(2)} ${(ROW*2.2).toFixed(2)} l ${(-CH*0.45).toFixed(2)} ${(ROW*2.2).toFixed(2)} z" fill="${t.px}"/>
+      <text x="${col(0.4)}" y="${y3.toFixed(2)}">All</text>
+      <text x="${col(4.6)}" y="${y3.toFixed(2)}">01</text>
+      <rect x="${invX.toFixed(2)}" y="${row(23.6).toFixed(2)}" width="${invW.toFixed(2)}" height="${(ROW*9.6).toFixed(2)}" fill="${t.px}"/>
+      <text x="${col(7.9)}" y="${y3.toFixed(2)}" fill="${t.pxOff}">St.</text>
+      <rect x="${col(12.1).toFixed(2)}" y="${row(24.4).toFixed(2)}" width="${(CH*0.55).toFixed(2)}" height="${(ROW*8).toFixed(2)}" fill="${t.px}"/>
+      <rect x="${col(12.9).toFixed(2)}" y="${row(26.0).toFixed(2)}" width="${(CH*0.55).toFixed(2)}" height="${(ROW*6.4).toFixed(2)}" fill="${t.px}"/>
+      <rect x="${col(13.7).toFixed(2)}" y="${row(27.6).toFixed(2)}" width="${(CH*0.55).toFixed(2)}" height="${(ROW*4.8).toFixed(2)}" fill="${t.px}"/>
+      <circle cx="${col(11.0).toFixed(2)}" cy="${row(28.4).toFixed(2)}" r="${(ROW*3.6).toFixed(2)}" fill="none" stroke="${t.px}" stroke-width="${(ROW*0.9).toFixed(2)}"/>
+      <text x="${col(17.2)}" y="${y3.toFixed(2)}">+0</text>
+    </g>
+    <rect x="${L.x}" y="${L.y}" width="${L.w}" height="${L.h}" fill="url(#grid-${k})"/>
+    <rect x="${L.x}" y="${L.y}" width="${L.w}" height="${L.h}" fill="url(#sheen-${k})" style="mix-blend-mode:screen" opacity=".5"/>
+    <rect x="${L.x}" y="${L.y}" width="${L.w}" height="${L.h}" fill="none" stroke="#000" stroke-width=".5" opacity=".55"/>
+  </g>`;
+}
+
+/* ---------- the whole panel ---------- */
+
+function panel(t){
+  const k = t.id;
+  let s = '';
+
+  /* face */
+  s += `<rect x="0" y="0" width="${W}" height="${H}" rx="1.8" fill="url(#face-${k})"/>
+  <g clip-path="url(#clip-${k})">
+    <rect x="0" y="0" width="${W}" height="${H}" filter="url(#coarse-${k})" opacity="${t.coarseAmt}" style="mix-blend-mode:soft-light"/>
+    <rect x="0" y="0" width="${W}" height="${H}" filter="url(#fine-${k})" opacity="${t.fineAmt}" style="mix-blend-mode:overlay"/>
+    <rect x="0" y="0" width="${W}" height="${H}" fill="url(#wash-${k})" style="mix-blend-mode:screen" opacity=".5"/>
+    <rect x="0" y="0" width="${W}" height=".55" fill="#fff" opacity=".22"/>
+    <rect x="0" y="${H-0.55}" width="${W}" height=".55" fill="#000" opacity=".35"/>
+  </g>
+  <rect x=".1" y=".1" width="${W-0.2}" height="${H-0.2}" rx="1.8" fill="none" stroke="#000" stroke-width=".3" opacity=".45"/>`;
+
+  /* recessed islands (variant C) / hairline rules (variant B) */
+  if(t.islands){
+    const tub = (x,y,w,h) => `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="1.4" fill="#000" opacity=".16"/>
+      <rect x="${x}" y="${y}" width="${w}" height="${h}" rx="1.4" fill="none" stroke="#000" stroke-width=".35" opacity=".45"/>
+      <rect x="${x+0.35}" y="${y+0.35}" width="${w-0.7}" height="${h-0.7}" rx="1.1" fill="none" stroke="#fff" stroke-width=".3" opacity=".16"/>`;
+    s += tub(159.5, 9.5, 62.5, 33.5);
+    s += tub(246.0, 8.0, 138.0, 33.0);
+    s += tub(7.5, 11.5, 23.0, 26.0);
+  }
+  if(t.rules){
+    [150.5, 232.5, 240.5].forEach(x => {
+      s += `<rect x="${x}" y="6" width=".22" height="${H-12}" fill="#000" opacity=".35"/><rect x="${x+0.22}" y="6" width=".22" height="${H-12}" fill="#fff" opacity=".10"/>`;
+    });
+  }
+
+  /* branding */
+  s += `<text x="38.04" y="6.2" font-size="5.8" font-weight="700" letter-spacing=".24" fill="url(#logo-${k})">FSVR</text>
+  <rect x="60.5" y="1.9" width="1.4" height="1.4" fill="${t.accent}"/>
+  <rect x="60.5" y="4.85" width="1.4" height="1.4" fill="${t.accent}"/>
+  <text x="63.2" y="3.2" font-size="2.05" fill="${t.silk}" font-weight="600" letter-spacing=".1">TONE GENERATOR</text>
+  <text x="63.2" y="6.15" font-size="2.05" fill="${t.silk}" font-weight="600" letter-spacing=".1">FORMANT SHAPING / FM SYNTHESIS</text>`;
+
+  /* volume */
+  s += pot(t, G.vol.cx, G.vol.cy, G.vol.r, -150);
+  s += silk(t, G.vol.cx, 33.6, 2.3, 'VOLUME');
+
+  /* lcd + its silkscreen strip */
+  s += lcd(t);
+  const fields = ['PART','MIDI','BANK/PGM#','VOL','FLT','PAN','REV','VAR','INS','KEY'];
+  const fx = [0.035,0.135,0.275,0.445,0.525,0.605,0.692,0.778,0.862,0.950];
+  fields.forEach((f,i) => { s += silk(t, G.lcd.x + fx[i]*G.lcd.w, 45.0, 2.15, f); });
+
+  /* mode buttons: PLAY/UTIL/SEARCH and PERFORM/EFFECT/VOICE */
+  const left = ['PLAY','UTIL','SEARCH'], right = ['PERFORM','EFFECT','VOICE'];
+  s += silk(t, G.led.cx[1], G.led.cy[0]-7.0, 2.1, 'EDIT');
+  left.forEach((n,r)  => { s += silk(t, G.led.cx[0], G.led.cy[r]-4.1, 2.1, n); });
+  right.forEach((n,r) => { s += chip(t, G.led.cx[1], G.led.cy[r]-5.0, 10.2, 3.5, n, 2.05); });
+  for(let r=0;r<3;r++) for(let c=0;c<2;c++)
+    s += lamp(t, G.led.cx[c], G.led.cy[r], G.led.r, (r===0&&c===0), t.ledOn);
+
+  /* plain buttons */
+  s += silk(t, G.btn.cx[0], G.btn.cy[0]-6.3, 2.1, 'MUTE/');
+  s += silk(t, G.btn.cx[0], G.btn.cy[0]-4.0, 2.1, 'SOLO');
+  s += silk(t, G.btn.cx[0], G.btn.cy[1]-4.1, 2.1, 'ENTER');
+  s += silk(t, G.btn.cx[0], G.btn.cy[2]-4.1, 2.1, 'EXIT');
+  const pairs = [['PART','−','+'],['CURSOR','◂','▸'],['VALUE','−','+']];
+  pairs.forEach((p,r) => {
+    const mid = (G.btn.cx[1]+G.btn.cx[2])/2, y = G.btn.cy[r] - (r===0 ? 6.3 : 4.1);
+    s += silk(t, mid, y, 2.1, p[0]);
+    s += `<text x="${G.btn.cx[1]-4.5}" y="${y}" font-size="2.4" fill="${t.silk}" text-anchor="middle" font-weight="700">${p[1]}</text>`;
+    s += `<text x="${G.btn.cx[2]+4.5}" y="${y}" font-size="2.4" fill="${t.silk}" text-anchor="middle" font-weight="700">${p[2]}</text>`;
+  });
+  s += `<text x="${(G.btn.cx[1]+G.btn.cx[2])/2}" y="${G.btn.cy[0]-4.0}" font-size="1.9" fill="${t.silkDim}" text-anchor="middle" font-weight="600" letter-spacing=".1">— ALL —</text>`;
+  for(let r=0;r<3;r++) for(let c=0;c<3;c++) s += button(t, G.btn.cx[c], G.btn.cy[r], G.btn.r);
+
+  /* knob mode strips */
+  const top = ['ATTACK','RELEASE','FORMANT','FM'], bot = ['PART/OP','GROUP','CURSOR','VALUE'];
+  top.forEach((n,i) => {
+    const x = G.knob.cx[i];
+    s += `<rect x="${x-13}" y="${G.km.cy[0]-2.2}" width="26" height="4.4" rx="1" fill="#ffffff" opacity=".07"/>
+          <rect x="${x-13}" y="${G.km.cy[0]-2.2}" width="26" height="4.4" rx="1" fill="none" stroke="${t.silkDim}" stroke-width=".22" opacity=".8"/>`;
+    s += silk(t, x, G.km.cy[0]+0.8, 2.3, n);
+  });
+  bot.forEach((n,i) => { s += chip(t, G.knob.cx[i], G.km.cy[1], 26, 4.4, n, 2.3); });
+  s += lamp(t, G.km.cx, G.km.cy[0], G.km.r, false, t.ledRed);
+  s += lamp(t, G.km.cx, G.km.cy[1], G.km.r, true,  t.ledRed);
+
+  /* the four knobs */
+  const angles = [-118, -40, 25, 96];
+  G.knob.cx.forEach((x,i) => {
+    s += pot(t, x, G.knob.cy, G.knob.r, angles[i]);
+    s += `<circle cx="${x-10.3}" cy="${G.km.cy[1]}" r="1.5" fill="${t.accentInk}" opacity=".9"/>
+          <text x="${x-10.3}" y="${G.km.cy[1]+0.78}" font-size="2.2" fill="${t.accent}" text-anchor="middle" font-weight="700">${i+1}</text>`;
+  });
+
+  return `<svg viewBox="-3 -3 ${W+6} ${H+6}" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="${esc(t.name)} panel mockup">
+  <defs>${defs(t)}</defs>
+  <g filter="url(#drop-${k})">${s}</g>
+</svg>`;
+}
+
+function defs(t){
+  const k = t.id;
+  return `
+  <clipPath id="clip-${k}"><rect x="0" y="0" width="${W}" height="${H}" rx="1.8"/></clipPath>
+  <linearGradient id="face-${k}" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0" stop-color="${t.faceTop}"/><stop offset=".5" stop-color="${t.faceMid}"/><stop offset="1" stop-color="${t.faceBot}"/>
+  </linearGradient>
+  <linearGradient id="logo-${k}" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0" stop-color="${t.logoTop}"/><stop offset="1" stop-color="${t.logoBot}"/>
+  </linearGradient>
+  <radialGradient id="wash-${k}" cx=".32" cy="0" r="1">
+    <stop offset="0" stop-color="#ffffff" stop-opacity="${t.washAmt}"/><stop offset="1" stop-color="#000000" stop-opacity="0"/>
+  </radialGradient>
+  <filter id="fine-${k}" x="0" y="0" width="100%" height="100%">
+    <feTurbulence type="fractalNoise" baseFrequency="${t.fine}" numOctaves="4" seed="${t.seed}"/>
+    <feColorMatrix type="saturate" values="0"/>
+  </filter>
+  <filter id="coarse-${k}" x="0" y="0" width="100%" height="100%">
+    <feTurbulence type="fractalNoise" baseFrequency="${t.coarse}" numOctaves="5" seed="${t.seed+4}"/>
+    <feColorMatrix type="saturate" values="0"/>
+  </filter>
+  <filter id="soft-${k}" x="-60%" y="-60%" width="220%" height="220%"><feGaussianBlur stdDeviation=".45"/></filter>
+  <filter id="bloom-${k}" x="-90%" y="-90%" width="280%" height="280%"><feGaussianBlur stdDeviation="${t.bloom}"/></filter>
+  <filter id="drop-${k}" x="-4%" y="-16%" width="108%" height="132%">
+    <feDropShadow dx="0" dy="1.1" stdDeviation="1.3" flood-color="#000" flood-opacity=".55"/>
+  </filter>
+  <radialGradient id="potbase-${k}" cx=".5" cy=".5" r=".5">
+    <stop offset=".85" stop-color="#000" stop-opacity=".0"/><stop offset="1" stop-color="#000" stop-opacity=".55"/>
+  </radialGradient>
+  <linearGradient id="potside-${k}" x1=".2" y1="0" x2=".8" y2="1">
+    <stop offset="0" stop-color="#55575c"/><stop offset=".45" stop-color="#26282c"/><stop offset="1" stop-color="#050506"/>
+  </linearGradient>
+  <radialGradient id="pottop-${k}" cx=".34" cy=".26" r=".82">
+    <stop offset="0" stop-color="#5b5e64"/><stop offset=".42" stop-color="#2e3136"/><stop offset=".82" stop-color="#141517"/><stop offset="1" stop-color="#232529"/>
+  </radialGradient>
+  <radialGradient id="potdimple-${k}" cx=".4" cy=".35" r=".8">
+    <stop offset="0" stop-color="#000" stop-opacity=".7"/><stop offset="1" stop-color="#6a6d73" stop-opacity=".45"/>
+  </radialGradient>
+  <radialGradient id="well-${k}" cx=".5" cy=".38" r=".62">
+    <stop offset=".55" stop-color="#000" stop-opacity=".55"/><stop offset=".93" stop-color="#000" stop-opacity=".22"/><stop offset="1" stop-color="#fff" stop-opacity=".30"/>
+  </radialGradient>
+  <radialGradient id="cap-${k}" cx=".35" cy=".28" r=".85">
+    <stop offset="0" stop-color="#63666c"/><stop offset=".45" stop-color="#303338"/><stop offset=".85" stop-color="#0e0f11"/><stop offset="1" stop-color="#26282c"/>
+  </radialGradient>
+  <radialGradient id="capface-${k}" cx=".4" cy=".32" r=".8">
+    <stop offset="0" stop-color="#fff" stop-opacity=".10"/><stop offset="1" stop-color="#000" stop-opacity=".22"/>
+  </radialGradient>
+  <radialGradient id="lens-${k}" cx=".36" cy=".30" r=".85">
+    <stop offset="0" stop-color="#d8dde1" stop-opacity=".92"/><stop offset=".45" stop-color="#9aa1a7" stop-opacity=".80"/>
+    <stop offset=".88" stop-color="#4e5459" stop-opacity=".88"/><stop offset="1" stop-color="#7d848a" stop-opacity=".9"/>
+  </radialGradient>
+  <linearGradient id="bezel-${k}" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0" stop-color="${t.bezTop}"/><stop offset="1" stop-color="${t.bezBot}"/>
+  </linearGradient>
+  <radialGradient id="glass-${k}" cx=".42" cy=".34" r=".92">
+    <stop offset="0" stop-color="${t.glassHi}"/><stop offset=".62" stop-color="${t.glassMid}"/><stop offset="1" stop-color="${t.glassLo}"/>
+  </radialGradient>
+  <linearGradient id="sheen-${k}" x1="0" y1="0" x2=".7" y2="1">
+    <stop offset="0" stop-color="#ffffff" stop-opacity=".22"/><stop offset=".33" stop-color="#ffffff" stop-opacity=".04"/><stop offset="1" stop-color="#ffffff" stop-opacity="0"/>
+  </linearGradient>
+  <pattern id="grid-${k}" width="${DOT}" height="${ROW}" patternUnits="userSpaceOnUse">
+    <rect x="0" y="0" width="${DOT}" height="${(ROW*0.17).toFixed(3)}" fill="${t.glassMid}" opacity="${t.gridAmt}"/>
+    <rect x="0" y="0" width="${(DOT*0.17).toFixed(3)}" height="${ROW}" fill="${t.glassMid}" opacity="${t.gridAmt}"/>
+  </pattern>`;
+}
+
+/* ---------- the three looks ---------- */
+
+const THEMES = [
+{
+  id:'a', name:'Vibrated Silver',
+  tag:'Hardware-true',
+  blurb:'The FS1R’s own face: vibrated aluminium, fine speckle over a slow blotch, dark charcoal silkscreen and the blue caption boxes. The LCD is the hardware’s yellow-green backlight with near-black pixels and a soft bloom onto the metal around the bezel.',
+  bullets:['<b>Face</b> warm light grey cast aluminium, two noise layers, fine speckle over a slow blotch','<b>LCD</b> #b9e36a backlight, dark pixels, dot-pitch grid over the glyphs','<b>Pots</b> moulded black plastic, 44-rib skirt, silver pointer, contact shadow','<b>Lamps</b> grey translucent lens with a specular dot when dark, green core + bloom when lit'],
+  faceTop:'#d4cfc5', faceMid:'#bfb9ae', faceBot:'#a49e94',
+  fine:'0.45', fineAmt:'.26', coarse:'0.032', coarseAmt:'.55', seed:3, washAmt:'.30',
+  silk:'#22252a', silkDim:'#5b5f66',
+  accent:'#1d5fa6', accentInk:'#f3f7ff',
+  logoTop:'#2f6fb5', logoBot:'#1b4c84',
+  bezTop:'#4a4d52', bezBot:'#1d1f22',
+  glassHi:'#d3f08a', glassMid:'#a9dc5f', glassLo:'#7fc243',
+  px:'#13210c', pxOff:'#b6e46c', glow:'#a8e05a', glowAmt:'.75', bloom:'1.9', gridAmt:'.55',
+  ledOn:'#5bf25a', ledRed:'#ff3c2e', pointer:'#e9e9e6', ribs:44
+},
+{
+  id:'b', name:'Graphite Night',
+  tag:'Dark anodised',
+  blurb:'Dark anodised graphite with a horizontal brushed grain, ice-white silkscreen and hairline rules splitting the three clusters. The display is the only bright thing on the face, so the backlight bloom reads much harder: cool green glass, black pixels, a cyan pointer line on every pot.',
+  bullets:['<b>Face</b> brushed graphite, anisotropic noise, stretched 100:1 for the grain direction','<b>LCD</b> cooler green, stronger bloom against the dark face','<b>Pots</b> matte black with a cyan indicator and a tighter 56-rib skirt','<b>Lamps</b> amber when lit, so they read against the dark metal instead of into it'],
+  faceTop:'#44484e', faceMid:'#33363b', faceBot:'#212327',
+  fine:'0.008 0.9', fineAmt:'.42', coarse:'0.038', coarseAmt:'.45', seed:11, washAmt:'.16',
+  silk:'#e2e7ec', silkDim:'#8d959c',
+  accent:'#2a6fd2', accentInk:'#eef4ff',
+  logoTop:'#9fd8ff', logoBot:'#4b9ede',
+  bezTop:'#1c1e21', bezBot:'#08090a',
+  glassHi:'#c2f8cd', glassMid:'#6fd98e', glassLo:'#3fae67',
+  px:'#04140a', pxOff:'#8ae8a6', glow:'#4dff92', glowAmt:'.95', bloom:'2.6', gridAmt:'.6',
+  ledOn:'#ffb52e', ledRed:'#ff4a3a', pointer:'#6fe3ff', ribs:56, rules:true
+},
+{
+  id:'c', name:'Teal Studio',
+  tag:'FSVR identity',
+  blurb:'Keeps the blue-green the current panel inherited from the manual artwork, but as a deeper cast alloy rather than flat fill, with the three clusters dropped into milled recesses. Ochre caption boxes and pointer lines instead of blue, an amber-green display and a chunkier ribbed pot.',
+  bullets:['<b>Face</b> deep teal-grey alloy, clusters sunk into milled tubs with a lip highlight','<b>LCD</b> amber-green backlight, warm bloom picked up by the ochre silkscreen','<b>Pots</b> heavy 30-rib skirt, ochre pointer, wider top face','<b>Lamps</b> mint green when lit; off lenses read grey against the darker face'],
+  faceTop:'#5e7678', faceMid:'#4c6264', faceBot:'#3a4c4e',
+  fine:'0.5', fineAmt:'.30', coarse:'0.03', coarseAmt:'.60', seed:23, washAmt:'.26',
+  silk:'#eff4f3', silkDim:'#b9c8c7',
+  accent:'#c1731a', accentInk:'#fff6e9',
+  logoTop:'#ffd9a1', logoBot:'#d98f30',
+  bezTop:'#2d3739', bezBot:'#101617',
+  glassHi:'#e2ee7e', glassMid:'#bcd94f', glassLo:'#8fb43a',
+  px:'#1d2410', pxOff:'#cfe46a', glow:'#cfe657', glowAmt:'.8', bloom:'2.1', gridAmt:'.5',
+  ledOn:'#4dff9b', ledRed:'#ff5e4d', pointer:'#f0b45a', ribs:30, islands:true
+}];
+
+document.getElementById('out').innerHTML = THEMES.map((t,i) => `
+  <section>
+    <div class="hd"><h2>${i+1}. ${t.name}</h2><span class="tag">${t.tag}</span></div>
+    <p class="note">${t.blurb}</p>
+    <div class="stage">${panel(t)}</div>
+    <ul>${t.bullets.map(b => `<li>${b}</li>`).join('')}</ul>
+  </section>`).join('');
+</script>
+</body>
+</html>

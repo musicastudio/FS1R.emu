@@ -53,7 +53,6 @@ Grouped by what blocks each item rather than by subsystem. This file is the list
 - The effects against hardware, 17 to 29 dB over three files and eighty-four segments. The largest number in the set
 - The drum's tonal half, 2 to 3 dB hot on every hit and 4 dB in its carriers' band, with the modulation shallower than the unit's in the first 6 ms. Three things it needs are unmeasured, the velocity law per sensitivity, a decay to a level that is not silence, and a modulator on a modulator; the files are written and FS1R.unlock `fs1r_capture_session3.py record` plays them
 - The bass part's formants at fundamentals of 80 to 120 Hz, an octave out either side: the formant window family, at a note the capture set never played
-- AM sensitivity at deep modulation. Three LFO depths recorded, the law is a saturation and not a scaling
 - The "1" forms and all1/all2's geometry, data already recorded in `docs/skirt.md`
 - The formant's window family, same data
 - The silent-segment scoring artifact: `10_envelope2`'s two hold segments are silence on both sides scored as a 30 dB disagreement
