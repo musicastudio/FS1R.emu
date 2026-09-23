@@ -2,7 +2,7 @@
 
 ![The FSVR standalone running](docs/standalone.png)
 
-**FSVR**, Formant Synthesizer Virtual Rack, is a software reconstruction of the Yamaha FS1R as a plugin and a console synth: its firmware logic rewritten in C++ from the decompiled ROM, four parts, 32 channels, the filter, both LFOs, pan, the three effect blocks, performances and Fseq playback. VST3, CLAP and standalone, with the front panel as the GUI.
+**FSVR**, Formant Synthesizer Virtual Rack, is a software reconstruction of the Yamaha FS1R as a plugin and a console synth: its firmware logic rewritten in C++ from the decompiled ROM, four parts, 32 channels, the filter, both LFOs, pan, the three effect blocks, performances and Fseq playback. VST3, CLAP, AU and standalone, with the front panel as the GUI.
 
 Download the latest build: **https://github.com/musicastudio/FSVR/releases/latest** (no installer, no dependencies).
 
@@ -97,12 +97,12 @@ What is left, worst first: the effects, the unvoiced pedestal above 4 kHz, AM se
 
 ### Prebuilt
 
-[The latest release](https://github.com/musicastudio/FSVR/releases/latest) has zipped VST3, CLAP and standalone builds for Windows, Linux and macOS. The macOS builds are universal, Apple silicon and Intel in one binary. No installer, no dependencies.
+[The latest release](https://github.com/musicastudio/FSVR/releases/latest) has zipped VST3, CLAP and standalone builds for Windows, Linux and macOS, with an AU for Logic Pro in the macOS zip. The macOS builds are universal, Apple silicon and Intel in one binary. No installer, no dependencies.
 
 Every push to `main` builds the same set through [GitHub Actions](https://github.com/musicastudio/FSVR/actions), so a build for an OS you do not own is always one Actions run away, including on a fork. `.github/workflows/build.yml` is three jobs:
 
 - **engine**, on `windows-latest`, `ubuntu-latest` and `macos-latest`. Plain CMake with no submodules, then `ctest`, which runs the effect self check everywhere and the engine self check on Windows. Uploads `FSVR-console-windows`.
-- **plugin**, on the same three. Checks out the submodules, installs the X11, ALSA and FreeType packages JUCE asks for on Linux, configures with `-DFS1R_BUILD_PLUGIN=ON`, and uploads `FSVR-plugin-windows`, `FSVR-plugin-linux` and `FSVR-plugin-macos`, each holding the VST3, the CLAP and the standalone for that OS.
+- **plugin**, on the same three. Checks out the submodules, installs the X11, ALSA and FreeType packages JUCE asks for on Linux, configures with `-DFS1R_BUILD_PLUGIN=ON`, and uploads `FSVR-plugin-windows`, `FSVR-plugin-linux` and `FSVR-plugin-macos`, each holding the VST3, the CLAP and the standalone for that OS, and the AU as well on macOS.
 - **release**, on a `v*` tag only. Zips every artifact and attaches it to a GitHub release.
 
 ### Building it
@@ -123,7 +123,7 @@ cmake -B build/plugin -S . -DFS1R_BUILD_PLUGIN=ON
 cmake --build build/plugin --config Release
 ```
 
-VST3, CLAP and a standalone land in `bin/VST3`, `bin/CLAP` and `bin/Standalone`. The 1408 factory voices, the 384 factory performances and the 90 preset formant sequences are built into the plugin, so its patch browser needs no EPROM image. [docs/plugin_guide.md](docs/plugin_guide.md) is the user guide.
+VST3, CLAP and a standalone land in `bin/VST3`, `bin/CLAP` and `bin/Standalone`, plus an AU in `bin/AU` on macOS, which is the only plugin format Logic Pro loads. The 1408 factory voices, the 384 factory performances and the 90 preset formant sequences are built into the plugin, so its patch browser needs no EPROM image. [docs/plugin_guide.md](docs/plugin_guide.md) is the user guide.
 
 On Windows `build.bat` is the shortcut, MSVC x64 out of the VS 2022 Professional vcvars64:
 

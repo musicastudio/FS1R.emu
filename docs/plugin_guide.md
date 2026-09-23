@@ -13,13 +13,16 @@ cmake --build build/plugin --config Release
 ```
 
 VST3, CLAP and a standalone land in `bin/VST3`, `bin/CLAP` and `bin/Standalone` (`build.bat plugin`
-runs those two commands). Without `-DFS1R_BUILD_PLUGIN=ON` the same CMake build produces only the
+runs those two commands); on macOS an AU lands in `bin/AU` as well, which is the only plugin format
+Logic Pro loads. Without `-DFS1R_BUILD_PLUGIN=ON` the same CMake build produces only the
 engine library, the console and the self checks, and needs no submodules.
 
 ## Installing on macOS
 
 The macOS builds are universal, so the same download runs on Apple silicon and on Intel. Copy
-`FSVR.vst3` into `~/Library/Audio/Plug-Ins/VST3` and `FSVR.clap` into `~/Library/Audio/Plug-Ins/CLAP`.
+`FSVR.component` into `~/Library/Audio/Plug-Ins/Components` for Logic Pro, `FSVR.vst3` into
+`~/Library/Audio/Plug-Ins/VST3` and `FSVR.clap` into `~/Library/Audio/Plug-Ins/CLAP`. Logic scans the
+AU at launch and validates a new one once; nothing else has to be registered.
 
 Nothing here is signed by an Apple developer account, so the first launch of the standalone needs
 **Open** from its right-click menu, or one command to drop the quarantine flag the download put on it:

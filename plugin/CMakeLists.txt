@@ -10,7 +10,7 @@ juce_add_plugin(fs1r_plugin
     ICON_BIG "${PROJECT_SOURCE_DIR}/icon.png"   # juceaide turns it into the exe's icon and the bundle's
     PLUGIN_MANUFACTURER_CODE Msst
     PLUGIN_CODE Fsvr
-    FORMATS VST3 Standalone
+    FORMATS AU VST3 Standalone     # AU is Logic's only plugin format; JUCE drops it off non-Apple builds
     IS_SYNTH TRUE
     NEEDS_MIDI_INPUT TRUE
     NEEDS_MIDI_OUTPUT TRUE
