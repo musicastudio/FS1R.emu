@@ -101,7 +101,6 @@ struct StepEG {
         if (swing == 0) { hold = (int)(cal::FEG_FLAT_S * TICK_HZ); return; }
         aim = std::clamp(target + swing / 2, -511.0, 511.0);
         k = cal::FEG_RATE_K * pow(2.0, -FEGRATE[clampi(R[s], 0, 99)] / 15.5);
-        if (target == 0) { cur = 0; done(); }   // measured once (flteg t40-l50): an end word of 0 ends at once
     }
     void done() { if (stage < 2) go(stage + 1); else stage = 9; }
     void release() { go(3); }

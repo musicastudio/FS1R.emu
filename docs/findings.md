@@ -70,8 +70,10 @@ past a target proportional to the swing gives and a linear ramp cannot.
 
 **A flat segment is a fixed 0.78 s.** Stage 2 in every note is L1 to L2 = L1, no swing, and it held
 0.71 to 0.86 s at every rate word from 11 to 224, so the CPU's +2/+3 words are not what the chip
-times; it takes 0.78 s over a zero swing regardless (`cal::FEG_FLAT_S`). And time 40 at L1 = 50, an
-end word of exactly 0, skipped its attack entirely: the level was already at the word.
+times; it takes 0.78 s over a zero swing regardless (`cal::FEG_FLAT_S`). Time 40 at L1 = 50 (end word
+0, the same as L4) showed no attack because there was none to show: L1 = L4 is a zero swing. An
+earlier reading of that note as "an end word of 0 ends at once" went into the engine and snapped Fat
+Line's decay to L2 = 50 shut, 5.20 to 7.40 dB on the demo set; reverted.
 
 **LFO2 never touches the staged cutoff word.** The `lfo2` run sampled the part's slot at 0x01068F78
 under LFO1 filter depth 99, under LFO2 depth 99, and under neither, 115 samples each: no slot moved
