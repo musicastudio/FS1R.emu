@@ -79,18 +79,30 @@ struct VFilter {
         }
     }
 };
-// 4-segment EG on a linear scale in the FS1R's own order: start at L4, run L1 -> L2 -> L3 and hold, key
-// off runs to L4. Stepped on the 192.3 Hz tick like the filter registers.
+// The filter EG, as the CPU drives it (FUN_0000D050 at note on, FUN_0000CB6C from the CMT1 interrupt
+// off VOP3-1's status word at 0x800242, FUN_0000D7B0 at note off). Per segment the CPU writes register
+// 0x2B = FEGRATE[time], 0x2C = the end level as (L - 50) * 256 / 50, 0x2D = an asymptote the segment
+// AIMS at, half the swing again past the end level (plus 2 or 3 for a zero swing), then 0x21 = go.
+// The chip runs toward the asymptote and raises its status bit when the level crosses the end, and the
+// CPU then loads the next segment. So each segment is an exponential aimed 1.5x past its own target and
+// cut at the target, which is what puts the knee in the unit's sweeps. Levels here are in the CPU's own
+// units, -256..255. KNOWN up to the rate word; what the chip makes of FEGRATE is the one INFERRED law,
+// cal::FEG_RATE_K, MEASURED off 14_sens and 06_filter_2.
 struct StepEG {
-    double cur = 0, target = 0, k = 1; int stage = 9; double L[4] = {}; int R[4] = {};
+    double cur = 0, target = 0, aim = 0, k = 1; int stage = 9; double L[4] = {}; int R[4] = {};
     void start(const double* lv, const int* rt) { for (int i = 0; i < 4; i++) { L[i] = lv[i]; R[i] = rt[i]; } cur = L[3]; go(0); }
-    void go(int s) { stage = s; target = L[s]; k = 1.0 - exp(-1.0 / (rate_secs(clampi(R[s], 0, 63)) * cal::FEG_STEP_K * TICK_HZ + 1)); }
+    void go(int s) {
+        stage = s; target = L[s];
+        double swing = target - cur;
+        aim = swing == 0 ? target + 3 : target + swing / 2;   // FUN_0000D050: +3 (+2 on the end word) when L1 == L4
+        aim = std::clamp(aim, -511.0, 511.0);
+        k = cal::FEG_RATE_K * pow(2.0, -FEGRATE[clampi(R[s], 0, 99)] / 32.0);
+    }
     void release() { go(3); }
     inline double tick() {
         if (stage > 3) return cur;
-        cur += (target - cur) * k;
-        if (fabs(target - cur) < 1e-4) { cur = target; if (stage < 2) go(stage + 1); else stage = 9; }
+        double was = cur; cur += (aim - cur) * k;
+        if ((target - was) * (target - cur) <= 0) { cur = target; if (stage < 2) go(stage + 1); else stage = 9; }
         return cur;
     }
 };
-

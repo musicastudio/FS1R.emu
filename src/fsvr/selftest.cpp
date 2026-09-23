@@ -287,6 +287,28 @@ int selftest(Synth& S) {
     ck("all sound off", live == 0);
 
     printf(g_fails ? "selftest: %d FAILURES\n" : "selftest: ok\n", g_fails);
+    // The filter EG as the firmware steps it (FUN_0000D050 / FUN_0000CB6C): every segment reaches its end
+    // level exactly, a flat segment still ends (asymptote target + 3), the hold is a hold, and the release
+    // returns to L4. Time per rate word is the chip's and unmeasured, so only the structure is checked.
+    {
+        StepEG e; double L[4] = {200, 100, 100, -100}; int R[4] = {0, 0, 50, 0};
+        e.start(L, R);
+        int n = 0; while (e.stage == 0 && n < 100000) { e.tick(); n++; }
+        ck("filter EG attack lands on L1", e.stage == 1 && e.cur == 200 && n > 1);
+        n = 0; while (e.stage == 1 && n < 100000) { e.tick(); n++; }
+        ck("filter EG decay lands on L2", e.stage == 2 && e.cur == 100);
+        n = 0; while (e.stage == 2 && n < 100000) { e.tick(); n++; }
+        ck("filter EG flat segment ends", e.stage == 9 && e.cur == 100 && n < 100000);
+        for (int i = 0; i < 1000; i++) e.tick();
+        ck("filter EG holds at L3", e.cur == 100);
+        e.release(); n = 0; while (e.stage == 3 && n < 100000) { e.tick(); n++; }
+        ck("filter EG release lands on L4", e.stage == 9 && e.cur == -100);
+        StepEG slow, fast; slow.start(L, (int[4]){99, 0, 0, 0}); fast.start(L, (int[4]){0, 0, 0, 0});
+        int ns = 0, nf = 0; while (slow.stage == 0 && ns < 10000000) { slow.tick(); ns++; }
+        while (fast.stage == 0 && nf < 10000000) { fast.tick(); nf++; }
+        ck("filter EG time 99 is slower than time 0", ns > 10 * nf);
+    }
+
     return g_fails ? 1 : 0;
 }
 

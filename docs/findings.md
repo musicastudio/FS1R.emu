@@ -8,6 +8,78 @@ Entries that have a dedicated working document (`aeg.md`, `skirt.md`, `noise.md`
 
 ---
 
+## 2026-09-23, the firmware audit: the filter EG is the CPU's, LFO2 and the Fseq delay were not what the engine had
+
+A pass over the engine against the flash with Ghidra's decompiler, readonly-folding the EPROM so the
+tables resolve, and with `FUN_00203000` given its real signature (the signed divide, `r1 / r0`, which the
+cached decompilations had lost so every `/ 889` and `/ 507` in the filter path read as a call). Nothing
+here is from a recording; each item names the function that settles it. The engine edits are in
+`vop3_filter.h`, `notes.cpp`, `fseq.cpp` and `cal.h`; the scores that moved are
+`06_filter_2` envelopes 2.68 to **2.47**, `14_sens` 3.34 to **3.28**, `08_panlevel_1` shape 1.71 to
+**1.60**, nothing else changed.
+
+**The filter EG is stepped by the CPU, one segment at a time.** `FUN_0000D050` (note on) writes the
+segment to VOP3-1 through the register primitive `FUN_00039648(idx, word)` = `*(u16*)(0x800000 + 2 * idx)`:
+register 0x2B is the rate, `0x374F4E[time]` (`FEGRATE`, 100 words, 0x0FFF down to 0x0016), 0x2C is the
+end level `(L - 50) * 256 / 50`, 0x2D is the asymptote, the end level plus **half the swing again**, so
+the chip aims past the target and the CPU cuts the segment when the chip's status word at 0x800242
+reports the crossing; 0x21 starts it. `FUN_0000CB6C` runs on that interrupt, advances the channel's stage
+word at 0x0106ADEC (1 attack, 2, 3, 4 hold, 5 release from `FUN_0000D7B0`, whose release aims at L4 with
+the same law) and loads the next segment. When the swing is zero the asymptote is the target plus 3 (plus
+2 on the end word), so a flat segment still ends. The engine's `StepEG` had four fixed time constants
+off the amplitude EG's rate table and a `FEG_STEP_K` fraction; it now has the firmware's structure, and
+the one thing left inferred is the chip's reading of the rate word (`cal::FEG_RATE_K`, a two-point
+guess, marked). FS1R.unlock's `capture3.py flteg` reads that off the stage word directly, and whether
+the chip is exponential or a ramp with it.
+
+**Everything else on the filter path was a different formula.** All in `FUN_0000D050` / `FUN_0000E170`:
+
+* cutoff key scaling is `(ks - 64) * (note - breakpoint) * 16 / 507`, the engine had `/ 64`;
+* resonance velocity is `sens * (vel - 127) * 116 / 889` for a positive sensitivity and `vel * 116 / 889`
+  scaled by the sensitivity for a negative one, the engine had `(sens * (vel - 64)) >> 4`;
+* the EG depth velocity is multiplicative, `depth * sens * (vel - 127) / 889` added to the depth, the
+  engine added a velocity term to the level;
+* the EG depth word is `0x120 * depth` (register 0x28); what the chip does with it against the level is
+  inside VOP3-1 (`cal::FEG_DEPTH_BYTES`, a guess, see `16_fltmod`).
+
+**LFO2 is not the CPU's.** `FUN_0000D050` and `FUN_0000E2A0` hand VOP3-1 a waveform (`FUN_0000C1AC`, the
+0x20-per-step field `ymp706_registers.md` had as the filter type) and a speed word from `0x374A04`
+(`FUN_0000C130`, `LFO2SPD`, 128 words), and nothing on the CPU side adds an LFO2 term to the cutoff
+coefficient. The engine had run LFO2 as a copy of LFO1 with the same speed table; it now uses
+`LFO2SPD` and the chip's rate per word is `cal::LFO2_INC_K`, a guess. The filter type reaches the chip
+another way: `FUN_0000C280` / `FUN_0000C604` patch the per-channel microcode jump. `capture3.py lfo2`
+confirms the cutoff word holds still under LFO2, and `16_fltmod` records the rate.
+
+**The voice's Formant and FM control** (`FUN_00017454`, handlers at 0x3DE04): the amount is
+`clamp(bias(src) * bias(dep) * 2 >> 7)` like every other controller, and the destinations store
+`-2 * amt` as a level offset, `amt << 5` as a frequency word offset, and `amt` into the per-op bandwidth
+offset that `FUN_0001F6BC` scales by the op's own `BWBIAS` as destination 37 does. The engine had a quarter,
+an eighth and a quarter of those, and `cal::VCTRL_FREQ` for a scale that is a shift in the flash.
+Removed.
+
+**The Fseq start delay** is `0x35BD3E[byte]` (`FSEQDLY`, 0 to 346) frames of a fixed 7000-count CMT1
+period, 8 ms, counted down by `FUN_0001A47A`, and the real frame rate starts when it runs out: 2.77 s
+at 99. `cal::FSEQ_DELAY_S = 1.0` was wrong in unit and value. Removed.
+
+**The pan LFO depth** goes through `eb86()` (`FUN_00019362` case 0x29 stores it at image +0x1F, 1 at
+byte 0); the engine used the raw byte, 22% shallow at the top.
+
+**The reverb's dimensions are not a tap pattern.** `FUN_0039B09C` loads the block: coefficient rows at
+`0x363600 + 0x364F10[type] * 0x128`, 0x5E coefficient words to the slots at `0x35E02C` and 0x36 delay
+words, in samples times `0x7AE1 / 65536`, to the slots at `0x35E0E8`, and `0x36FEB4` is the eight-row
+width/height/depth table the room types index. The engine's early reflections are an invented six-tap
+spread (`run_reverb`, marked INFERRED). Not changed here: it is a rebuild of the block from the
+microcode, `vop3_2_microcode.md` territory, and the 09_effects files are the ones to score it with.
+
+**Still inferred, and what settles each**, in `FS1R.unlock/captures/capture3.py` (reads only) and
+`captures/requests/16_fltmod.mid` (one recording, 2.3 min):
+
+| constant | what | how |
+|---|---|---|
+| `FEG_RATE_K` | chip time per filter EG rate word, and exponential vs ramp | `capture3 flteg`: the stage word through 14 notes |
+| `FEG_DEPTH_BYTES` | cutoff bytes per EG level per depth word | `16_fltmod` held-level segments, cutoff parked at 96 |
+| `LFO2_INC_K` | LFO2 phase per tick per speed word | `16_fltmod` lfo2 segments; `capture3 lfo2` proves it is the chip's |
+
 ## 2026-09-22, the noise band is two unequal poles, the drum is not the noise, and the effects-off demo
 
 rgwan recorded the fifteen demo songs with the effects and the filter stripped (`captures/demo_nofilterfx`), plus Vokodrone's bass and drum parts on their own. Against the whole take the engine sits 2.8 dB under the unit in the median band, flat across the octaves, with four songs at zero and Ana-Unison at -8; the top octave, +3.3 dB bright on Vokodrone, is the one band the day's work moved, to -0.6.

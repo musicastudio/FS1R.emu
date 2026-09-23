@@ -34,7 +34,9 @@ void Synth::fseq_start(int vel) {
     fseqDir = dir;
     fseqStep = dir > 0 ? off : clampi(fseq.endStep - off, 0, fseq.endStep);
     fseqAcc = 0; fseqClockAcc = 0; fseqRun = true; fseqHeld = true; fseqVel = vel;
-    fseqDelay = clampi(perf.c[0x26], 0, 99) / 99.0 * cal::FSEQ_DELAY_S;
+    // FUN_0001A560: the delay is FSEQDLY[byte] frames of a fixed 7000-count CMT1 period (8 ms at clock/32),
+    // counted down by FUN_0001A47A, and the real frame rate starts when it runs out.
+    fseqDelay = FSEQDLY[clampi(perf.c[0x26], 0, 99)] * 7000.0 * 32.0 / CPU_HZ;
 }
 
 void Synth::fseq_step() {

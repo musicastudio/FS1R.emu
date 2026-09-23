@@ -79,16 +79,19 @@ static const double EG_HOLD_LAG  = 0.0081;  // ... plus this, fixed. MEASURED ov
 static const double FEG_SEMIS    = 48.0;    // frequency EG range at the full register swing of 128 (four octaves).
                                             // The sysex byte reaches the register through FEGLVL, which is measured
 static const double FEG_TIME_K   = 0.3;     // frequency EG time as a fraction of rate_secs
-static const double FEG_STEP_K   = 0.09;    // the filter EG's time constant as a fraction of a full
-                                            // traverse at its own rate. MEASURED off 14_sens and
-                                            // 06_filter_2, the only recordings that sweep a filter EG:
-                                            // at the 0.25 this replaces, a decay at time 60 has not
-                                            // recovered by the end of a four second note where the unit
-                                            // is back in its passband inside a second. The envelope error
-                                            // over 06_filter_2's four segments bottoms at 2.68 dB here
-                                            // against 6.31 at 0.25, and it is flat from 0.06 to 0.12, so
-                                            // the last digit is not measured. The amplitude EG's own
-                                            // rising constant is a sixteenth, which is the same order.
+static const double FEG_RATE_K   = 0.67;    // GUESS, not measured. The filter EG's per-tick approach toward its
+                                            // asymptote is FEG_RATE_K * 2^(-word / 32) for the FEGRATE word the CPU
+                                            // hands VOP3-1 (register 0x2B). The segment structure is the firmware's,
+                                            // see StepEG; only the chip's reading of the word is modelled, and a
+                                            // register run reads it outright: FS1R.unlock capture3 `flteg` watches
+                                            // the CPU's own stage word through a note, which gives the time per
+                                            // word and whether the chip is exponential or a ramp. Placeholder shape
+                                            // and value from two points of 14_sens (times 20 and 60).
+static const double FEG_DEPTH_BYTES = 96.0; // GUESS, not measured. Cutoff bytes the filter EG moves the corner at full
+                                            // depth (64) and full level (256); the CPU ships 0x120 * depth and the
+                                            // chip's scale of that against the EG level is inside VOP3-1. 14_sens's
+                                            // depth sweep saturates at byte 0 at every depth from 16 up, so it only
+                                            // bounds this; one recording with the cutoff parked at 96 settles it.
 static const double WIN_SKIRT    = 2.0;     // the grain window is sin^p, p = WIN_SKIRT * step^skirt. The
                                             // skirt is the one shape control all1, all2, odd1 and odd2
                                             // have, voice byte 6 being the formant's bandwidth and
@@ -238,8 +241,10 @@ static const double RESO_COMP    = 0.0;     // how much of resonance table B is 
                                             // below the corner reads 0.2, -0.9, 0.0 dB at resonance 0 and
                                             // 0.0, -0.1, 0.1 at resonance 60, so the octaves the peak does
                                             // not reach do not move at all.
-static const double FSEQ_DELAY_S = 1.0;     // performance Fseq start delay at its maximum of 99
-static const double VCTRL_FREQ   = 8.0;     // voice Formant/FM control: pitch word units per depth step
+static const double LFO2_INC_K   = 1.0;     // GUESS, not measured. LFO2 runs on VOP3-1 off the LFO2SPD word (FUN_0000C130);
+                                            // this is how many 16-bit phase units per 192 Hz tick one unit of the
+                                            // word is worth. capture3 `lfo2` in FS1R.unlock reads the rate off the
+                                            // chip's own cutoff word.
 static const double PMS_FRAC[8]  = {0, 0.0264, 0.0534, 0.0889, 0.1612, 0.2769, 0.4967, 1.0};  // per-op pitch mod sensitivity, DX7 curve
 // The output path, MEASURED from rgwan's recording of the whole capture set on 2026-09-18. These three
 // are no longer inferred: they come off the digital tap itself. captures/analysis/ holds the numbers and

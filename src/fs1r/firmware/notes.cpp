@@ -76,10 +76,17 @@ void Synth::start_filter(Chan& C, const Part& pt, int vel) {
     const Voice& V = pt.voice;
     C.fltOn = (pt.p[7] & 1) != 0; C.fltType = V.fltType; C.flt.clear();
     C.fltInGain = db2lin(V.fltInGain); C.fltGain = C.fltInGain * cal::FLT_LOSS;
+    // FUN_0000D050 / FUN_0000CB6C / FUN_0000D7B0: the level words are (L - 50) * 256 / 50 and each
+    // time is clamped to 0..99 after the part offset, then shortened by the time scaling term
+    // (note - 60) * time * tscale / 0x57F and, on the attack alone, by the velocity term
+    // (vel - 127) * time * atkvel / 0x6F2. Both divide toward zero, as the firmware's sdiv does.
     double lv[4]; int rt[4];
-    int ts = (V.fltTscale * C.keyfact) >> 5;
-    for (int i = 0; i < 4; i++) { lv[i] = V.fltL[i] - 50; rt[i] = clampi(egrate(V.fltT[i]) + ts, 0, 63); }
-    rt[0] = clampi(rt[0] + ((V.fltAtkVel * (vel - 64)) >> 5), 0, 63);   // attack time velocity
+    for (int i = 0; i < 4; i++) {
+        lv[i] = (V.fltL[i] - 50) * 256 / 50;
+        int t = clampi(V.fltT[i], 0, 99), t2 = t - ((C.noteP - 60) * t * V.fltTscale) / 0x57F;
+        if (i == 0) t2 -= ((vel - 127) * t * V.fltAtkVel) / 0x6F2;
+        rt[i] = clampi(t2, 0, 99);
+    }
     C.feg.start(lv, rt);
 }
 
@@ -231,9 +238,14 @@ void Synth::lfo_tick(Chan& C, const Part& pt) {
 }
 
 void Synth::lfo2_tick(Chan& C, const Part& pt) {
+    // LFO2 is not the CPU's: FUN_0000D050 / FUN_0000E2A0 hand VOP3-1 the waveform (FUN_0000C1AC, the
+    // 0x20-per-step field the docs had as the filter type) and the speed word LFO2SPD[speed] (FUN_0000C130)
+    // and the chip runs it. The speed byte is voice + part - 64 + the destination 45 word, clamped 0..127.
+    // What the chip makes of the increment is INFERRED: read as a 16 bit phase per tick it puts speed 64
+    // at 0.19 Hz and 127 at 1.6 Hz, and the register run in FS1R.unlock capture3 `lfo2` is what settles it.
     const Voice& V = pt.voice;
-    int sp = clampi(V.lfo2speed + pt.p[0x2E] - 64 + clampi(ctrl_offset(C.part, 45) * 2, -255, 255), 0, 255);
-    uint32_t inc = sp == 0 ? 0xB : sp * (sp < 0xA0 ? 0xB : 0xB + ((sp - 0xA0) >> 2)); inc = (inc & 0xFFFF) << 1;
+    int sp = clampi(V.lfo2speed + pt.p[0x2E] - 64 + ctrl_offset(C.part, 45), 0, 127);
+    uint32_t inc = LFO2SPD[sp] * cal::LFO2_INC_K;
     uint32_t ph = C.lfo2Phase + inc; bool wrapped = ph > 0xFFFF; C.lfo2Phase = ph & 0xFFFF;
     int hi = C.lfo2Phase >> 8;
     switch (V.lfo2wave) {
@@ -308,25 +320,32 @@ void Synth::refresh_regs(Chan& C, const Part& pt) {
 }
 
 void Synth::voice_ctrl(Chan& C, const Part& pt) {
+    // FUN_00017454 walks the ten control slots with amt = clamp(src' * dep' * 2 >> 7) (FUN_00016FF0, the
+    // same bias-and-scale the controller sets use), src being the part's FORMANT or FM byte as
+    // (v - 64) * 2 clamped to a signed byte. The handlers at flash 0x3DE04: "out" stores -2 * amt as a
+    // level offset (FUN_00017A4A), "freq" stores amt << 5 as a frequency word offset (FUN_00017B02), and
+    // "width" stores amt into the per-op bandwidth offset that FUN_0001F6BC then scales by the op's own
+    // BWBIAS, exactly as destination 37 does (FUN_00017B6E). The engine had roughly a quarter, an eighth
+    // and a quarter of those, and a cal constant for a scale that is a shift in the flash.
     memset(C.vcLvl, 0, sizeof C.vcLvl); memset(C.vcFreq, 0, sizeof C.vcFreq); memset(C.vcBw, 0, sizeof C.vcBw);
     const uint8_t* b = pt.voice.raw;
-    int src[2] = {ctrl_part(C.part, 32, pt.p[0x1D]) - 64, ctrl_part(C.part, 33, pt.p[0x1E]) - 64};
+    int src[2] = {clampi((ctrl_part(C.part, 32, pt.p[0x1D]) - 64) * 2, -128, 127), clampi((ctrl_part(C.part, 33, pt.p[0x1E]) - 64) * 2, -128, 127)};
     for (int k = 0; k < 10; k++) {
         int d = b[k < 5 ? 0x40 + k : 0x4A + (k - 5)];
         int dep = (int)b[k < 5 ? 0x45 + k : 0x4F + (k - 5)] - 64;
         int dd = (d >> 4) & 3, v = (d >> 3) & 1, o = d & 7;
-        if (!dd || !dep) continue;
-        int amt = (src[k < 5 ? 0 : 1] * dep) >> 6;
-        if (dd == 1) C.vcLvl[o][v] -= amt;            // "out": more control means less attenuation
-        else if (dd == 2) C.vcFreq[o][v] += (int)(amt * cal::VCTRL_FREQ);
-        else C.vcBw[o][v] += amt / 2;
+        if (dd < 1 || dd > 3) continue;
+        int amt = clampi((ctrl_bias(src[k < 5 ? 0 : 1]) * ctrl_bias(dep) * 2) >> 7, -128, 127);
+        if (dd == 1) C.vcLvl[o][v] += clampi(-2 * amt, -255, 255);
+        else if (dd == 2) C.vcFreq[o][v] += amt << 5;
+        else { const uint8_t* op = pt.voice.raw + 112 + o * 62; int bias = v ? (op[35 + 5] & 0xF) : ((op[4] >> 3) & 0xF); C.vcBw[o][v] += clampi((amt * BWBIAS[bias]) >> 3, -128, 127); }
     }
 }
 
 void Synth::refresh_pan(Chan& C, const Part& pt) {
     int base = pt.p[0x0E] ? ctrl_part(C.part, 18, pt.p[0x0E]) : C.panBase;             // Panpot edits the part byte
     int idx = pan_index(base, pt.p[0x28], C.noteP);
-    idx += ((C.lfoVal * clampi(pt.p[0x29], 0, 99) * (int)(C.lfoFade >> 8)) >> 16) / 2; // pan LFO depth, faded in, LFO1
+    idx += ((C.lfoVal * std::max(1, eb86(clampi(pt.p[0x29], 0, 99))) * (int)(C.lfoFade >> 8)) >> 16) / 2; // pan LFO depth: image +0x1F is eb86(byte), 1 at 0 (FUN_00019362 case 0x29)
     if (perf.c[0x11]) idx += (perf.c[0x11] - 64) / 2;                              // performance pan
     idx = clampi(idx, 0, 127);
     C.panL = db2lin(-LEVEL_DB * PANL[idx]); C.panR = db2lin(-LEVEL_DB * PANR[idx]);
@@ -335,21 +354,43 @@ void Synth::refresh_pan(Chan& C, const Part& pt) {
 void Synth::refresh_filter(Chan& C, const Part& pt) {
     if (!C.fltOn) return;
     const Voice& V = pt.voice; int part = C.part;
-    double cut = V.fltCut + (ctrl_part(part, 21, pt.p[0x18]) - 64);
-    cut += (V.fltKsDepth * (C.noteP - clampi(V.fltKsPoint, 0, 127))) / 64.0;       // cutoff key scaling
-    int egd = V.fegDepth + (ctrl_part(part, 23, pt.p[0x1F]) - 64) + ((V.fltEgVel * (C.vel - 64)) >> 4);
-    cut += C.feg.cur * egd / 50.0;                                                 // filter EG, levels 0..100 around 50
-    int fade = C.lfoFade >> 8;
-    // Destinations 42 and 44 add to the LFO depths, not to the cutoff: FUN_0000DB3C takes the
-    // controller's word, scales it by 99/127 and adds it to the voice's own depth before clamping.
-    int lfo1d = clampi(V.fltLfo1 + ctrl_offset(part, 42) * 99 / 127, 0, 99);
-    int lfo2d = clampi(V.fltLfo2 + pt.p[0x2F] - 64 + ctrl_offset(part, 44) * 99 / 127, 0, 99);
-    cut += C.lfoVal * eb86(lfo1d) * fade / 4194304.0 * 64.0;                       // LFO1 filter mod
-    cut += C.lfo2Val * eb86(lfo2d) / 16384.0 * 64.0;                               // LFO2 filter mod
-    // FUN_0000DB3C: the part's resonance offset counts double, and the sum is clamped to the raw
-    // 0..116 the chip takes (reso_q clamps it there).
-    int reso = V.fltReso + (ctrl_part(part, 22, pt.p[0x19]) - 64) * 2 + ((V.fltResoVel * (C.vel - 64)) >> 4);
-    C.flt.setup(C.fltType, cut_hz(cut), reso);
+    // FUN_0000DB3C, FUN_0000D050 and FUN_0000E170, with the firmware's own integer arithmetic. Every
+    // division is the flash's sdiv, which truncates toward zero.
+    auto sdiv = [](long long n, long long d) { return (int)(n / d); };
+    int vel = C.vel;
+    // Destinations 42 and 44 add to the LFO depths, not to the cutoff: the controller word is scaled by
+    // 99/127 and added to the voice's own depth before the clamp.
+    int lfo1d = clampi(V.fltLfo1 + sdiv(ctrl_offset(part, 42) * 99, 127), 0, 99);
+    int lfo2d = clampi(V.fltLfo2 + pt.p[0x2F] - 64 + sdiv(ctrl_offset(part, 44) * 99, 127), 0, 99);
+    // Cutoff: voice byte plus the part offset, plus LFO1 * depth * 0x3000 / 0x2076F9, clamped 0..127.
+    // The LFO2 term is not here: LFO2 runs on VOP3-1 itself (FUN_0000C130 and FUN_0000CA30 hand it
+    // the speed and depth) and the engine adds it below as the chip would, INFERRED in shape.
+    // The LFO word the CPU keeps per channel (FUN_0002C36C, +0x14) is lfo * fade >> 8 as a signed byte,
+    // and the depth byte goes in raw, not through eb86.
+    int lfoW = (int8_t)((C.lfoVal * clampi(C.lfoFade >> 8, 0, 255)) >> 8);
+    int cut = V.fltCut + (ctrl_part(part, 21, pt.p[0x18]) - 64) + sdiv((long long)lfoW * lfo1d * 0x3000, 0x2076F9);
+    cut = clampi(cut, 0, 127);
+    // FUN_0000C36C: the key scaling reaches the coefficient as ((ks - 64) << 11) / 0x180 per semitone
+    // from the breakpoint, in the same units as 0xA9 per cutoff byte, so in cutoff bytes it is
+    // (ks - 64) * (note - bp) * 16 / (3 * 0xA9), about a byte per 32 semitone-steps at full depth.
+    double ks = (double)((V.fltKsDepth << 11) / 0x180) * (C.noteP - clampi(V.fltKsPoint, 0, 127)) / 0xA9;
+    // Filter EG depth: FUN_0000D050 and FUN_0000E4AC. depth = voice + part - 128, then the velocity term
+    // multiplies it: depth * egvel_sens * (vel - 127) / 0x379 (or * vel for a negative sense), and the
+    // sum is clamped to -64..64 and shipped as 0x120 * depth (FUN_0000CB1C). How many cutoff bytes the
+    // chip makes of that word against the EG level is cal::FEG_DEPTH_BYTES.
+    int egd = V.fegDepth + (ctrl_part(part, 23, pt.p[0x1F]) - 64);
+    int egv = V.fltEgVel;
+    egd = clampi(egd + sdiv((long long)(egv > 0 ? vel - 127 : vel) * egd * egv, 0x379), -64, 64);
+    double cutf = cut + ks + C.feg.cur / 256.0 * egd / 64.0 * cal::FEG_DEPTH_BYTES;
+    cutf += C.lfo2Val * eb86(lfo2d) / 16384.0 * 64.0;                              // LFO2 filter mod, INFERRED
+    // FUN_0000DB3C: the part's resonance offset counts double, and the velocity sense scales
+    // (vel - 127) * 0x74 / 0x379 (or vel * 0x74 / 0x379 for a negative sense) by the sense, then the
+    // sum is clamped to the raw 0..116 the chip takes. fltReso here is the byte less 16, which reso_q
+    // and reso_fb put back.
+    int rv = V.fltResoVel;
+    int reso = V.fltReso + 16 + (ctrl_part(part, 22, pt.p[0x19]) - 64) * 2 + sdiv((long long)(rv > 0 ? vel - 127 : vel) * 0x74, 0x379) * rv;
+    reso = clampi(reso, 0, 116) - 16;
+    C.flt.setup(C.fltType, cut_hz(cutf), reso);
 }
 
 void Synth::tick() {

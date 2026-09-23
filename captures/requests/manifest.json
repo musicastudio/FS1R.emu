@@ -16977,6 +16977,415 @@
    "duration_s": 33.72,
    "sha1": "0e880e7da2a0c5fe9d77ae86be81d7b5e04547c4",
    "why": "the demo's drum voice one hit at a time, to hold the three files above against"
+  },
+  {
+   "file": "16_fltmod.mid",
+   "segments": [
+    {
+     "id": "filtoff-a",
+     "what": "the source with the part filter off: every corner below is a ratio to this",
+     "pins": [
+      "filter response"
+     ],
+     "measure": "spectrum",
+     "note": 60,
+     "velocity": 100,
+     "t_on": 4.1,
+     "t_off": 7.1,
+     "t_end": 7.8,
+     "steady": [
+      4.7,
+      6.9
+     ]
+    },
+    {
+     "id": "held-l0-d64",
+     "what": "cutoff 96, EG level 0, depth 0: the corner the depth line pivots on",
+     "pins": [
+      "FEG_DEPTH_BYTES"
+     ],
+     "measure": "spectrum",
+     "note": 60,
+     "velocity": 100,
+     "t_on": 9.0,
+     "t_off": 12.0,
+     "t_end": 12.7,
+     "steady": [
+      9.6,
+      11.8
+     ]
+    },
+    {
+     "id": "held-l99-d72",
+     "what": "cutoff 96, EG held at level 99, depth byte 72: the corner's shift against the pivot is the chip's depth scale",
+     "pins": [
+      "FEG_DEPTH_BYTES"
+     ],
+     "measure": "spectrum",
+     "note": 60,
+     "velocity": 100,
+     "t_on": 13.2,
+     "t_off": 16.2,
+     "t_end": 16.9,
+     "steady": [
+      13.8,
+      16.0
+     ]
+    },
+    {
+     "id": "held-l99-d80",
+     "what": "cutoff 96, EG held at level 99, depth byte 80: the corner's shift against the pivot is the chip's depth scale",
+     "pins": [
+      "FEG_DEPTH_BYTES"
+     ],
+     "measure": "spectrum",
+     "note": 60,
+     "velocity": 100,
+     "t_on": 17.4,
+     "t_off": 20.4,
+     "t_end": 21.1,
+     "steady": [
+      18.0,
+      20.2
+     ]
+    },
+    {
+     "id": "held-l99-d96",
+     "what": "cutoff 96, EG held at level 99, depth byte 96: the corner's shift against the pivot is the chip's depth scale",
+     "pins": [
+      "FEG_DEPTH_BYTES"
+     ],
+     "measure": "spectrum",
+     "note": 60,
+     "velocity": 100,
+     "t_on": 21.6,
+     "t_off": 24.6,
+     "t_end": 25.3,
+     "steady": [
+      22.2,
+      24.4
+     ]
+    },
+    {
+     "id": "held-l99-d112",
+     "what": "cutoff 96, EG held at level 99, depth byte 112: the corner's shift against the pivot is the chip's depth scale",
+     "pins": [
+      "FEG_DEPTH_BYTES"
+     ],
+     "measure": "spectrum",
+     "note": 60,
+     "velocity": 100,
+     "t_on": 25.8,
+     "t_off": 28.8,
+     "t_end": 29.5,
+     "steady": [
+      26.4,
+      28.6
+     ]
+    },
+    {
+     "id": "held-l99-d127",
+     "what": "cutoff 96, EG held at level 99, depth byte 127: the corner's shift against the pivot is the chip's depth scale",
+     "pins": [
+      "FEG_DEPTH_BYTES"
+     ],
+     "measure": "spectrum",
+     "note": 60,
+     "velocity": 100,
+     "t_on": 30.0,
+     "t_off": 33.0,
+     "t_end": 33.7,
+     "steady": [
+      30.6,
+      32.8
+     ]
+    },
+    {
+     "id": "held-l99-d56",
+     "what": "cutoff 96, EG held at level 99, depth byte 56: the corner's shift against the pivot is the chip's depth scale",
+     "pins": [
+      "FEG_DEPTH_BYTES"
+     ],
+     "measure": "spectrum",
+     "note": 60,
+     "velocity": 100,
+     "t_on": 34.2,
+     "t_off": 37.2,
+     "t_end": 37.9,
+     "steady": [
+      34.8,
+      37.0
+     ]
+    },
+    {
+     "id": "held-l99-d48",
+     "what": "cutoff 96, EG held at level 99, depth byte 48: the corner's shift against the pivot is the chip's depth scale",
+     "pins": [
+      "FEG_DEPTH_BYTES"
+     ],
+     "measure": "spectrum",
+     "note": 60,
+     "velocity": 100,
+     "t_on": 38.4,
+     "t_off": 41.4,
+     "t_end": 42.1,
+     "steady": [
+      39.0,
+      41.2
+     ]
+    },
+    {
+     "id": "held-l99-d32",
+     "what": "cutoff 96, EG held at level 99, depth byte 32: the corner's shift against the pivot is the chip's depth scale",
+     "pins": [
+      "FEG_DEPTH_BYTES"
+     ],
+     "measure": "spectrum",
+     "note": 60,
+     "velocity": 100,
+     "t_on": 42.6,
+     "t_off": 45.6,
+     "t_end": 46.3,
+     "steady": [
+      43.2,
+      45.4
+     ]
+    },
+    {
+     "id": "held-l99-d16",
+     "what": "cutoff 96, EG held at level 99, depth byte 16: the corner's shift against the pivot is the chip's depth scale",
+     "pins": [
+      "FEG_DEPTH_BYTES"
+     ],
+     "measure": "spectrum",
+     "note": 60,
+     "velocity": 100,
+     "t_on": 46.8,
+     "t_off": 49.8,
+     "t_end": 50.5,
+     "steady": [
+      47.4,
+      49.6
+     ]
+    },
+    {
+     "id": "held-l99-d0",
+     "what": "cutoff 96, EG held at level 99, depth byte 0: the corner's shift against the pivot is the chip's depth scale",
+     "pins": [
+      "FEG_DEPTH_BYTES"
+     ],
+     "measure": "spectrum",
+     "note": 60,
+     "velocity": 100,
+     "t_on": 51.0,
+     "t_off": 54.0,
+     "t_end": 54.7,
+     "steady": [
+      51.6,
+      53.8
+     ]
+    },
+    {
+     "id": "held-l75-d127",
+     "what": "cutoff 96, EG held at level 75, depth 127: whether the level is linear in cutoff bytes",
+     "pins": [
+      "FEG_DEPTH_BYTES"
+     ],
+     "measure": "spectrum",
+     "note": 60,
+     "velocity": 100,
+     "t_on": 55.2,
+     "t_off": 58.2,
+     "t_end": 58.9,
+     "steady": [
+      55.8,
+      58.0
+     ]
+    },
+    {
+     "id": "held-l50-d127",
+     "what": "cutoff 96, EG held at level 50, depth 127: whether the level is linear in cutoff bytes",
+     "pins": [
+      "FEG_DEPTH_BYTES"
+     ],
+     "measure": "spectrum",
+     "note": 60,
+     "velocity": 100,
+     "t_on": 59.4,
+     "t_off": 62.4,
+     "t_end": 63.1,
+     "steady": [
+      60.0,
+      62.2
+     ]
+    },
+    {
+     "id": "held-l25-d127",
+     "what": "cutoff 96, EG held at level 25, depth 127: whether the level is linear in cutoff bytes",
+     "pins": [
+      "FEG_DEPTH_BYTES"
+     ],
+     "measure": "spectrum",
+     "note": 60,
+     "velocity": 100,
+     "t_on": 63.6,
+     "t_off": 66.6,
+     "t_end": 67.3,
+     "steady": [
+      64.2,
+      66.4
+     ]
+    },
+    {
+     "id": "lfo2-s20",
+     "what": "LPF24 at cutoff 64, LFO2 triangle at speed 20 on the filter at full depth: the corner's period is the chip's rate for the 0x374A04 word",
+     "pins": [
+      "LFO2_INC_K"
+     ],
+     "measure": "envelope",
+     "note": 60,
+     "velocity": 100,
+     "t_on": 67.8,
+     "t_off": 75.8,
+     "t_end": 76.5,
+     "steady": [
+      68.4,
+      75.6
+     ]
+    },
+    {
+     "id": "lfo2-s40",
+     "what": "LPF24 at cutoff 64, LFO2 triangle at speed 40 on the filter at full depth: the corner's period is the chip's rate for the 0x374A04 word",
+     "pins": [
+      "LFO2_INC_K"
+     ],
+     "measure": "envelope",
+     "note": 60,
+     "velocity": 100,
+     "t_on": 77.0,
+     "t_off": 85.0,
+     "t_end": 85.7,
+     "steady": [
+      77.6,
+      84.8
+     ]
+    },
+    {
+     "id": "lfo2-s60",
+     "what": "LPF24 at cutoff 64, LFO2 triangle at speed 60 on the filter at full depth: the corner's period is the chip's rate for the 0x374A04 word",
+     "pins": [
+      "LFO2_INC_K"
+     ],
+     "measure": "envelope",
+     "note": 60,
+     "velocity": 100,
+     "t_on": 86.2,
+     "t_off": 94.2,
+     "t_end": 94.9,
+     "steady": [
+      86.8,
+      94.0
+     ]
+    },
+    {
+     "id": "lfo2-s80",
+     "what": "LPF24 at cutoff 64, LFO2 triangle at speed 80 on the filter at full depth: the corner's period is the chip's rate for the 0x374A04 word",
+     "pins": [
+      "LFO2_INC_K"
+     ],
+     "measure": "envelope",
+     "note": 60,
+     "velocity": 100,
+     "t_on": 95.4,
+     "t_off": 103.4,
+     "t_end": 104.1,
+     "steady": [
+      96.0,
+      103.2
+     ]
+    },
+    {
+     "id": "lfo2-s100",
+     "what": "LPF24 at cutoff 64, LFO2 triangle at speed 100 on the filter at full depth: the corner's period is the chip's rate for the 0x374A04 word",
+     "pins": [
+      "LFO2_INC_K"
+     ],
+     "measure": "envelope",
+     "note": 60,
+     "velocity": 100,
+     "t_on": 104.6,
+     "t_off": 112.6,
+     "t_end": 113.3,
+     "steady": [
+      105.2,
+      112.4
+     ]
+    },
+    {
+     "id": "lfo2-s127",
+     "what": "LPF24 at cutoff 64, LFO2 triangle at speed 127 on the filter at full depth: the corner's period is the chip's rate for the 0x374A04 word",
+     "pins": [
+      "LFO2_INC_K"
+     ],
+     "measure": "envelope",
+     "note": 60,
+     "velocity": 100,
+     "t_on": 113.8,
+     "t_off": 121.8,
+     "t_end": 122.5,
+     "steady": [
+      114.4,
+      121.6
+     ]
+    },
+    {
+     "id": "lfo2-s60-dly60",
+     "what": "LFO2 speed 60 with delay 60: the fade-in against LFO1's",
+     "pins": [
+      "LFO2_INC_K"
+     ],
+     "measure": "envelope",
+     "note": 60,
+     "velocity": 100,
+     "t_on": 123.0,
+     "t_off": 131.0,
+     "t_end": 131.7,
+     "steady": [
+      123.6,
+      130.8
+     ]
+    },
+    {
+     "id": "filtoff-b",
+     "what": "the source with the filter off again at the far end of the file",
+     "pins": [
+      "filter response"
+     ],
+     "measure": "spectrum",
+     "note": 60,
+     "velocity": 100,
+     "t_on": 132.9,
+     "t_off": 135.9,
+     "t_end": 136.6,
+     "steady": [
+      133.5,
+      135.7
+     ]
+    }
+   ],
+   "marker_start": [
+    1.2,
+    1.5,
+    1.8
+   ],
+   "marker_end": [
+    137.8,
+    138.1,
+    138.4
+   ],
+   "duration_s": 139.52,
+   "sha1": "15e3e0eadfb38f6e9c246e11ca778c55a9e20b3d",
+   "why": "the filter EG depth scale and the LFO2 rate, both inside VOP3-1"
   }
  ]
 }
