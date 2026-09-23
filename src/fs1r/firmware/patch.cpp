@@ -87,18 +87,30 @@ void apply_aced(uint8_t* out) {
 }
 
 void convert_dx7(const uint8_t* v, uint8_t* out) {
+    // FUN_00035918 (common) and FUN_00035E96 (one operator), with the per-algorithm row DX7MAP[alg]:
+    // the FS1R algorithm, which FS1R operator each DX operator lands on, +2 on the output level where
+    // the row says so, and the carrier level corrections. Rates go through the two correction tables
+    // and a term in the rate scaling and the output level; the engine had 99 - rate.
     init_blank_voice(out); memcpy(out, v + 145, 10);
-    out[0x2C] = (uint8_t)std::min(v[134] + 8, 87); out[0x3D] = v[135] & 7;
+    const unsigned short* row = DX7MAP + 33 * (v[134] & 31);
+    out[0x2C] = (uint8_t)row[16]; out[0x3D] = v[135] & 7;
+    for (int o = 0; o < 8; o++) out[0x2D + o] = (uint8_t)((row[2 * o + 1] >> 3) & 0xF);
     out[0x11] = v[137]; out[0x12] = v[138]; out[0x15] = v[139]; out[0x16] = v[140]; out[0x13] = v[141] & 1; out[0x10] = (uint8_t)std::min<int>(v[142], 5);
     out[0x1E] = (uint8_t)std::min<int>(v[144], 48);
     out[0x1F] = v[133]; out[0x20] = v[130]; out[0x21] = v[131]; out[0x3E] = v[132]; out[0x22] = v[133];
     for (int i = 0; i < 4; i++) out[0x23 + i] = (uint8_t)(99 - std::min<int>(v[126 + i], 99));
-    for (int j = 0; j < 6; j++) {
-        const uint8_t* d = v + j * 21; uint8_t* p = out + 112 + (2 + j) * 62;
-        for (int i = 0; i < 4; i++) { p[16 + i] = (uint8_t)(99 - std::min<int>(d[i], 99)); p[12 + i] = (uint8_t)std::min<int>(d[4 + i], 99); }
-        p[23] = d[8]; p[24] = d[9]; p[25] = d[10]; p[26] = d[11] & 3; p[27] = d[12] & 3; p[21] = d[13] & 7;
+    for (int j = 0; j < 6; j++) {                     // j = 0 is DX operator 6
+        const uint8_t* d = v + j * 21; uint8_t* p = out + 112 + row[26 + j] * 62;
+        int ol = std::min<int>(d[16], 99) + (row[17 + j] == 1 ? 2 : 0), rs = d[13] & 7;
+        int att = rs * 1386 / 504 + (99 - ol) * 4 / 10 + 6, dec = rs * 1386 / 504 + (99 - ol) * 2 / 10;
+        for (int i = 0; i < 4; i++) {
+            int r = std::min<int>(d[i], 99);
+            int t = i == 0 ? 99 - DX7RATE_A[r] - r - att : 99 - DX7RATE_B[r] - r - dec;
+            p[16 + i] = (uint8_t)clampi(t, 0, 99); p[12 + i] = (uint8_t)std::min<int>(d[4 + i], 99);
+        }
+        p[23] = d[8]; p[24] = d[9]; p[25] = d[10]; p[26] = d[11] & 3; p[27] = d[12] & 3; p[21] = 7;   // tscale 7, the rate scaling is folded into the times
         int ams = std::min<int>(d[14], 3) * 2, ts = std::min<int>(d[15], 7);
-        p[33] = (uint8_t)(ams << 4 | (ts + 7)); p[22] = (uint8_t)std::min<int>(d[16], 99);
+        p[33] = (uint8_t)(ams << 4 | (ts + 7)); p[22] = (uint8_t)std::min<int>(ol, 99);
         int fixed = d[17] & 1, coarse = d[18] & 31, fine = std::min<int>(d[19], 99);
         if (fixed) {
             double hz = pow(10.0, coarse % 4) * pow(10.0, fine / 100.0);
@@ -106,7 +118,7 @@ void convert_dx7(const uint8_t* v, uint8_t* out) {
             if (f > 127) { f = 0; c++; }
             coarse = clampi(c, 0, 31); fine = clampi(f, 0, 127);
         }
-        p[1] = (uint8_t)coarse; p[2] = (uint8_t)fine; p[5] = (uint8_t)(fixed << 6 | (2 + j));
+        p[1] = (uint8_t)coarse; p[2] = (uint8_t)fine; p[5] = (uint8_t)(fixed << 6 | row[26 + j]);
         p[7] = (uint8_t)clampi((d[20] - 7) * 2 + 15, 0, 30);
         p[0] = (uint8_t)((v[136] & 1) << 6 | 24);
         p[31] = (uint8_t)(7 << 3 | (v[143] & 7));

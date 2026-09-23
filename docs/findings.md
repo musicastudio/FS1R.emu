@@ -8,6 +8,34 @@ Entries that have a dedicated working document (`aeg.md`, `skirt.md`, `noise.md`
 
 ---
 
+## 2026-09-23, the DX7 conversion was a guess, and B024's hiss was its algorithm map
+
+rgwan: B024 Velvet Dyno hisses at high velocity. Rendering its two parts alone puts the hiss on part 2,
+BrightEP 1, a PrC voice, so a DX7 conversion, whose spectrum at velocity 127 in the engine ran flat to
+16 kHz. The engine's `convert_dx7` mapped DX algorithm N to FS1R algorithm N + 8, placed DX operator
+6 - j on FS1R operator j + 2, and took every EG time as `99 - rate`. The firmware's converter is
+`FUN_00035918` (the common block) and `FUN_00035E96` (one operator), driven by a 33-word row per DX
+algorithm at EPROM `0x389F8C` (`DX7MAP`):
+
+* words 0..15 are the FS1R connection words, and word 16 the FS1R algorithm. N + 8 holds for DX 1 to
+  23 and for 25 to 28 (+7); DX 24 is FS1R 7, 29 is 6, 30 is 36, 31 is 8, 32 is 1. BrightEP 1 is DX 30:
+  the engine had it on FS1R 38, which puts its feedback on the operator DX left silent and its chain
+  in the wrong order;
+* words 26..31 say which FS1R operator each DX operator 6..1 lands on, and it is not j + 2 for eleven
+  of the 32 algorithms (DX 10, 11, 12, 13, 23 to 32);
+* words 17..22 add 2 to the output level of the operators the row marks, and the row's t1 words carry
+  the carrier level corrections (bits 3..6), which the engine had left at zero;
+* the EG times are `99 - TAB[rate] - rate - term`, with `DX7RATE_A` (`0x38A84C`) on the attack and
+  `DX7RATE_B` (`0x38A8B0`) on the rest, and the term `rs * 1386 / 504 + (99 - OL) * 4 / 10 + 6` on
+  the attack, `rs * 1386 / 504 + (99 - OL) * 2 / 10` on the others, rs the DX rate scaling and OL the
+  output level after the +2. The rate scaling also lands on `tscale` as it is;
+* the DX AMS lands on both the AM sensitivity and the EG bias sensitivity nibble unscaled (the engine
+  doubled it into AM only), the detune is `dx + 8`, and the two FS1R operators no DX operator reaches
+  get the firmware's template (bandwidth 20, times 20, level 0).
+
+BrightEP 1 at velocity 127 now rolls off 86 dB by 4 kHz where it was flat. The fixed-frequency
+conversion (`FUN_00035658`) is software float and the engine's `log2(hz / 440) + 16` is kept.
+
 ## 2026-09-23, a part whose voice bank is off receives nothing
 
 rgwan: A011 Sho plays parts 1 and 2 on the unit and all four in FSVR, with parts 3 and 4 sounding
