@@ -20,9 +20,9 @@ This project is still in development, still not fully accurate to hardware.
 
 https://github.com/user-attachments/assets/fc235492-d053-4abb-af04-8e1041c32d46
 
-**FSVR (v0.4.1)**
+**FSVR (v0.4.2)**
 
-https://github.com/user-attachments/assets/066d8666-7ea0-498e-8226-a44619df0e40
+https://github.com/user-attachments/assets/cd14ac04-0fbb-4622-a766-381059fc2659
 
 ### FS1R DEMO SONG 1: Vokodrone
 
@@ -30,9 +30,9 @@ https://github.com/user-attachments/assets/066d8666-7ea0-498e-8226-a44619df0e40
 
 https://github.com/user-attachments/assets/8afa466b-e7c4-4427-a058-392120f1a15d
 
-**FSVR (v0.4.1)**
+**FSVR (v0.4.2)**
 
-https://github.com/user-attachments/assets/536fc1f7-ea69-4665-9292-403467f4a875
+https://github.com/user-attachments/assets/8e32c342-dfe5-4d7e-b1a8-d9215826331c
 
 ## Background and History
 
