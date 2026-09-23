@@ -303,7 +303,10 @@ int selftest(Synth& S) {
         ck("filter EG holds at L3", e.cur == 100);
         e.release(); n = 0; while (e.stage == 3 && n < 100000) { e.tick(); n++; }
         ck("filter EG release lands on L4", e.stage == 9 && e.cur == -100);
-        StepEG slow, fast; slow.start(L, (int[4]){60, 0, 0, 0}); fast.start(L, (int[4]){20, 0, 0, 0});
+        // Named rather than compound literals: a (int[4]){...} temporary is a clang extension that
+        // GCC rejects as taking the address of a temporary array and MSVC as C4576.
+        const int rateSlow[4] = {60, 0, 0, 0}, rateFast[4] = {20, 0, 0, 0};
+        StepEG slow, fast; slow.start(L, rateSlow); fast.start(L, rateFast);
         int ns = 0, nf = 0; while (slow.stage == 0 && ns < 10000000) { slow.tick(); ns++; }
         while (fast.stage == 0 && nf < 10000000) { fast.tick(); nf++; }
         ck("filter EG time 60 vs 20: 2^(40/15.5) = 6x per 15 words... 15x over 40 (flteg 0.81 vs 0.052 s)", ns > 12 * nf && ns < 18 * nf);
