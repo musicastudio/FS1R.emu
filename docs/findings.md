@@ -8,6 +8,43 @@ Entries that have a dedicated working document (`aeg.md`, `skirt.md`, `noise.md`
 
 ---
 
+## 2026-09-23, the filter EG's rate law off the CPU's own stage word: exponential, doubling every 15.5 rate words
+
+`fs1r_capture_session3.py flteg` rerun after the gate fix, twelve notes, the CPU's stage word at
+0x0106ADEC sampled every 26 ms. The attack segment, L4 = 0 to L1 = 100 (a swing of 512 level units),
+at times 10 to 80:
+
+| time | 10 | 20 | 30 | 40 | 50 | 60 | 70 | 80 |
+|---|---|---|---|---|---|---|---|---|
+| rate word | 119 | 134 | 149 | 164 | 179 | 194 | 209 | 224 |
+| attack, s | 0.052 | 0.078 | 0.129 | 0.233 | 0.418 | 0.806 | 1.565 | 2.994 |
+
+`t = 1.33e-4 * 2^(word / 15.5) + 0.024 s` to 1.2% rms, the 24 ms being the sampler's own offset. Time
+0 (word 11) and 99 (word 253) fall outside the sampler: the first ends inside the first sample and the
+second had not ended at six seconds, 11 s by the law. With the asymptote half a swing past the end the
+segment covers two thirds of the way to it, ln 3 time constants, so the chip's per-tick approach is
+`42.9 * 2^(-word / 15.5)` at the 192.3 Hz tick (`cal::FEG_RATE_K`, was a 0.67 guess on a `/ 32` law).
+
+**Exponential, not a ramp.** Time 40 at L1 = 25 (a swing of 128) took 0.232 s against 0.233 at L1 =
+100 (a swing of 512): the time does not depend on the swing, which is what an exponential aimed
+past a target proportional to the swing gives and a linear ramp cannot.
+
+**A flat segment is a fixed 0.78 s.** Stage 2 in every note is L1 to L2 = L1, no swing, and it held
+0.71 to 0.86 s at every rate word from 11 to 224, so the CPU's +2/+3 words are not what the chip
+times; it takes 0.78 s over a zero swing regardless (`cal::FEG_FLAT_S`). And time 40 at L1 = 50, an
+end word of exactly 0, skipped its attack entirely: the level was already at the word.
+
+**LFO2 never touches the staged cutoff word.** The `lfo2` run sampled the part's slot at 0x01068F78
+under LFO1 filter depth 99, under LFO2 depth 99, and under neither, 115 samples each: no slot moved
+in any of the three. LFO1's filter term is the CPU's and goes out by a different path (the `+0x28`
+offset word FUN_0002E6CC refreshes, not the staged coefficient), and LFO2 is the chip's own, which
+`20_fltmod` measured the rate of. The engine had both right in structure.
+
+`06_filter_2` envelopes 2.38 to **2.52**, `14_sens` 3.21 to **3.14**; what is left in both is the
+patch's amplitude onset (the unit's first 100 ms sit 10 to 30 dB above the engine's on every filter
+EG segment, EG depth or not), not the filter EG, which now opens at the same millisecond. No GUESS
+constants remain in `cal.h`.
+
 ## 2026-09-23, session 3's take: the filter EG depth and LFO2's rate measured, three files already inside 0.1 dB
 
 rgwan ran `fs1r_capture_session3.py` and recorded the six outstanding request files as one take

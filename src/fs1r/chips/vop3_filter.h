@@ -89,20 +89,27 @@ struct VFilter {
 // units, -256..255. KNOWN up to the rate word; what the chip makes of FEGRATE is the one INFERRED law,
 // cal::FEG_RATE_K, MEASURED off 14_sens and 06_filter_2.
 struct StepEG {
-    double cur = 0, target = 0, aim = 0, k = 1; int stage = 9; double L[4] = {}; int R[4] = {};
+    double cur = 0, target = 0, aim = 0, k = 1; int stage = 9, hold = 0; double L[4] = {}; int R[4] = {};
     void start(const double* lv, const int* rt) { for (int i = 0; i < 4; i++) { L[i] = lv[i]; R[i] = rt[i]; } cur = L[3]; go(0); }
     void go(int s) {
-        stage = s; target = L[s];
+        stage = s; target = L[s]; hold = 0;
         double swing = target - cur;
-        aim = swing == 0 ? target + 3 : target + swing / 2;   // FUN_0000D050: +3 (+2 on the end word) when L1 == L4
-        aim = std::clamp(aim, -511.0, 511.0);
-        k = cal::FEG_RATE_K * pow(2.0, -FEGRATE[clampi(R[s], 0, 99)] / 32.0);
+        // FUN_0000D050: the asymptote (0x2D) is half the swing again past the end word (0x2C), so the
+        // segment ends when the level has covered two thirds of the way to it, ln 3 time constants,
+        // whatever the swing. A zero swing gets end +2 and asymptote +3 from the CPU, and the chip takes
+        // a fixed 0.78 s over it at every rate word measured (flteg, words 11 to 224).
+        if (swing == 0) { hold = (int)(cal::FEG_FLAT_S * TICK_HZ); return; }
+        aim = std::clamp(target + swing / 2, -511.0, 511.0);
+        k = cal::FEG_RATE_K * pow(2.0, -FEGRATE[clampi(R[s], 0, 99)] / 15.5);
+        if (target == 0) { cur = 0; done(); }   // measured once (flteg t40-l50): an end word of 0 ends at once
     }
+    void done() { if (stage < 2) go(stage + 1); else stage = 9; }
     void release() { go(3); }
     inline double tick() {
         if (stage > 3) return cur;
+        if (hold) { if (--hold == 0) done(); return cur; }
         double was = cur; cur += (aim - cur) * k;
-        if ((target - was) * (target - cur) <= 0) { cur = target; if (stage < 2) go(stage + 1); else stage = 9; }
+        if ((target - was) * (target - cur) <= 0) { cur = target; done(); }
         return cur;
     }
 };

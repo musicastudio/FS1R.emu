@@ -59,7 +59,6 @@ Grouped by what blocks each item rather than by subsystem. This file is the list
 
 **Blocked on a hardware session**
 
-- The chip's reading of the filter EG rate word, `FEG_RATE_K`, a guess: FS1R.unlock `fs1r_capture_session3.py flteg` stopped on a parameter-request address error on 2026-09-23, fixed, wants a rerun. `FEG_DEPTH_BYTES` and `LFO2_INC_K` are measured off `20_fltmod`
 - Whether the chip latches per grain or slews the level register on a 3 to 5 ms constant. The lever is the grain rate
 - The per-channel arrays at 0x0103B384 and 0x01044C, which the voice image does not carry
 - The effects, against a register session rather than against the Data List

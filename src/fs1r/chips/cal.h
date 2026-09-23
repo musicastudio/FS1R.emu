@@ -80,14 +80,14 @@ static const double EG_HOLD_LAG  = 0.0081;  // ... plus this, fixed. MEASURED ov
 static const double FEG_SEMIS    = 48.0;    // frequency EG range at the full register swing of 128 (four octaves).
                                             // The sysex byte reaches the register through FEGLVL, which is measured
 static const double FEG_TIME_K   = 0.3;     // frequency EG time as a fraction of rate_secs
-static const double FEG_RATE_K   = 0.67;    // GUESS, not measured. The filter EG's per-tick approach toward its
-                                            // asymptote is FEG_RATE_K * 2^(-word / 32) for the FEGRATE word the CPU
-                                            // hands VOP3-1 (register 0x2B). The segment structure is the firmware's,
-                                            // see StepEG; only the chip's reading of the word is modelled, and a
-                                            // register run reads it outright: FS1R.unlock fs1r_capture_session3 `flteg` watches
-                                            // the CPU's own stage word through a note, which gives the time per
-                                            // word and whether the chip is exponential or a ramp. Placeholder shape
-                                            // and value from two points of 14_sens (times 20 and 60).
+static const double FEG_RATE_K   = 42.9;    // MEASURED, FS1R.unlock session 3 `flteg` 2026-09-23: the filter EG's per-tick
+                                            // approach toward its asymptote is FEG_RATE_K * 2^(-word / 15.5) for the
+                                            // FEGRATE word the CPU hands VOP3-1 (register 0x2B). Eight attack times
+                                            // off the CPU's own stage word, words 119 to 224, 52 ms to 3.0 s, fit to
+                                            // 1.2% rms with a 24 ms offset that is the sampler's; the same word at
+                                            // swings of 128 and 512 took the same 0.23 s, so the chip is exponential.
+static const double FEG_FLAT_S   = 0.78;    // MEASURED, flteg: a filter EG segment with no swing holds 0.78 s (0.71 to
+                                            // 0.86 over eleven notes, the sampler's 26 ms either side) at every rate word.
 static const double FEG_DEPTH_BYTES = 110.0;// MEASURED, 20_fltmod 2026-09-23: cutoff bytes the filter EG moves the corner
                                             // at full depth (64) and full level (256). Six held-level segments at
                                             // cutoff 96 put the corner 13.1, 25.5 and 52 bytes down for depth words
