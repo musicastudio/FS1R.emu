@@ -8,6 +8,17 @@ Entries that have a dedicated working document (`aeg.md`, `skirt.md`, `noise.md`
 
 ---
 
+## 2026-09-23, the plugin's voice Note Shift parameter defaulted to -24
+
+rgwan: some performances play an octave off in FSVR. The engine's pitch path is the firmware's
+(`FUN_00010DC4`: system, performance, part and voice shifts each clamped in turn), and every ROM
+performance renders at the pitch its bytes ask for. The plugin was the culprit: `gen_parameters.py`
+reads each parameter's centre out of the Data List's range text, and the voice common Note Shift is
+the one row written `(-24-0-+24)` with hyphens where every other bipolar row uses `~`. It parsed as
+unipolar with a default of 0, which is -24 semitones, and a host or preset that reset the parameter
+to its default, or a GUI that showed it, dropped the voice an octave (two octaves against a part at
+-12). The range parser takes either separator now; the JSON changed on that one parameter only.
+
 ## 2026-09-23, the DX7 conversion was a guess, and B024's hiss was its algorithm map
 
 rgwan: B024 Velvet Dyno hisses at high velocity. Rendering its two parts alone puts the hiss on part 2,
