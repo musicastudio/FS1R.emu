@@ -1,7 +1,6 @@
-// PatchManager - where patches come from: the 1408 factory voices bundled with the binary, the same
-// voices read out of an EPROM image when one is loaded, .syx files the user imports, and DX7
-// VCED/ACED dumps. Everything reaches the engine as sysex, so nothing here knows how the engine
-// stores a voice.
+// PatchManager - where patches come from: the 1408 factory voices bundled with the binary, .syx files
+// the user imports, and DX7 VCED/ACED dumps. Everything reaches the engine as sysex, so nothing here
+// knows how the engine stores a voice.
 //
 // Voices are numbered the way the engine numbers them: 0-255 are the native banks PrA and PrB,
 // 256-1407 the DX7-format banks PrC..PrK. A bank and program number pair - which is how the hardware
@@ -37,12 +36,6 @@ public:
 
     explicit PatchManager(fs1r::Device& d) : dev(d) { buildLists(); }
 
-    // The EPROM image. Nothing needs it any more: the voices, performances and Fseqs it holds are all
-    // bundled. Loading one only changes where they are read from.
-    bool setRomFile(const juce::File& f);
-    bool hasRom() const { return romLoaded; }
-    juce::File romFile() const { return rom; }
-
     const std::vector<PatchEntry>& voices() const { return voiceList; }
     const std::vector<PatchEntry>& performances() const { return perfList; }
     const std::vector<PatchEntry>& fseqs() const { return fseqList; }
@@ -55,7 +48,7 @@ public:
     static juce::String voiceCode(int index);          // J001 for the first native voice, U001 for an import
     static juce::String performanceCode(int index);    // A001 .. C128
 
-    bool loadVoice(int index, int part);         // the EPROM when there is one, the bundled bank otherwise
+    bool loadVoice(int index, int part);         // out of the bundled bank
     bool loadPerformance(int index);             // and the Fseq that performance asks for
     bool loadFseq(int index);                    // preset Fseq 0-89
 
@@ -70,8 +63,6 @@ private:
     void buildLists();
 
     fs1r::Device& dev;
-    juce::File rom;
-    bool romLoaded = false;
     std::vector<PatchEntry> voiceList, perfList, fseqList;
     // Where each bundled performance's 400 data bytes start, so loading one can read the voices and
     // the Fseq it asks for straight out of them.

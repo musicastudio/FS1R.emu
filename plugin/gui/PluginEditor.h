@@ -24,7 +24,6 @@ private:
     void timerCallback() override;
     void addPage(const juce::String& name, ParameterPage* page);
     void showPage(const juce::String& name);
-    void openRom();
     void importSyx();
     void saveSyx();
     void refillVoices();                 // the voice list for the bank and category now chosen
@@ -32,7 +31,7 @@ private:
     Processor& proc;
     PanelView panel;
     juce::TabbedComponent tabs{juce::TabbedButtonBar::TabsAtTop};
-    juce::TextButton romButton, loadButton, saveButton;
+    juce::TextButton loadButton, saveButton;
     // The patch browser, in the hardware's own terms: a category, a bank and the voice inside it
     // (owner's manual page 27). Picking one sets the part's bank and program number, which is what
     // actually loads it.

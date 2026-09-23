@@ -13,13 +13,10 @@ Editor::Editor(Processor& p) : juce::AudioProcessorEditor(&p), proc(p), panel(p)
         showPage(page);
     };
 
-    romButton.setButtonText("EPROM...");
     loadButton.setButtonText("Import .syx");
     saveButton.setButtonText("Save .syx");
-    romButton.onClick = [this] { openRom(); };
     loadButton.onClick = [this] { importSyx(); };
     saveButton.onClick = [this] { saveSyx(); };
-    addAndMakeVisible(romButton);
     addAndMakeVisible(loadButton);
     addAndMakeVisible(saveButton);
 
@@ -183,16 +180,6 @@ void Editor::timerCallback() {
     }
 }
 
-void Editor::openRom() {
-    chooser = std::make_unique<juce::FileChooser>("FS1R v1.20 EPROM image (2 MB)", juce::File(), "*.bin");
-    chooser->launchAsync(juce::FileBrowserComponent::openMode | juce::FileBrowserComponent::canSelectFiles,
-                         [this](const juce::FileChooser& fc) {
-                             if (fc.getResult() == juce::File()) return;
-                             proc.patches().setRomFile(fc.getResult());
-                             refillVoices();
-                         });
-}
-
 // Every voice in the file joins the browser as the "Usr" bank, so an imported .syx is browsed the same
 // way the factory ones are. A performance or Fseq dump has no voices in it and goes straight in.
 void Editor::importSyx() {
@@ -223,7 +210,6 @@ void Editor::resized() {
     panel.setBounds(r.removeFromTop((int)std::lround(r.getWidth() / PanelView::kAspect)));
     r.removeFromTop(6);
     auto bar = r.removeFromTop(26);
-    romButton.setBounds(bar.removeFromLeft(80).reduced(2));
     loadButton.setBounds(bar.removeFromLeft(90).reduced(2));
     saveButton.setBounds(bar.removeFromLeft(80).reduced(2));
     searchBox.setBounds(bar.removeFromRight(150).reduced(2));

@@ -63,13 +63,6 @@ juce::String PatchManager::performanceCode(int index) {
            juce::String(index % 128 + 1).paddedLeft('0', 3);
 }
 
-bool PatchManager::setRomFile(const juce::File& f) {
-    romLoaded = f.existsAsFile() && dev.loadRom(f.getFullPathName().toRawUTF8());
-    rom = romLoaded ? f : juce::File();
-    buildLists();
-    return romLoaded;
-}
-
 // Walks a run of FS1R bulk dumps, handing each one's data to fn. The ends come from the F0 and F7
 // bytes rather than from the byte count, which an Fseq bulk cannot express (Data List 3.2.1).
 template <typename Fn>
@@ -87,8 +80,7 @@ static void forEachDump(const uint8_t* d, size_t len, Fn fn) {
 void PatchManager::buildLists() {
     voiceList.clear();
     perfList.clear();
-    // The voice list is always the factory set: the bundled .syx bank and the EPROM hold the same
-    // 1408 voices in the same order, so the names come from the bundled index either way.
+    // The voice list is the factory set, out of the bundled .syx bank, in the EPROM's own order.
     for (int i = 0; i < kNumVoices; ++i) {
         PatchEntry e;
         e.index = i;
@@ -150,7 +142,6 @@ bool PatchManager::loadVoice(int index, int part) {
                dev.loadSyx(imported.data(), imported.size(), index - kNumVoices, part);
     }
     index = juce::jlimit(0, kNumVoices - 1, index);
-    if (romLoaded) return dev.loadRomVoice(part, index);
     return dev.loadSyx((const uint8_t*)BinaryData::fs1r_presets_syx,
                        (size_t)BinaryData::fs1r_presets_syxSize, index, part);
 }
@@ -158,14 +149,12 @@ bool PatchManager::loadVoice(int index, int part) {
 bool PatchManager::loadPerformance(int index) {
     dev.allNotesOff();
     index = juce::jlimit(0, kNumPerformances - 1, index);
-    // With the EPROM the engine fetches the part voices and the Fseq for itself.
-    if (romLoaded) return dev.loadRomPerformance(index);
     if (index >= (int)perfData.size() ||
         !dev.loadSyx((const uint8_t*)BinaryData::fs1r_performances_syx,
                      (size_t)BinaryData::fs1r_performances_syxSize, index, 0))
         return false;
-    // Without it, the performance arrives holding nothing but a bank and program number per part and
-    // an Fseq number, so those are followed here out of the bundled banks.
+    // A performance holds nothing but a bank and program number per part and an Fseq number, so those
+    // are followed here out of the bundled banks, which is what the hardware does from its own ROM.
     const uint8_t* d = perfData[(size_t)index];
     for (int part = 0; part < 4; ++part) {
         const uint8_t* p = d + 192 + 52 * part;          // the part's own 52 bytes
@@ -180,7 +169,6 @@ bool PatchManager::loadPerformance(int index) {
 bool PatchManager::loadFseq(int index) {
     dev.allNotesOff();
     index = juce::jlimit(0, kNumFseqs - 1, index);
-    if (romLoaded) return dev.loadRomFseq(index + 1);       // the engine numbers the preset Fseqs from 1
     return dev.loadSyx((const uint8_t*)BinaryData::fs1r_fseqs_syx,
                        (size_t)BinaryData::fs1r_fseqs_syxSize, index, 0);
 }

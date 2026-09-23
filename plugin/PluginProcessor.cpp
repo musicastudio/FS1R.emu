@@ -100,9 +100,9 @@ void Processor::selectVoice(int voiceIndex) {
     }
 }
 
-// The engine only loads a voice from a bank and program number when it has the EPROM image and a
-// program change arrives, so the plugin does it here instead: the bundled bank covers the same 1408
-// voices, and this keeps one path for the panel, the browser and host automation alike.
+// The engine only loads a voice from a bank and program number when it has an EPROM image, which the
+// plugin does not, so the plugin does it here instead: the bundled bank covers the same 1408 voices,
+// and this keeps one path for the panel, the browser and host automation alike.
 void Processor::loadSelectedVoice() {
     // "off" and "Int" name no preset voice, so the part keeps the one it is holding.
     const int preset = PatchManager::indexFor(parameterValue(bankParam), parameterValue(progParam));
@@ -111,8 +111,8 @@ void Processor::loadSelectedVoice() {
     needRefresh = true;
 }
 
-// The engine loads the Fseq a performance names out of the EPROM image; with the preset sequences
-// bundled it no longer needs one, so the same three bytes are watched here.
+// The engine loads the Fseq a performance names out of an EPROM image; with the preset sequences
+// bundled there is none, so the same three bytes are watched here.
 void Processor::loadSelectedFseq() {
     if (parameterValue(fseqPartParam) == 0) return;    // no part plays it
     if (parameterValue(fseqBankParam) == 0) return;    // "int": the unit's own Fseq store, which we have none of
@@ -308,8 +308,6 @@ void Processor::getStateInformation(juce::MemoryBlock& out) {
     for (int cc : ccForParam) s.writeInt(cc);
     s.writeInt((int)sysex.size());
     s.write(sysex.data(), sysex.size());
-    auto romPath = patchManager.romFile().getFullPathName();
-    s.writeString(romPath);
 }
 
 void Processor::setStateInformation(const void* data, int size) {
@@ -329,9 +327,7 @@ void Processor::setStateInformation(const void* data, int size) {
         s.read(sysex.data(), len);
         dev.setState(sysex.data(), sysex.size());
     }
-    auto romPath = s.readString();
-    if (romPath.isNotEmpty()) patchManager.setRomFile(juce::File(romPath));
-    needRefresh = true;
+    needRefresh = true;                            // a format 2 trailer may hold an EPROM path; ignored
 }
 
 juce::AudioProcessorEditor* Processor::createEditor() { return new Editor(*this); }

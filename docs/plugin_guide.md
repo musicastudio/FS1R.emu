@@ -80,12 +80,6 @@ selection, exactly as on the hardware, and moving any of them loads it.
 `plugin/fs1r_performances.syx` and `plugin/fs1r_fseqs.syx`; all are committed, and
 `tools/check_presets.py` checks them in the build's test step.
 
-## The EPROM image
-
-Press **EPROM...** and point it at a 2 MB v1.20 dump. Nothing needs it any more - the voices,
-performances and Fseqs it holds are all bundled, and the built-in copies were extracted from it.
-Loading one only changes where they are read from.
-
 ## The panel
 
 The panel is page 14 of the owner's manual, with live controls placed over the drawing. Three departures
