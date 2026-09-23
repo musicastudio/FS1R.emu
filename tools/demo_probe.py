@@ -168,7 +168,7 @@ def cmd_dump(a):
 # ------------------------------------------------------------------ the two takes side by side
 def _align():
     """Every render's lag in the recording, found the way check_demo does it, in song order."""
-    ref = cd.mono(ROOT / "captures/FS1R DEMO.flac")
+    ref = cd.mono(ROOT / "captures/raw/FS1R DEMO.flac")
     renv = cd.envelope(ref)
     prev, out = None, []
     # Only the numbered songs. captures/demo/ also holds all.mid, the whole demo in one file, and a

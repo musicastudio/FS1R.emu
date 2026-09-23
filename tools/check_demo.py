@@ -4,7 +4,7 @@
     python tools/extract_demo.py
     for f in captures/demo/[0-9]*.mid; do bin/fs1r_emu -r eprom.bin -smf "$f" \
         -w "captures/demo/render/$(basename "$f" .mid).wav" -d 2; done
-    python tools/check_demo.py "captures/FS1R DEMO.flac" captures/demo/render
+    python tools/check_demo.py "captures/raw/FS1R DEMO.flac" captures/demo/render
 
 The demo song is the one piece of hardware audio that needs no capture rig: the unit plays it from its
 own EPROM, so the same byte stream drives the recording and our engine. The recording is one take of
