@@ -40,7 +40,7 @@ the chip is exponential or a ramp with it.
 * the EG depth velocity is multiplicative, `depth * sens * (vel - 127) / 889` added to the depth, the
   engine added a velocity term to the level;
 * the EG depth word is `0x120 * depth` (register 0x28); what the chip does with it against the level is
-  inside VOP3-1 (`cal::FEG_DEPTH_BYTES`, a guess, see `16_fltmod`).
+  inside VOP3-1 (`cal::FEG_DEPTH_BYTES`, a guess, see `20_fltmod`).
 
 **LFO2 is not the CPU's.** `FUN_0000D050` and `FUN_0000E2A0` hand VOP3-1 a waveform (`FUN_0000C1AC`, the
 0x20-per-step field `ymp706_registers.md` had as the filter type) and a speed word from `0x374A04`
@@ -48,7 +48,7 @@ the chip is exponential or a ramp with it.
 coefficient. The engine had run LFO2 as a copy of LFO1 with the same speed table; it now uses
 `LFO2SPD` and the chip's rate per word is `cal::LFO2_INC_K`, a guess. The filter type reaches the chip
 another way: `FUN_0000C280` / `FUN_0000C604` patch the per-channel microcode jump. `capture3.py lfo2`
-confirms the cutoff word holds still under LFO2, and `16_fltmod` records the rate.
+confirms the cutoff word holds still under LFO2, and `20_fltmod` records the rate.
 
 **The voice's Formant and FM control** (`FUN_00017454`, handlers at 0x3DE04): the amount is
 `clamp(bias(src) * bias(dep) * 2 >> 7)` like every other controller, and the destinations store
@@ -72,19 +72,19 @@ spread (`run_reverb`, marked INFERRED). Not changed here: it is a rebuild of the
 microcode, `vop3_2_microcode.md` territory, and the 09_effects files are the ones to score it with.
 
 **Still inferred, and what settles each**, in `FS1R.unlock/captures/capture3.py` (reads only) and
-`captures/requests/16_fltmod.mid` (one recording, 2.3 min):
+`captures/requests/20_fltmod.mid` (one recording, 2.3 min):
 
 | constant | what | how |
 |---|---|---|
-| `FEG_RATE_K` | chip time per filter EG rate word, and exponential vs ramp | `capture3 flteg`: the stage word through 14 notes |
-| `FEG_DEPTH_BYTES` | cutoff bytes per EG level per depth word | `16_fltmod` held-level segments, cutoff parked at 96 |
-| `LFO2_INC_K` | LFO2 phase per tick per speed word | `16_fltmod` lfo2 segments; `capture3 lfo2` proves it is the chip's |
+| `FEG_RATE_K` | chip time per filter EG rate word, and exponential vs ramp | `fs1r_capture_session3 flteg`: the stage word through 14 notes |
+| `FEG_DEPTH_BYTES` | cutoff bytes per EG level per depth word | `20_fltmod` held-level segments, cutoff parked at 96 |
+| `LFO2_INC_K` | LFO2 phase per tick per speed word | `20_fltmod` lfo2 segments; `capture3 lfo2` proves it is the chip's |
 
 ## 2026-09-22, the noise band is two unequal poles, the drum is not the noise, and the effects-off demo
 
 rgwan recorded the fifteen demo songs with the effects and the filter stripped (`captures/demo_nofilterfx`), plus Vokodrone's bass and drum parts on their own. Against the whole take the engine sits 2.8 dB under the unit in the median band, flat across the octaves, with four songs at zero and Ana-Unison at -8; the top octave, +3.3 dB bright on Vokodrone, is the one band the day's work moved, to -0.6.
 
-**The snare is the two sine carriers, not the noise.** `tools/compare_isolated.py` lines the drum take up against a render of channel 3 alone and scores each note by band. The drum part reads 1.5 to 3.3 dB hot on every note and the snare 4 dB hot in the 100 to 200 Hz band, which is operators 6 and 8, sines at 143 Hz under a three-deep modulator chain and a feedback operator. Muting every unvoiced operator costs the engine's snare half a decibel. Time-frequency slices say where: for the first 6 ms the unit's carrier line is 12 dB down where the engine's is already clear, so the unit's modulation is deeper early and decays through the first 10 ms, and the engine's modulator, whose EG drops 99 to 80 at rate 51, is already down. Nothing in the capture set measures a decay to a level that is not silence, the velocity law at any sensitivity but 0, or a modulator on a modulator, and `tools/make_capture_tonal.py` writes the four files that do, the fourth being the drum voice itself one hit at a time. `docs/captures/capture_request_0922.md`.
+**The snare is the two sine carriers, not the noise.** `tools/compare_isolated.py` lines the drum take up against a render of channel 3 alone and scores each note by band. The drum part reads 1.5 to 3.3 dB hot on every note and the snare 4 dB hot in the 100 to 200 Hz band, which is operators 6 and 8, sines at 143 Hz under a three-deep modulator chain and a feedback operator. Muting every unvoiced operator costs the engine's snare half a decibel. Time-frequency slices say where: for the first 6 ms the unit's carrier line is 12 dB down where the engine's is already clear, so the unit's modulation is deeper early and decays through the first 10 ms, and the engine's modulator, whose EG drops 99 to 80 at rate 51, is already down. Nothing in the capture set measures a decay to a level that is not silence, the velocity law at any sensitivity but 0, or a modulator on a modulator, and `tools/make_capture_tonal.py` writes the four files that do, the fourth being the drum voice itself one hit at a time. FS1R.unlock `fs1r_capture_session3.py record` plays them.
 
 **The noise band is two digital one-poles with different coefficients**, and the "pedestal" of 2026-09-21 is the second pole's own floor: a digital one-pole passes `(a / (2 - a))^2` at Nyquist, which is white, sits at the same level at any centre and rises with the register twelve decibels an octave. Fitting both poles free reproduces every one of forty-one segments to 0.6 to 0.9 dB rms over 200 Hz to 23 kHz, and the 1 kHz take gives the same coefficients as the 8 kHz one at every register they share. The peak falls one `LEVEL_DB` per register from 25 up. The skirt is two controls rather than a register shift. The unvoiced output is also averaged two samples at a time, which the fixed sines of `01_reference` do not show and every wideband noise segment does. Band shape over 100 Hz to 22 kHz: `13_unvoiced3` 2.23 to **0.61**, `05_unvoiced_1` 2.65 to **1.19**, `15_filter`'s source 2.16 to **0.52**. `docs/noise.md`, `tools/fit_noise_band.py`.
 

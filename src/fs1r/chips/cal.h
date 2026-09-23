@@ -83,7 +83,7 @@ static const double FEG_RATE_K   = 0.67;    // GUESS, not measured. The filter E
                                             // asymptote is FEG_RATE_K * 2^(-word / 32) for the FEGRATE word the CPU
                                             // hands VOP3-1 (register 0x2B). The segment structure is the firmware's,
                                             // see StepEG; only the chip's reading of the word is modelled, and a
-                                            // register run reads it outright: FS1R.unlock capture3 `flteg` watches
+                                            // register run reads it outright: FS1R.unlock fs1r_capture_session3 `flteg` watches
                                             // the CPU's own stage word through a note, which gives the time per
                                             // word and whether the chip is exponential or a ramp. Placeholder shape
                                             // and value from two points of 14_sens (times 20 and 60).
@@ -243,7 +243,7 @@ static const double RESO_COMP    = 0.0;     // how much of resonance table B is 
                                             // not reach do not move at all.
 static const double LFO2_INC_K   = 1.0;     // GUESS, not measured. LFO2 runs on VOP3-1 off the LFO2SPD word (FUN_0000C130);
                                             // this is how many 16-bit phase units per 192 Hz tick one unit of the
-                                            // word is worth. capture3 `lfo2` in FS1R.unlock reads the rate off the
+                                            // word is worth. fs1r_capture_session3 `lfo2` in FS1R.unlock reads the rate off the
                                             // chip's own cutoff word.
 static const double PMS_FRAC[8]  = {0, 0.0264, 0.0534, 0.0889, 0.1612, 0.2769, 0.4967, 1.0};  // per-op pitch mod sensitivity, DX7 curve
 // The output path, MEASURED from rgwan's recording of the whole capture set on 2026-09-18. These three

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """One capture file for the two filter numbers that live inside VOP3-1 and need a recording.
 
-    python tools/make_capture_fltmod.py     -> captures/requests/16_fltmod.mid + its manifest row
+    python tools/make_capture_fltmod.py     -> captures/requests/20_fltmod.mid + its manifest row
 
 The register run in FS1R.unlock (`capture3.py flteg` and `lfo2`) reads the filter EG's time per rate
 word and settles that LFO2 is the chip's own; what it cannot read is what the chip does with the words:
@@ -72,9 +72,9 @@ def g_fltmod():
 def main():
     outdir = ROOT / "captures" / "requests"
     segs = list(g_fltmod())
-    e = m.build_file(outdir / "16_fltmod.mid", segs, m.marker_voice())
+    e = m.build_file(outdir / "20_fltmod.mid", segs, m.marker_voice())
     e["why"] = "the filter EG depth scale and the LFO2 rate, both inside VOP3-1"
-    print(f"16_fltmod.mid  {len(segs)} segments  {e['duration_s'] / 60:.1f} min")
+    print(f"20_fltmod.mid  {len(segs)} segments  {e['duration_s'] / 60:.1f} min")
     merge_manifest(outdir, [e])
 
 

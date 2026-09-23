@@ -143,7 +143,7 @@ static inline double cut_hz(double c) {
 // (0x40 vs 0x7F) and +-0x4000 tap mix want. Reading A alone as 1/Q is what forced RESO_PER_OCT to 32.
 // INFERRED is what the two become: A scales the ladder's feedback and B is available as passband lift.
 // The demo settled both scalings, and neither landed on the textbook value. See docs/findings.md, the 2026-09-19 ladder entry.
-static inline double reso_r(int r) { return pow(2.0, -clampi(r + 16, 0, 116) / 16.0); }  // fltReso = sysex byte - 16, so r+16 is the byte: A[byte] = 1 - 2^(-byte/16), measured on hardware (capture3's convhand)
+static inline double reso_r(int r) { return pow(2.0, -clampi(r + 16, 0, 116) / 16.0); }  // fltReso = sysex byte - 16, so r+16 is the byte: A[byte] = 1 - 2^(-byte/16), measured on hardware (fs1r_capture_session3's convhand)
 static inline double reso_q(int r) { return cal::RESO_Q0 * pow(2.0, clampi(r + 16, 0, 116) / cal::RESO_PER_OCT); }
 // The feedback goes as the CUBE of resonance table A, not as A itself. MEASURED: driving the engine's own
 // ladder with noise gives a k-to-peak-lift map, and pushing 15_filter's eleven measured lifts back through

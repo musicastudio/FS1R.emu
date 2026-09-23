@@ -242,7 +242,7 @@ void Synth::lfo2_tick(Chan& C, const Part& pt) {
     // 0x20-per-step field the docs had as the filter type) and the speed word LFO2SPD[speed] (FUN_0000C130)
     // and the chip runs it. The speed byte is voice + part - 64 + the destination 45 word, clamped 0..127.
     // What the chip makes of the increment is INFERRED: read as a 16 bit phase per tick it puts speed 64
-    // at 0.19 Hz and 127 at 1.6 Hz, and the register run in FS1R.unlock capture3 `lfo2` is what settles it.
+    // at 0.19 Hz and 127 at 1.6 Hz, and the register run in FS1R.unlock fs1r_capture_session3 `lfo2` is what settles it.
     const Voice& V = pt.voice;
     int sp = clampi(V.lfo2speed + pt.p[0x2E] - 64 + ctrl_offset(C.part, 45), 0, 127);
     uint32_t inc = LFO2SPD[sp] * cal::LFO2_INC_K;
