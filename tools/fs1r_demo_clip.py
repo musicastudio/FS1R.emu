@@ -22,8 +22,8 @@ in order and correlating log envelopes, which means it renders every song before
 few seconds each and it beats an offset pasted into a script.
 
 The video track is a scrolling waveform because GitHub gives an audio-only mp4 no player at all. The
-.ogg beside it is the same cut as plain audio, for anywhere a video player is the wrong shape. ffmpeg
-comes from the imageio-ffmpeg wheel; there is no system ffmpeg on the machine this was written on.
+.ogg beside it is the same cut as plain audio, for anywhere a video player is the wrong shape. Any
+ffmpeg with drawtext will do: a system one, the static-ffmpeg wheel, or the imageio-ffmpeg wheel.
 
 The 48 kHz render is left in captures/demo/render/ next to the other songs', which is where they are
 kept to listen to. --drop-wav deletes it instead.
@@ -36,8 +36,6 @@ import sys
 import tempfile
 import wave
 from pathlib import Path
-
-import imageio_ffmpeg
 
 HERE = Path(__file__).resolve().parent
 ROOT = HERE.parent
@@ -88,6 +86,7 @@ def encoder():
     except ImportError:
         pass
     try:
+        import imageio_ffmpeg
         cands.append(imageio_ffmpeg.get_ffmpeg_exe())
     except Exception:
         pass
