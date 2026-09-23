@@ -64,10 +64,22 @@ jobs:
         run: cmake -B build/plugin -S . -DFS1R_BUILD_PLUGIN=ON -DCMAKE_BUILD_TYPE=Release
       - name: Build
         run: cmake --build build/plugin --config Release
+      # Zipped here rather than in the release job, because an Actions artifact does not carry the
+      # executable bit: bin/ uploaded as loose files comes back 644, and a macOS bundle whose
+      # Contents/MacOS file is not executable fails to launch with "The application FSVR can't be
+      # opened". A zip records the mode, and the artifact is then that one file, so a download off a
+      # plain Actions run is as usable as a release asset. -y keeps the .component's symlinks as
+      # symlinks.
+      - name: Zip
+        if: runner.os != 'Windows'
+        run: cd bin && zip -ry ../FSVR-plugin-${{ matrix.name }}.zip .
+      - name: Zip
+        if: runner.os == 'Windows'
+        run: Compress-Archive -Path bin\* -DestinationPath FSVR-plugin-${{ matrix.name }}.zip
       - uses: actions/upload-artifact@v4
         with:
           name: FSVR-plugin-${{ matrix.name }}
-          path: bin
+          path: FSVR-plugin-${{ matrix.name }}.zip
           if-no-files-found: error
 
   release:
@@ -80,10 +92,14 @@ jobs:
       - uses: actions/download-artifact@v4
         with:
           path: artifacts
-      - name: Zip
+      # The plugin jobs upload a ready zip each, so only the console artifact is still loose files.
+      - name: Zip the console
         run: |
           cd artifacts
-          for d in */; do (cd "$d" && zip -r "../${d%/}.zip" .); done
+          for d in */; do
+            n=${d%/}
+            if [ -f "$n/$n.zip" ]; then mv "$n/$n.zip" . && rmdir "$n"; else (cd "$n" && zip -r "../$n.zip" .); fi
+          done
           ls -l
       - uses: softprops/action-gh-release@v2
         with:

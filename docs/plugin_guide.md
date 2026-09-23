@@ -16,6 +16,18 @@ VST3, CLAP and a standalone land in `bin/VST3`, `bin/CLAP` and `bin/Standalone` 
 runs those two commands). Without `-DFS1R_BUILD_PLUGIN=ON` the same CMake build produces only the
 engine library, the console and the self checks, and needs no submodules.
 
+## Installing on macOS
+
+The macOS builds are universal, so the same download runs on Apple silicon and on Intel. Copy
+`FSVR.vst3` into `~/Library/Audio/Plug-Ins/VST3` and `FSVR.clap` into `~/Library/Audio/Plug-Ins/CLAP`.
+
+Nothing here is signed by an Apple developer account, so the first launch of the standalone needs
+**Open** from its right-click menu, or one command to drop the quarantine flag the download put on it:
+
+```bash
+xattr -dr com.apple.quarantine ~/Downloads/FSVR.app
+```
+
 ## The standalone's audio device
 
 **Options > Audio/MIDI Settings**. With the default **Windows Audio** device type JUCE runs at the

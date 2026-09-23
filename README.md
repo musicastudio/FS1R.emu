@@ -97,7 +97,7 @@ What is left, worst first: the effects, the unvoiced pedestal above 4 kHz, AM se
 
 ### Prebuilt
 
-[The latest release](https://github.com/musicastudio/FSVR/releases/latest) has zipped VST3, CLAP and standalone builds for Windows, Linux and macOS. No installer, no dependencies.
+[The latest release](https://github.com/musicastudio/FSVR/releases/latest) has zipped VST3, CLAP and standalone builds for Windows, Linux and macOS. The macOS builds are universal, Apple silicon and Intel in one binary. No installer, no dependencies.
 
 Every push to `main` builds the same set through [GitHub Actions](https://github.com/musicastudio/FSVR/actions), so a build for an OS you do not own is always one Actions run away, including on a fork. `.github/workflows/build.yml` is three jobs:
 
