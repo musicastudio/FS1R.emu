@@ -56,6 +56,7 @@ int selftest(Synth& S) {
             ck("EG rate scaling, tscale 3", eg_ratescale(3, kc2[n]) == w3[n]);
         }
         ck("EG rate scaling saturates low", eg_ratescale(7, 60) == -11);
+        ck("key code 87, the demo drum's note 41, reads -8 (19_drums)", eg_keyoff(87) == -8);
         ck("EG rate scaling saturates high", eg_ratescale(7, 127) == 11);
     }
     // The formant window against the bandwidth byte, 04_formant_1's own staircase: flat to 40, opening
@@ -88,9 +89,13 @@ int selftest(Synth& S) {
                                                             && fabs(row_db(1, 2) + 15.563) < 0.05);
         ck("skirt 2 is sin^8", fabs(row_db(2, 1) + 1.9382) < 0.02 && fabs(row_db(2, 3) + 18.837) < 0.1);
         ck("the exponent doubles rather than stepping", fabs(row_db(3, 1) + 1.0216) < 0.02);
-        ck("the formant's exponent goes by sqrt(2)",                    // 2 * sqrt(2)^2 = 4 = skirt 1's
-           fabs(row_db(0, 1) - 20 * log10(fabs(line(0, 1) / line(0, 0)))) < 1e-12
-           && fabs(cal::WIN_SKIRT * cal::WIN_SKIRT_FRMT * cal::WIN_SKIRT_FRMT - 4.0) < 1e-6);
+        // The asymmetric family: the same rise, a sin^2 fall whatever the skirt, and no mean in the
+        // stored all1/all2 waveform, which is the window with g_winDC taken out.
+        ck("the '1' family shares the rise", g_win[1][5][256] == g_win[0][5][256]);
+        ck("the '1' family falls as sin^2", fabs(g_win[1][5][768] - g_win[0][0][768]) < 1e-6);
+        ck("the '1' family is asymmetric", g_win[1][5][768] > 4 * g_win[0][5][768]);
+        double dc = 0; for (int i = 0; i < 1024; i++) dc += g_win[0][0][i] - g_winDC[0][0];
+        ck("all2 at skirt 0 carries no DC", fabs(dc) < 1e-3);
     }
     // Register 0xC0 against the note. docs/ymp706_registers.md used to gloss it as "note/3 + 10", which is
     // out by 63 and is what made the old rate scaling look like dead code when it was merely wrong.

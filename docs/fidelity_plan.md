@@ -1,6 +1,8 @@
 # Matching the engine to the hardware: what is still open, and what closes it
 
 > **Worked through on 2026-09-21, the same day.** rgwan recorded all five files the request asked for. Items 1, 2, 4 and 6 are closed, item 3 turned into the first real measurement of the effect model, and item 6's diagnosis below was wrong in a way worth keeping. What each one became is marked in place; `docs/noise.md` is the working for item 1. The table below is the state before any of it, and the one at the bottom is after.
+>
+> **2026-09-24.** Items 7 and 8 closed off the data already recorded, and the drum's note 41 with them. Everything outside the effects is now inside the measurement; the effects are the one item left, at the bottom.
 
 Written 2026-09-21 against every recording and register session in hand: rgwan's 0918 take of the 21 frozen request files, the 0919 `05b`, `08b` and `10_envelope2` takes, the 0920 `11_detune` and `12_fseqlevel` takes, both register sessions, and `captures/FS1R DEMO.flac`. Everything below is measured off those unless it says otherwise. The numbers come from `python tools/analyze_capture.py captures/hardware/*.wav --compare` run today against the current build.
 
@@ -194,9 +196,39 @@ Two tooling faults fixed along the way, both of which had been producing numbers
 
 ## What is left, in order
 
-1. **The effects**, 17 to 29 dB over three files and eighty-four segments. The largest number in the set by a long way, measured against real impulse responses for the first time, and a piece of work on its own scale: eighty-seven types modelled from the Data List with nothing checked.
-2. **The unvoiced pedestal.** The noise band's core matches inside 0.6 dB and everything above 4 kHz is 4 to 10 dB short, which is the same energy STATUS.md's "top octave" item has been chasing. `docs/noise.md` has the band-by-band numbers and what would settle it.
+1. **The effects**, 17 to 29 dB over three files and eighty-four segments. The largest number in the set by a long way, measured against real impulse responses for the first time, and a piece of work on its own scale: eighty-seven types modelled from the Data List with nothing checked. **The only item left.**
+2. ~~**The unvoiced pedestal.**~~ **Closed 2026-09-22 by the two-pole reading, confirmed 2026-09-24**: octave bands from 125 Hz to 16 kHz agree inside 0.5 dB over eleven wideband segments. What the analyzer still reports on the 1 kHz files is its sub-100 Hz bands at the two floors. `docs/noise.md`.
 3. ~~**AM sensitivity at deep modulation**~~ **Closed 2026-09-23 off the existing take**: the chip's AM word is seven bits and the sensitivity weights are {0,1,2,4,5,6,7,8}/8. `docs/findings.md`.
-4. **The "1" forms and all1/all2's geometry**, item 7, and **the formant's window family**, item 8. Both have their data recorded in `docs/skirt.md` and neither needs hardware.
+4. ~~**The "1" forms and all1/all2's geometry**, item 7, and **the formant's window family**, item 8.~~ **Closed 2026-09-24 off the skirt sweep's sixty partials and `04_formant_2`**: one skirt law, two window shapes. The "1" forms and the formant take the exponent on the rise and keep a `sin^2` fall; all1 and all2 are the window alone, read by phase. All six harmonic forms inside 0.5 to 1.8 dB at every skirt, `04_formant_2` 2.52 to **0.44**. `docs/skirt.md`.
 5. ~~**The filter EG's remaining 3.36 dB.**~~ **Closed 2026-09-21 by `15_filter`**, and the filter with it. `06_filter` could never measure one: its source is a single 32.7 Hz partial, so its eleven resonance segments read flat to a millidecibel on the unit and only three of sixteen cutoff bytes said anything. Against a source with energy everywhere the corner is `17.4 * 2^(byte / 12)` to 0.098 octaves rms, the resonance peak reaches 19.9 dB where the engine topped out at 8.5, the feedback goes as the cube of table A, `RESO_COMP` is measured at zero, and the filter EG's segment rate was nearly three times too slow. `06_filter_2`'s envelopes 5.43 to **2.68**. `docs/filter.md`.
 6. ~~**The silent-segment scoring artifact**~~ **Closed 2026-09-23**: `SILENT_DB` is -100 dB, the float render's post-EG residue was above the old -120 gate.
+7. ~~**The drum's note 41.**~~ **Closed 2026-09-24**: key code 87 (the 2026-09-23 note said 86), and the key-code interpolation truncates rather than rounds, -8 where -7 was. `19_drums` 1.25 / 3.03 to **0.81 / 1.92**. `docs/aeg.md`.
+
+## Where it landed, 2026-09-24
+
+`python tools/bench_captures.py` prints this table; the columns are level, shape and envelope as above.
+
+| file | level | shape | envelope | against 2026-09-23 |
+|---|---|---|---|---|
+| `01_reference_1` / `_2` | 0.05 / 0.05 | 0.21 | | unchanged |
+| `02_envelope_1` / `_2` / `_3` | 0.20 / 0.06 / 0.34 | | 0.64 / 0.43 / 0.61 | unchanged |
+| `03_fm_1` / `_2` | 0.05 / 0.05 | **0.01** / 0.54 | | 0.19 / 0.56 |
+| `04_formant_1` / `_2` / `_3` | 0.06 / **0.07** / 0.29 | 0.77 / **0.44** / 2.14 | | 0.29 / 2.52 / 0.73, `_3`'s move is one six-band segment |
+| `05_unvoiced_1` / `_2` / `05b` | 0.21 / 0.27 / 0.41 | 3.13 / 3.64 / 3.07 | | unchanged; the sub-100 Hz bands, see `noise.md` |
+| `06_filter_1` / `_2` | 0.01 / 0.01 | 0.32 / 0.17 | **1.78** | 0.44 / 0.24, 2.52 |
+| `07_modulation_1` / `_2` | 0.05 / 0.05 | | 2.21 / 0.81 | unchanged |
+| `08_panlevel_1` / `_2` / `08b` | 0.20 / 0.21 / 0.22 | 1.52 / 3.23 | | 1.60 / 3.35 |
+| `09_effects_1` / `_2` / `_3` | 14.56 / 20.38 / 30.42 | | 19.12 / 16.88 / 19.17 | unchanged, the effects |
+| `10_envelope2` | 0.41 | | 0.68 | unchanged |
+| `11_detune_1` / `_2` | 0.05 / 0.18 | 0.14 | | 0.23 |
+| `12_fseqlevel` | 3.16 | | 12.16 | unchanged |
+| `13_unvoiced3` | 1.05 | 1.03 | | unchanged |
+| `14_sens` | **1.17** | | 3.10 | 1.66, 3.14 |
+| `15_filter` | 1.74 | 4.22 | | unchanged |
+| `16_velocity_1` / `_2` | 0.06 / 0.06 | | | unchanged |
+| `17_egdecay` | 0.09 | | 0.43 | unchanged |
+| `18_fmchain` | 0.05 | 0.13 | | 0.15 |
+| `19_drums` | **0.81** | | **1.92** | 1.25, 3.03 |
+| `20_fltmod` | 2.10 | 3.53 | 9.24 | unchanged, LFO2's waveform against the analyzer's alignment |
+
+Twenty-seven of the thirty-six files agree with the unit inside half a decibel of level; the nine that do not are the three effect files, the two whose numbers are the sub-100 Hz metric, `12_fseqlevel` and `20_fltmod` at frame and LFO rates the analyzer's alignment cannot hold, and `14_sens` and `15_filter` at 1.2 and 1.7. The demo, effects in: mean|err| 4.92 dB, tilt 1.96, envelope correlation median 0.976 and worst 0.908.

@@ -121,3 +121,9 @@ Where it stands, band shape as rms over sixth-octave bands from 100 Hz within 40
 The resonance carrier's table was read against a band whose RMS the engine had at `1 / sqrt(3)` of what it assumed, the uniform noise it ran on; the noise source is unit variance now and the table is scaled by `sqrt(3)`, which keeps the three recordings and Kalimba where they were. The tone still scatters 3 dB between the two takes in opposite directions at settings 5 and 7, so its law against the register is not read.
 
 Reproducing this: `python tools/fit_noise_band.py` prints the table above off `captures/hardware/`.
+
+## 2026-09-24, the pedestal is closed and the shape number is the metric
+
+Read again against the current engine, octave bands of hardware minus engine with each side's level divided out, over eleven wideband segments across `05_unvoiced_1`, `13_unvoiced3` and `05_unvoiced_2`: -0.5 to +0.5 dB in every octave from 125 Hz to 16 kHz, the 4 to 8 kHz and 8 to 16 kHz bands included. The two-pole reading above had already closed it. The 3.1 to 3.7 dB that `tools/analyze_capture.py --compare` still prints as shape for the 1 kHz files is its sixth-octave bands under 100 Hz, one or two FFT bins each at the recording's floor on one side and the render's on the other; the same files over 100 Hz read 1.9 to 2.2, and over the bands within 40 dB of the peak 1.2 to 1.6. A gate on those bands was tried in the analyzer and taken out, because it also empties the files whose spectra are three lines. The number is the metric's, not the engine's, and it is left as it is so the ledger stays comparable.
+
+What is left in the unvoiced chain is the resonance carrier's level against the register, which the two takes still put 2 to 3 dB apart in opposite directions at settings 6 and 7. Not a shape, and not above 4 kHz.

@@ -2,36 +2,59 @@
 #include "fs1r/internal.h"
 
 float g_sin[4097];
-float g_win[2][8][1025];       // [formant?][skirt]: the two window families
+float g_win[2][8][1025];       // [asymmetric?][skirt]: the two window families
+float g_winDC[2][8];           // each window's mean, which a grain under a DC carrier does not carry
 float g_db2lin[2305];                                          // -128 .. +16 dB in 1/16 dB steps
 
 void init_tables() {
     for (int i = 0; i <= 4096; i++) g_sin[i] = (float)sin(2 * PI * i / 4096.0);
     for (int i = 0; i <= 2304; i++) g_db2lin[i] = (float)pow(10.0, (i / 16.0 - 128.0) / 20.0);
-    // MEASURED 2026-09-19, FS1R.unlock's skirt sweep: the grain window is sin^p and the skirt multiplies
-    // p, it does not step it. On odd2 and res2, whose grain is exactly one period long under a carrier at
-    // an integer multiple of the grain rate, p = 2 * 2^skirt reproduces the unit's line amplitudes to
-    // 0.01 dB at skirt 1 and under 0.7 dB out to skirt 6, which is the measurement's own floor. The
-    // formant goes slower, p = 2 * sqrt(2)^skirt, fitted against 04_formant_2's sixteen segments at two
-    // bandwidths; no exponent of any sin^p family gets its shape closer than 2.6 dB, so the family itself
-    // is still wrong there and this is the best member of it. docs/formant.md.
+    // MEASURED 2026-09-19 (FS1R.unlock's skirt sweep, all sixty partials) and 2026-09-24 (the same take
+    // read again, plus 04_formant_2): the grain window is sin^p with p = 2 * 2^skirt on every form, and
+    // there are two families. The "2" forms (all2, odd2, res2) are the symmetric window, whose line
+    // amplitudes are the binomial row C(p, p/2 - k) to 0.4 to 0.7 dB over eight skirts. The "1" forms
+    // (all1, odd1, res1) and the formant are the SAME exponent on the rising half only; the falling
+    // half stays sin^2 whatever the skirt. That is what the period-averaged waveform shows directly
+    // (a rise that sharpens with the skirt on a fall that never moves) and it puts all1, odd1 and res1
+    // within 0.4 to 1.3 dB over every skirt where a sin^p at any exponent left 6 to 17. The formant is
+    // that same asymmetric window stretched over its bandwidth: 04_formant_2's sixteen skirt segments
+    // land inside 0.4 to 1.8 dB where the sqrt(2)-per-step symmetric fit could not get under 2.5.
+    // docs/skirt.md, docs/formant.md.
     for (int f = 0; f < 2; f++)
         for (int s = 0; s < 8; s++) {
-            double p = cal::WIN_SKIRT * pow(f ? cal::WIN_SKIRT_FRMT : cal::WIN_SKIRT_STEP, s);
-            for (int i = 0; i <= 1024; i++) g_win[f][s][i] = (float)pow(sin(PI * i / 1024.0), p);
+            double p = cal::WIN_SKIRT * pow(cal::WIN_SKIRT_STEP, s);
+            double acc = 0;
+            for (int i = 0; i <= 1024; i++) {
+                double x = sin(PI * i / 1024.0);
+                g_win[f][s][i] = (float)pow(x, f && i > 512 ? cal::WIN_SKIRT : p);
+                if (i < 1024) acc += g_win[f][s][i];
+            }
+            g_winDC[f][s] = (float)(acc / 1024.0);
         }
 }
 
 double Synth::op_sample(OpState& s, const OpV& v, double f0, double fop, int ratio, double pm, double gain) {
-    if (v.form == 0) { s.phase += fop / SR; if (s.phase >= 1) s.phase -= 1; return gain * fsin(s.phase + pm); }
+    if (v.form <= 2) {
+        s.phase += fop / SR; if (s.phase >= 1) s.phase -= 1;
+        if (v.form == 0) return gain * fsin(s.phase + pm);
+        // all1 and all2 are a stored waveform read by phase, the same way the sine is: one period of
+        // the skirt's window with its mean taken out, so a modulator reaches it as phase like any other
+        // form. MEASURED 2026-09-24 off the skirt sweep's sixty partials: all2's lines are the symmetric
+        // window's own Fourier row C(p, p/2 - k) to 0.4 to 0.7 dB at every skirt, and all1's the
+        // asymmetric window's to 0.4 to 1.3, where the two-period grain under a carrier at fop that this
+        // replaces was 36 to 66 dB out by skirt 7. At skirt 0 the DC-free sin^2 is -cos / 2, the single
+        // partial the unit gives, and the mean is gone because the unit's is: every all1/all2 take reads
+        // mean / rms under 0.03 where a raw sin^2 pulse train sits at 0.7. docs/skirt.md.
+        double x = s.phase + pm; x -= floor(x);
+        return gain * cal::FORM_LEVEL * 2.0 * (fwin(v.form == 1, v.skirt, x) - g_winDC[v.form == 1][v.skirt]);
+    }
     double fw, fc, wl;
     if (v.form == 7) { fw = f0; fc = fop; wl = s.wl7; }                                                          // formant: window at the fundamental (INFERRED bw curve)
-    // all1/all2/odd1/odd2 are a group that starts at the operator's own frequency, so they are the same
-    // windowed carrier the formant is, with the carrier at fop. MEASURED: the unit gives one partial on
-    // all1 and all2 and partials 1 and 3 on odd1 and odd2, where the fixed quarter-period window at DC
-    // this replaces gave a full harmonic series. Retriggering at twice fop is what leaves the odd
-    // partials: a grain train at that spacing under a carrier at fop puts its lines at fop, 3 fop,
-    // 5 fop and nowhere else.
+    // odd1/odd2 are a group that starts at the operator's own frequency, so they are the same windowed
+    // carrier the formant is, with the carrier at fop. MEASURED: the unit gives partials 1 and 3 on odd1
+    // and odd2, where the fixed quarter-period window at DC this replaces gave a full harmonic series.
+    // Retriggering at twice fop is what leaves the odd partials: a grain train at that spacing under a
+    // carrier at fop puts its lines at fop, 3 fop, 5 fop and nowhere else.
     //
     // The window is FIXED, and the bandwidth has nothing to do with it. MEASURED on 2026-09-19 by
     // sweeping register 0x218 through all hundred values on each form in turn: the formant's window
@@ -46,14 +69,13 @@ double Synth::op_sample(OpState& s, const OpV& v, double f0, double fop, int rat
     // either side 6 dB down and everything else at the noise floor, and the peak level flat across
     // the whole range. The 1 + ratio * 31 / 99 this replaces topped out at 32 times the fundamental
     // where the unit reaches 100. docs/formant.md.
-    // The window is one grain period for the odd and resonant forms and two for all1 and all2.
-    // MEASURED off the sideband ratios, which a sin^2 window fixes exactly: a grain exactly one
-    // period long makes the two partials either side of the peak 6.02 dB down and kills everything
-    // beyond them, which is what the unit gives res1 and res2 at every one of a hundred settings.
-    // all1 and all2 are a single partial with nothing within 88 dB, so their window is the longer
-    // one the engine has slots for.
+    // The window is one grain period for the odd and resonant forms; the "1" and "2" of each pair
+    // differ in the window's shape (g_win), not its length. MEASURED off the sideband ratios, which a
+    // sin^2 window fixes exactly: a grain exactly one period long makes the two partials either side
+    // of the peak 6.02 dB down and kills everything beyond them, which is what the unit gives res1
+    // and res2 at every one of a hundred settings.
     else if (v.form == 5 || v.form == 6) { fw = fop; fc = fop * (ratio + 1); wl = 1.0; }
-    else { fw = (v.form >= 3 ? 2 * fop : fop); fc = fop; wl = v.form < 3 ? 2.0 : 1.0; }
+    else { fw = 2 * fop; fc = fop; wl = 1.0; }
     wl = std::min(wl, 2.0);
     s.fphase += fw / SR;
     if (s.fphase >= 1) {
@@ -66,10 +88,12 @@ double Synth::op_sample(OpState& s, const OpV& v, double f0, double fop, int rat
         s.nextGen ^= 1; s.halfCount++;
     }
     double winc = fw / (wl * SR), y = 0;
+    // The "1" forms and the formant take the asymmetric window, the "2" forms the symmetric one.
+    int fam = v.form == 3 || v.form == 5 || v.form == 7;
     for (int k = 0; k < 2; k++) {
         WinGen& g = s.g[k]; if (!g.on) continue;
         g.w += winc; if (g.w >= 1) { g.on = false; continue; }
-        y += gain * fwin(v.form == 7, v.skirt, g.w) * fsin(g.c + pm); g.c += g.fc / SR;
+        y += gain * fwin(fam, v.skirt, g.w) * fsin(g.c + pm); g.c += g.fc / SR;
     }
     if (v.form == 7) { if (cal::FRMT_NORM != 0.0) y *= pow(1.0 / wl, cal::FRMT_NORM); }
     else y *= cal::FORM_LEVEL * 2.0 / wl;    // every form but sine and frmt; a shorter grain carries less

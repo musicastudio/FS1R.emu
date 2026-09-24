@@ -100,20 +100,18 @@ static const double WIN_SKIRT    = 2.0;     // the grain window is sin^p, p = WI
                                             // MEASURED: skirt 0 is sin^2 on every form, which puts the
                                             // two partials either side of a one-period grain 6.02 dB
                                             // down, exactly as the unit does on res1, res2, odd1 and odd2
-static const double WIN_SKIRT_STEP = 2.0;   // what the skirt multiplies p by, per step, on all/odd/res.
+static const double WIN_SKIRT_STEP = 2.0;   // what the skirt multiplies p by, per step, on every form.
                                             // MEASURED on odd2 and res2, whose grain is one period long
                                             // under a carrier at an integer multiple of the grain rate,
                                             // so their line amplitudes are the window's own Fourier
                                             // coefficients: p = 2, 4, 8, 16, 32, 64, 128 reproduces them
-                                            // to 0.01 dB at skirt 1 and 0.7 dB at skirt 6. all1, odd1 and
-                                            // res1 take the same law here and are still 10 to 14 dB out,
-                                            // which is what the pairs differ by and is not yet modelled
-static const double WIN_SKIRT_FRMT = 1.4142136;  // the same per step for the formant, sqrt(2) rather than
-                                            // 2. FITTED against 04_formant_2's sixteen segments at two
-                                            // bandwidths; INFERRED as a law, since the fit is per skirt
-                                            // and only its slope is closed-form. The family itself is
-                                            // still wrong there: no exponent of any sin^p gets the
-                                            // formant's skirt closer than 2.6 dB of band shape
+                                            // to 0.01 dB at skirt 1 and 0.7 dB at skirt 6. The "1" forms
+                                            // and the formant take the same p on the window's rising half
+                                            // only, with the fall held at sin^2 (ymp706.cpp, init_tables);
+                                            // MEASURED 2026-09-24, all six harmonic forms inside 0.5 to
+                                            // 1.8 dB per skirt and 04_formant_2's sixteen skirt segments
+                                            // inside 0.4 to 2.4, where the sqrt(2)-per-step symmetric fit
+                                            // the formant had could not get under 2.5. tools/check_skirt.py
 static const double FORM_LEVEL   = 0.520;   // what a grain train is worth on every form but the formant,
                                             // against a grain sum normalised by its own window length.
                                             // MEASURED: it puts all1, all2, odd1, odd2 and both resonant

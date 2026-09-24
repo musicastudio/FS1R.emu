@@ -38,14 +38,18 @@ static inline int egrate(int t) { return ((99 - clampi(t, 0, 99)) * 0xA4) >> 8; 
 // saturates at both ends: notes 12 and 24 both read -13, and note 120 reads +13 where 108 reads +12. Nothing
 // linear fits the ten, a search over every trunc((a * c0 + b) / c) with a and c under 32 comes back empty, so
 // this is a table on the chip. Four key codes is three semitones, and the engine interpolates between the
-// samples it has. Sweeping 0xC0 as a register is what closes the gap: FS1R.unlock/docs/unknowns.md experiment 8.
+// samples it has, truncating toward zero. MEASURED at one point between the samples, 2026-09-24: the demo
+// drum's note 41 is key code 87, and 19_drums' six note-41 hits want -8 or -9 there (envelope shape 8.1 to
+// 1.5 dB rms, level -0.9 to -0.3 dB), where rounding the interpolation gave -7 and the chip's own -10 at 85
+// reads 4.5. Truncation gives -8. The other two of every four are still interpolated; sweeping 0xC0 as a
+// register is what would read all 128: FS1R.unlock/docs/unknowns.md experiment 8.
 static const int EG_KEYOFF[10] = {-13, -13, -10, -5, -2, 2, 4, 8, 12, 13};   // key codes 77, 81, 85 ... 113
 static inline int eg_keyoff(int c0) {
     int i = (c0 - 77) >> 2;
     if (i < 0) return EG_KEYOFF[0];
     if (i >= 9) return EG_KEYOFF[9];
     int a = EG_KEYOFF[i], b = EG_KEYOFF[i + 1];
-    return a + ((b - a) * ((c0 - 77) & 3) + 2) / 4;
+    return a + ((b - a) * ((c0 - 77) & 3)) / 4;
 }
 // The noise band's two coefficients and its peak gain against the bandwidth register and the skirt,
 // read off cal.h's tables: piecewise linear in the register, and the skirt a per-step multiplier that
@@ -116,6 +120,7 @@ static inline double word_hz(int w) { return 440.0 * pow(2.0, (std::clamp(w, 0, 
 // ------------------------------------------------------------------------------------------ tables (chip side)
 extern float g_sin[4097];
 extern float g_win[2][8][1025];
+extern float g_winDC[2][8];
 extern float g_db2lin[2305];
 void init_tables();
 static inline float fsin(double ph) { double x = (ph - floor(ph)) * 4096.0; int i = (int)x; float f = (float)(x - i); return g_sin[i] + (g_sin[i + 1] - g_sin[i]) * f; }

@@ -161,9 +161,29 @@ Every number above comes from these. dB below each group's own peak, partials 1 
 | 7 | -0 | -0 | -0 | -0 | -0 | -0 | 0 | -0 | -0 | -0 | -1 | -1 | -2 | -2 |
 
 
+## 2026-09-24, the "1" forms, all1/all2 and the formant, closed off the same take
+
+The sweep's own CSVs carry sixty partials per step, and the take itself is in `FS1R.unlock/captures/2026-09-19-sweep/gate_smoke_skirt.flac`; period-averaging each step at the fundamental gives the grain waveform directly, which the line tables above could only hint at. Three things came out, and they close every item that was open here.
+
+**The "1" forms are the same exponent on the rising half of the window, with the fall held at `sin^2`.** The period average of all1 shows it plainly: the rise steepens with every skirt step and the fall is the same curve at skirt 7 as at skirt 0. all2's rise and fall both steepen. So there is one skirt law, `p = 2 * 2^skirt`, and two window shapes, symmetric `sin^p` for all2, odd2 and res2, and `sin^p` up / `sin^2` down for all1, odd1 and res1. Against the sixty-line rows, rms over the lines the take resolves (within 50 dB of the peak and 12 dB clear of the floor):
+
+| form | 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 |
+|---|---|---|---|---|---|---|---|---|
+| all1 | 0.00 | 0.60 | 0.55 | 1.00 | 1.03 | 1.09 | 1.18 | 1.84 |
+| all2 | 0.00 | 0.56 | 0.54 | 0.50 | 0.60 | 0.73 | 0.87 | 0.85 |
+| odd1 | 0.66 | 0.79 | 0.87 | 0.81 | 0.72 | 1.11 | 1.10 | 1.67 |
+| odd2 | 0.57 | 0.42 | 0.64 | 0.75 | 0.77 | 0.66 | 0.85 | 1.27 |
+| res1 | 0.57 | 0.54 | 1.10 | 0.74 | 0.55 | 1.08 | 1.81 | 2.76 |
+| res2 | 0.40 | 1.06 | 1.04 | 0.59 | 1.37 | 0.90 | 2.10 | 3.75 |
+
+Before this the "1" forms read 10 to 45 dB and all1/all2 48 to 81 above skirt 1. `tools/check_skirt.py` renders all six through the engine and prints this table; the res2 skirt 7 number is the take's floor, which its row reaches by partial 25.
+
+**all1 and all2 are the window alone.** all2's lines are the binomial row `C(p, p/2 - k)` on *every* harmonic, and that is a one-period `sin^p` pulse train with no carrier: the engine's two-period grain under a carrier at the fundamental was what put the group on the fourth partial. The unit's output carries none of the train's mean (mean over rms under 0.03 on every take, where the raw train has 0.7), so the engine stores one period of the window with its mean removed and reads it by the operator's phase, the same way it reads the sine. At skirt 0 that is `-cos / 2`, the single partial the unit gives. A modulator now reaches all1 and all2 as phase, which the grain construction could not do.
+
+**The formant is the asymmetric window stretched over its bandwidth.** `04_formant_2`'s sixteen skirt segments, per line against the unit at 261.6 Hz: 0.4 to 2.4 dB at bandwidth 20 and 0.6 to 1.5 at 60, level within 0.4 dB throughout, where the `sqrt(2)`-per-step symmetric fit could not get its band shape under 2.5 and was 4 dB quiet by skirt 7. `WIN_SKIRT_FRMT` is gone from `cal.h`. The guess in the section above, that the formant's window generator might be a different thing, was wrong in an instructive way: the exponent law was never different, only the window's second half.
+
+**The formant's own skirt sweep** is no longer needed; `04_formant_2` has the formant at two bandwidths and eight skirts and the model reproduces it. `sweep.py skirt` still has the fixed 1 kHz patch for `frmt` if anyone wants the seventh row of the table above.
+
 ## What is still open
 
-* **The "1" forms' window.** Measured in full above and not modelled. It is the single largest disagreement left in the voiced chain, 10 to 14 dB on three of the seven forms.
-* **The window family on the formant.** 2.52 dB that no `sin^p` can remove.
-* **all1 and all2's geometry.** The engine builds them as two overlapping grains, a window two periods long at a carrier on the fundamental, which is what makes skirt 0 a single partial with nothing within 88 dB, exactly as the unit has it. Once the skirt opens, the engine's group slides off the fundamental and peaks around the fourth partial where the unit's stays on the first, and it is 36 to 66 dB out. The unit's all2 at skirt 7 is flat from the fundamental to the twentieth partial within 4 dB. That is a geometry fault, not an exponent one: it moves both members of the pair the same way and it was there before the exponent changed.
-* **The formant's own skirt sweep.** The 2026-09-19 run gave it a ratio-mode patch and recorded silence, eighty decibels under the other six: a formant whose centre is the fundamental and whose window is 1.3 ms long puts out nothing. `sweep.py skirt` uses `formbw`'s fixed 1 kHz patch for `frmt` now, and one rerun of two minutes gets the seventh form.
+Nothing. The last thing the skirt sweep cannot say is the window's sample-level shape between the lines the take resolves, which is inside the measurement floor.

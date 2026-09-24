@@ -8,6 +8,51 @@ Entries that have a dedicated working document (`aeg.md`, `skirt.md`, `noise.md`
 
 ---
 
+## 2026-09-24, the "1" forms are the same window with a sin^2 fall, all1/all2 are the window alone, and the drum's key code is 87
+
+Nothing recorded; three readings of data already on disk, and the last three open items outside the effects.
+
+**The skirt has two window families, and the formant is one of them.** FS1R.unlock's 2026-09-19 skirt
+sweep carries sixty partials per step, not the fourteen `skirt.md` tabulated, and period-averaging each
+step's take gives the grain waveform itself. On all1 the rise sharpens with the skirt and the fall never
+moves; on all2 both do. So the "2" forms are `sin^p` with `p = 2 * 2^skirt` (the binomial rows, as before),
+and the "1" forms are the **same exponent on the rising half with the fall held at `sin^2`**. That one
+asymmetric window puts all1, odd1 and res1 inside 0.4 to 1.8 dB rms over the lines the take resolves at
+every skirt, where no symmetric `sin^p` got under 6. `04_formant_2` says the formant is the same
+asymmetric window stretched over its bandwidth: its sixteen skirt segments land at 0.4 to 2.4 dB per
+line, level to 0.4 dB, where the `sqrt(2)`-per-step symmetric fit had 2.5 dB of band shape and 4 dB of
+level at skirt 7. `WIN_SKIRT_FRMT` is gone; one skirt law, two window shapes. `tools/check_skirt.py`
+renders all six harmonic forms at every skirt against the sweep and is the check.
+
+**all1 and all2 are the window alone, read by phase like the sine.** The engine had them as a two-period
+grain under a carrier at the fundamental, which is one partial at skirt 0 and 36 to 66 dB wrong above it.
+all2's sixty lines are `C(p, p/2 - k)` on every harmonic, which is a one-period `sin^p` pulse train with
+no carrier at all; the unit's output carries none of its mean (mean / rms under 0.03 on every take where a
+raw pulse train sits at 0.7). So the two are a stored one-period waveform, the window minus its mean,
+indexed by the operator's phase, and a modulator reaches them as phase like any other form. all1 and all2
+now score 0.5 to 1.8 dB per skirt against 48 to 81 before; `04_formant_3`'s four form segments do not
+move, since they sit at skirt 0.
+
+**The drum's note 41 is key code 87, not 86** (`(NOTETAB[41] >> 8) + 10`; the 2026-09-23 entry miscounted).
+Between the measured -10 at 85 and -5 at 89, the rounded interpolation gave -7 and the six note-41 hits of
+`19_drums` want -8 or -9: envelope shape 8.1 to 1.5 dB rms and level -0.9 to -0.3 dB over the six, against
+5.8 to 8.9 and +0.4 to +1.0 at -7, and 13 to 28 at -5. Truncating toward zero instead of rounding gives -8.
+`19_drums` 1.25 / 3.03 to **0.81 / 1.92** in level and envelope. The other two of every four key codes are
+still interpolated; register 0xC0 driven directly is what reads all 128 (`fs1r_capture_session4.py`).
+
+**The unvoiced "pedestal above 4 kHz" is already closed** and had been since 2026-09-22's two-pole reading:
+octave bands of hardware minus engine over eleven wideband unvoiced segments across three files sit at
+-0.5 to +0.5 dB from 125 Hz to 16 kHz, including 4 to 8 and 8 to 16 kHz. The 3.1 to 3.7 dB
+`analyze_capture.py` still reports as "shape" on the 1 kHz files is its sixth-octave bands below 100 Hz, one
+or two FFT bins each at the two floors, which `noise.md` already said; a gate on those was tried and
+dropped because it also empties the sparse-spectrum files. The number is the metric, not the engine.
+
+Capture bench, before to after: `04_formant_2` shape 2.52 to **0.44**, `19_drums` envelope 3.03 to **1.92**
+and level 1.25 to **0.81**, `06_filter_2` envelope 2.52 to **1.78**, `03_fm_1` shape 0.19 to 0.01, `14_sens`
+level 1.66 to 1.17; `04_formant_3` reads 0.73 to 2.14 on one segment (`f0-note72`, six bands, a 1 kHz
+formant three partials wide at a 523 Hz fundamental) while its other 24 hold. Nothing else moved. Demo,
+effects in: mean|err| 5.23 to **4.92**, tilt 2.06 to **1.96**, worst envelope correlation 0.902 to **0.908**.
+
 ## 2026-09-23, the plugin's voice Note Shift parameter defaulted to -24
 
 rgwan: some performances play an octave off in FSVR. The engine's pitch path is the firmware's

@@ -152,7 +152,7 @@ Two notes on reading the demo numbers. The band tilt is each song's per-octave e
 
 ## What is still open
 
-* **The key code law between its samples.** Ten key codes four apart, interpolated. Register 0xC0 driven directly gives all 128, and says whether the chip latches a rate at its segment's start or re-reads the key code every frame. `FS1R.unlock/docs/unknowns.md` experiment 8, `sweep.py keycode`.
+* **The key code law between its samples.** Ten key codes four apart, interpolated, truncating toward zero. One point between them is measured now (2026-09-24): key code 87, the demo drum's note 41, wants -8 or -9 off `19_drums`' six hits, and truncation gives -8 where rounding gave -7. Register 0xC0 driven directly gives all 128, and says whether the chip latches a rate at its segment's start or re-reads the key code every frame. `FS1R.unlock/captures/fs1r_capture_session4.py keycode`.
 * **Whether the rate scaling reaches the hold register.** Free with the same run, since its patch carries a hold.
 * **The hold's fixed lag.** 8.1 ms with six milliseconds of scatter that is the 192.3 Hz tick. A register sweep does not fix that either; only a trace of the chip's own writes would, which is the SH-2 core item.
 * **The 0.55 % the decay rates sit under `rate_secs`** over rates 16 to 33, unexplained and too small to model.

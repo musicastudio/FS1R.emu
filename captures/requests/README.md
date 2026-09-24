@@ -36,7 +36,14 @@ The recording procedure is in `docs/captures/hardware_capture_request.md`. In sh
 | `08b_panlevel_perfpn.mid` | 8 | 0.7 | the performance pan, which 08_panlevel leaves at centre |
 | `12_fseqlevel.mid` | 14 | 1.3 | what the voiced level register does between Fseq frames |
 | `15_filter.mid` | 53 | 3.8 | the per-voice filter, against a source that has energy at every frequency |
+| `16_velocity_1.mid`, `_2` | 63 | 2.8 | the velocity law at seven amplitude sensitivities |
+| `17_egdecay.mid` | 10 | 0.9 | an EG decay that stops at a level rather than at silence |
+| `18_fmchain.mid` | 11 | 0.8 | the modulation index on the second and third links of a chain |
+| `19_drums.mid` | 16 | 0.6 | the demo's drum voice one hit at a time |
+| `20_fltmod.mid` | 15 | 2.3 | the filter EG depth scale and the LFO2 rate inside VOP3-1 |
+| `21_keycode.mid` | 110 | 8.9 | the EG key code table at every semitone, one decay per note 12 to 120. **Not yet recorded** |
+| `22_ures.mid` | 20 | 1.5 | the unvoiced resonance carrier's level against the bandwidth register. **Not yet recorded** |
 
-Total 850 segments, 68 minutes.
+Total 1095 segments, 85 minutes; everything through `20_fltmod` has a take in `captures/hardware/`. The two unrecorded files are played by `FS1R.unlock/captures/fs1r_capture_session4.py record`; nothing in the engine waits on them.
 
 Files are numbered in priority order. 01 to 04 carry most of the value: without 01 nothing else can be read in absolute terms, and 02 to 04 settle the envelope, the modulation index and the formant window, which are the three models the engine leans on hardest.

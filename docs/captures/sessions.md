@@ -12,6 +12,8 @@ The audio capture kit is a separate thing and lives in this repo, at [captures/]
 | Session 2 | 2026-09-19 | Nine stages, plus one unbroken recording across three sweeps. The CPU side checked at 92,928 points. Two constants the session went after came back measured |
 | Band and skirt sweep | 2026-09-19 | The three parameters that shape a voiced operator. First run aimed at the wrong register and was repeated once the firmware was read |
 | Filter and level sweeps | 2026-09-20, 2026-09-21 | Filter coefficients and the Fseq level path |
+| Session 3 | 2026-09-23 | The filter EG's rate law off the CPU's stage word, LFO2 confirmed as VOP3-1's, and the six tonal request files recorded (`16_velocity` to `20_fltmod`) |
+| Session 4 | not yet run | `fs1r_capture_session4.py`: the key code table at every semitone, the unvoiced resonance carrier's level law, the per-channel arrays under loud notes. Nothing in the engine waits on it |
 
 ## What the sessions changed in the engine
 

@@ -17386,6 +17386,2252 @@
    "duration_s": 139.52,
    "sha1": "15e3e0eadfb38f6e9c246e11ca778c55a9e20b3d",
    "why": "the filter EG depth scale and the LFO2 rate, both inside VOP3-1"
+  },
+  {
+   "file": "21_keycode.mid",
+   "segments": [
+    {
+     "id": "kc-ref-note60",
+     "what": "the same decay at time scaling 0: the rate with no key term, the ladder's origin",
+     "pins": [
+      "rate scaling"
+     ],
+     "measure": "envelope",
+     "note": 60,
+     "velocity": 100,
+     "t_on": 3.4,
+     "t_off": 7.4,
+     "t_end": 7.7,
+     "steady": [
+      4.0,
+      7.2
+     ]
+    },
+    {
+     "id": "kc-note12",
+     "what": "time scaling 7 at note 12, key code 77: the chip's rate at this key code, and its hold",
+     "pins": [
+      "rate scaling"
+     ],
+     "measure": "envelope",
+     "note": 12,
+     "velocity": 100,
+     "t_on": 8.2,
+     "t_off": 12.2,
+     "t_end": 12.5,
+     "steady": [
+      8.8,
+      12.0
+     ]
+    },
+    {
+     "id": "kc-note13",
+     "what": "time scaling 7 at note 13, key code 78: the chip's rate at this key code, and its hold",
+     "pins": [
+      "rate scaling"
+     ],
+     "measure": "envelope",
+     "note": 13,
+     "velocity": 100,
+     "t_on": 13.0,
+     "t_off": 17.0,
+     "t_end": 17.3,
+     "steady": [
+      13.6,
+      16.8
+     ]
+    },
+    {
+     "id": "kc-note14",
+     "what": "time scaling 7 at note 14, key code 78: the chip's rate at this key code, and its hold",
+     "pins": [
+      "rate scaling"
+     ],
+     "measure": "envelope",
+     "note": 14,
+     "velocity": 100,
+     "t_on": 17.8,
+     "t_off": 21.8,
+     "t_end": 22.1,
+     "steady": [
+      18.4,
+      21.6
+     ]
+    },
+    {
+     "id": "kc-note15",
+     "what": "time scaling 7 at note 15, key code 78: the chip's rate at this key code, and its hold",
+     "pins": [
+      "rate scaling"
+     ],
+     "measure": "envelope",
+     "note": 15,
+     "velocity": 100,
+     "t_on": 22.6,
+     "t_off": 26.6,
+     "t_end": 26.9,
+     "steady": [
+      23.2,
+      26.4
+     ]
+    },
+    {
+     "id": "kc-note16",
+     "what": "time scaling 7 at note 16, key code 79: the chip's rate at this key code, and its hold",
+     "pins": [
+      "rate scaling"
+     ],
+     "measure": "envelope",
+     "note": 16,
+     "velocity": 100,
+     "t_on": 27.4,
+     "t_off": 31.4,
+     "t_end": 31.7,
+     "steady": [
+      28.0,
+      31.2
+     ]
+    },
+    {
+     "id": "kc-note17",
+     "what": "time scaling 7 at note 17, key code 79: the chip's rate at this key code, and its hold",
+     "pins": [
+      "rate scaling"
+     ],
+     "measure": "envelope",
+     "note": 17,
+     "velocity": 100,
+     "t_on": 32.2,
+     "t_off": 36.2,
+     "t_end": 36.5,
+     "steady": [
+      32.8,
+      36.0
+     ]
+    },
+    {
+     "id": "kc-note18",
+     "what": "time scaling 7 at note 18, key code 79: the chip's rate at this key code, and its hold",
+     "pins": [
+      "rate scaling"
+     ],
+     "measure": "envelope",
+     "note": 18,
+     "velocity": 100,
+     "t_on": 37.0,
+     "t_off": 41.0,
+     "t_end": 41.3,
+     "steady": [
+      37.6,
+      40.8
+     ]
+    },
+    {
+     "id": "kc-note19",
+     "what": "time scaling 7 at note 19, key code 80: the chip's rate at this key code, and its hold",
+     "pins": [
+      "rate scaling"
+     ],
+     "measure": "envelope",
+     "note": 19,
+     "velocity": 100,
+     "t_on": 41.8,
+     "t_off": 45.8,
+     "t_end": 46.1,
+     "steady": [
+      42.4,
+      45.6
+     ]
+    },
+    {
+     "id": "kc-note20",
+     "what": "time scaling 7 at note 20, key code 80: the chip's rate at this key code, and its hold",
+     "pins": [
+      "rate scaling"
+     ],
+     "measure": "envelope",
+     "note": 20,
+     "velocity": 100,
+     "t_on": 46.6,
+     "t_off": 50.6,
+     "t_end": 50.9,
+     "steady": [
+      47.2,
+      50.4
+     ]
+    },
+    {
+     "id": "kc-note21",
+     "what": "time scaling 7 at note 21, key code 80: the chip's rate at this key code, and its hold",
+     "pins": [
+      "rate scaling"
+     ],
+     "measure": "envelope",
+     "note": 21,
+     "velocity": 100,
+     "t_on": 51.4,
+     "t_off": 55.4,
+     "t_end": 55.7,
+     "steady": [
+      52.0,
+      55.2
+     ]
+    },
+    {
+     "id": "kc-note22",
+     "what": "time scaling 7 at note 22, key code 81: the chip's rate at this key code, and its hold",
+     "pins": [
+      "rate scaling"
+     ],
+     "measure": "envelope",
+     "note": 22,
+     "velocity": 100,
+     "t_on": 56.2,
+     "t_off": 60.2,
+     "t_end": 60.5,
+     "steady": [
+      56.8,
+      60.0
+     ]
+    },
+    {
+     "id": "kc-note23",
+     "what": "time scaling 7 at note 23, key code 81: the chip's rate at this key code, and its hold",
+     "pins": [
+      "rate scaling"
+     ],
+     "measure": "envelope",
+     "note": 23,
+     "velocity": 100,
+     "t_on": 61.0,
+     "t_off": 65.0,
+     "t_end": 65.3,
+     "steady": [
+      61.6,
+      64.8
+     ]
+    },
+    {
+     "id": "kc-note24",
+     "what": "time scaling 7 at note 24, key code 81: the chip's rate at this key code, and its hold",
+     "pins": [
+      "rate scaling"
+     ],
+     "measure": "envelope",
+     "note": 24,
+     "velocity": 100,
+     "t_on": 65.8,
+     "t_off": 69.8,
+     "t_end": 70.1,
+     "steady": [
+      66.4,
+      69.6
+     ]
+    },
+    {
+     "id": "kc-note25",
+     "what": "time scaling 7 at note 25, key code 82: the chip's rate at this key code, and its hold",
+     "pins": [
+      "rate scaling"
+     ],
+     "measure": "envelope",
+     "note": 25,
+     "velocity": 100,
+     "t_on": 70.6,
+     "t_off": 74.6,
+     "t_end": 74.9,
+     "steady": [
+      71.2,
+      74.4
+     ]
+    },
+    {
+     "id": "kc-note26",
+     "what": "time scaling 7 at note 26, key code 82: the chip's rate at this key code, and its hold",
+     "pins": [
+      "rate scaling"
+     ],
+     "measure": "envelope",
+     "note": 26,
+     "velocity": 100,
+     "t_on": 75.4,
+     "t_off": 79.4,
+     "t_end": 79.7,
+     "steady": [
+      76.0,
+      79.2
+     ]
+    },
+    {
+     "id": "kc-note27",
+     "what": "time scaling 7 at note 27, key code 82: the chip's rate at this key code, and its hold",
+     "pins": [
+      "rate scaling"
+     ],
+     "measure": "envelope",
+     "note": 27,
+     "velocity": 100,
+     "t_on": 80.2,
+     "t_off": 84.2,
+     "t_end": 84.5,
+     "steady": [
+      80.8,
+      84.0
+     ]
+    },
+    {
+     "id": "kc-note28",
+     "what": "time scaling 7 at note 28, key code 83: the chip's rate at this key code, and its hold",
+     "pins": [
+      "rate scaling"
+     ],
+     "measure": "envelope",
+     "note": 28,
+     "velocity": 100,
+     "t_on": 85.0,
+     "t_off": 89.0,
+     "t_end": 89.3,
+     "steady": [
+      85.6,
+      88.8
+     ]
+    },
+    {
+     "id": "kc-note29",
+     "what": "time scaling 7 at note 29, key code 83: the chip's rate at this key code, and its hold",
+     "pins": [
+      "rate scaling"
+     ],
+     "measure": "envelope",
+     "note": 29,
+     "velocity": 100,
+     "t_on": 89.8,
+     "t_off": 93.8,
+     "t_end": 94.1,
+     "steady": [
+      90.4,
+      93.6
+     ]
+    },
+    {
+     "id": "kc-note30",
+     "what": "time scaling 7 at note 30, key code 83: the chip's rate at this key code, and its hold",
+     "pins": [
+      "rate scaling"
+     ],
+     "measure": "envelope",
+     "note": 30,
+     "velocity": 100,
+     "t_on": 94.6,
+     "t_off": 98.6,
+     "t_end": 98.9,
+     "steady": [
+      95.2,
+      98.4
+     ]
+    },
+    {
+     "id": "kc-note31",
+     "what": "time scaling 7 at note 31, key code 84: the chip's rate at this key code, and its hold",
+     "pins": [
+      "rate scaling"
+     ],
+     "measure": "envelope",
+     "note": 31,
+     "velocity": 100,
+     "t_on": 99.4,
+     "t_off": 103.4,
+     "t_end": 103.7,
+     "steady": [
+      100.0,
+      103.2
+     ]
+    },
+    {
+     "id": "kc-note32",
+     "what": "time scaling 7 at note 32, key code 84: the chip's rate at this key code, and its hold",
+     "pins": [
+      "rate scaling"
+     ],
+     "measure": "envelope",
+     "note": 32,
+     "velocity": 100,
+     "t_on": 104.2,
+     "t_off": 108.2,
+     "t_end": 108.5,
+     "steady": [
+      104.8,
+      108.0
+     ]
+    },
+    {
+     "id": "kc-note33",
+     "what": "time scaling 7 at note 33, key code 84: the chip's rate at this key code, and its hold",
+     "pins": [
+      "rate scaling"
+     ],
+     "measure": "envelope",
+     "note": 33,
+     "velocity": 100,
+     "t_on": 109.0,
+     "t_off": 113.0,
+     "t_end": 113.3,
+     "steady": [
+      109.6,
+      112.8
+     ]
+    },
+    {
+     "id": "kc-note34",
+     "what": "time scaling 7 at note 34, key code 85: the chip's rate at this key code, and its hold",
+     "pins": [
+      "rate scaling"
+     ],
+     "measure": "envelope",
+     "note": 34,
+     "velocity": 100,
+     "t_on": 113.8,
+     "t_off": 117.8,
+     "t_end": 118.1,
+     "steady": [
+      114.4,
+      117.6
+     ]
+    },
+    {
+     "id": "kc-note35",
+     "what": "time scaling 7 at note 35, key code 85: the chip's rate at this key code, and its hold",
+     "pins": [
+      "rate scaling"
+     ],
+     "measure": "envelope",
+     "note": 35,
+     "velocity": 100,
+     "t_on": 118.6,
+     "t_off": 122.6,
+     "t_end": 122.9,
+     "steady": [
+      119.2,
+      122.4
+     ]
+    },
+    {
+     "id": "kc-note36",
+     "what": "time scaling 7 at note 36, key code 85: the chip's rate at this key code, and its hold",
+     "pins": [
+      "rate scaling"
+     ],
+     "measure": "envelope",
+     "note": 36,
+     "velocity": 100,
+     "t_on": 123.4,
+     "t_off": 127.4,
+     "t_end": 127.7,
+     "steady": [
+      124.0,
+      127.2
+     ]
+    },
+    {
+     "id": "kc-note37",
+     "what": "time scaling 7 at note 37, key code 86: the chip's rate at this key code, and its hold",
+     "pins": [
+      "rate scaling"
+     ],
+     "measure": "envelope",
+     "note": 37,
+     "velocity": 100,
+     "t_on": 128.2,
+     "t_off": 132.2,
+     "t_end": 132.5,
+     "steady": [
+      128.8,
+      132.0
+     ]
+    },
+    {
+     "id": "kc-note38",
+     "what": "time scaling 7 at note 38, key code 86: the chip's rate at this key code, and its hold",
+     "pins": [
+      "rate scaling"
+     ],
+     "measure": "envelope",
+     "note": 38,
+     "velocity": 100,
+     "t_on": 133.0,
+     "t_off": 137.0,
+     "t_end": 137.3,
+     "steady": [
+      133.6,
+      136.8
+     ]
+    },
+    {
+     "id": "kc-note39",
+     "what": "time scaling 7 at note 39, key code 86: the chip's rate at this key code, and its hold",
+     "pins": [
+      "rate scaling"
+     ],
+     "measure": "envelope",
+     "note": 39,
+     "velocity": 100,
+     "t_on": 137.8,
+     "t_off": 141.8,
+     "t_end": 142.1,
+     "steady": [
+      138.4,
+      141.6
+     ]
+    },
+    {
+     "id": "kc-note40",
+     "what": "time scaling 7 at note 40, key code 87: the chip's rate at this key code, and its hold",
+     "pins": [
+      "rate scaling"
+     ],
+     "measure": "envelope",
+     "note": 40,
+     "velocity": 100,
+     "t_on": 142.6,
+     "t_off": 146.6,
+     "t_end": 146.9,
+     "steady": [
+      143.2,
+      146.4
+     ]
+    },
+    {
+     "id": "kc-note41",
+     "what": "time scaling 7 at note 41, key code 87: the chip's rate at this key code, and its hold",
+     "pins": [
+      "rate scaling"
+     ],
+     "measure": "envelope",
+     "note": 41,
+     "velocity": 100,
+     "t_on": 147.4,
+     "t_off": 151.4,
+     "t_end": 151.7,
+     "steady": [
+      148.0,
+      151.2
+     ]
+    },
+    {
+     "id": "kc-note42",
+     "what": "time scaling 7 at note 42, key code 87: the chip's rate at this key code, and its hold",
+     "pins": [
+      "rate scaling"
+     ],
+     "measure": "envelope",
+     "note": 42,
+     "velocity": 100,
+     "t_on": 152.2,
+     "t_off": 156.2,
+     "t_end": 156.5,
+     "steady": [
+      152.8,
+      156.0
+     ]
+    },
+    {
+     "id": "kc-note43",
+     "what": "time scaling 7 at note 43, key code 88: the chip's rate at this key code, and its hold",
+     "pins": [
+      "rate scaling"
+     ],
+     "measure": "envelope",
+     "note": 43,
+     "velocity": 100,
+     "t_on": 157.0,
+     "t_off": 161.0,
+     "t_end": 161.3,
+     "steady": [
+      157.6,
+      160.8
+     ]
+    },
+    {
+     "id": "kc-note44",
+     "what": "time scaling 7 at note 44, key code 88: the chip's rate at this key code, and its hold",
+     "pins": [
+      "rate scaling"
+     ],
+     "measure": "envelope",
+     "note": 44,
+     "velocity": 100,
+     "t_on": 161.8,
+     "t_off": 165.8,
+     "t_end": 166.1,
+     "steady": [
+      162.4,
+      165.6
+     ]
+    },
+    {
+     "id": "kc-note45",
+     "what": "time scaling 7 at note 45, key code 88: the chip's rate at this key code, and its hold",
+     "pins": [
+      "rate scaling"
+     ],
+     "measure": "envelope",
+     "note": 45,
+     "velocity": 100,
+     "t_on": 166.6,
+     "t_off": 170.6,
+     "t_end": 170.9,
+     "steady": [
+      167.2,
+      170.4
+     ]
+    },
+    {
+     "id": "kc-note46",
+     "what": "time scaling 7 at note 46, key code 89: the chip's rate at this key code, and its hold",
+     "pins": [
+      "rate scaling"
+     ],
+     "measure": "envelope",
+     "note": 46,
+     "velocity": 100,
+     "t_on": 171.4,
+     "t_off": 175.4,
+     "t_end": 175.7,
+     "steady": [
+      172.0,
+      175.2
+     ]
+    },
+    {
+     "id": "kc-note47",
+     "what": "time scaling 7 at note 47, key code 89: the chip's rate at this key code, and its hold",
+     "pins": [
+      "rate scaling"
+     ],
+     "measure": "envelope",
+     "note": 47,
+     "velocity": 100,
+     "t_on": 176.2,
+     "t_off": 180.2,
+     "t_end": 180.5,
+     "steady": [
+      176.8,
+      180.0
+     ]
+    },
+    {
+     "id": "kc-note48",
+     "what": "time scaling 7 at note 48, key code 89: the chip's rate at this key code, and its hold",
+     "pins": [
+      "rate scaling"
+     ],
+     "measure": "envelope",
+     "note": 48,
+     "velocity": 100,
+     "t_on": 181.0,
+     "t_off": 185.0,
+     "t_end": 185.3,
+     "steady": [
+      181.6,
+      184.8
+     ]
+    },
+    {
+     "id": "kc-note49",
+     "what": "time scaling 7 at note 49, key code 90: the chip's rate at this key code, and its hold",
+     "pins": [
+      "rate scaling"
+     ],
+     "measure": "envelope",
+     "note": 49,
+     "velocity": 100,
+     "t_on": 185.8,
+     "t_off": 189.8,
+     "t_end": 190.1,
+     "steady": [
+      186.4,
+      189.6
+     ]
+    },
+    {
+     "id": "kc-note50",
+     "what": "time scaling 7 at note 50, key code 90: the chip's rate at this key code, and its hold",
+     "pins": [
+      "rate scaling"
+     ],
+     "measure": "envelope",
+     "note": 50,
+     "velocity": 100,
+     "t_on": 190.6,
+     "t_off": 194.6,
+     "t_end": 194.9,
+     "steady": [
+      191.2,
+      194.4
+     ]
+    },
+    {
+     "id": "kc-note51",
+     "what": "time scaling 7 at note 51, key code 90: the chip's rate at this key code, and its hold",
+     "pins": [
+      "rate scaling"
+     ],
+     "measure": "envelope",
+     "note": 51,
+     "velocity": 100,
+     "t_on": 195.4,
+     "t_off": 199.4,
+     "t_end": 199.7,
+     "steady": [
+      196.0,
+      199.2
+     ]
+    },
+    {
+     "id": "kc-note52",
+     "what": "time scaling 7 at note 52, key code 91: the chip's rate at this key code, and its hold",
+     "pins": [
+      "rate scaling"
+     ],
+     "measure": "envelope",
+     "note": 52,
+     "velocity": 100,
+     "t_on": 200.2,
+     "t_off": 204.2,
+     "t_end": 204.5,
+     "steady": [
+      200.8,
+      204.0
+     ]
+    },
+    {
+     "id": "kc-note53",
+     "what": "time scaling 7 at note 53, key code 91: the chip's rate at this key code, and its hold",
+     "pins": [
+      "rate scaling"
+     ],
+     "measure": "envelope",
+     "note": 53,
+     "velocity": 100,
+     "t_on": 205.0,
+     "t_off": 209.0,
+     "t_end": 209.3,
+     "steady": [
+      205.6,
+      208.8
+     ]
+    },
+    {
+     "id": "kc-note54",
+     "what": "time scaling 7 at note 54, key code 91: the chip's rate at this key code, and its hold",
+     "pins": [
+      "rate scaling"
+     ],
+     "measure": "envelope",
+     "note": 54,
+     "velocity": 100,
+     "t_on": 209.8,
+     "t_off": 213.8,
+     "t_end": 214.1,
+     "steady": [
+      210.4,
+      213.6
+     ]
+    },
+    {
+     "id": "kc-note55",
+     "what": "time scaling 7 at note 55, key code 92: the chip's rate at this key code, and its hold",
+     "pins": [
+      "rate scaling"
+     ],
+     "measure": "envelope",
+     "note": 55,
+     "velocity": 100,
+     "t_on": 214.6,
+     "t_off": 218.6,
+     "t_end": 218.9,
+     "steady": [
+      215.2,
+      218.4
+     ]
+    },
+    {
+     "id": "kc-note56",
+     "what": "time scaling 7 at note 56, key code 92: the chip's rate at this key code, and its hold",
+     "pins": [
+      "rate scaling"
+     ],
+     "measure": "envelope",
+     "note": 56,
+     "velocity": 100,
+     "t_on": 219.4,
+     "t_off": 223.4,
+     "t_end": 223.7,
+     "steady": [
+      220.0,
+      223.2
+     ]
+    },
+    {
+     "id": "kc-note57",
+     "what": "time scaling 7 at note 57, key code 92: the chip's rate at this key code, and its hold",
+     "pins": [
+      "rate scaling"
+     ],
+     "measure": "envelope",
+     "note": 57,
+     "velocity": 100,
+     "t_on": 224.2,
+     "t_off": 228.2,
+     "t_end": 228.5,
+     "steady": [
+      224.8,
+      228.0
+     ]
+    },
+    {
+     "id": "kc-note58",
+     "what": "time scaling 7 at note 58, key code 93: the chip's rate at this key code, and its hold",
+     "pins": [
+      "rate scaling"
+     ],
+     "measure": "envelope",
+     "note": 58,
+     "velocity": 100,
+     "t_on": 229.0,
+     "t_off": 233.0,
+     "t_end": 233.3,
+     "steady": [
+      229.6,
+      232.8
+     ]
+    },
+    {
+     "id": "kc-note59",
+     "what": "time scaling 7 at note 59, key code 93: the chip's rate at this key code, and its hold",
+     "pins": [
+      "rate scaling"
+     ],
+     "measure": "envelope",
+     "note": 59,
+     "velocity": 100,
+     "t_on": 233.8,
+     "t_off": 237.8,
+     "t_end": 238.1,
+     "steady": [
+      234.4,
+      237.6
+     ]
+    },
+    {
+     "id": "kc-note60",
+     "what": "time scaling 7 at note 60, key code 93: the chip's rate at this key code, and its hold",
+     "pins": [
+      "rate scaling"
+     ],
+     "measure": "envelope",
+     "note": 60,
+     "velocity": 100,
+     "t_on": 238.6,
+     "t_off": 242.6,
+     "t_end": 242.9,
+     "steady": [
+      239.2,
+      242.4
+     ]
+    },
+    {
+     "id": "kc-note61",
+     "what": "time scaling 7 at note 61, key code 94: the chip's rate at this key code, and its hold",
+     "pins": [
+      "rate scaling"
+     ],
+     "measure": "envelope",
+     "note": 61,
+     "velocity": 100,
+     "t_on": 243.4,
+     "t_off": 247.4,
+     "t_end": 247.7,
+     "steady": [
+      244.0,
+      247.2
+     ]
+    },
+    {
+     "id": "kc-note62",
+     "what": "time scaling 7 at note 62, key code 94: the chip's rate at this key code, and its hold",
+     "pins": [
+      "rate scaling"
+     ],
+     "measure": "envelope",
+     "note": 62,
+     "velocity": 100,
+     "t_on": 248.2,
+     "t_off": 252.2,
+     "t_end": 252.5,
+     "steady": [
+      248.8,
+      252.0
+     ]
+    },
+    {
+     "id": "kc-note63",
+     "what": "time scaling 7 at note 63, key code 94: the chip's rate at this key code, and its hold",
+     "pins": [
+      "rate scaling"
+     ],
+     "measure": "envelope",
+     "note": 63,
+     "velocity": 100,
+     "t_on": 253.0,
+     "t_off": 257.0,
+     "t_end": 257.3,
+     "steady": [
+      253.6,
+      256.8
+     ]
+    },
+    {
+     "id": "kc-note64",
+     "what": "time scaling 7 at note 64, key code 95: the chip's rate at this key code, and its hold",
+     "pins": [
+      "rate scaling"
+     ],
+     "measure": "envelope",
+     "note": 64,
+     "velocity": 100,
+     "t_on": 257.8,
+     "t_off": 261.8,
+     "t_end": 262.1,
+     "steady": [
+      258.4,
+      261.6
+     ]
+    },
+    {
+     "id": "kc-note65",
+     "what": "time scaling 7 at note 65, key code 95: the chip's rate at this key code, and its hold",
+     "pins": [
+      "rate scaling"
+     ],
+     "measure": "envelope",
+     "note": 65,
+     "velocity": 100,
+     "t_on": 262.6,
+     "t_off": 266.6,
+     "t_end": 266.9,
+     "steady": [
+      263.2,
+      266.4
+     ]
+    },
+    {
+     "id": "kc-note66",
+     "what": "time scaling 7 at note 66, key code 95: the chip's rate at this key code, and its hold",
+     "pins": [
+      "rate scaling"
+     ],
+     "measure": "envelope",
+     "note": 66,
+     "velocity": 100,
+     "t_on": 267.4,
+     "t_off": 271.4,
+     "t_end": 271.7,
+     "steady": [
+      268.0,
+      271.2
+     ]
+    },
+    {
+     "id": "kc-note67",
+     "what": "time scaling 7 at note 67, key code 96: the chip's rate at this key code, and its hold",
+     "pins": [
+      "rate scaling"
+     ],
+     "measure": "envelope",
+     "note": 67,
+     "velocity": 100,
+     "t_on": 272.2,
+     "t_off": 276.2,
+     "t_end": 276.5,
+     "steady": [
+      272.8,
+      276.0
+     ]
+    },
+    {
+     "id": "kc-note68",
+     "what": "time scaling 7 at note 68, key code 96: the chip's rate at this key code, and its hold",
+     "pins": [
+      "rate scaling"
+     ],
+     "measure": "envelope",
+     "note": 68,
+     "velocity": 100,
+     "t_on": 277.0,
+     "t_off": 281.0,
+     "t_end": 281.3,
+     "steady": [
+      277.6,
+      280.8
+     ]
+    },
+    {
+     "id": "kc-note69",
+     "what": "time scaling 7 at note 69, key code 96: the chip's rate at this key code, and its hold",
+     "pins": [
+      "rate scaling"
+     ],
+     "measure": "envelope",
+     "note": 69,
+     "velocity": 100,
+     "t_on": 281.8,
+     "t_off": 285.8,
+     "t_end": 286.1,
+     "steady": [
+      282.4,
+      285.6
+     ]
+    },
+    {
+     "id": "kc-note70",
+     "what": "time scaling 7 at note 70, key code 97: the chip's rate at this key code, and its hold",
+     "pins": [
+      "rate scaling"
+     ],
+     "measure": "envelope",
+     "note": 70,
+     "velocity": 100,
+     "t_on": 286.6,
+     "t_off": 290.6,
+     "t_end": 290.9,
+     "steady": [
+      287.2,
+      290.4
+     ]
+    },
+    {
+     "id": "kc-note71",
+     "what": "time scaling 7 at note 71, key code 97: the chip's rate at this key code, and its hold",
+     "pins": [
+      "rate scaling"
+     ],
+     "measure": "envelope",
+     "note": 71,
+     "velocity": 100,
+     "t_on": 291.4,
+     "t_off": 295.4,
+     "t_end": 295.7,
+     "steady": [
+      292.0,
+      295.2
+     ]
+    },
+    {
+     "id": "kc-note72",
+     "what": "time scaling 7 at note 72, key code 97: the chip's rate at this key code, and its hold",
+     "pins": [
+      "rate scaling"
+     ],
+     "measure": "envelope",
+     "note": 72,
+     "velocity": 100,
+     "t_on": 296.2,
+     "t_off": 300.2,
+     "t_end": 300.5,
+     "steady": [
+      296.8,
+      300.0
+     ]
+    },
+    {
+     "id": "kc-note73",
+     "what": "time scaling 7 at note 73, key code 98: the chip's rate at this key code, and its hold",
+     "pins": [
+      "rate scaling"
+     ],
+     "measure": "envelope",
+     "note": 73,
+     "velocity": 100,
+     "t_on": 301.0,
+     "t_off": 305.0,
+     "t_end": 305.3,
+     "steady": [
+      301.6,
+      304.8
+     ]
+    },
+    {
+     "id": "kc-note74",
+     "what": "time scaling 7 at note 74, key code 98: the chip's rate at this key code, and its hold",
+     "pins": [
+      "rate scaling"
+     ],
+     "measure": "envelope",
+     "note": 74,
+     "velocity": 100,
+     "t_on": 305.8,
+     "t_off": 309.8,
+     "t_end": 310.1,
+     "steady": [
+      306.4,
+      309.6
+     ]
+    },
+    {
+     "id": "kc-note75",
+     "what": "time scaling 7 at note 75, key code 98: the chip's rate at this key code, and its hold",
+     "pins": [
+      "rate scaling"
+     ],
+     "measure": "envelope",
+     "note": 75,
+     "velocity": 100,
+     "t_on": 310.6,
+     "t_off": 314.6,
+     "t_end": 314.9,
+     "steady": [
+      311.2,
+      314.4
+     ]
+    },
+    {
+     "id": "kc-note76",
+     "what": "time scaling 7 at note 76, key code 99: the chip's rate at this key code, and its hold",
+     "pins": [
+      "rate scaling"
+     ],
+     "measure": "envelope",
+     "note": 76,
+     "velocity": 100,
+     "t_on": 315.4,
+     "t_off": 319.4,
+     "t_end": 319.7,
+     "steady": [
+      316.0,
+      319.2
+     ]
+    },
+    {
+     "id": "kc-note77",
+     "what": "time scaling 7 at note 77, key code 99: the chip's rate at this key code, and its hold",
+     "pins": [
+      "rate scaling"
+     ],
+     "measure": "envelope",
+     "note": 77,
+     "velocity": 100,
+     "t_on": 320.2,
+     "t_off": 324.2,
+     "t_end": 324.5,
+     "steady": [
+      320.8,
+      324.0
+     ]
+    },
+    {
+     "id": "kc-note78",
+     "what": "time scaling 7 at note 78, key code 99: the chip's rate at this key code, and its hold",
+     "pins": [
+      "rate scaling"
+     ],
+     "measure": "envelope",
+     "note": 78,
+     "velocity": 100,
+     "t_on": 325.0,
+     "t_off": 329.0,
+     "t_end": 329.3,
+     "steady": [
+      325.6,
+      328.8
+     ]
+    },
+    {
+     "id": "kc-note79",
+     "what": "time scaling 7 at note 79, key code 100: the chip's rate at this key code, and its hold",
+     "pins": [
+      "rate scaling"
+     ],
+     "measure": "envelope",
+     "note": 79,
+     "velocity": 100,
+     "t_on": 329.8,
+     "t_off": 333.8,
+     "t_end": 334.1,
+     "steady": [
+      330.4,
+      333.6
+     ]
+    },
+    {
+     "id": "kc-note80",
+     "what": "time scaling 7 at note 80, key code 100: the chip's rate at this key code, and its hold",
+     "pins": [
+      "rate scaling"
+     ],
+     "measure": "envelope",
+     "note": 80,
+     "velocity": 100,
+     "t_on": 334.6,
+     "t_off": 338.6,
+     "t_end": 338.9,
+     "steady": [
+      335.2,
+      338.4
+     ]
+    },
+    {
+     "id": "kc-note81",
+     "what": "time scaling 7 at note 81, key code 100: the chip's rate at this key code, and its hold",
+     "pins": [
+      "rate scaling"
+     ],
+     "measure": "envelope",
+     "note": 81,
+     "velocity": 100,
+     "t_on": 339.4,
+     "t_off": 343.4,
+     "t_end": 343.7,
+     "steady": [
+      340.0,
+      343.2
+     ]
+    },
+    {
+     "id": "kc-note82",
+     "what": "time scaling 7 at note 82, key code 101: the chip's rate at this key code, and its hold",
+     "pins": [
+      "rate scaling"
+     ],
+     "measure": "envelope",
+     "note": 82,
+     "velocity": 100,
+     "t_on": 344.2,
+     "t_off": 348.2,
+     "t_end": 348.5,
+     "steady": [
+      344.8,
+      348.0
+     ]
+    },
+    {
+     "id": "kc-note83",
+     "what": "time scaling 7 at note 83, key code 101: the chip's rate at this key code, and its hold",
+     "pins": [
+      "rate scaling"
+     ],
+     "measure": "envelope",
+     "note": 83,
+     "velocity": 100,
+     "t_on": 349.0,
+     "t_off": 353.0,
+     "t_end": 353.3,
+     "steady": [
+      349.6,
+      352.8
+     ]
+    },
+    {
+     "id": "kc-note84",
+     "what": "time scaling 7 at note 84, key code 101: the chip's rate at this key code, and its hold",
+     "pins": [
+      "rate scaling"
+     ],
+     "measure": "envelope",
+     "note": 84,
+     "velocity": 100,
+     "t_on": 353.8,
+     "t_off": 357.8,
+     "t_end": 358.1,
+     "steady": [
+      354.4,
+      357.6
+     ]
+    },
+    {
+     "id": "kc-note85",
+     "what": "time scaling 7 at note 85, key code 102: the chip's rate at this key code, and its hold",
+     "pins": [
+      "rate scaling"
+     ],
+     "measure": "envelope",
+     "note": 85,
+     "velocity": 100,
+     "t_on": 358.6,
+     "t_off": 362.6,
+     "t_end": 362.9,
+     "steady": [
+      359.2,
+      362.4
+     ]
+    },
+    {
+     "id": "kc-note86",
+     "what": "time scaling 7 at note 86, key code 102: the chip's rate at this key code, and its hold",
+     "pins": [
+      "rate scaling"
+     ],
+     "measure": "envelope",
+     "note": 86,
+     "velocity": 100,
+     "t_on": 363.4,
+     "t_off": 367.4,
+     "t_end": 367.7,
+     "steady": [
+      364.0,
+      367.2
+     ]
+    },
+    {
+     "id": "kc-note87",
+     "what": "time scaling 7 at note 87, key code 102: the chip's rate at this key code, and its hold",
+     "pins": [
+      "rate scaling"
+     ],
+     "measure": "envelope",
+     "note": 87,
+     "velocity": 100,
+     "t_on": 368.2,
+     "t_off": 372.2,
+     "t_end": 372.5,
+     "steady": [
+      368.8,
+      372.0
+     ]
+    },
+    {
+     "id": "kc-note88",
+     "what": "time scaling 7 at note 88, key code 103: the chip's rate at this key code, and its hold",
+     "pins": [
+      "rate scaling"
+     ],
+     "measure": "envelope",
+     "note": 88,
+     "velocity": 100,
+     "t_on": 373.0,
+     "t_off": 377.0,
+     "t_end": 377.3,
+     "steady": [
+      373.6,
+      376.8
+     ]
+    },
+    {
+     "id": "kc-note89",
+     "what": "time scaling 7 at note 89, key code 103: the chip's rate at this key code, and its hold",
+     "pins": [
+      "rate scaling"
+     ],
+     "measure": "envelope",
+     "note": 89,
+     "velocity": 100,
+     "t_on": 377.8,
+     "t_off": 381.8,
+     "t_end": 382.1,
+     "steady": [
+      378.4,
+      381.6
+     ]
+    },
+    {
+     "id": "kc-note90",
+     "what": "time scaling 7 at note 90, key code 103: the chip's rate at this key code, and its hold",
+     "pins": [
+      "rate scaling"
+     ],
+     "measure": "envelope",
+     "note": 90,
+     "velocity": 100,
+     "t_on": 382.6,
+     "t_off": 386.6,
+     "t_end": 386.9,
+     "steady": [
+      383.2,
+      386.4
+     ]
+    },
+    {
+     "id": "kc-note91",
+     "what": "time scaling 7 at note 91, key code 104: the chip's rate at this key code, and its hold",
+     "pins": [
+      "rate scaling"
+     ],
+     "measure": "envelope",
+     "note": 91,
+     "velocity": 100,
+     "t_on": 387.4,
+     "t_off": 391.4,
+     "t_end": 391.7,
+     "steady": [
+      388.0,
+      391.2
+     ]
+    },
+    {
+     "id": "kc-note92",
+     "what": "time scaling 7 at note 92, key code 104: the chip's rate at this key code, and its hold",
+     "pins": [
+      "rate scaling"
+     ],
+     "measure": "envelope",
+     "note": 92,
+     "velocity": 100,
+     "t_on": 392.2,
+     "t_off": 396.2,
+     "t_end": 396.5,
+     "steady": [
+      392.8,
+      396.0
+     ]
+    },
+    {
+     "id": "kc-note93",
+     "what": "time scaling 7 at note 93, key code 104: the chip's rate at this key code, and its hold",
+     "pins": [
+      "rate scaling"
+     ],
+     "measure": "envelope",
+     "note": 93,
+     "velocity": 100,
+     "t_on": 397.0,
+     "t_off": 401.0,
+     "t_end": 401.3,
+     "steady": [
+      397.6,
+      400.8
+     ]
+    },
+    {
+     "id": "kc-note94",
+     "what": "time scaling 7 at note 94, key code 105: the chip's rate at this key code, and its hold",
+     "pins": [
+      "rate scaling"
+     ],
+     "measure": "envelope",
+     "note": 94,
+     "velocity": 100,
+     "t_on": 401.8,
+     "t_off": 405.8,
+     "t_end": 406.1,
+     "steady": [
+      402.4,
+      405.6
+     ]
+    },
+    {
+     "id": "kc-note95",
+     "what": "time scaling 7 at note 95, key code 105: the chip's rate at this key code, and its hold",
+     "pins": [
+      "rate scaling"
+     ],
+     "measure": "envelope",
+     "note": 95,
+     "velocity": 100,
+     "t_on": 406.6,
+     "t_off": 410.6,
+     "t_end": 410.9,
+     "steady": [
+      407.2,
+      410.4
+     ]
+    },
+    {
+     "id": "kc-note96",
+     "what": "time scaling 7 at note 96, key code 105: the chip's rate at this key code, and its hold",
+     "pins": [
+      "rate scaling"
+     ],
+     "measure": "envelope",
+     "note": 96,
+     "velocity": 100,
+     "t_on": 411.4,
+     "t_off": 415.4,
+     "t_end": 415.7,
+     "steady": [
+      412.0,
+      415.2
+     ]
+    },
+    {
+     "id": "kc-note97",
+     "what": "time scaling 7 at note 97, key code 106: the chip's rate at this key code, and its hold",
+     "pins": [
+      "rate scaling"
+     ],
+     "measure": "envelope",
+     "note": 97,
+     "velocity": 100,
+     "t_on": 416.2,
+     "t_off": 420.2,
+     "t_end": 420.5,
+     "steady": [
+      416.8,
+      420.0
+     ]
+    },
+    {
+     "id": "kc-note98",
+     "what": "time scaling 7 at note 98, key code 106: the chip's rate at this key code, and its hold",
+     "pins": [
+      "rate scaling"
+     ],
+     "measure": "envelope",
+     "note": 98,
+     "velocity": 100,
+     "t_on": 421.0,
+     "t_off": 425.0,
+     "t_end": 425.3,
+     "steady": [
+      421.6,
+      424.8
+     ]
+    },
+    {
+     "id": "kc-note99",
+     "what": "time scaling 7 at note 99, key code 106: the chip's rate at this key code, and its hold",
+     "pins": [
+      "rate scaling"
+     ],
+     "measure": "envelope",
+     "note": 99,
+     "velocity": 100,
+     "t_on": 425.8,
+     "t_off": 429.8,
+     "t_end": 430.1,
+     "steady": [
+      426.4,
+      429.6
+     ]
+    },
+    {
+     "id": "kc-note100",
+     "what": "time scaling 7 at note 100, key code 107: the chip's rate at this key code, and its hold",
+     "pins": [
+      "rate scaling"
+     ],
+     "measure": "envelope",
+     "note": 100,
+     "velocity": 100,
+     "t_on": 430.6,
+     "t_off": 434.6,
+     "t_end": 434.9,
+     "steady": [
+      431.2,
+      434.4
+     ]
+    },
+    {
+     "id": "kc-note101",
+     "what": "time scaling 7 at note 101, key code 107: the chip's rate at this key code, and its hold",
+     "pins": [
+      "rate scaling"
+     ],
+     "measure": "envelope",
+     "note": 101,
+     "velocity": 100,
+     "t_on": 435.4,
+     "t_off": 439.4,
+     "t_end": 439.7,
+     "steady": [
+      436.0,
+      439.2
+     ]
+    },
+    {
+     "id": "kc-note102",
+     "what": "time scaling 7 at note 102, key code 107: the chip's rate at this key code, and its hold",
+     "pins": [
+      "rate scaling"
+     ],
+     "measure": "envelope",
+     "note": 102,
+     "velocity": 100,
+     "t_on": 440.2,
+     "t_off": 444.2,
+     "t_end": 444.5,
+     "steady": [
+      440.8,
+      444.0
+     ]
+    },
+    {
+     "id": "kc-note103",
+     "what": "time scaling 7 at note 103, key code 108: the chip's rate at this key code, and its hold",
+     "pins": [
+      "rate scaling"
+     ],
+     "measure": "envelope",
+     "note": 103,
+     "velocity": 100,
+     "t_on": 445.0,
+     "t_off": 449.0,
+     "t_end": 449.3,
+     "steady": [
+      445.6,
+      448.8
+     ]
+    },
+    {
+     "id": "kc-note104",
+     "what": "time scaling 7 at note 104, key code 108: the chip's rate at this key code, and its hold",
+     "pins": [
+      "rate scaling"
+     ],
+     "measure": "envelope",
+     "note": 104,
+     "velocity": 100,
+     "t_on": 449.8,
+     "t_off": 453.8,
+     "t_end": 454.1,
+     "steady": [
+      450.4,
+      453.6
+     ]
+    },
+    {
+     "id": "kc-note105",
+     "what": "time scaling 7 at note 105, key code 108: the chip's rate at this key code, and its hold",
+     "pins": [
+      "rate scaling"
+     ],
+     "measure": "envelope",
+     "note": 105,
+     "velocity": 100,
+     "t_on": 454.6,
+     "t_off": 458.6,
+     "t_end": 458.9,
+     "steady": [
+      455.2,
+      458.4
+     ]
+    },
+    {
+     "id": "kc-note106",
+     "what": "time scaling 7 at note 106, key code 109: the chip's rate at this key code, and its hold",
+     "pins": [
+      "rate scaling"
+     ],
+     "measure": "envelope",
+     "note": 106,
+     "velocity": 100,
+     "t_on": 459.4,
+     "t_off": 463.4,
+     "t_end": 463.7,
+     "steady": [
+      460.0,
+      463.2
+     ]
+    },
+    {
+     "id": "kc-note107",
+     "what": "time scaling 7 at note 107, key code 109: the chip's rate at this key code, and its hold",
+     "pins": [
+      "rate scaling"
+     ],
+     "measure": "envelope",
+     "note": 107,
+     "velocity": 100,
+     "t_on": 464.2,
+     "t_off": 468.2,
+     "t_end": 468.5,
+     "steady": [
+      464.8,
+      468.0
+     ]
+    },
+    {
+     "id": "kc-note108",
+     "what": "time scaling 7 at note 108, key code 109: the chip's rate at this key code, and its hold",
+     "pins": [
+      "rate scaling"
+     ],
+     "measure": "envelope",
+     "note": 108,
+     "velocity": 100,
+     "t_on": 469.0,
+     "t_off": 473.0,
+     "t_end": 473.3,
+     "steady": [
+      469.6,
+      472.8
+     ]
+    },
+    {
+     "id": "kc-note109",
+     "what": "time scaling 7 at note 109, key code 110: the chip's rate at this key code, and its hold",
+     "pins": [
+      "rate scaling"
+     ],
+     "measure": "envelope",
+     "note": 109,
+     "velocity": 100,
+     "t_on": 473.8,
+     "t_off": 477.8,
+     "t_end": 478.1,
+     "steady": [
+      474.4,
+      477.6
+     ]
+    },
+    {
+     "id": "kc-note110",
+     "what": "time scaling 7 at note 110, key code 110: the chip's rate at this key code, and its hold",
+     "pins": [
+      "rate scaling"
+     ],
+     "measure": "envelope",
+     "note": 110,
+     "velocity": 100,
+     "t_on": 478.6,
+     "t_off": 482.6,
+     "t_end": 482.9,
+     "steady": [
+      479.2,
+      482.4
+     ]
+    },
+    {
+     "id": "kc-note111",
+     "what": "time scaling 7 at note 111, key code 110: the chip's rate at this key code, and its hold",
+     "pins": [
+      "rate scaling"
+     ],
+     "measure": "envelope",
+     "note": 111,
+     "velocity": 100,
+     "t_on": 483.4,
+     "t_off": 487.4,
+     "t_end": 487.7,
+     "steady": [
+      484.0,
+      487.2
+     ]
+    },
+    {
+     "id": "kc-note112",
+     "what": "time scaling 7 at note 112, key code 111: the chip's rate at this key code, and its hold",
+     "pins": [
+      "rate scaling"
+     ],
+     "measure": "envelope",
+     "note": 112,
+     "velocity": 100,
+     "t_on": 488.2,
+     "t_off": 492.2,
+     "t_end": 492.5,
+     "steady": [
+      488.8,
+      492.0
+     ]
+    },
+    {
+     "id": "kc-note113",
+     "what": "time scaling 7 at note 113, key code 111: the chip's rate at this key code, and its hold",
+     "pins": [
+      "rate scaling"
+     ],
+     "measure": "envelope",
+     "note": 113,
+     "velocity": 100,
+     "t_on": 493.0,
+     "t_off": 497.0,
+     "t_end": 497.3,
+     "steady": [
+      493.6,
+      496.8
+     ]
+    },
+    {
+     "id": "kc-note114",
+     "what": "time scaling 7 at note 114, key code 111: the chip's rate at this key code, and its hold",
+     "pins": [
+      "rate scaling"
+     ],
+     "measure": "envelope",
+     "note": 114,
+     "velocity": 100,
+     "t_on": 497.8,
+     "t_off": 501.8,
+     "t_end": 502.1,
+     "steady": [
+      498.4,
+      501.6
+     ]
+    },
+    {
+     "id": "kc-note115",
+     "what": "time scaling 7 at note 115, key code 112: the chip's rate at this key code, and its hold",
+     "pins": [
+      "rate scaling"
+     ],
+     "measure": "envelope",
+     "note": 115,
+     "velocity": 100,
+     "t_on": 502.6,
+     "t_off": 506.6,
+     "t_end": 506.9,
+     "steady": [
+      503.2,
+      506.4
+     ]
+    },
+    {
+     "id": "kc-note116",
+     "what": "time scaling 7 at note 116, key code 112: the chip's rate at this key code, and its hold",
+     "pins": [
+      "rate scaling"
+     ],
+     "measure": "envelope",
+     "note": 116,
+     "velocity": 100,
+     "t_on": 507.4,
+     "t_off": 511.4,
+     "t_end": 511.7,
+     "steady": [
+      508.0,
+      511.2
+     ]
+    },
+    {
+     "id": "kc-note117",
+     "what": "time scaling 7 at note 117, key code 112: the chip's rate at this key code, and its hold",
+     "pins": [
+      "rate scaling"
+     ],
+     "measure": "envelope",
+     "note": 117,
+     "velocity": 100,
+     "t_on": 512.2,
+     "t_off": 516.2,
+     "t_end": 516.5,
+     "steady": [
+      512.8,
+      516.0
+     ]
+    },
+    {
+     "id": "kc-note118",
+     "what": "time scaling 7 at note 118, key code 113: the chip's rate at this key code, and its hold",
+     "pins": [
+      "rate scaling"
+     ],
+     "measure": "envelope",
+     "note": 118,
+     "velocity": 100,
+     "t_on": 517.0,
+     "t_off": 521.0,
+     "t_end": 521.3,
+     "steady": [
+      517.6,
+      520.8
+     ]
+    },
+    {
+     "id": "kc-note119",
+     "what": "time scaling 7 at note 119, key code 113: the chip's rate at this key code, and its hold",
+     "pins": [
+      "rate scaling"
+     ],
+     "measure": "envelope",
+     "note": 119,
+     "velocity": 100,
+     "t_on": 521.8,
+     "t_off": 525.8,
+     "t_end": 526.1,
+     "steady": [
+      522.4,
+      525.6
+     ]
+    },
+    {
+     "id": "kc-note120",
+     "what": "time scaling 7 at note 120, key code 113: the chip's rate at this key code, and its hold",
+     "pins": [
+      "rate scaling"
+     ],
+     "measure": "envelope",
+     "note": 120,
+     "velocity": 100,
+     "t_on": 526.6,
+     "t_off": 530.6,
+     "t_end": 530.9,
+     "steady": [
+      527.2,
+      530.4
+     ]
+    }
+   ],
+   "marker_start": [
+    1.2,
+    1.5,
+    1.8
+   ],
+   "marker_end": [
+    531.4,
+    531.7,
+    532.0
+   ],
+   "duration_s": 533.12,
+   "sha1": "c9f8e36c0c49d4dc9389ff1b6ce4023e6f856e93",
+   "why": "the EG key code table at every semitone, where 10_envelope2 had one note per octave"
+  },
+  {
+   "file": "22_ures.mid",
+   "segments": [
+    {
+     "id": "ures-bw8-r4",
+     "what": "unvoiced resonance 4 at 8 kHz, bandwidth 8, skirt 0: the carrier's level against the bandwidth register",
+     "pins": [
+      "noise resonance"
+     ],
+     "measure": "spectrum",
+     "note": 60,
+     "velocity": 100,
+     "t_on": 3.4,
+     "t_off": 6.4,
+     "t_end": 7.1,
+     "steady": [
+      4.0,
+      6.2
+     ]
+    },
+    {
+     "id": "ures-bw8-r5",
+     "what": "unvoiced resonance 5 at 8 kHz, bandwidth 8, skirt 0: the carrier's level against the bandwidth register",
+     "pins": [
+      "noise resonance"
+     ],
+     "measure": "spectrum",
+     "note": 60,
+     "velocity": 100,
+     "t_on": 7.6,
+     "t_off": 10.6,
+     "t_end": 11.3,
+     "steady": [
+      8.2,
+      10.4
+     ]
+    },
+    {
+     "id": "ures-bw8-r6",
+     "what": "unvoiced resonance 6 at 8 kHz, bandwidth 8, skirt 0: the carrier's level against the bandwidth register",
+     "pins": [
+      "noise resonance"
+     ],
+     "measure": "spectrum",
+     "note": 60,
+     "velocity": 100,
+     "t_on": 11.8,
+     "t_off": 14.8,
+     "t_end": 15.5,
+     "steady": [
+      12.4,
+      14.6
+     ]
+    },
+    {
+     "id": "ures-bw8-r7",
+     "what": "unvoiced resonance 7 at 8 kHz, bandwidth 8, skirt 0: the carrier's level against the bandwidth register",
+     "pins": [
+      "noise resonance"
+     ],
+     "measure": "spectrum",
+     "note": 60,
+     "velocity": 100,
+     "t_on": 16.0,
+     "t_off": 19.0,
+     "t_end": 19.7,
+     "steady": [
+      16.6,
+      18.8
+     ]
+    },
+    {
+     "id": "ures-bw20-r4",
+     "what": "unvoiced resonance 4 at 8 kHz, bandwidth 20, skirt 0: the carrier's level against the bandwidth register",
+     "pins": [
+      "noise resonance"
+     ],
+     "measure": "spectrum",
+     "note": 60,
+     "velocity": 100,
+     "t_on": 20.2,
+     "t_off": 23.2,
+     "t_end": 23.9,
+     "steady": [
+      20.8,
+      23.0
+     ]
+    },
+    {
+     "id": "ures-bw20-r5",
+     "what": "unvoiced resonance 5 at 8 kHz, bandwidth 20, skirt 0: the carrier's level against the bandwidth register",
+     "pins": [
+      "noise resonance"
+     ],
+     "measure": "spectrum",
+     "note": 60,
+     "velocity": 100,
+     "t_on": 24.4,
+     "t_off": 27.4,
+     "t_end": 28.1,
+     "steady": [
+      25.0,
+      27.2
+     ]
+    },
+    {
+     "id": "ures-bw20-r6",
+     "what": "unvoiced resonance 6 at 8 kHz, bandwidth 20, skirt 0: the carrier's level against the bandwidth register",
+     "pins": [
+      "noise resonance"
+     ],
+     "measure": "spectrum",
+     "note": 60,
+     "velocity": 100,
+     "t_on": 28.6,
+     "t_off": 31.6,
+     "t_end": 32.3,
+     "steady": [
+      29.2,
+      31.4
+     ]
+    },
+    {
+     "id": "ures-bw20-r7",
+     "what": "unvoiced resonance 7 at 8 kHz, bandwidth 20, skirt 0: the carrier's level against the bandwidth register",
+     "pins": [
+      "noise resonance"
+     ],
+     "measure": "spectrum",
+     "note": 60,
+     "velocity": 100,
+     "t_on": 32.8,
+     "t_off": 35.8,
+     "t_end": 36.5,
+     "steady": [
+      33.4,
+      35.6
+     ]
+    },
+    {
+     "id": "ures-bw36-r4",
+     "what": "unvoiced resonance 4 at 8 kHz, bandwidth 36, skirt 0: the carrier's level against the bandwidth register",
+     "pins": [
+      "noise resonance"
+     ],
+     "measure": "spectrum",
+     "note": 60,
+     "velocity": 100,
+     "t_on": 37.0,
+     "t_off": 40.0,
+     "t_end": 40.7,
+     "steady": [
+      37.6,
+      39.8
+     ]
+    },
+    {
+     "id": "ures-bw36-r5",
+     "what": "unvoiced resonance 5 at 8 kHz, bandwidth 36, skirt 0: the carrier's level against the bandwidth register",
+     "pins": [
+      "noise resonance"
+     ],
+     "measure": "spectrum",
+     "note": 60,
+     "velocity": 100,
+     "t_on": 41.2,
+     "t_off": 44.2,
+     "t_end": 44.9,
+     "steady": [
+      41.8,
+      44.0
+     ]
+    },
+    {
+     "id": "ures-bw36-r6",
+     "what": "unvoiced resonance 6 at 8 kHz, bandwidth 36, skirt 0: the carrier's level against the bandwidth register",
+     "pins": [
+      "noise resonance"
+     ],
+     "measure": "spectrum",
+     "note": 60,
+     "velocity": 100,
+     "t_on": 45.4,
+     "t_off": 48.4,
+     "t_end": 49.1,
+     "steady": [
+      46.0,
+      48.2
+     ]
+    },
+    {
+     "id": "ures-bw36-r7",
+     "what": "unvoiced resonance 7 at 8 kHz, bandwidth 36, skirt 0: the carrier's level against the bandwidth register",
+     "pins": [
+      "noise resonance"
+     ],
+     "measure": "spectrum",
+     "note": 60,
+     "velocity": 100,
+     "t_on": 49.6,
+     "t_off": 52.6,
+     "t_end": 53.3,
+     "steady": [
+      50.2,
+      52.4
+     ]
+    },
+    {
+     "id": "ures-bw52-r4",
+     "what": "unvoiced resonance 4 at 8 kHz, bandwidth 52, skirt 0: the carrier's level against the bandwidth register",
+     "pins": [
+      "noise resonance"
+     ],
+     "measure": "spectrum",
+     "note": 60,
+     "velocity": 100,
+     "t_on": 53.8,
+     "t_off": 56.8,
+     "t_end": 57.5,
+     "steady": [
+      54.4,
+      56.6
+     ]
+    },
+    {
+     "id": "ures-bw52-r5",
+     "what": "unvoiced resonance 5 at 8 kHz, bandwidth 52, skirt 0: the carrier's level against the bandwidth register",
+     "pins": [
+      "noise resonance"
+     ],
+     "measure": "spectrum",
+     "note": 60,
+     "velocity": 100,
+     "t_on": 58.0,
+     "t_off": 61.0,
+     "t_end": 61.7,
+     "steady": [
+      58.6,
+      60.8
+     ]
+    },
+    {
+     "id": "ures-bw52-r6",
+     "what": "unvoiced resonance 6 at 8 kHz, bandwidth 52, skirt 0: the carrier's level against the bandwidth register",
+     "pins": [
+      "noise resonance"
+     ],
+     "measure": "spectrum",
+     "note": 60,
+     "velocity": 100,
+     "t_on": 62.2,
+     "t_off": 65.2,
+     "t_end": 65.9,
+     "steady": [
+      62.8,
+      65.0
+     ]
+    },
+    {
+     "id": "ures-bw52-r7",
+     "what": "unvoiced resonance 7 at 8 kHz, bandwidth 52, skirt 0: the carrier's level against the bandwidth register",
+     "pins": [
+      "noise resonance"
+     ],
+     "measure": "spectrum",
+     "note": 60,
+     "velocity": 100,
+     "t_on": 66.4,
+     "t_off": 69.4,
+     "t_end": 70.1,
+     "steady": [
+      67.0,
+      69.2
+     ]
+    },
+    {
+     "id": "ures-bw68-r4",
+     "what": "unvoiced resonance 4 at 8 kHz, bandwidth 68, skirt 0: the carrier's level against the bandwidth register",
+     "pins": [
+      "noise resonance"
+     ],
+     "measure": "spectrum",
+     "note": 60,
+     "velocity": 100,
+     "t_on": 70.6,
+     "t_off": 73.6,
+     "t_end": 74.3,
+     "steady": [
+      71.2,
+      73.4
+     ]
+    },
+    {
+     "id": "ures-bw68-r5",
+     "what": "unvoiced resonance 5 at 8 kHz, bandwidth 68, skirt 0: the carrier's level against the bandwidth register",
+     "pins": [
+      "noise resonance"
+     ],
+     "measure": "spectrum",
+     "note": 60,
+     "velocity": 100,
+     "t_on": 74.8,
+     "t_off": 77.8,
+     "t_end": 78.5,
+     "steady": [
+      75.4,
+      77.6
+     ]
+    },
+    {
+     "id": "ures-bw68-r6",
+     "what": "unvoiced resonance 6 at 8 kHz, bandwidth 68, skirt 0: the carrier's level against the bandwidth register",
+     "pins": [
+      "noise resonance"
+     ],
+     "measure": "spectrum",
+     "note": 60,
+     "velocity": 100,
+     "t_on": 79.0,
+     "t_off": 82.0,
+     "t_end": 82.7,
+     "steady": [
+      79.6,
+      81.8
+     ]
+    },
+    {
+     "id": "ures-bw68-r7",
+     "what": "unvoiced resonance 7 at 8 kHz, bandwidth 68, skirt 0: the carrier's level against the bandwidth register",
+     "pins": [
+      "noise resonance"
+     ],
+     "measure": "spectrum",
+     "note": 60,
+     "velocity": 100,
+     "t_on": 83.2,
+     "t_off": 86.2,
+     "t_end": 86.9,
+     "steady": [
+      83.8,
+      86.0
+     ]
+    }
+   ],
+   "marker_start": [
+    1.2,
+    1.5,
+    1.8
+   ],
+   "marker_end": [
+    87.4,
+    87.7,
+    88.0
+   ],
+   "duration_s": 89.12,
+   "sha1": "0eb0f013eb0359f3589b671b2deb837730ea7e12",
+   "why": "the unvoiced resonance carrier's level against the bandwidth register"
   }
  ]
 }
