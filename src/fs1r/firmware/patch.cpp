@@ -100,7 +100,7 @@ void convert_dx7(const uint8_t* v, uint8_t* out) {
     out[0x1F] = v[133]; out[0x20] = v[130]; out[0x21] = v[131]; out[0x3E] = v[132]; out[0x22] = v[133];
     for (int i = 0; i < 4; i++) out[0x23 + i] = (uint8_t)(99 - std::min<int>(v[126 + i], 99));
     for (int j = 0; j < 6; j++) {                     // j = 0 is DX operator 6
-        const uint8_t* d = v + j * 21; uint8_t* p = out + 112 + row[26 + j] * 62;
+        const uint8_t* d = v + j * 21; uint8_t* p = out + 112 + row[25 + j] * 62;   // slot: word 25 + j (0x389FBE), FUN_00035E96
         int ol = std::min<int>(d[16], 99) + (row[17 + j] == 1 ? 2 : 0), rs = d[13] & 7;
         int att = rs * 1386 / 504 + (99 - ol) * 4 / 10 + 6, dec = rs * 1386 / 504 + (99 - ol) * 2 / 10;
         for (int i = 0; i < 4; i++) {
@@ -108,7 +108,7 @@ void convert_dx7(const uint8_t* v, uint8_t* out) {
             int t = i == 0 ? 99 - DX7RATE_A[r] - r - att : 99 - DX7RATE_B[r] - r - dec;
             p[16 + i] = (uint8_t)clampi(t, 0, 99); p[12 + i] = (uint8_t)std::min<int>(d[4 + i], 99);
         }
-        p[23] = d[8]; p[24] = d[9]; p[25] = d[10]; p[26] = d[11] & 3; p[27] = d[12] & 3; p[21] = 7;   // tscale 7, the rate scaling is folded into the times
+        p[23] = d[8]; p[24] = d[9]; p[25] = d[10]; p[26] = d[11] & 3; p[27] = d[12] & 3; p[21] = rs;  // time scaling = the DX rate scaling (FUN_00035E96 c16), and its term is in the times too
         int ams = std::min<int>(d[14], 3) * 2, ts = std::min<int>(d[15], 7);
         p[33] = (uint8_t)(ams << 4 | (ts + 7)); p[22] = (uint8_t)std::min<int>(ol, 99);
         int fixed = d[17] & 1, coarse = d[18] & 31, fine = std::min<int>(d[19], 99);
@@ -118,8 +118,8 @@ void convert_dx7(const uint8_t* v, uint8_t* out) {
             if (f > 127) { f = 0; c++; }
             coarse = clampi(c, 0, 31); fine = clampi(f, 0, 127);
         }
-        p[1] = (uint8_t)coarse; p[2] = (uint8_t)fine; p[5] = (uint8_t)(fixed << 6 | row[26 + j]);
-        p[7] = (uint8_t)clampi((d[20] - 7) * 2 + 15, 0, 30);
+        p[1] = (uint8_t)coarse; p[2] = (uint8_t)fine; p[5] = (uint8_t)(fixed << 6 | j);                  // FUN_0003161E: Fseq track = the DX index
+        p[7] = (uint8_t)(d[20] + 8);                                                                   // detune: DX 0..14 -> 8..22 (bf8)
         p[0] = (uint8_t)((v[136] & 1) << 6 | 24);
         p[31] = (uint8_t)(7 << 3 | (v[143] & 7));
     }

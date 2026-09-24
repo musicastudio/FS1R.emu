@@ -324,6 +324,15 @@ int selftest(Synth& S) {
     // A part whose voice bank is off receives nothing even with a receive channel (A011 Sho, parts 3 and 4).
     { S.perf.part[1].p[1] = 0; S.perf.part[1].p[4] = 0x10; ck("bank off silences the part", !S.part_listens(1, 0)); S.perf.part[1].p[1] = 2; ck("bank on hears it again", S.part_listens(1, 0)); }
 
+    // DX7 conversion: the operator slot is DX7MAP word 25 + j, and every DX carrier lands on an FS1R carrier
+    { uint8_t vced[155] = {}; vced[134] = 4;                        // DX algorithm 5: carriers 1, 3, 5
+      for (int j = 0; j < 6; j++) vced[j * 21 + 16] = (uint8_t)(10 + j);   // output level tags op6..op1 as 10..15
+      uint8_t out[608]; convert_dx7(vced, out); bool ok = true;
+      const unsigned char* alg = FS1R_ALG[out[0x2C]];
+      for (int j = 0; j < 6; j++) for (int o = 0; o < 8; o++) if (out[112 + o * 62 + 22] == 10 + j) {
+          bool carrier = alg[2 * o + 1] & 1, want = (6 - j) == 1 || (6 - j) == 3 || (6 - j) == 5; if (carrier != want) ok = false; }
+      ck("DX7 alg 5 carriers land on FS1R carriers (B025 Tremolo)", ok); }
+
     // A voice edit reaches a sounding note: op 1 coarse 1 -> 2 moves its frequency word an octave.
     { S.perf.part[0].p[1] = 2; S.perf.part[0].p[4] = 0x10; S.perf.part[0].voice.v[0].fixed = 0; S.perf.part[0].voice.v[0].form = 0;
       S.midi_in(0x90, 60, 100); int w0 = -1; for (auto& c : S.ch) if (c.active && c.part == 0) w0 = c.freqWord[0];

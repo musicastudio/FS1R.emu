@@ -8,6 +8,14 @@ Entries that have a dedicated working document (`aeg.md`, `skirt.md`, `noise.md`
 
 ---
 
+## 2026-09-24, the DX7 conversion placed every operator one slot off (B025 Tremolo's tone after note-off, Full Tines)
+
+`1532608` rewrote `convert_dx7` from `FUN_00035918`/`FUN_00035E96` and read the operator slot out of DX7MAP word `26 + j`. The firmware reads word `25 + j` (`0x389FBE + 2j` off the row base `0x389F8C + 66 * alg`; `26 + j` is the same list shifted by one, which is why it looked plausible). The effect: DX operator 6 landed on the slot meant for DX operator 5 and so on round, so in DX algorithm 5 (FS1R 12) the carrier DX op 2, with its L4 of 99 and rates of 99, went into FS1R op 8, a carrier slot, and sustained at full level after note-off until the channel died; every other DX voice had its carriers and modulators swapped by one. A check against all 32 DX algorithms' carrier sets: word `25 + j` puts every DX carrier on an FS1R carrier slot, word `26 + j` fails 31 of them. Two more bytes read against the demo's own `FullTine 1` bulk (the demo song sends the converted voice, so the firmware's conversion is on disk): time scaling is the DX rate scaling, not 7, and detune is `dx + 8`. What remains different between the engine's conversion and the unit's for that voice is the LFO block, the ACED-only bytes (the demo's bulk carries values the VCED cannot) and the ±1 rate rounding, none of which the VCED alone can produce. Selftest carries the carrier-set check.
+
+**Voice edits reach sounding notes** and **the plugin's voice Note Shift** (a −24 default) are in the same set of commits.
+
+---
+
 ## 2026-09-24, session 4: the key code table at every semitone, the hold does not scale, the unvoiced resonance carrier and the noise it takes with it
 
 Two recordings from `FS1R.unlock/captures/2026-09-24-5` (`fs1r_capture_session4.py record`); the `perchan3` register dump stopped on a script bug (the bulk-echo query put an operator byte address of 134 in a MIDI data byte) and is fixed for the next run.
