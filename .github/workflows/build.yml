@@ -89,13 +89,16 @@ jobs:
     permissions:
       contents: write
     steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
       # The release body is the annotated tag's message (AGENTS.md, "Releases"). generate_release_notes
-      # alone left v0.4.6 with nothing but a compare link.
+      # alone left v0.4.6 with nothing but a compare link, and actions/checkout peels a tag ref to its
+      # commit, which handed v0.4.7 the commit message, so the tag object is read off the API instead.
+      # A lightweight tag has no tag object and fails here on purpose.
       - name: Release notes from the tag
-        run: git tag -l --format='%(contents)' "${GITHUB_REF_NAME}" > notes.md && test -s notes.md
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          sha=$(gh api "repos/${GITHUB_REPOSITORY}/git/ref/tags/${GITHUB_REF_NAME}" --jq .object.sha)
+          gh api "repos/${GITHUB_REPOSITORY}/git/tags/$sha" --jq .message > notes.md && test -s notes.md
       - uses: actions/download-artifact@v4
         with:
           path: artifacts
