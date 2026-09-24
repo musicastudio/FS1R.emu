@@ -51,6 +51,7 @@ Grouped by what blocks each item rather than by subsystem. This file is the list
 **Ready, needs no hardware**
 
 - The effects against hardware, 17 to 29 dB over three files and eighty-four segments. The largest number in the set, and the only item left outside a hardware session
+- CPU: A020 Vox Morph at 8 notes is 53 % of one desktop core (16 channels, all eight unvoiced operators live). Not a fidelity item; the options and their measured gains are in [docs/performance.md](docs/performance.md), starting with the −100 dB operator gate that never lets a level-0 operator go idle
 
 **Blocked on a hardware session** (`FS1R.unlock/captures/fs1r_capture_session4.py` carries all of it)
 

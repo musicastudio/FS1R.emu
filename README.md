@@ -95,6 +95,8 @@ Against rgwan's digital recording of the built-in demo, which the unit plays fro
 
 Nothing in `cal.h` is a guess any more, and nothing outside the effects is open. The last three modelling items closed on 2026-09-24 off data already recorded: the window family behind the "1" forms and the formant, the `all1`/`all2` construction, and the key code table at the demo drum's note; the fourth hardware session the same day then read that table at every semitone, found the EG hold does not scale with it, and read the unvoiced resonance carrier against the bandwidth register. [docs/fidelity_plan.md](docs/fidelity_plan.md) has the per-file table; [STATUS.md](STATUS.md) carries the KNOWN / INFERRED / UNKNOWN lists and the open work; `FS1R.unlock/captures/fs1r_capture_session4.py` holds the one register dump still to run, the per-channel arrays, which the engine is not waiting on.
 
+**Known issue:** performances that layer two parts of a voice with all eight unvoiced operators live (A020 Vox Morph is the extreme) are heavy, about half a desktop core at 8 notes and more than a laptop i7 has to give. [docs/performance.md](docs/performance.md) has the measurements and the fixes in order of cost.
+
 What is left is **the effects layer, VOP3-2**: 87 algorithms modelled from the Data List, 17 to 29 dB against real impulse responses over eighty-four segments. It is a rebuild of each block from the microcode or a measurement of each against a register session, and it is the last piece. Tiers 0 to 3 and 5 are done, so the engine, the library and console split, the plugin in all three formats, the front panel GUI, the licence and CI are all in, and Tier 4, fidelity and verification, is complete outside the effects.
 
 ## Build and run

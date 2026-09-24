@@ -38,6 +38,10 @@ The path tells you, and it tells you what a disagreement with real hardware mean
 
 **Scale is not fidelity.** `src/fsvr/tuning.h` holds knobs that trade CPU for nothing else. If changing one moves a measurement, the value is wrong, not the hardware's.
 
+## Releases
+
+Every release tag carries release notes: an annotated tag (`git tag -a vX.Y.Z -F notes.md`) whose body says what was measured, what changed and the numbers, and which collaborator reports it answers. The Actions job's `generate_release_notes` alone leaves only a compare link, which is not release notes. Skip them only when told to for that release.
+
 ## Before you say it works
 
 ```bash

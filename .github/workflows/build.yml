@@ -89,6 +89,13 @@ jobs:
     permissions:
       contents: write
     steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      # The release body is the annotated tag's message (AGENTS.md, "Releases"). generate_release_notes
+      # alone left v0.4.6 with nothing but a compare link.
+      - name: Release notes from the tag
+        run: git tag -l --format='%(contents)' "${GITHUB_REF_NAME}" > notes.md && test -s notes.md
       - uses: actions/download-artifact@v4
         with:
           path: artifacts
@@ -104,4 +111,4 @@ jobs:
       - uses: softprops/action-gh-release@v2
         with:
           files: artifacts/*.zip
-          generate_release_notes: true
+          body_path: notes.md
