@@ -146,14 +146,15 @@ void Synth::refresh_ctl(Chan& C) {
         int ureg = clampi(C.ubwReg[o] + C.vcBw[o][1], 0, 127);
         NoiseBand nb = noise_band(ureg, u.skirt);
         s.na = nb.a1; s.na2 = nb.a2;
-        s.nscale = db2lin(nb.gdb + cal::NOISE_LEVEL_DB);
+        double resDc, resNoise; ures(ureg, u.res, resDc, resNoise);
+        s.nscale = db2lin(nb.gdb + cal::NOISE_LEVEL_DB) * resNoise;
         // Bandwidth register 0 silences the noise and leaves the resonance carrier alone. The capture set
         // cannot see the split, since every segment it has at bandwidth 0 is at resonance 0 too, and the
         // demo settles it: Kalimba runs two unvoiced operators at bandwidth 0 with resonance 5 and 7, and
         // taking the carrier down with the noise costs it 3.9 dB of band tilt where leaving it alone costs
         // nothing anywhere else. So the carrier is set against the band the register would give at 5.
         NoiseBand nc = ureg == 0 ? noise_band(5, u.skirt) : nb;
-        s.nres = db2lin(nc.gdb + cal::NOISE_LEVEL_DB) * sqrt(noise_band_var(nc.a1, nc.a2)) * cal::NOISE_RES_DC[u.res & 7];
+        s.nres = db2lin(nc.gdb + cal::NOISE_LEVEL_DB) * sqrt(noise_band_var(nc.a1, nc.a2)) * resDc;
     }
 }
 

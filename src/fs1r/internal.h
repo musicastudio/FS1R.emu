@@ -30,27 +30,26 @@ static const int AMS_W[8] = {0, 1, 2, 4, 5, 6, 7, 8};
 static inline double am_att(int regAM, int ams) { return std::min(regAM, 127) * LEVEL_DB * AMS_W[ams & 7] / 8.0; }
 static inline int eb86(int v) { return std::min(255, (((v & 0xFF) << 1) * 0xA5) >> 7); }   // 0..99 -> 0..127
 static inline int eb70(int v) { return (((v & 0xFF) << 1) * 0xA5) >> 8; }                   // 0..99 -> 0..127 (bandwidth)
-static inline int egrate(int t) { return ((99 - clampi(t, 0, 99)) * 0xA4) >> 8; }          // EG time -> chip rate 0..63
-// The chip's own rate scaling: register 0x50 is the operator's time scaling 0..7 and register 0xC0 the key code,
-// and it adds (tscale * keyoff) / 8 to every rate, truncating toward zero. The 24 tscale segments of 02_envelope_3
-// and the 20 tkey segments of 10_envelope2 recover the rate exactly off the (4 + (q & 3)) << (q >> 2) ladder, and
-// between them they pin keyoff at ten key codes, four apart, which is one note per octave from 12 to 120. It
-// saturates at both ends: notes 12 and 24 both read -13, and note 120 reads +13 where 108 reads +12. Nothing
-// linear fits the ten, a search over every trunc((a * c0 + b) / c) with a and c under 32 comes back empty, so
-// this is a table on the chip. Four key codes is three semitones, and the engine interpolates between the
-// samples it has, truncating toward zero. MEASURED at one point between the samples, 2026-09-24: the demo
-// drum's note 41 is key code 87, and 19_drums' six note-41 hits want -8 or -9 there (envelope shape 8.1 to
-// 1.5 dB rms, level -0.9 to -0.3 dB), where rounding the interpolation gave -7 and the chip's own -10 at 85
-// reads 4.5. Truncation gives -8. The other two of every four are still interpolated; sweeping 0xC0 as a
-// register is what would read all 128: FS1R.unlock/docs/unknowns.md experiment 8.
-static const int EG_KEYOFF[10] = {-13, -13, -10, -5, -2, 2, 4, 8, 12, 13};   // key codes 77, 81, 85 ... 113
-static inline int eg_keyoff(int c0) {
-    int i = (c0 - 77) >> 2;
-    if (i < 0) return EG_KEYOFF[0];
-    if (i >= 9) return EG_KEYOFF[9];
-    int a = EG_KEYOFF[i], b = EG_KEYOFF[i + 1];
-    return a + ((b - a) * ((c0 - 77) & 3)) / 4;
+// The unvoiced resonance carrier and the noise it takes with it, cal::URES_*, interpolated over the register.
+static inline void ures(int reg, int res, double& dc, double& noiseGain) {
+    if ((res & 7) < 4) { dc = 0; noiseGain = 1; return; }
+    double r = std::clamp((double)reg, (double)cal::URES_REG[0], (double)cal::URES_REG[4]);
+    int i = 0; while (i < 3 && cal::URES_REG[i + 1] <= r) i++;
+    double f = (r - cal::URES_REG[i]) / (cal::URES_REG[i + 1] - cal::URES_REG[i]); int k = (res & 7) - 4;
+    dc = cal::URES_DC[i][k] + (cal::URES_DC[i + 1][k] - cal::URES_DC[i][k]) * f;
+    noiseGain = pow(10.0, (cal::URES_NOISE_DB[i][k] + (cal::URES_NOISE_DB[i + 1][k] - cal::URES_NOISE_DB[i][k]) * f) / 20.0);
 }
+static inline int egrate(int t) { return ((99 - clampi(t, 0, 99)) * 0xA4) >> 8; }          // EG time -> chip rate 0..63
+// The chip's own rate scaling: register 0x50 is the operator's time scaling 0..7 and register 0xC0 the key code.
+// MEASURED 2026-09-24 off 21_keycode: every semitone 12..120 at time scaling 7, decaying at nominal rate 34,
+// each slope landing on the (4 + (q & 3)) << (q >> 2) ladder (fit error 0.06 over 109 notes). With the twenty
+// tscale-3 points of 10_envelope2 that pins the chip's key offset x at every key code 77..113: the rate moves
+// by trunc(tscale * x / 8), x saturates at -13 below 82 and +13 above 109, and it is symmetric about 95.5.
+// Key codes 86/87 and 104/105 admit 8 or 9; 8 is what 19_drums' note 41 wanted. docs/aeg.md.
+static const signed char EG_KEYOFF[37] = {   // key codes 77 .. 113
+    -13, -13, -13, -13, -13, -12, -12, -10, -10, -8, -8, -5, -5, -4, -4, -2, -2, -2, -1,
+      1,   2,   2,   2,   4,   4,   5,   5,   8,   8, 10, 10, 12, 12, 13, 13, 13, 13};
+static inline int eg_keyoff(int c0) { return EG_KEYOFF[clampi(c0 - 77, 0, 36)]; }
 // The noise band's two coefficients and its peak gain against the bandwidth register and the skirt,
 // read off cal.h's tables: piecewise linear in the register, and the skirt a per-step multiplier that
 // is itself interpolated across the three registers it was measured at.
@@ -265,7 +264,7 @@ struct EG {                      // amplitude EG on the chip: hold, 4 segments. 
         int hr = egrate(h); if (hr < 0x3F) hr = std::min(hr + 4, 0x3E);   // FUN_00019414: +4 only below 0x3F
         // 0x3F is the firmware's "no hold", the one value it does not offset. Anything else holds for half a
         // traverse at that rate plus a fixed lag, both measured.
-        holdLeft = hr < 0x3F ? (rate_secs(hr + rs) * cal::EG_HOLD_FRAC + cal::EG_HOLD_LAG) * SR : 0;
+        holdLeft = hr < 0x3F ? (rate_secs(hr) * cal::EG_HOLD_FRAC + cal::EG_HOLD_LAG) * SR : 0;   // the key code does not reach the hold: 21_keycode holds 135 ms at every note 12..120 (MEASURED 2026-09-24)
         if (holdLeft < 1) next(1);
     }
     void next(int s) {

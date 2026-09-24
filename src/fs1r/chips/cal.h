@@ -195,7 +195,24 @@ static const double NOISE_LEVEL_DB = 31.5;  // the recording's scale onto the en
 // and the 1 kHz take at register 51, in opposite directions at settings 5 and 7, so its law against the
 // register is not read yet. The engine's res / 7 ramp had the tone taking over from setting 2 and added
 // 12 dB across the range where the unit adds 3.
-static const double NOISE_RES_DC[8] = {0, 0, 0, 0, 0.36, 0.80, 1.32, 1.77};
+// MEASURED 2026-09-24, 22_ures: five bandwidth registers by the four settings that carry a tone, at 8 kHz,
+// left channel only (the recording's right channel lags the left by one sample, which costs a mono sum
+// 1.25 dB at 8 kHz). The carrier is a sine to the sample (envelope cv 0.003 at register 10, setting 7)
+// and its amplitude against the band's RMS depends on the register as much as on the setting: 1.50 at
+// register 10 where it is 2.37 at 87. And the noise under it is not left alone: a narrow band loses
+// 23 dB of noise at setting 7 where a wide one loses nothing. Both are read together, interpolated
+// across the register and clamped outside 10..87; settings 0 to 3 are the plain band (13_unvoiced3).
+// The whole take, tone and noise alike, sits 1.1 dB over the engine at 8 kHz, as 13_unvoiced3 does,
+// and that offset is the noise level's own against the centre frequency, not this table's: the DC is
+// against the unit's band and the noise column is relative to setting 4.
+// ponytail: the noise loss is a gain; the unit also reshapes the band (the centre drops more than the
+// skirts at register 10), which a gain cannot see. The 8 kHz take cannot say whether the carrier scales
+// with the centre frequency.
+static const int    URES_REG[5]         = {10, 25, 46, 67, 87};
+static const double URES_DC[5][4]       = {{0.60, 1.18, 1.40, 1.50}, {0.37, 0.86, 1.20, 1.42}, {0.31, 0.55, 1.07, 1.57},
+                                           {0.34, 0.58, 1.26, 2.38}, {0.33, 0.65, 1.09, 2.37}};       // settings 4..7
+static const double URES_NOISE_DB[5][4] = {{0.0, -4.9, -13.2, -23.4}, {0.0, -2.1, -9.5, -19.1}, {0.0, -1.0, -4.9, -11.3},
+                                           {0.0, 0.0, -0.2, -0.9}, {0.0, -0.3, -0.1, 0.5}};
 // The filter is not the YMP706's: it runs on VOP3-1 and the CPU hands it coefficients, so these come
 // from the firmware's own conversions (FUN_0000C36C, FUN_0000C3D0) and only the chip's reading of them
 // is a guess. docs/ymp706_registers.md, "The per-voice filter".

@@ -57,6 +57,10 @@ int selftest(Synth& S) {
         }
         ck("EG rate scaling saturates low", eg_ratescale(7, 60) == -11);
         ck("key code 87, the demo drum's note 41, reads -8 (19_drums)", eg_keyoff(87) == -8);
+        // 21_keycode, every semitone: saturated below 82 and above 109, and the hold does not scale
+        ck("key code table ends (21_keycode)", eg_keyoff(70) == -13 && eg_keyoff(81) == -13 && eg_keyoff(82) == -12 && eg_keyoff(109) == 12 && eg_keyoff(110) == 13 && eg_keyoff(127) == 13);
+        { EG lo, hi; int L[4] = {0, 0, 0, 63}, R[4] = {0, 34, 0, 0}; lo.start(L, R, 40, -11); hi.start(L, R, 40, 11);
+          ck("hold length ignores the key code (21_keycode)", lo.holdLeft == hi.holdLeft); }
         ck("EG rate scaling saturates high", eg_ratescale(7, 127) == 11);
     }
     // The formant window against the bandwidth byte, 04_formant_1's own staircase: flat to 40, opening

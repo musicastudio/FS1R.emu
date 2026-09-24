@@ -150,9 +150,19 @@ The request files are left as they are. Regenerating them with the byte centred 
 
 Two notes on reading the demo numbers. The band tilt is each song's per-octave error with its own median band removed, because `captures/FS1R DEMO.flac` is one take through whatever gain rgwan's converter sat at, where the capture set was measured off the digital tap; the recording's absolute level is not the engine's to match, and `tools/demo_probe.py score` reports both.
 
+## The key code table at every semitone, and the hold does not scale
+
+`21_keycode` (recorded 2026-09-24, `FS1R.unlock/captures/2026-09-24-5`) plays the same decay, nominal rate 34 at time scaling 7, at every note from 12 to 120. Each of the 109 slopes lands on the `(4 + (q & 3)) << (q >> 2)` ladder, 0.06 of fit error over the lot, so every note names its rate outright, and with `10_envelope2`'s time-scaling-3 points the offset `x` in `trunc(tscale * x / 8)` is pinned at every key code from 77 to 113:
+
+| key code | 77–81 | 82–83 | 84–85 | 86–87 | 88–89 | 90–91 | 92–94 | 95–96 | 97–99 | 100–101 | 102–103 | 104–105 | 106–107 | 108–109 | 110–113 |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| x | −13 | −12 | −10 | −8 | −5 | −4 | −2 | −1/+1 | +2 | +4 | +5 | +8 | +10 | +12 | +13 |
+
+It saturates at ±13 exactly where the ten-point table had guessed, and between the samples it is not the interpolation the engine carried: 86–87 read −8 (the drum's −8 confirmed), 88–89 read −5 where the line gave −6, 104–105 read +8 where the line gave +9. Symmetric about 95.5; the one ambiguity is 95–96, which time scaling 7 and 3 both read as a zero step and could be −1, 0 or +1. `EG_KEYOFF` is now the 37-entry table. Twelve of the 109 notes had been on the wrong rate step, an eighth to a fifth of the decay time each.
+
+**The hold does not scale.** The same take holds 135 ms at note 12 and 135 ms at note 120, ±2 ms, where the engine had scaled the hold with the key code and held note 12 for 920 ms. The scaling reaches the four rate registers and not the hold's. `21_keycode` 7.99 / 2.43 → **4.44 / 0.57**; what is left of its level is the ten-second segments' RMS window against decays that now match to the step.
+
 ## What is still open
 
-* **The key code law between its samples.** Ten key codes four apart, interpolated, truncating toward zero. One point between them is measured now (2026-09-24): key code 87, the demo drum's note 41, wants -8 or -9 off `19_drums`' six hits, and truncation gives -8 where rounding gave -7. Register 0xC0 driven directly gives all 128, and says whether the chip latches a rate at its segment's start or re-reads the key code every frame. `FS1R.unlock/captures/fs1r_capture_session4.py keycode`.
-* **Whether the rate scaling reaches the hold register.** Free with the same run, since its patch carries a hold.
 * **The hold's fixed lag.** 8.1 ms with six milliseconds of scatter that is the 192.3 Hz tick. A register sweep does not fix that either; only a trace of the chip's own writes would, which is the SH-2 core item.
 * **The 0.55 % the decay rates sit under `rate_secs`** over rates 16 to 33, unexplained and too small to model.

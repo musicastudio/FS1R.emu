@@ -3,6 +3,8 @@
 > **Worked through on 2026-09-21, the same day.** rgwan recorded all five files the request asked for. Items 1, 2, 4 and 6 are closed, item 3 turned into the first real measurement of the effect model, and item 6's diagnosis below was wrong in a way worth keeping. What each one became is marked in place; `docs/noise.md` is the working for item 1. The table below is the state before any of it, and the one at the bottom is after.
 >
 > **2026-09-24.** Items 7 and 8 closed off the data already recorded, and the drum's note 41 with them. Everything outside the effects is now inside the measurement; the effects are the one item left, at the bottom.
+>
+> **2026-09-24, session 4.** `21_keycode` read the key code table at every semitone and found the hold does not scale with it; `22_ures` read the unvoiced resonance carrier against the bandwidth register and the noise it takes with it. `docs/findings.md`. The table at the bottom is updated.
 
 Written 2026-09-21 against every recording and register session in hand: rgwan's 0918 take of the 21 frozen request files, the 0919 `05b`, `08b` and `10_envelope2` takes, the 0920 `11_detune` and `12_fseqlevel` takes, both register sessions, and `captures/FS1R DEMO.flac`. Everything below is measured off those unless it says otherwise. The numbers come from `python tools/analyze_capture.py captures/hardware/*.wav --compare` run today against the current build.
 
@@ -222,13 +224,15 @@ Two tooling faults fixed along the way, both of which had been producing numbers
 | `10_envelope2` | 0.41 | | 0.68 | unchanged |
 | `11_detune_1` / `_2` | 0.05 / 0.18 | 0.14 | | 0.23 |
 | `12_fseqlevel` | 3.16 | | 12.16 | unchanged |
-| `13_unvoiced3` | 1.05 | 1.03 | | unchanged |
+| `13_unvoiced3` | 1.05 | **0.86** | | 1.03, the resonance carrier's noise cut |
 | `14_sens` | **1.17** | | 3.10 | 1.66, 3.14 |
 | `15_filter` | 1.74 | 4.22 | | unchanged |
 | `16_velocity_1` / `_2` | 0.06 / 0.06 | | | unchanged |
 | `17_egdecay` | 0.09 | | 0.43 | unchanged |
 | `18_fmchain` | 0.05 | 0.13 | | 0.15 |
-| `19_drums` | **0.81** | | **1.92** | 1.25, 3.03 |
+| `19_drums` | 1.22 | | 2.28 | 0.81, 1.92: the hold no longer scales with the key code, which the hits at note 60 had been leaning on |
 | `20_fltmod` | 2.10 | 3.53 | 9.24 | unchanged, LFO2's waveform against the analyzer's alignment |
+| `21_keycode` | 4.44 | | **0.57** | new; 7.99 / 2.43 on the old table. The level is the ten-second RMS window against a decay, not a level |
+| `22_ures` | 1.08 | **0.62** | | new; 0.82 / 2.11 on the old carrier table. The level is the 8 kHz noise offset every unvoiced take at that centre carries |
 
-Twenty-seven of the thirty-six files agree with the unit inside half a decibel of level; the nine that do not are the three effect files, the two whose numbers are the sub-100 Hz metric, `12_fseqlevel` and `20_fltmod` at frame and LFO rates the analyzer's alignment cannot hold, and `14_sens` and `15_filter` at 1.2 and 1.7. The demo, effects in: mean|err| 4.92 dB, tilt 1.96, envelope correlation median 0.976 and worst 0.908.
+Twenty-seven of the thirty-eight files agree with the unit inside half a decibel of level; the eleven that do not are the three effect files, the two whose numbers are the sub-100 Hz metric, `12_fseqlevel` and `20_fltmod` at frame and LFO rates the analyzer's alignment cannot hold, `14_sens` and `15_filter` at 1.2 and 1.7, and the two session-4 files whose level column is not a level (above). The demo, effects in: mean|err| 4.92 dB, tilt 1.96, envelope correlation median 0.976 and worst 0.908.

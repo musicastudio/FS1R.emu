@@ -8,6 +8,18 @@ Entries that have a dedicated working document (`aeg.md`, `skirt.md`, `noise.md`
 
 ---
 
+## 2026-09-24, session 4: the key code table at every semitone, the hold does not scale, the unvoiced resonance carrier and the noise it takes with it
+
+Two recordings from `FS1R.unlock/captures/2026-09-24-5` (`fs1r_capture_session4.py record`); the `perchan3` register dump stopped on a script bug (the bulk-echo query put an operator byte address of 134 in a MIDI data byte) and is fixed for the next run.
+
+**`21_keycode`.** One decay at every semitone 12..120, time scaling 7. Every slope lands on the chip's rate ladder, so the key offset is read at all 37 key codes 77..113, not ten of them: the ten-point interpolation had twelve notes a rate step off, and the hold had been scaled with the key code where the unit holds 135 ms at every note. `docs/aeg.md`. `21_keycode` 7.99 / 2.43 → 4.44 / 0.57; `19_drums` 0.81 / 1.92 → 1.24 / 2.32, which is the price of the note-60 hits' hold no longer scaling; the drum's own note 41 is unchanged at −8.
+
+**`22_ures`.** The unvoiced resonance carrier at five bandwidth registers by the four settings that carry a tone, 8 kHz. The carrier's amplitude against the band depends on the register as much as on the setting (1.50 at register 10, 2.37 at 87, setting 7), and the noise under it is cut: 23 dB at register 10 and setting 7, nothing at 67 and up. `NOISE_RES_DC` is now `URES_DC` and `URES_NOISE_DB`, two five-by-four tables interpolated over the register. Read off the left channel alone: the recording's right channel lags the left by one sample, which costs a mono sum 1.25 dB at 8 kHz and had put a phantom decibel into every unvoiced take at that centre. `22_ures` 0.82 / 2.11 → 1.08 / 0.62; the level that remains is the 1.1 dB every 8 kHz unvoiced take sits over the engine (`13_unvoiced3` too), the noise level against the centre, not this table.
+
+**Voice edits reach sounding notes**, and the plugin's voice Note Shift defaulted to −24 (`gen_parameters.py` read the one Data List row written with hyphens instead of tildes as unipolar). Both in the same release.
+
+---
+
 ## 2026-09-24, the "1" forms are the same window with a sin^2 fall, all1/all2 are the window alone, and the drum's key code is 87
 
 Nothing recorded; three readings of data already on disk, and the last three open items outside the effects.
