@@ -99,6 +99,8 @@ why the Data List says "FSeq Bulk does not interpret Byte Count" (3.2.1): the he
 field (byte 0x1B, frames = 128 * (n + 1)) is what says how long the dump is, and the engine's loader
 reads it there.
 
+`Internal Perform Bank` and `Internal Voice Bank` is actually cherry-picking from `preset performances` and `preset voices` by `factory set` functions.
+
 ## 3. FS1R data model (from the Data List)
 
 Bulk/sysex layout is fully documented and is the natural patch format for the softsynth:
