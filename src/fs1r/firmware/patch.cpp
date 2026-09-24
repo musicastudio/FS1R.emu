@@ -87,41 +87,56 @@ void apply_aced(uint8_t* out) {
 }
 
 void convert_dx7(const uint8_t* v, uint8_t* out) {
-    // FUN_00035918 (common) and FUN_00035E96 (one operator), with the per-algorithm row DX7MAP[alg]:
-    // the FS1R algorithm, which FS1R operator each DX operator lands on, +2 on the output level where
-    // the row says so, and the carrier level corrections. Rates go through the two correction tables
-    // and a term in the rate scaling and the output level; the engine had 99 - rate.
-    init_blank_voice(out); memcpy(out, v + 145, 10);
+    // FUN_00035918 (common) and FUN_00035E96 (one operator), byte for byte. The common block is a list of
+    // 16-bit words the firmware then packs; the per-algorithm row DX7MAP[alg] carries the FS1R algorithm,
+    // the operator slot each DX operator lands on, +2 on the output level where the row says so, and
+    // the carrier level corrections. Checked against the demo's own converted bulks (FullTine 1, DX-Acrd 4)
+    // on every byte the demo did not edit afterwards.
+    memset(out, 0, 608);
+    for (int i = 0; i < 10; i++) { uint8_t c = v[145 + i]; out[i] = (c < 0x20 || c > 0x7D) ? 0x20 : c; }
     const unsigned short* row = DX7MAP + 33 * (v[134] & 31);
-    out[0x2C] = (uint8_t)row[16]; out[0x3D] = v[135] & 7;
-    for (int o = 0; o < 8; o++) out[0x2D + o] = (uint8_t)((row[2 * o + 1] >> 3) & 0xF);
-    out[0x11] = v[137]; out[0x12] = v[138]; out[0x15] = v[139]; out[0x16] = v[140]; out[0x13] = v[141] & 1; out[0x10] = (uint8_t)std::min<int>(v[142], 5);
-    out[0x1E] = (uint8_t)std::min<int>(v[144], 48);
-    out[0x1F] = v[133]; out[0x20] = v[130]; out[0x21] = v[131]; out[0x3E] = v[132]; out[0x22] = v[133];
-    for (int i = 0; i < 4; i++) out[0x23 + i] = (uint8_t)(99 - std::min<int>(v[126 + i], 99));
+    out[0x10] = v[142]; out[0x11] = v[137]; out[0x12] = v[138]; out[0x13] = v[141]; out[0x15] = v[139] >> 1; out[0x16] = v[140];
+    out[0x18] = v[142]; out[0x19] = v[137];                                       // LFO2 takes LFO1's wave and speed
+    out[0x1E] = v[144];
+    auto l100 = [](int x) { return (uint8_t)(x == 99 ? 100 : x); };            // PEG levels: 99 becomes 100
+    out[0x1F] = l100(v[133]); out[0x20] = l100(v[130]); out[0x21] = l100(v[131]); out[0x22] = l100(v[133]); out[0x3E] = l100(v[132]);
+    for (int i = 0; i < 4; i++) out[0x23 + i] = (uint8_t)(99 - v[126 + i]);
+    out[0x2C] = (uint8_t)row[16]; for (int o = 0; o < 8; o++) out[0x2D + o] = (uint8_t)((row[2 * o + 1] >> 3) & 0xF);
+    out[0x3D] = v[135];
+    out[0x40] = (uint8_t)(1 << 4 | DX7CTRL[2 * (v[134] & 31)]);     out[0x45] = 74;  // formant control 1: output, +10, on the algorithm's op
+    out[0x46] = out[0x47] = out[0x48] = out[0x49] = 64;
+    out[0x4A] = (uint8_t)(1 << 4 | DX7CTRL[2 * (v[134] & 31) + 1]); out[0x4F] = 71;  // FM control 1: output, +7
+    out[0x50] = out[0x51] = out[0x52] = out[0x53] = 64;
+    out[0x55] = 0x24; out[0x56] = 10; out[0x57] = 85; out[0x58] = 7; out[0x5B] = 69; out[0x5C] = 60; out[0x5D] = 12;   // the filter block's defaults
+    out[0x64] = 64; out[0x65] = 50; out[0x66] = 100; out[0x67] = out[0x68] = 75; out[0x69] = out[0x6A] = out[0x6B] = 30; out[0x6C] = 99;
+    // the two unused slots take the template at 0x38A914 (35 bytes), with their Fseq track = the slot
+    // (both converted bulks carry break point 60 and the call index 6/7 in byte 5, where the ROM template has 39 and 0)
+    for (int o = 0, j = 6; o < 8; o++) { uint8_t* p = out + 112 + o * 62; memcpy(p, DX7OPTEMPLATE, 35); p[23] = 60; memcpy(p + 35, DX7UOP + 27 * o, 27);
+        bool used = false; for (int k = 0; k < 6; k++) if (row[25 + k] == o) used = true;
+        if (!used) p[5] = (uint8_t)(j++); }
     for (int j = 0; j < 6; j++) {                     // j = 0 is DX operator 6
-        const uint8_t* d = v + j * 21; uint8_t* p = out + 112 + row[25 + j] * 62;   // slot: word 25 + j (0x389FBE), FUN_00035E96
-        int ol = std::min<int>(d[16], 99) + (row[17 + j] == 1 ? 2 : 0), rs = d[13] & 7;
+        const uint8_t* d = v + j * 21; uint8_t* p = out + 112 + row[25 + j] * 62;   // slot: word 25 + j (0x389FBE)
+        int ol = d[16] + (row[17 + j] == 1 ? 2 : 0), rs = d[13];
         int att = rs * 1386 / 504 + (99 - ol) * 4 / 10 + 6, dec = rs * 1386 / 504 + (99 - ol) * 2 / 10;
-        for (int i = 0; i < 4; i++) {
-            int r = std::min<int>(d[i], 99);
-            int t = i == 0 ? 99 - DX7RATE_A[r] - r - att : 99 - DX7RATE_B[r] - r - dec;
-            p[16 + i] = (uint8_t)clampi(t, 0, 99); p[12 + i] = (uint8_t)std::min<int>(d[4 + i], 99);
-        }
-        p[23] = d[8]; p[24] = d[9]; p[25] = d[10]; p[26] = d[11] & 3; p[27] = d[12] & 3; p[21] = rs;  // time scaling = the DX rate scaling (FUN_00035E96 c16), and its term is in the times too
-        int ams = std::min<int>(d[14], 3) * 2, ts = std::min<int>(d[15], 7);
-        p[33] = (uint8_t)(ams << 4 | (ts + 7)); p[22] = (uint8_t)std::min<int>(ol, 99);
-        int fixed = d[17] & 1, coarse = d[18] & 31, fine = std::min<int>(d[19], 99);
+        int coarse = d[18], fine = d[19], fixed = d[17] & 1;
         if (fixed) {
-            double hz = pow(10.0, coarse % 4) * pow(10.0, fine / 100.0);
+            double hz = pow(10.0, coarse % 4) * pow(10.0, fine / 100.0);        // FUN_00035658, software float, INFERRED
             double x = log2(hz / 440.0) + 16; int c = (int)floor(x); int f = (int)lround((x - c) * 128);
             if (f > 127) { f = 0; c++; }
             coarse = clampi(c, 0, 31); fine = clampi(f, 0, 127);
         }
-        p[1] = (uint8_t)coarse; p[2] = (uint8_t)fine; p[5] = (uint8_t)(fixed << 6 | j);                  // FUN_0003161E: Fseq track = the DX index
-        p[7] = (uint8_t)(d[20] + 8);                                                                   // detune: DX 0..14 -> 8..22 (bf8)
-        p[0] = (uint8_t)((v[136] & 1) << 6 | 24);
-        p[31] = (uint8_t)(7 << 3 | (v[143] & 7));
+        p[0] = (uint8_t)((v[136] & 1) << 6 | 24); p[1] = (uint8_t)coarse; p[2] = (uint8_t)fine; p[3] = 0;
+        p[4] = 7 << 3; p[5] = (uint8_t)(fixed << 6 | 0 << 3 | j);              // bw bias 0, sine, skirt 0, Fseq track = DX index
+        p[6] = 0; p[7] = (uint8_t)(d[20] + 8); p[8] = p[9] = 50; p[10] = p[11] = 0;
+        for (int i = 0; i < 4; i++) {
+            int r = d[i];
+            int t = i == 0 ? 99 - DX7RATE_A[r] - r - att : 99 - DX7RATE_B[r] - r - dec;
+            p[16 + i] = (uint8_t)clampi(t, 0, 99); p[12 + i] = d[4 + i];
+        }
+        p[20] = 0; p[21] = (uint8_t)rs; p[22] = (uint8_t)ol;
+        p[23] = d[8]; p[24] = d[9]; p[25] = d[10]; p[26] = d[11]; p[27] = d[12]; p[28] = p[29] = p[30] = 0;
+        p[31] = (uint8_t)(7 << 3 | v[143]); p[32] = 7;
+        p[33] = (uint8_t)(d[14] << 4 | (d[15] + 7)); p[34] = (uint8_t)(d[14] + 7);   // amp mod sense, velocity sense; EG bias sense = ams
     }
     apply_aced(out);
 }

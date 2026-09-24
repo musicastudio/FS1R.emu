@@ -436,7 +436,7 @@ static const unsigned short FSEQDLY[100] = {
     280, 283, 287, 290, 294, 297, 301, 304, 308, 311, 315, 318, 322, 325, 329, 332,
     336, 339, 343, 346
 };
-// DX7 -> FS1R conversion rows (FUN_00035918/E96): [alg][33]: 0..15 connection words with the carrier correction in t1 bits 3-6, 16 the FS1R algorithm, 17..22 +2 on the output level for DX ops 6..1, 23..25 unknown, 26..31 the FS1R operator each DX op 6..1 lands on, 32 unknown
+// DX7 -> FS1R conversion rows (FUN_00035918/E96): [alg][33]: 0..15 connection words with the carrier correction in t1 bits 3-6, 16 the FS1R algorithm, 17..22 +2 on the output level for DX ops 6..1, 23..24 unknown, 25..30 the FS1R operator each DX op 6..1 lands on, 31..32 unknown
 static const unsigned short DX7MAP[1056] = {
     1, 3, 0, 1, 28, 0, 32, 0, 32, 0, 32, 25, 0, 0, 32, 25,
     8, 1, 1, 1, 0, 1, 0, 0, 0, 2, 3, 4, 5, 6, 7, 0,
@@ -524,6 +524,36 @@ static const signed char DX7RATE_B[100] = {
     1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
     0, 0, 0, 0
+};
+// DX7 -> FS1R: formant and FM control destination operator per DX algorithm, pairs
+static const unsigned short DX7CTRL[64] = {
+    4, 6, 4, 6, 6, 3, 6, 3, 6, 2, 6, 2, 6, 3, 6, 4,
+    4, 6, 6, 3, 3, 6, 6, 2, 2, 4, 6, 4, 4, 6, 6, 3,
+    3, 6, 6, 5, 6, 2, 3, 5, 2, 5, 6, 2, 3, 0, 1, 0,
+    1, 0, 3, 0, 1, 3, 3, 1, 2, 0, 5, 1, 5, 0, 5, 0
+};
+// DX7 -> FS1R: the voiced operator block of an unused slot (FUN_00035E96)
+static const unsigned char DX7OPTEMPLATE[35] = {
+    24, 1, 0, 0, 56, 0, 20, 15, 50, 50, 20, 20, 99, 99, 99, 0,
+    0, 20, 20, 0, 0, 0, 0, 39, 0, 0, 3, 0, 0, 0, 0, 56,
+    7, 7, 7
+};
+// DX7 -> FS1R: the unvoiced operator block per slot, 8 x 27 (FUN_00035E96)
+static const unsigned char DX7UOP[216] = {
+    24, 14, 0, 0, 20, 7, 0, 50, 50, 20, 20, 0, 7, 99, 99, 99,
+    0, 0, 20, 20, 0, 0, 0, 7, 7, 7, 7, 24, 15, 0, 0, 20,
+    7, 0, 50, 50, 20, 20, 0, 7, 99, 99, 99, 0, 0, 20, 20, 0,
+    0, 0, 7, 7, 7, 7, 24, 15, 75, 0, 20, 7, 0, 50, 50, 20,
+    20, 0, 7, 99, 99, 99, 0, 0, 20, 20, 0, 0, 0, 7, 7, 7,
+    7, 24, 16, 0, 0, 20, 7, 0, 50, 50, 20, 20, 0, 7, 99, 99,
+    99, 0, 0, 20, 20, 0, 0, 0, 7, 7, 7, 7, 24, 16, 42, 0,
+    20, 7, 0, 50, 50, 20, 20, 0, 7, 99, 99, 99, 0, 0, 20, 20,
+    0, 0, 0, 7, 7, 7, 7, 24, 16, 75, 0, 20, 7, 0, 50, 50,
+    20, 20, 0, 7, 99, 99, 99, 0, 0, 20, 20, 0, 0, 0, 7, 7,
+    7, 7, 24, 16, 104, 0, 20, 7, 0, 50, 50, 20, 20, 0, 7, 99,
+    99, 99, 0, 0, 20, 20, 0, 0, 0, 7, 7, 7, 7, 24, 17, 0,
+    0, 20, 7, 0, 50, 50, 20, 20, 0, 7, 99, 99, 99, 0, 0, 20,
+    20, 0, 0, 0, 7, 7, 7, 7
 };
 // LFO2 speed 0..127 -> VOP3-1 phase increment (FUN_0000C130)
 static const unsigned short LFO2SPD[128] = {
