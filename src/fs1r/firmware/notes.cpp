@@ -50,6 +50,11 @@ void Synth::note_on(int part, int note, int vel) {
     setup_peg(C, pt, vel);
     // Fseq trigger (FUN_0000fffa): first note only, or every note
     if (fseq.valid && fseqPart == part && ((perf.c[0x24] & 1) || !anyOther(C))) fseq_start(vel);
+    // The filter EG is staged before the coefficients are written, as FUN_0000B0E8 does (FUN_0000D050
+    // stages the EG, then writes cutoff, resonance and input gain in one pass). It used to run at the end
+    // of note_on, after refresh_regs, so the note's first tick reached the chip with the EG of whatever
+    // played on this channel last.
+    start_filter(C, pt, vel);
     refresh_regs(C, pt);
     if (getenv("FS1R_DEBUG")) {
         printf("note %d vel %d -> note' %d pitch %d keyfact %d C0 %d\n", note, vel, C.noteP, C.pitchNote, C.keyfact, C.regC0);
@@ -69,13 +74,11 @@ void Synth::note_on(int part, int note, int vel) {
         s.rng = 0x9E3779B9u * (o + 1) ^ clock; if (!s.rng) s.rng = 1;
         s.attS = -1e9;                    // the level glide starts at the new note's own level
     }
-    start_filter(C, pt, vel);
 }
 
 void Synth::start_filter(Chan& C, const Part& pt, int vel) {
     const Voice& V = pt.voice;
-    C.fltOn = (pt.p[7] & 1) != 0; C.fltType = V.fltType; C.flt.clear();
-    C.fltInGain = db2lin(V.fltInGain); C.fltGain = C.fltInGain * cal::FLT_LOSS;
+    C.flt.clear();
     // FUN_0000D050 / FUN_0000CB6C / FUN_0000D7B0: the level words are (L - 50) * 256 / 50 and each
     // time is clamped to 0..99 after the part offset, then shortened by the time scaling term
     // (note - 60) * time * tscale / 0x57F and, on the attack alone, by the velocity term
@@ -362,8 +365,17 @@ void Synth::refresh_pan(Chan& C, const Part& pt) {
 }
 
 void Synth::refresh_filter(Chan& C, const Part& pt) {
-    if (!C.fltOn) return;
     const Voice& V = pt.voice; int part = C.part;
+    // The switch, the type and the input gain are read on the tick rather than latched at note-on, so a
+    // held note follows them as it already follows cutoff and resonance. Ours, and not the unit's:
+    // FUN_0000B0E8 hands the switch to the filter channel at note-on only (FUN_00010B48 reads part 0x07
+    // into DAT_01029160 and gates the whole call on it), so on hardware a sounding note keeps whatever it
+    // started with. docs/Differences.md.
+    bool on = (pt.p[7] & 1) != 0;
+    if (on && !C.fltOn) C.flt.clear();          // switched in mid-note: start from rest, not from stale state
+    C.fltOn = on; C.fltType = V.fltType;
+    C.fltInGain = db2lin(V.fltInGain); C.fltGain = C.fltInGain * cal::FLT_LOSS;
+    if (!on) return;
     // FUN_0000DB3C, FUN_0000D050 and FUN_0000E170, with the firmware's own integer arithmetic. Every
     // division is the flash's sdiv, which truncates toward zero.
     auto sdiv = [](long long n, long long d) { return (int)(n / d); };

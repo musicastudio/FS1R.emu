@@ -321,6 +321,22 @@ int selftest(Synth& S) {
         ck("filter EG time 60 vs 20: 2^(40/15.5) = 6x per 15 words... 15x over 40 (flteg 0.81 vs 0.052 s)", ns > 12 * nf && ns < 18 * nf);
     }
 
+    // The part's filter switch is live: a held note picks it up on the tick, as cutoff and resonance
+    // already do. Ours, not the unit's, which latches it at note-on. docs/Differences.md.
+    {
+        Part& pt = S.perf.part[0]; pt.p[7] = 0;
+        S.midi_in(0x90, 60, 100);
+        std::vector<float> l(1024), r(1024);
+        S.render(l.data(), r.data(), 1024);
+        Chan* c = nullptr; for (auto& x : S.ch) if (x.active && x.note == 60) { c = &x; break; }
+        ck("note on with the filter off leaves it off", c && !c->fltOn);
+        pt.p[7] = 1; S.render(l.data(), r.data(), 1024);
+        ck("filter switched on mid-note reaches the held note", c && c->fltOn);
+        pt.p[7] = 0; S.render(l.data(), r.data(), 1024);
+        ck("and switched off again mid-note", c && !c->fltOn);
+        S.midi_in(0x80, 60, 0); S.midi_in(0xB0, 120, 0);
+    }
+
     // A part whose voice bank is off receives nothing even with a receive channel (A011 Sho, parts 3 and 4).
     { S.perf.part[1].p[1] = 0; S.perf.part[1].p[4] = 0x10; ck("bank off silences the part", !S.part_listens(1, 0)); S.perf.part[1].p[1] = 2; ck("bank on hears it again", S.part_listens(1, 0)); }
 

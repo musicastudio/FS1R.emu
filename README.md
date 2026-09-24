@@ -238,6 +238,7 @@ python tools/regress.py                 # the whole fixed preset list against th
 - `docs/aeg.md`, `formant.md`, `skirt.md`, `noise.md` and `detune.md`, one measurement each, the working behind the constants in `cal`
 - `docs/midi_dispatch.md` how a Note On, a Control Change and both aftertouches get from the SCI0 interrupt to the tone generator; `interface_from_firmware.md` the panel's cursor stops and controller set, read out of the EPROM's own screen tables
 - `docs/vop3_microcode.md`, `vop3_2_microcode.md` and `vop3_pinout.md` the VOP3 reference
+- [docs/Differences.md](docs/Differences.md) the short list of places FSVR knowingly behaves differently from the unit, and why
 - [docs/plugin_guide.md](docs/plugin_guide.md) the plugin user guide. The Data List and owner's manual text and the formant patent are here too.
 - [STATUS.md](STATUS.md) what is known, what is modelled and what nobody knows, with the open work at the end
 - [docs/findings.md](docs/findings.md) the research log, newest first, and the evidence behind each constant
