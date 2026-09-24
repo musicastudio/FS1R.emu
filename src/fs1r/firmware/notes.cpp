@@ -103,6 +103,16 @@ void Synth::compute_pitch(Chan& C, const Part& pt, int note) {
     C.pitchNote = pitch;
 }
 
+// A voice parameter change reaches the notes already sounding, as the unit's own edit buffer does:
+// the per-channel words are rebuilt from the voice at the note's own pitch and velocity. The EGs in
+// flight keep the segments they started with, and the filter EG likewise; everything the tick
+// reads through refresh_regs (frequency, level, form, bandwidth, detune, algorithm, LFOs, filter)
+// moves at once.
+void Synth::voice_changed(int part) {
+    const Part& pt = perf.part[part];
+    for (auto& C : ch) if (C.active && C.part == part) { setup_ops(C, pt, C.vel); refresh_regs(C, pt); }
+}
+
 void Synth::retune(Chan& C, int note) {
     const Part& pt = perf.part[C.part];
     C.note = note; compute_pitch(C, pt, note);

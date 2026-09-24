@@ -320,6 +320,13 @@ int selftest(Synth& S) {
     // A part whose voice bank is off receives nothing even with a receive channel (A011 Sho, parts 3 and 4).
     { S.perf.part[1].p[1] = 0; S.perf.part[1].p[4] = 0x10; ck("bank off silences the part", !S.part_listens(1, 0)); S.perf.part[1].p[1] = 2; ck("bank on hears it again", S.part_listens(1, 0)); }
 
+    // A voice edit reaches a sounding note: op 1 coarse 1 -> 2 moves its frequency word an octave.
+    { S.perf.part[0].p[1] = 2; S.perf.part[0].p[4] = 0x10; S.perf.part[0].voice.v[0].fixed = 0; S.perf.part[0].voice.v[0].form = 0;
+      S.midi_in(0x90, 60, 100); int w0 = -1; for (auto& c : S.ch) if (c.active && c.part == 0) w0 = c.freqWord[0];
+      uint8_t m[10] = {0xF0, 0x43, 0x10, 0x5E, 0x60, 0x00, 0x01, 0x00, 2, 0xF7}; apply_param_change_locked(S, m, 10);
+      int w1 = -1; for (auto& c : S.ch) if (c.active && c.part == 0) w1 = c.freqWord[0];
+      ck("voice edit reaches the sounding note", w0 >= 0 && w1 == w0 + 1024); S.all_off(); }
+
     return g_fails ? 1 : 0;
 }
 

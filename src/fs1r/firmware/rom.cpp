@@ -127,8 +127,8 @@ bool write_param(Synth& S, int ah, int am, int al, int val) {
     }
     if (ah == 0x10 && ((am == 0 && al >= 0x50) || am == 1)) { int i = am ? 48 + al : al - 0x50; if (i >= 112) return false; S.perf.fx[i] = v; return true; }
     if (ah >= 0x30 && ah <= 0x33 && am == 0 && al < 52) { S.perf.part[ah - 0x30].p[al] = v; return true; }
-    if (ah >= 0x40 && ah <= 0x43 && am == 0 && al < 112) { Voice& V = S.perf.part[ah - 0x40].voice; V.raw[al] = v; decode_voice(V); return true; }
-    if (ah >= 0x60 && ah <= 0x63 && am < 8 && al < 62) { Voice& V = S.perf.part[ah - 0x60].voice; V.raw[112 + am * 62 + al] = v; decode_voice(V); return true; }
+    if (ah >= 0x40 && ah <= 0x43 && am == 0 && al < 112) { Voice& V = S.perf.part[ah - 0x40].voice; V.raw[al] = v; decode_voice(V); S.voice_changed(ah - 0x40); return true; }
+    if (ah >= 0x60 && ah <= 0x63 && am < 8 && al < 62) { Voice& V = S.perf.part[ah - 0x60].voice; V.raw[112 + am * 62 + al] = v; decode_voice(V); S.voice_changed(ah - 0x60); return true; }
     if (ah == 0x70 && am == 0 && al < 32) {                       // Fseq header
         uint8_t h[32] = {}; std::vector<uint8_t> cur; S.fseq_bytes(cur);
         if (cur.size() >= 32) memcpy(h, cur.data(), 32);

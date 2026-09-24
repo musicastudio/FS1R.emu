@@ -428,6 +428,7 @@ struct Synth {
     // FUN_00010dc4: note shifts, note table, part detune, master tune
     void compute_pitch(Chan& C, const Part& pt, int note);
     void retune(Chan& C, int note);
+    void voice_changed(int part);              // rebuild the sounding channels' words after a voice edit
     // per-operator note-dependent values: levels (FUN_00012a32/FUN_00012fcc/FUN_00012e2c), frequency words (FUN_0001e838/FUN_000135d8),
     // formant transpose words (FUN_00013bc6), bandwidth registers (FUN_0001ba06), EG rates with part offsets
     void setup_ops(Chan& C, const Part& pt, int vel);
