@@ -13,7 +13,7 @@ bool load_rom(Rom& R, const char* path) {
 void rom_voice(const Rom& R, int idx, Voice& V) {
     idx = clampi(idx, 0, 1407);
     if (idx < 256) memcpy(V.raw, R.d.data() + 0x5C280 + (size_t)idx * 608, 608);
-    else { const uint8_t* r = R.d.data() + 0x30091 + (size_t)(idx - 256) * 155; uint8_t vced[155]; memcpy(vced, r + 10, 145); memcpy(vced + 145, r, 10); convert_dx7(vced, V.raw); }
+    else convert_dx7(R.d.data() + 0x30000 + (size_t)(idx - 256) * 155, V.raw);   // 155-byte VCED, name last, as tools/extract_presets.py reads it
     decode_voice(V);
 }
 

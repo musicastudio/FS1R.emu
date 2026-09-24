@@ -15,6 +15,7 @@ express a 512 frame dump, which is exactly why the header is what says how long 
 
 Exits non-zero on the first mismatch. No dependencies beyond the standard library.
 """
+import csv
 import sys
 from pathlib import Path
 
@@ -104,6 +105,10 @@ def main():
             print(f"check_presets: missing {f}; run tools/make_presets_blob.py", file=sys.stderr)
             return 1
     rows = [l.split(",") for l in CSV.read_text(encoding="utf-8").splitlines()[1:] if l]
+    files = {}
+    for r in csv.DictReader((ROOT / "presets" / "index.csv").open(encoding="utf-8")):
+        if r["bank"] in ("native", "dx7"):
+            files[int(r["index"]) + (0 if r["bank"] == "native" else NATIVE)] = (ROOT / r["file"].replace("\\", "/")).read_bytes()
     all_dumps = list(dumps(SYX.read_bytes()))
     fails = []
 
@@ -123,6 +128,10 @@ def main():
             fails.append(f"voice {n} has a bad checksum")
         if name_of(d, n) != row[1].strip():
             fails.append(f"voice {n} is named {name_of(d, n)!r}, the index says {row[1].strip()!r}")
+        # The blob's bytes, not just its names: a stale blob kept every DX7 name over the next voice's data.
+        f = files.get(n)
+        if f is None or (d[9:-2] if native else d) != (f[9:-2] if native else f):
+            fails.append(f"voice {n} differs from its presets/ file; run tools/make_presets_blob.py")
         if len(fails) > 5:
             break
 
