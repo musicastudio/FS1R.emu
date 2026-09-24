@@ -264,7 +264,11 @@ static const double LFO2_INC_K   = 3000.0 / 192.3;  // MEASURED, 20_fltmod 2026-
                                             // within 4% of that. ponytail: speed 127 (word 556) reads 43.2 Hz where
                                             // this gives 25.4, one point above word 232 and unexplained; a speed
                                             // sweep from 100 to 127 would say where the law bends.
-static const double PMS_FRAC[8]  = {0, 0.0264, 0.0534, 0.0889, 0.1612, 0.2769, 0.4967, 1.0};  // per-op pitch mod sensitivity, DX7 curve
+static const double PMS_FRAC[8]  = {0, 0.038, 0.076, 0.125, 0.212, 0.365, 0.620, 1.0};        // per-op pitch mod sensitivity. MEASURED 2026-09-24
+                                            // off 07_modulation_1's eight pms segments at pitch depth 99: the
+                                            // fundamental's swing at pms 1..6 is 0.038, 0.076, 0.125, 0.212, 0.365,
+                                            // 0.620 of pms 7's, where the DX7 curve the engine carried gave 0.026,
+                                            // 0.053, 0.089, 0.161, 0.277, 0.497, a third shy at every step.
 // The output path, MEASURED from rgwan's recording of the whole capture set on 2026-09-18. These three
 // are no longer inferred: they come off the digital tap itself. captures/analysis/ holds the numbers and
 // docs/capture_0918.md the working.

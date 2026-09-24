@@ -126,6 +126,10 @@ void Synth::refresh_ctl(Chan& C) {
         else if (!v.fixed) fop = word_hz(C.freqWord[o] + C.regPitch + pmw + det);
         else fop = word_hz(C.freqWord[o] + C.fbW[o] + pmw + det + (C.regFM * v.fms) / 7);
         s.fop = fop;
+        // The formant's window runs at the channel pitch through the operator's own pitch mod sense, not
+        // through the full LFO word: rgwan's demo take of 15_Human (pms 1..4, pmd 12) wobbles its formant
+        // harmonics 33..48 cents, the same as its pms 2 sine carriers, where a window on C.f0 gave 541.
+        s.fw = word_hz(C.regPitch + 0x1243 + pmw - C.vcFreq[o][0]);
         s.bw = clampi(C.bwReg[o] + C.vcBw[o][0], 0, 99);                 // register 0x218, the formant's
         s.ratio = v.form == 7 ? 0 : clampi(C.frmtWord[o], 0, 99);         // register 0x230, every other form's
         s.wl7 = std::min(cal::FRMT_WL_MAX, C.f0 / (cal::FRMT_BW_HZ0 * pow(2.0, s.bw / cal::FRMT_BW_DB)));
@@ -178,7 +182,7 @@ void Synth::render_chan(Chan& C, double& outL, double& outR) {
         if (gain != 0.0 || s.g[0].on || s.g[1].on) {
             double fop = s.fop;
             if (s.feg.stage < 2) fop *= pow(2.0, s.feg.tick() / 12.0);
-            y = op_sample(s, v, C.f0, fop, s.ratio, in * FM_INDEX, gain);
+            y = op_sample(s, v, s.fw, fop, s.ratio, in * FM_INDEX, gain);
         }
         Cb = y; if (t0 & 2) H = y; if (t1 & 4) S += y; if (t0 & 4) fbNew = y;
         if (t1 & 1) mix += y * partV;

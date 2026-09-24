@@ -333,6 +333,13 @@ int selftest(Synth& S) {
           bool carrier = alg[2 * o + 1] & 1, want = (6 - j) == 1 || (6 - j) == 3 || (6 - j) == 5; if (carrier != want) ok = false; }
       ck("DX7 alg 5 carriers land on FS1R carriers (B025 Tremolo)", ok); }
 
+    // The formant window follows the operator's own pitch mod sense, not the channel word at pms 7
+    { S.perf.part[0].p[1] = 2; S.perf.part[0].p[4] = 0x10; Voice& V = S.perf.part[0].voice;
+      V.v[0].form = 7; V.v[0].fixed = 1; V.v[0].pms = 1; V.pmd = 99; V.lfo1delay = 0;
+      S.midi_in(0x90, 60, 100); float L[480], R[480]; double lo = 1e9, hi = 0;
+      for (int k = 0; k < 400; k++) { S.render(L, R, 480); if (k < 200) continue; for (auto& c : S.ch) if (c.active && c.part == 0) { lo = std::min(lo, c.op[0].fw); hi = std::max(hi, c.op[0].fw); } }
+      ck("formant window pitch mod goes through pms (B011 Human Eh)", hi > lo && 1200 * log2(hi / lo) < 200); S.all_off(); }
+
     // A voice edit reaches a sounding note: op 1 coarse 1 -> 2 moves its frequency word an octave.
     { S.perf.part[0].p[1] = 2; S.perf.part[0].p[4] = 0x10; S.perf.part[0].voice.v[0].fixed = 0; S.perf.part[0].voice.v[0].form = 0;
       S.midi_in(0x90, 60, 100); int w0 = -1; for (auto& c : S.ch) if (c.active && c.part == 0) w0 = c.freqWord[0];
