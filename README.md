@@ -60,6 +60,8 @@ Three words carry the status of each piece below. **Read** is lifted out of the 
 
 The practical result is that patches, performances and Fseqs load and play with the same parameter interpretation the hardware uses, because the same logic computes them. What still differs from a real unit lives inside the two custom chips.
 
+A short list of places FSVR behaves differently **on purpose** is kept in [docs/Differences.md](docs/Differences.md), with the firmware address behind each one. There is one entry today: a part's filter switch is live here, so turning the filter on or off reaches the notes already sounding, where the unit latches that switch per note at note-on and only its cutoff and resonance follow a held note.
+
 ### The processors
 
 - **SH7044 CPU**, SH-2 at 28 MHz with 256 KB of internal flash. **Read, and verified against the unit.** The firmware's logic is rewritten in C++: the note-on path, the 192.3 Hz MTU2 tick, the CMT1 Fseq frame timer and every conversion table. rgwan ran a debug monitor over the whole capture set on 2026-09-18 and read the voice image back segment by segment, so the CPU side is checked byte for byte, 240,476 checks over 802 segments with no mismatch. Running the real firmware on an emulated SH-2 core (gearmulator has one with the SH7040 peripherals) stays on the list as a second opinion, not as a replacement.
