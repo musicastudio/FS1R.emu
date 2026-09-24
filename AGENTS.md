@@ -42,6 +42,10 @@ The path tells you, and it tells you what a disagreement with real hardware mean
 
 Every release tag carries release notes: an annotated tag (`git tag -a vX.Y.Z -F notes.md`) whose body says what was measured, what changed and the numbers, and which collaborator reports it answers. The Actions job's `generate_release_notes` alone leaves only a compare link, which is not release notes. Skip them only when told to for that release.
 
+The release job reads that body off the tag *object* through the API, not from a checkout: `actions/checkout` peels a tag ref to its commit, so `git tag -l --format='%(contents)'` in the job returned the commit message and v0.4.7 shipped with it as the body (patched by hand afterwards). A lightweight tag has no object and fails the job on purpose. Check the release page's body after the run, not just the zips.
+
+**One release per request.** A release is cut when asked for, then the next one waits for the next ask: more changes pushed later in the same conversation go to `main` and stay there until the user says to release them. Do not chain point releases on your own because the previous one has already built.
+
 ## Before you say it works
 
 ```bash
