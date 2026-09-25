@@ -126,6 +126,19 @@ def main():
         print("\nWARNING: damp-ref decays too, so something other than the steal is stopping the note. "
               "The damp segments cannot be trusted until that is explained.")
 
+    # a steal segment that does not decay at all means the steal did not land on the audible channel,
+    # which is what the stimulus is built to make visible. Say so instead of reporting a fitted tau.
+    steals = [(k, rows[k]) for k in ("damp-loud", "damp-mid", "damp-quiet", "damp-lowf", "damp-highf")
+              if k in rows]
+    flat = [k for k, r in steals if not r.get("too_fast") and abs(r["slope_db_s"]) < 5.0]
+    if len(flat) == len(steals) and steals:
+        print(f"\nNO DAMP in this recording: every steal segment holds its level ({', '.join(flat)}).")
+        print("  The tone survives the steal, so the unit did not take the audible channel. That is")
+        print("  this file's designed-visible failure, not a rate: the allocator reading behind")
+        print("  tools/make_capture_damp.py is wrong somewhere, and cal::DAMP_MS stays unmeasured.")
+        print("  Read the allocator directly (FS1R.unlock session6) rather than re-recording this.")
+        return
+
     three = [rows.get(k) for k in ("damp-loud", "damp-mid", "damp-quiet")]
     if all(r and not r.get("too_fast") for r in three):
         sl = [r["slope_db_s"] for r in three]

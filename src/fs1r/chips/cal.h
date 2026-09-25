@@ -295,17 +295,19 @@ static const double DAMP_MS      = 1.0;     // the note-on damp: what is left of
                                             // the allocator reuses decays with this time constant instead of
                                             // being cut to zero. INFERRED, and the one constant here with no
                                             // measurement behind it: FUN_00023000 proves the damp EXISTS (it
-                                            // sets the taken channel's EG stage word to 4 and writes register
-                                            // 0xFC/FD, the mask coming out of the one-hot table at 0x35B260),
-                                            // but nothing says how fast the chip fades. 1.0 ms is the order of
-                                            // the level register's own glide and it removes the step; the demo
-                                            // songs cannot pin it, since a damp only happens when the
-                                            // allocator runs out of channels and the four songs that do it
+                                            // sets the taken channel's EG stage word to 4, the release stage,
+                                            // and writes register 0xFC/FD, the mask coming out of the one-hot
+                                            // table at 0x35B260), but nothing says how fast the chip fades.
+                                            // 1.0 ms is the order of the level register's own glide and it
+                                            // removes the step. The demo songs cannot pin it, since a damp only
+                                            // happens when the allocator runs out and the four songs that do it
                                             // never do it twice the same way. captures/requests/23_damp.mid
-                                            // (tools/make_capture_damp.py) is built to measure it: hold N
-                                            // notes to fill the channels, then strike one more and read the
-                                            // decay of the stolen note's own partial. Until that take exists
-                                            // this is a shape with a plausible rate, not a measurement.
+                                            // (tools/make_capture_damp.py) was built and recorded for it, and
+                                            // came back with NO damp in it: the unit did not take the channel
+                                            // the file aimed at, so the tone survives every steal. That is the
+                                            // file's designed-visible failure, not a number, so this is still
+                                            // open. FS1R.unlock session6 reads the allocator arrays directly to
+                                            // find which assumption broke. docs/findings.md 2026-09-25
 static const double CHAN_CLIP    = 1.1919;  // the channel accumulator saturates here, hard and memoryless,
                                             // before the filter loop. stack-4 and stack-8 are driven 4x and
                                             // 8x past one carrier and recover the same ceiling to five places.
