@@ -8,6 +8,33 @@ Entries that have a dedicated working document (`aeg.md`, `skirt.md`, `noise.md`
 
 ---
 
+## 2026-09-25, the unit does not step at the control tick: the B016 click is ours, and it is the insertion path
+
+`24_onset` was recorded (`FS1R.unlock/captures/2026-09-25-8`, gate clean, EPROM and stub matching, 63 s played) and it answers the question the previous entry asked.
+
+**The control is honest and the unit is flat.** `onset-plain`, the segment with every tick-driven update switched off, reads **1.08x** at one tick period after note-on, so the tick period, the alignment and the analyzer are all sound. Against that, per segment, hardware then engine:
+
+| segment | unit | ours |
+| --- | --- | --- |
+| onset-b016 | **1.68x** | **9.80x** |
+| onset-plain (control) | 1.08x | 1.41x |
+| onset-lfo | 1.17x | 1.79x |
+| onset-filter | 2.02x | 0.42x |
+| onset-peg | 1.31x | 2.40x |
+| onset-feg | **0.98x** | **2.54x** |
+
+So **the unit has no step at the control tick at all**, on B016 or on any of the isolated subsystems. The discontinuity is entirely ours. Two segments separate by more than the control's own spread: B016 itself, and `onset-feg`.
+
+**Which operator, and which block.** Muting B016's part-1 operators one at a time through the real parameter-change address (`0x60 + part`, op, 22) moves the ratio from 4.41x to **1.77x when operator 2 is muted** and nowhere else, so op2 carries it. Op2's own envelopes are not the cause though: its frequency EG is flat (init +0, attack +0, so `FreqEG::start` puts it straight in stage 2 and it never ticks), and tracing its amplitude EG, `att`, `attS` and `regLevel` sample by sample across 244..255 shows a smooth ramp with **nothing changing at 249**.
+
+The step is downstream of the channel. Switching the parts' insertion switch off (part byte 0x14) drops the ratio to **2.93x and moves the peak from 5.188 ms to 1.831 ms**, i.e. removes it; zeroing the reverb send instead changes nothing (4.41x, still 5.188 ms). So it is the **insertion path**, and B016 has `insSw 1` on both parts. What makes that odd, and unresolved: B016's reverb, variation and insertion types all read **0**, which is `C_THRU` in `run_var_ins` and an early pass-through in `run_reverb`, so no block should be doing anything. Either the type decode is wrong for this performance or something in the per-block level and pan words is being applied at the tick boundary rather than per sample.
+
+**Where this stopped.** Probing the chain further needs `Device`, not `Synth`: `Synth::render` on a `rom_perf`-loaded performance renders silence, and three separate probes wasted on that path all read zeros and briefly made the step look absent from the channel sum when it was really absent from the whole probe. `onset-feg` (2.54x against the unit's 0.98x) is a second, independent bug with a measurement already in hand, and it is smaller and better isolated than the insertion one.
+
+**Also ruled out here.** The operator frequency EG is not B016's cause even though `onset-feg` is a real defect, because B016's FEGs are all flat. And LFO1's value, the previous entry's candidate, was already reverted for changing nothing.
+
+---
+
 ## 2026-09-25, the B016 click is locked to the control tick, not to the waveform
 
 B016 Dyno Rose clicks on note-on in the engine and not on James's unit, and it has now survived three fixes that were each a genuine fault against the firmware and none of them this one: the frequency EG (a linear ramp, not an exponential approach), the note-on damp (`FUN_00023000` releases the channel it takes rather than zeroing it), and the channel allocator (round robin with a note-priority steal). Measured after all three, the transient ratio is **4.14x its own body, exactly what it was before any of them**.
