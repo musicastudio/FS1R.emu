@@ -79,7 +79,16 @@ static const double EG_HOLD_LAG  = 0.0081;  // ... plus this, fixed. MEASURED ov
                                             // leaves that one value alone.
 static const double FEG_SEMIS    = 48.0;    // frequency EG range at the full register swing of 128 (four octaves).
                                             // The sysex byte reaches the register through FEGLVL, which is measured
-static const double FEG_TIME_K   = 0.3;     // frequency EG time as a fraction of rate_secs
+static const double FEG_TRAVERSE = 24.0;    // semitones the operator frequency EG covers in one traverse at
+                                            // rate_secs(word), the amplitude EG's own rate ladder. MEASURED
+                                            // 2026-09-25 off 07_modulation_2: the two attack segments at time 40
+                                            // (rate word 37, a 546 ms traverse) ramp at 4393 and 4391 cents per
+                                            // second, which is 23.99 and 23.98 semitones per traverse. So the chip
+                                            // steps one EG engine for both and only the unit differs: 0.375 dB per
+                                            // step on the amplitude side, a quarter tone here, a 96-unit scale
+                                            // quartered either way. The ramp is linear and its slope does not
+                                            // depend on the swing, which is what separates this from the filter
+                                            // EG's exponential approach (FEG_RATE_K, a different chip).
 static const double FEG_RATE_K   = 42.9;    // MEASURED, FS1R.unlock session 3 `flteg` 2026-09-23: the filter EG's per-tick
                                             // approach toward its asymptote is FEG_RATE_K * 2^(-word / 15.5) for the
                                             // FEGRATE word the CPU hands VOP3-1 (register 0x2B). Eight attack times

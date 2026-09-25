@@ -295,7 +295,10 @@ int selftest(Synth& S) {
     live = 0; for (auto& c : S.ch) if (c.active) live++;
     ck("all sound off", live == 0);
 
-    printf(g_fails ? "selftest: %d FAILURES\n" : "selftest: ok\n", g_fails);
+    // The summary belongs after the last check, not here: it used to print at this point, so every
+    // check below it (the filter EG, the formant window, the DX7 conversion, the voice edit) printed its
+    // failure and then reported "selftest: ok" above it, and the caller's exit code was the only place
+    // the truth showed.
     // The filter EG as the firmware steps it (FUN_0000D050 / FUN_0000CB6C): every segment reaches its end
     // level exactly, a flat segment still ends (asymptote target + 3), the hold is a hold, and the release
     // returns to L4. Time per rate word is the chip's and unmeasured, so only the structure is checked.
@@ -399,6 +402,44 @@ int selftest(Synth& S) {
       int w1 = -1; for (auto& c : S.ch) if (c.active && c.part == 0) w1 = c.freqWord[0];
       ck("voice edit reaches the sounding note", w0 >= 0 && w1 == w0 + 1024); S.all_off(); }
 
+    // The operator frequency EG is a linear ramp at a rate the amplitude EG's own ladder sets, and the
+    // slope does not depend on the swing: that is what 07_modulation_2 measured and what separates it
+    // from the exponential approach the engine used to have. Two swings at one attack time, the larger
+    // taking proportionally longer, is the smallest thing that fails if the shape goes back.
+    { init_perf(S.perf); Voice& V = S.perf.part[0].voice;
+      S.perf.part[0].p[1] = 2; S.perf.part[0].p[4] = 0x10;
+      auto ramp_ticks = [&](int init) {
+          // attack level 0, so the ramp runs from feg_semis(init) to zero at the attack time
+          V.v[0].fegInit = init; V.v[0].fegAtt = 0; V.v[0].fegAttT = 40; V.v[0].fegDecT = 40;
+          S.all_off(); S.midi_in(0x90, 60, 100);
+          Chan* C = nullptr; for (auto& c : S.ch) if (c.active && c.part == 0) C = &c;
+          if (!C) return -1;
+          double prev = C->op[0].feg.cur; int n = 0; double step = 0, worst = 0;
+          // tick the EG directly: it runs per sample, and what is under test is its own shape. The last
+          // step is short, since it lands exactly on the target rather than overshooting it, so the
+          // constant-rate check covers every step but that one.
+          for (int k = 0; k < 400000 && C->op[0].feg.stage == 0; k++) {
+              double cur = C->op[0].feg.tick();
+              double d = fabs(cur - prev);
+              if (C->op[0].feg.stage != 0) break;            // the truncated final step
+              if (n == 0) step = d; else worst = std::max(worst, fabs(d - step));
+              prev = cur; n++;
+          }
+          ck("frequency EG ramps at a constant rate", n > 100 && worst < step * 1e-6);
+          return n;
+      };
+      int n25 = ramp_ticks(25), n50 = ramp_ticks(50);
+      double s25 = FreqEG::feg_semis(25), s50 = FreqEG::feg_semis(50);
+      // the two swings are 10.5 and 47.6 semitones, so the sample counts must be in that ratio
+      ck("frequency EG time is proportional to the swing",
+         n25 > 0 && n50 > 0 && fabs((double)n50 / n25 - s50 / s25) < 0.02 * (s50 / s25));
+      // and the rate is FEG_TRAVERSE semitones per traverse of the amplitude EG's rate word
+      double want = cal::FEG_TRAVERSE / (rate_secs(egrate(40)) * SR);
+      ck("frequency EG slope is FEG_TRAVERSE per traverse",
+         n25 > 0 && fabs(s25 / n25 - want) < want * 0.01);
+      S.all_off(); init_perf(S.perf); }
+
+    printf(g_fails ? "selftest: %d FAILURES\n" : "selftest: ok\n", g_fails);
     return g_fails ? 1 : 0;
 }
 

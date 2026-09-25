@@ -8,6 +8,33 @@ Entries that have a dedicated working document (`aeg.md`, `skirt.md`, `noise.md`
 
 ---
 
+## 2026-09-25, the operator frequency EG is a linear ramp, not an exponential approach (B056 Tech Lead, B049 Hollow, B115 Obie Strings, B120 Hit)
+
+James: B056 Tech Lead sounds like two tones a few hundred milliseconds apart settling onto one pitch, B049 Hollow and B115 Obie Strings do the same and B120 Hit is out of tune altogether; adjusting the PEG does nothing. It does nothing because none of those patches uses it: B056's voice (PrA 081 `Tech Lead`) has a flat pitch EG, every level 50 and the release times 20. What every one of the four has is an operator **frequency** EG, which is a different block: per operator, sysex `0x08`-`0x0B` voiced and `0x2A`-`0x2D` unvoiced, init and attack levels through `FEGLVL` into registers 0x60-0x78 and both times through the amplitude EG's own rate conversion. The CPU side of that was already checked against the unit's voice image, so the question was only what the chip does with the two words, and the engine's answer was a guess: an exponential approach with `cal::FEG_TIME_K = 0.3` as a fraction of `rate_secs`, carried since the block was first written.
+
+`07_modulation_2` has six frequency EG segments and has had them since the first capture set. They are marked `measure: envelope`, so the analyzer had only ever read their amplitude; nobody had tracked the carrier. Tracking it (`zero crossings of the segment, 4 ms hops`) reads the shape straight off the recording:
+
+| segment | init | attack | attack time | what the unit does |
+|---|---|---|---|---|
+| `feg-i25-a0-t40` | +25 | 0 | 40 | 946 cents down to 0 in 220 ms, straight |
+| `feg-i-25-a0-t40` | -25 | 0 | 40 | 946 cents up to 0 in 220 ms, straight |
+| `feg-i0-a50-t40` | 0 | +50 | 40 | 4762 cents up over 1.07 s, straight |
+| `feg-i0-a-50-t40` | 0 | -50 | 40 | 4800 cents down over 0.71 s, straight |
+| `feg-i50-a0-t0` | +50 | 0 | 0 | over inside one analysis window |
+| `feg-i-50-a0-t0` | -50 | 0 | 0 | the same |
+
+**Linear, and the slope does not depend on the swing.** A straight line fits the four moving segments to 0.3, 1.3, 3.8 and 3.8 cents rms; the best exponential over the same points, free to pick its own time constant, leaves 39 to 90. Four and a half times the swing takes four and a half times as long, at one attack time, which is what a ramp does and what an approach cannot: an exponential aimed past a target proportional to the swing takes the *same* time whatever the swing, which is exactly the argument that settled the filter EG's shape the other way on 2026-09-23 (`flteg`, 128 and 512 both 0.23 s). The two EGs are on different chips and they do not behave alike.
+
+**The rate is the amplitude EG's own ladder, read as pitch.** Attack time 40 is rate word 37, a 546 ms traverse of `rate_secs`; the two long segments ramp at 4393 and 4391 cents per second, which is 23.99 and 23.98 semitones per traverse. So one stepper runs both EGs and only the unit of the step differs: 0.375 dB on the amplitude side, a quarter tone here, a 96-unit scale quartered either way. `cal::FEG_TRAVERSE = 24.0` replaces `FEG_TIME_K`, and it is measured rather than fitted: two segments at one rate word agree to 0.07 %, and the number they land on is the one the amplitude side's scale predicts.
+
+Against the unit, the worst frequency EG envelope in `07_modulation_2` goes from 2.16 to 1.40 dB rms and the file's mean from 0.81 to 0.76; the four moving segments now track the recording's pitch inside 1 to 5 cents where they were 200 to 2900 cents out. On B056 the fundamental is steady from the first analysis window at note 60, where it used to slide 308 Hz down to 260 over 150 ms, which is the "two tones settling" exactly: op7's `FEG init +14 att +6` was crawling toward its target on the old curve instead of ramping to it.
+
+Seven of the nineteen render regression cases move, and they are precisely the seven whose voices have a non-flat frequency EG (`rom-voice0` and the three Fseq cases on PrA 000 `Ballad EP`, `perf-towarp` on `Warp1`/`Warp2`, and the two `ctrl-freqbias` cases on `Tech BD`); the other twelve are byte-identical. The selftest gained the shape check: two swings at one attack time, the constant step, and the slope against `FEG_TRAVERSE`.
+
+Two things this does not settle. `FEG_SEMIS` is still 48 semitones for the full 128-step register swing, since the four segments here all read their own endpoints consistently with it but none of them pins the scale independently of `FEGLVL`. And B016 Dyno Rose's note-on click is **not** this: it is unchanged by the fix, it sits in a converted DX7 voice (PrC 050 `BrightEP 1`) whose operator ratios convert correctly, and no recording in the set covers it. It stays open.
+
+---
+
 ## 2026-09-24, the engine read every DX-bank voice one record off the EPROM, and so did the bundled bank (B014 Full Tines)
 
 James: B014 Full Tines does not sound like demo song 2, and the demo's `FullTine 1` bulk is the unit's own conversion of that voice, so the two should be one patch. They were not, for a reason upstream of the converter. The DX7 voice table in the EPROM starts at `0x230000` and holds 1152 plain 155-byte VCEDs with the name last; `5c2a48b` (rgwan) fixed `tools/extract_presets.py`, which had been reading records from `0x230091` with the name moved to the front, i.e. each record's first 145 bytes were the *next* voice's operator and common data under this voice's name. Two consumers kept the old read: `rom_voice` in `src/fs1r/firmware/rom.cpp`, which the console's `-r`/`-P` path, the plugin's ROM loader and a performance's bank/program bytes all go through, and `plugin/generated/fs1r_presets.syx`, which was last packed before the extractor fix (`tools/check_presets.py` only compared names, and every name was right). The selftest's DX-Acrd 4 VCED fixture was typed off the same shifted read, which is why the byte-for-byte diff of `0c7c10f` needed a skip list for "the demo's edits": the "edits" were the neighbouring voice.

@@ -287,19 +287,35 @@ struct EG {                      // amplitude EG on the chip: hold, 4 segments. 
     }
     bool done() const { return stage == 5 || (stage == 4 && cur <= -120); }
 };
-struct FreqEG {                  // init -> attack level -> 0. The level curve is the firmware's, read back off the
-                                 // voice images (FEGLVL, register 0x60/0x68); the range and the time curve are INFERRED.
-    double cur = 0, target = 0, k = 0, kdec = 0; int stage = 2;
+struct FreqEG {                  // init -> attack level -> 0. The level curve and the times are the firmware's, read
+                                 // back off the voice images (FEGLVL and the EG rate conversion, registers 0x60-0x78).
+    double cur = 0, target = 0, katt = 0, kdec = 0; int stage = 2;
     // The sysex byte is not linear in the register: FEGLVL maps 0..100 onto 0..255 with 128 the centre, and
     // half the displayed depth is only a fifth of the register offset. 128 register steps = FEG_SEMIS.
     static double feg_semis(int v) { return (FEGLVL[clampi(v + 50, 0, 100)] - 128) * cal::FEG_SEMIS / 128.0; }
+    // A LINEAR RAMP in semitones, and the slope does not depend on the swing. MEASURED 2026-09-25 off
+    // 07_modulation_2's four moving frequency EG segments, tracking the carrier rather than its envelope:
+    // init 25 and init -25 at attack time 40 slide 946 cents in 220 ms, and attack +-50 at the same time
+    // slides 4762 and 4800 cents at the same 4390 cents per second, holding a straight line to 0.3 to 3.8
+    // cents rms where the best exponential over the same points leaves 39 to 90. Four times the swing
+    // takes four times as long, which is what a ramp does and an approach cannot.
+    //
+    // The slope is the amplitude EG's own rate ladder read as pitch: a traverse at rate_secs(word) covers
+    // cal::FEG_TRAVERSE semitones, which the two long segments put at 23.99 and 23.98 against the 24.0
+    // that a 96-unit scale quartered gives. So the chip runs one stepper for both EGs and only the unit of
+    // the step differs, 0.375 dB on the amplitude side and a quarter tone here.
     void start(int init, int att, int attT, int decT) {
         cur = feg_semis(init); target = feg_semis(att); stage = (init == 0 && att == 0) ? 2 : 0;
-        k = 1.0 - exp(-1.0 / (rate_secs(egrate(attT)) * cal::FEG_TIME_K * SR + 1)); kdec = 1.0 - exp(-1.0 / (rate_secs(egrate(decT)) * cal::FEG_TIME_K * SR + 1));
+        katt = cal::FEG_TRAVERSE / (rate_secs(egrate(attT)) * SR);
+        kdec = cal::FEG_TRAVERSE / (rate_secs(egrate(decT)) * SR);
     }
     inline double tick() {
-        if (stage == 0) { cur += (target - cur) * k; if (fabs(target - cur) < 0.01) stage = 1; }
-        else if (stage == 1) { cur += (0 - cur) * kdec; if (fabs(cur) < 0.001) { cur = 0; stage = 2; } }
+        if (stage == 0) {
+            double d = target - cur;
+            if (fabs(d) <= katt) { cur = target; stage = 1; } else cur += d < 0 ? -katt : katt;
+        } else if (stage == 1) {
+            if (fabs(cur) <= kdec) { cur = 0; stage = 2; } else cur += cur < 0 ? kdec : -kdec;
+        }
         return cur;
     }
 };
