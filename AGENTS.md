@@ -10,6 +10,10 @@ That split is the whole project, and it decides how you should answer almost any
 - **[docs/findings.md](docs/findings.md)** the research log: every conclusion and the evidence behind it
 - **[docs/fidelity_plan.md](docs/fidelity_plan.md)** where the engine stands against each recording, ranked
 
+## Names in the repo
+
+Two collaborators, and the repo uses their GitHub handles rather than their chat display names: **rgwan** owns the unit, the dumps and the capture sessions, and **jameshansen** owns the project. A chat client may show either under some other display name; write `rgwan` and `jameshansen` in commits, release notes, findings and docs anyway, so one person is one name everywhere and the history stays greppable.
+
 ## Where a claim comes from
 
 The path tells you, and it tells you what a disagreement with real hardware means.
