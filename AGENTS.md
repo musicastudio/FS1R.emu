@@ -46,6 +46,8 @@ The release job reads that body off the tag *object* through the API, not from a
 
 **One release per request.** A release is cut when asked for, then the next one waits for the next ask: more changes pushed later in the same conversation go to `main` and stay there until the user says to release them. Do not chain point releases on your own because the previous one has already built.
 
+**Increment the last digit only, unless the user names the version.** `0.4.7` goes to `0.4.8`, never to `0.5.0`, however much the round changed. The minor and major digits are the user's call and not an inference from the size of the diff: v0.5.0 was cut for four measured engine fixes and had to be retagged as v0.4.8. Ask, or bump the patch digit.
+
 ## Before you say it works
 
 ```bash
