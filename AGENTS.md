@@ -62,6 +62,8 @@ python tools/regress.py
 
 Nineteen fixed cases against `tools/regress_ref.json`. It compares pitch, harmonic peaks, envelope, stereo width and centroid. **If it fails, that is a finding, not an inconvenience.** Only run `--update` when you meant to change the output and can say why in the commit message.
 
+`regress.py` and `check_formant.py` drive `bin/fs1r_emu.exe` on Windows and `bin/render_capture` anywhere else, picked by `tools/fs1r_render.py` (the console is in `bin/` on every checkout but fails before `main()` under WSL, so the choice is made by running it, not by looking for the file). **The stored reference is a Windows build's**, since the engine calls `rand()` for random note phase and pan and the two C libraries disagree, so on Linux every case fails on a fresh checkout. To check a change there, fingerprint the same build twice: `--update` before your edit, keep the file aside, then compare after. A case that moves is real; one that moves without touching its subsystem is the reference, not the engine.
+
 For a change that should not alter the output at all, prove it rather than assume it. Render a fixed case before and after and compare the file hashes:
 
 ```bash

@@ -126,6 +126,40 @@ inline bool read_smf(const char* path, std::vector<SmfEvent>& out) {
     return !out.empty();
 }
 
+// One note, held for half the render, with an optional second note struck a third of the way in (mono
+// legato and portamento) and control changes sent before either. This is the console's -w path, and it
+// lives here rather than in console/main.cpp so the portable renderer can run it too: tools/regress.py
+// is the gate every engine change has to pass, and on a machine without the Windows console it could
+// not run at all.
+inline int render_note(fs1r::Device& dev, const char* path, int note, double secs, int note2,
+                       const std::vector<std::pair<int, int>>& cc, WavFormat format = WAV_S16) {
+    int frames = (int)(secs * SR), half = frames / 2, third = frames / 3;
+    std::vector<float> l(frames, 0.f), r(frames, 0.f);
+    dev.forceChannel(0);                                   // offline: every part with a receive channel plays
+    auto note_on = [&](int n, int v) { uint8_t m[3] = {0x90, (uint8_t)n, (uint8_t)v}; dev.sendMidi(m, 3); };
+    auto note_off = [&](int n) { uint8_t m[3] = {0x80, (uint8_t)n, 0}; dev.sendMidi(m, 3); };
+    for (auto& c : cc) { uint8_t m[3] = {0xB0, (uint8_t)c.first, (uint8_t)c.second}; dev.sendMidi(m, 3); }
+    note_on(note, 100);
+    if (note2 >= 0) {
+        dev.process(l.data(), r.data(), third);
+        note_on(note2, 100);
+        dev.process(l.data() + third, r.data() + third, half - third);
+    } else dev.process(l.data(), r.data(), half);
+    note_off(note); if (note2 >= 0) note_off(note2);
+    dev.process(l.data() + half, r.data() + half, frames - half);
+    write_wav(path, l, r, format);
+    return 0;
+}
+
+// Part 1 mono with full-time portamento at this time, over sysex, exactly as the console's -mono does.
+inline void set_mono_porta(fs1r::Device& dev, int time) {
+    uint8_t m[10] = {0xF0, 0x43, 0x10, 0x5E, 0x30, 0x00, 0x05, 0, 0, 0xF7};
+    dev.sendMidi(m, 10);                                             // mono
+    m[6] = 0x06; m[8] = 0; dev.sendMidi(m, 10);                      // last-note priority
+    m[6] = 0x24; m[8] = 3; dev.sendMidi(m, 10);                      // portamento on, full time
+    m[6] = 0x25; m[8] = (uint8_t)(time & 0x7F); dev.sendMidi(m, 10);
+}
+
 inline int render_smf(fs1r::Device& dev, const char* smfPath, const char* wavPath, double tailSecs,
                       WavFormat format = WAV_S16) {
     std::vector<SmfEvent> ev;

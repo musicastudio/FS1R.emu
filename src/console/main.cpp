@@ -71,26 +71,9 @@ static void pump_midi(fs1r::Device& dev) {
 }
 
 // ------------------------------------------------------------------------------------------ offline render
+// The render itself is fsvr/smf.h's, shared with tools/render_capture.cpp.
 static int g_note2 = -1;   // -n2: second note played at 1/3 while the first is held (mono legato / portamento)
 static std::vector<std::pair<int, int>> g_cc;   // -cc num=val: control changes sent before the note
-static int render_wav(fs1r::Device& dev, const char* path, int note, double secs) {
-    int frames = (int)(secs * SR), half = frames / 2, third = frames / 3;
-    std::vector<float> l(frames, 0.f), r(frames, 0.f);
-    dev.forceChannel(0);                                   // offline: every part with a receive channel plays
-    auto note_on = [&](int n, int v) { uint8_t m[3] = {0x90, (uint8_t)n, (uint8_t)v}; dev.sendMidi(m, 3); };
-    auto note_off = [&](int n) { uint8_t m[3] = {0x80, (uint8_t)n, 0}; dev.sendMidi(m, 3); };
-    for (auto& c : g_cc) { uint8_t m[3] = {0xB0, (uint8_t)c.first, (uint8_t)c.second}; dev.sendMidi(m, 3); }
-    note_on(note, 100);
-    if (g_note2 >= 0) {
-        dev.process(l.data(), r.data(), third);
-        note_on(g_note2, 100);
-        dev.process(l.data() + third, r.data() + third, half - third);
-    } else dev.process(l.data(), r.data(), half);
-    note_off(note); if (g_note2 >= 0) note_off(g_note2);
-    dev.process(l.data() + half, r.data() + half, frames - half);
-    write_wav(path, l, r);
-    return 0;
-}
 
 // ------------------------------------------------------------------------------------------ main
 static std::string ini_path() { char p[MAX_PATH]; GetModuleFileNameA(nullptr, p, MAX_PATH); std::string s(p); size_t k = s.find_last_of("\\/"); return s.substr(0, k + 1) + "fs1r_emu.ini"; }
@@ -141,19 +124,13 @@ int main(int argc, char** argv) {
         if (!dev.loadSyx(d.data(), d.size(), std::max(0, pick), 0)) { printf("no FS1R voice/performance/Fseq or DX7 voice dump #%d found in %s\n", std::max(0, pick), syx); return 1; }
     } else if (dev.romLoaded() && pick >= 0) dev.loadRomVoice(0, pick);
     if (fseqIdx >= 0 && !dev.loadRomFseq(fseqIdx)) { printf("-f needs -r\n"); return 1; }
-    if (monoTime >= 0) {   // part 1 mono, full-time portamento with this time, straight through sysex
-        uint8_t m[10] = {0xF0, 0x43, 0x10, 0x5E, 0x30, 0x00, 0x05, 0, 0, 0xF7};
-        dev.sendMidi(m, 10);                                             // mono
-        m[6] = 0x06; m[8] = 0; dev.sendMidi(m, 10);                      // last-note priority
-        m[6] = 0x24; m[8] = 3; dev.sendMidi(m, 10);                      // portamento on, full time
-        m[6] = 0x25; m[8] = (uint8_t)(monoTime & 0x7F); dev.sendMidi(m, 10);
-    }
+    if (monoTime >= 0) fs1r_smf::set_mono_porta(dev, monoTime);
     printf("performance \"%s\"", dev.performanceName());
     for (int p = 0; p < 4; p++) if (dev.partActive(p)) printf("  part%d \"%s\" alg %d", p + 1, dev.voiceName(p), dev.algorithm(p) + 1);
     if (dev.fseqFrames()) printf("  fseq \"%s\" (%d frames)", dev.fseqName(), dev.fseqFrames());
     printf("\n");
     if (smf) { if (!wav) { printf("-smf needs -w out.wav\n"); return 1; } return render_smf(dev, smf, wav, testSecs); }
-    if (wav) return render_wav(dev, wav, testNote, testSecs);
+    if (wav) return fs1r_smf::render_note(dev, wav, testNote, testSecs, g_note2, g_cc);
 
     std::string ini = ini_path();
     if (midiPort < 0) { FILE* f = fopen(ini.c_str(), "r"); if (f) { if (fscanf(f, "midi_in=%d", &midiPort) != 1) midiPort = -1; fclose(f); } }

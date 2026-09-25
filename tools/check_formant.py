@@ -20,8 +20,10 @@ from pathlib import Path
 
 import numpy as np
 
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from fs1r_render import renderer, note_args
+
 ROOT = Path(__file__).resolve().parents[1]
-EXE = ROOT / "bin/fs1r_emu.exe"
 OUT = ROOT / "build"
 TABLES = ROOT / "src/fs1r/firmware/tables.h"
 
@@ -151,8 +153,8 @@ def measure(path, note):
 
 
 def main():
-    if not EXE.exists():
-        raise SystemExit("build bin\\fs1r_emu.exe first (build.bat)")
+    exe = renderer()
+    print(f"renderer: {exe.name}")
     OUT.mkdir(exist_ok=True)
     fails = 0
     print("%-22s %8s %8s %9s %9s %7s %5s" % ("case", "want f0", "got f0", "want frmt", "got frmt", "error", "tol"))
@@ -169,7 +171,7 @@ def main():
         syx.write_bytes(to_syx(build_voice(coarse, fine, transpose, detune, bw, skirt)))
         for note in (40, 52, 64):
             wav = OUT / f"formtest_{note}.wav"
-            r = subprocess.run([str(EXE), "-v", str(syx), "-w", str(wav), "-n", str(note), "-d", "1.5"],
+            r = subprocess.run(note_args(exe, syx=syx, wav=wav, note=note, secs=1.5),
                                capture_output=True, text=True)
             if r.returncode != 0:
                 print("render failed:", r.stdout, r.stderr)

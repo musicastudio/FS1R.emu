@@ -16,8 +16,10 @@ from pathlib import Path
 
 import numpy as np
 
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from fs1r_render import renderer
+
 ROOT = Path(__file__).resolve().parents[1]
-EXE = ROOT / "bin/fs1r_emu.exe"
 OUT = ROOT / "build"
 REF = Path(__file__).resolve().parent / "regress_ref.json"
 DEFAULT_ROM = ROOT.parent / "FS1R_DISASM/roms/fs1r_v120_eprom_cpuview.bin"
@@ -124,8 +126,8 @@ def main():
     ap.add_argument("--rom", default=str(DEFAULT_ROM))
     ap.add_argument("--tol", type=float, default=0.02)
     a = ap.parse_args()
-    if not EXE.exists():
-        raise SystemExit("build bin\\fs1r_emu.exe first (build.bat)")
+    exe = renderer()
+    print(f"renderer: {exe.name}")
     rom = Path(a.rom)
     OUT.mkdir(exist_ok=True)
     ref = json.loads(REF.read_text()) if REF.exists() and not a.update else {}
@@ -134,7 +136,10 @@ def main():
         if "{rom}" in " ".join(extra) and not rom.exists():
             skipped += 1
             continue
-        args = [str(EXE)] + [x.replace("{rom}", str(rom)) for x in extra]
+        args = [str(exe)] + [x.replace("{rom}", str(rom)) for x in extra]
+        # The portable renderer spells the Fseq index -fseq, since -f alone is its float-output flag.
+        if not exe.name.startswith("fs1r_emu"):
+            args = ["-fseq" if x == "-f" else x for x in args]
         wav = OUT / f"regress_{name}.wav"
         args += ["-w", str(wav), "-n", str(note), "-d", str(secs)]
         r = subprocess.run(args, capture_output=True, text=True)
