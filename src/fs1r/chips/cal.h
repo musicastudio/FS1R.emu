@@ -291,6 +291,21 @@ static const double LEVEL_SLEW_MS= 1.6;     // the voiced level register does no
                                             // latched to the grain. Flat between 1.2 and 2.0, so the last digit
                                             // is not measured. The unvoiced level is not slewed, see
                                             // render_chan. docs/formant.md.
+static const double DAMP_MS      = 1.0;     // the note-on damp: what is left of the previous note in a channel
+                                            // the allocator reuses decays with this time constant instead of
+                                            // being cut to zero. INFERRED, and the one constant here with no
+                                            // measurement behind it: FUN_00023000 proves the damp EXISTS (it
+                                            // sets the taken channel's EG stage word to 4 and writes register
+                                            // 0xFC/FD, the mask coming out of the one-hot table at 0x35B260),
+                                            // but nothing says how fast the chip fades. 1.0 ms is the order of
+                                            // the level register's own glide and it removes the step; the demo
+                                            // songs cannot pin it, since a damp only happens when the
+                                            // allocator runs out of channels and the four songs that do it
+                                            // never do it twice the same way. captures/requests/23_damp.mid
+                                            // (tools/make_capture_damp.py) is built to measure it: hold N
+                                            // notes to fill the channels, then strike one more and read the
+                                            // decay of the stolen note's own partial. Until that take exists
+                                            // this is a shape with a plausible rate, not a measurement.
 static const double CHAN_CLIP    = 1.1919;  // the channel accumulator saturates here, hard and memoryless,
                                             // before the filter loop. stack-4 and stack-8 are driven 4x and
                                             // 8x past one carrier and recover the same ceiling to five places.

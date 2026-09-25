@@ -19632,6 +19632,140 @@
    "duration_s": 89.12,
    "sha1": "0eb0f013eb0359f3589b671b2deb837730ea7e12",
    "why": "the unvoiced resonance carrier's level against the bandwidth register"
+  },
+  {
+   "file": "23_damp.mid",
+   "segments": [
+    {
+     "id": "damp-ref",
+     "what": "the audible note with no steal at all: the reference the three damp segments are read against, since the note's own envelope has to be separated from the fade (fixed carrier at 4008.5 Hz, part volume 127)",
+     "pins": [
+      "DAMP_MS"
+     ],
+     "measure": "envelope",
+     "note": 120,
+     "velocity": 127,
+     "t_on": 6.864,
+     "t_off": 8.364,
+     "t_end": 8.846,
+     "steady": [
+      5.664,
+      6.664
+     ],
+     "carrier_hz": 4008.536,
+     "steal": false
+    },
+    {
+     "id": "damp-loud",
+     "what": "the steal at full part volume: the fade's shape and how long it takes (fixed carrier at 4008.5 Hz, part volume 127)",
+     "pins": [
+      "DAMP_MS"
+     ],
+     "measure": "envelope",
+     "note": 120,
+     "velocity": 127,
+     "t_on": 12.81,
+     "t_off": 14.31,
+     "t_end": 14.792,
+     "steady": [
+      11.61,
+      12.61
+     ],
+     "carrier_hz": 4008.536,
+     "steal": true
+    },
+    {
+     "id": "damp-mid",
+     "what": "the same steal 8 dB down. A fixed time constant fades in the same time as damp-loud; a fixed dB-per-second slope fades quicker from the lower level (fixed carrier at 4008.5 Hz, part volume 100)",
+     "pins": [
+      "DAMP_MS"
+     ],
+     "measure": "envelope",
+     "note": 120,
+     "velocity": 127,
+     "t_on": 18.756,
+     "t_off": 20.256,
+     "t_end": 20.738,
+     "steady": [
+      17.556,
+      18.556
+     ],
+     "carrier_hz": 4008.536,
+     "steal": true
+    },
+    {
+     "id": "damp-quiet",
+     "what": "the same steal quieter again, the third point that separates a time from a rate (fixed carrier at 4008.5 Hz, part volume 80)",
+     "pins": [
+      "DAMP_MS"
+     ],
+     "measure": "envelope",
+     "note": 120,
+     "velocity": 127,
+     "t_on": 24.702,
+     "t_off": 26.202,
+     "t_end": 26.684,
+     "steady": [
+      23.502,
+      24.502
+     ],
+     "carrier_hz": 4008.536,
+     "steal": true
+    },
+    {
+     "id": "damp-lowf",
+     "what": "the steal at 500 Hz: a fade on the level register looks the same as at 4 kHz, a mute on the output does not (fixed carrier at 501.1 Hz, part volume 127)",
+     "pins": [
+      "DAMP_MS"
+     ],
+     "measure": "envelope",
+     "note": 120,
+     "velocity": 127,
+     "t_on": 30.648,
+     "t_off": 32.148,
+     "t_end": 32.63,
+     "steady": [
+      29.448,
+      30.448
+     ],
+     "carrier_hz": 501.067,
+     "steal": true
+    },
+    {
+     "id": "damp-highf",
+     "what": "the steal at 8 kHz, the other end of the same question (fixed carrier at 8017.1 Hz, part volume 127)",
+     "pins": [
+      "DAMP_MS"
+     ],
+     "measure": "envelope",
+     "note": 120,
+     "velocity": 127,
+     "t_on": 36.594,
+     "t_off": 38.094,
+     "t_end": 38.576,
+     "steady": [
+      35.394,
+      36.394
+     ],
+     "carrier_hz": 8017.072,
+     "steal": true
+    }
+   ],
+   "marker_start": [
+    1.2,
+    1.5,
+    1.8
+   ],
+   "marker_end": [
+    39.776,
+    40.076,
+    40.376
+   ],
+   "duration_s": 41.496,
+   "sha1": "be8314f979a187a57ad1fe7f29ad95892400079f",
+   "why": "the note-on damp rate (cal::DAMP_MS): how fast the chip fades a channel the allocator takes from a sounding note",
+   "group": "damp",
+   "group_number": 23
   }
  ]
 }

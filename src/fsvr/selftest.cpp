@@ -439,6 +439,34 @@ int selftest(Synth& S) {
          n25 > 0 && fabs(s25 / n25 - want) < want * 0.01);
       S.all_off(); init_perf(S.perf); }
 
+    // A note-on that takes a channel from a sounding note damps it rather than zeroing it
+    // (FUN_00023000: EG stage word to 4 and register 0xFC/FD, the mask out of the one-hot table at
+    // 0x35B260). Fill every channel with a sounding note, strike one more, and the displaced channel's
+    // own output must carry on into the next sample instead of dropping to zero.
+    { init_perf(S.perf); Voice& V = S.perf.part[0].voice;
+      S.perf.part[0].p[1] = 2; S.perf.part[0].p[4] = 0x10;
+      V.v[0].form = 0; V.v[0].level = 99; V.v[0].fixed = 0; V.v[0].coarse = 1; V.v[0].keysync = 1;
+      for (int i = 0; i < 4; i++) { V.v[0].L[i] = i == 3 ? 0 : 99; V.v[0].T[i] = i == 3 ? 99 : 0; }
+      S.all_off();
+      float l[64], r[64];
+      for (int k = 0; k < NCHAN; k++) { S.midi_in(0x90, 36 + k, 100); S.render(l, r, 8); }
+      int live = 0; for (auto& c : S.ch) if (c.active) live++;
+      ck("every channel is sounding before the steal", live == NCHAN);
+      // the channel the allocator will take, and what it is putting out right now
+      Chan* victim = &S.ch[0];
+      for (auto& c : S.ch) if (c.age < victim->age) victim = &c;
+      double before = fabs(victim->lastL) + fabs(victim->lastR);
+      ck("the victim channel is making sound", before > 1e-4);
+      S.midi_in(0x90, 100, 100);                       // one more note: the allocator has to steal
+      double damp = fabs(victim->dampL) + fabs(victim->dampR);
+      ck("note-on damps the stolen channel rather than zeroing it", damp > 0.5 * before);
+      // and the damp decays rather than persisting
+      double first = damp;
+      for (int k = 0; k < 400; k++) S.render(l, r, 1);
+      double later = fabs(victim->dampL) + fabs(victim->dampR);
+      ck("the damp decays", later < 0.5 * first);
+      S.all_off(); init_perf(S.perf); }
+
     printf(g_fails ? "selftest: %d FAILURES\n" : "selftest: ok\n", g_fails);
     return g_fails ? 1 : 0;
 }

@@ -111,6 +111,9 @@ static inline int vel_att(int b, int vel) {
 static inline double db2lin(double db) { return db <= -150 ? 0.0 : pow(10.0, db / 20.0); }
 // One pole per sample coefficient for the voiced level register, cal::LEVEL_SLEW_MS as a rate.
 const double LEVEL_SLEW_K = 1.0 - exp(-1.0 / (cal::LEVEL_SLEW_MS * 0.001 * SR));
+// The note-on damp, same shape: what is left of the previous note in a reused channel decays at this
+// rate instead of being cut to zero. cal::DAMP_MS.
+const double DAMP_K = exp(-1.0 / (cal::DAMP_MS * 0.001 * SR));
 // 1024 units per octave, and the word is a 16 bit register that saturates rather than wrapping.
 // MEASURED 2026-09-21 off 12_fseqlevel: a ratio operator driven by an Fseq lands past the ceiling at
 // every note and the unit answers with one line at 23982 Hz, which is word 32767 to a tenth.
@@ -331,6 +334,11 @@ struct OpState {
 };
 struct Chan {
     bool active = false; int part = 0, note = 0, vel = 0; bool held = false, sustained = false; uint32_t age = 0;
+    // The channel's last output, and the damp left over from the note this channel was playing before.
+    // FUN_00023000: note-on damps the channel it is about to take (the mask table at 0x35B260 is one hot
+    // per channel) rather than silencing it, so the previous note's waveform fades instead of being cut
+    // between two samples. cal::DAMP_MS is how fast.
+    double lastL = 0, lastR = 0, dampL = 0, dampR = 0;
     // CPU side, computed at note-on
     int noteP = 60;            // note after all shifts (DAT_0103937a)
     int pitchNote = 0;         // NOTETAB + detune + tune (DAT_01028a84)

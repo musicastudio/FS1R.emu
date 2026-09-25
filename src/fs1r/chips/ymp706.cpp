@@ -215,6 +215,15 @@ void Synth::render_chan(Chan& C, double& outL, double& outR) {
     mix = std::clamp(mix, -cal::CHAN_CLIP, cal::CHAN_CLIP);
     if (C.fltOn) mix = C.flt.run(C.fltType, mix * C.fltGain);
     outL = mix * C.panL; outR = mix * C.panR;
+    // Remember this channel's own output, so a note-on that takes this channel has something to fade,
+    // and add whatever the previous note left behind (FUN_00023000, see note_on).
+    C.lastL = outL; C.lastR = outR;
+    if (C.dampL != 0.0 || C.dampR != 0.0) {
+        outL += C.dampL; outR += C.dampR;
+        C.dampL *= DAMP_K; C.dampR *= DAMP_K;
+        if (fabs(C.dampL) < 1e-7 && fabs(C.dampR) < 1e-7) C.dampL = C.dampR = 0.0;
+        else C.active = true;                      // a damp still sounding keeps the channel rendering
+    }
 }
 
 void Synth::render(float* outL, float* outR, int frames) {

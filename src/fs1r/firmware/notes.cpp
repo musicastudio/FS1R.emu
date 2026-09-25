@@ -36,7 +36,15 @@ void Synth::note_on(int part, int note, int vel) {
     for (auto& x : ch) if (!x.active) { c = &x; break; }
     if (!c) { c = &ch[0]; for (auto& x : ch) if (x.age < c->age) c = &x; }
     Chan& C = *c; bool sync = V.lfo1sync != 0; uint32_t keepPhase = C.lfoPhase;
+    // FUN_00023000: the firmware damps the channel it is about to take, it does not silence it. The mask
+    // it is called with comes out of the one-hot table at 0x35B260 indexed by the allocated channel, and
+    // the call sets that channel's EG stage word to 4 (release) and writes register 0xFC/FD. So a note
+    // landing on a channel that is still sounding fades the old waveform out over cal::DAMP_MS. Zeroing
+    // the struct instead put a step the size of the old note's own output into the output between two
+    // samples, which is a click the unit does not make.
+    double dL = C.active ? C.lastL + C.dampL : 0.0, dR = C.active ? C.lastR + C.dampR : 0.0;
     C = Chan(); C.active = true; C.part = part; C.note = note; C.vel = vel; C.held = true; C.age = ++clock;
+    C.dampL = dL; C.dampR = dR;
     C.lfoPhase = sync ? 0 : keepPhase;
     C.lfo2Phase = V.lfo2sync ? (uint32_t)(V.lfo2phase * 0x4000) : (uint32_t)(rand() & 0xFFFF);
     C.panBase = pt.p[0x0E] ? pt.p[0x0E] : (rand() % 128);       // part pan 0 = random per note; the rest is the table index
