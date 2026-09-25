@@ -452,19 +452,52 @@ int selftest(Synth& S) {
       for (int k = 0; k < NCHAN; k++) { S.midi_in(0x90, 36 + k, 100); S.render(l, r, 8); }
       int live = 0; for (auto& c : S.ch) if (c.active) live++;
       ck("every channel is sounding before the steal", live == NCHAN);
-      // the channel the allocator will take, and what it is putting out right now
-      Chan* victim = &S.ch[0];
-      for (auto& c : S.ch) if (c.age < victim->age) victim = &c;
-      double before = fabs(victim->lastL) + fabs(victim->lastR);
-      ck("the victim channel is making sound", before > 1e-4);
+      // the channel the allocator will actually take, found the same way the allocator picks it:
+      // strike the note, then see which channel now holds it (age no longer decides this)
+      double before[NCHAN];
+      for (int i = 0; i < NCHAN; i++) before[i] = fabs(S.ch[i].lastL) + fabs(S.ch[i].lastR);
       S.midi_in(0x90, 100, 100);                       // one more note: the allocator has to steal
-      double damp = fabs(victim->dampL) + fabs(victim->dampR);
-      ck("note-on damps the stolen channel rather than zeroing it", damp > 0.5 * before);
-      // and the damp decays rather than persisting
-      double first = damp;
-      for (int k = 0; k < 400; k++) S.render(l, r, 1);
-      double later = fabs(victim->dampL) + fabs(victim->dampR);
-      ck("the damp decays", later < 0.5 * first);
+      Chan* victim = nullptr;
+      for (auto& c : S.ch) if (c.active && c.note == 100) victim = &c;
+      ck("the steal produced a channel holding the new note", victim != nullptr);
+      if (victim) {
+          int vi = int(victim - S.ch);
+          ck("the victim channel was making sound", before[vi] > 1e-4);
+          double damp = fabs(victim->dampL) + fabs(victim->dampR);
+          ck("note-on damps the stolen channel rather than zeroing it", damp > 0.5 * before[vi]);
+          double first = damp;
+          for (int k = 0; k < 400; k++) S.render(l, r, 1);
+          double later = fabs(victim->dampL) + fabs(victim->dampR);
+          ck("the damp decays", later < 0.5 * first);
+      }
+      S.all_off(); init_perf(S.perf); }
+
+    // The allocator, against the unit itself (FS1R.unlock captures/2026-09-25-7, session6 alloc).
+    // Filling an empty machine with notes 36..67 on part 1 put them on channels 1..31 then 0, and a
+    // 33rd note of 100 arriving on the full part took channel 2 (which held note 37). Both are
+    // round-robin behaviour the old "lowest free, else oldest" got wrong.
+    { init_perf(S.perf); Voice& V = S.perf.part[0].voice;
+      V.v[0].form = 0; V.v[0].level = 99; V.v[0].fixed = 0; V.v[0].coarse = 1; V.v[0].keysync = 1;
+      for (int i = 0; i < 4; i++) { V.v[0].L[i] = i == 3 ? 0 : 99; V.v[0].T[i] = i == 3 ? 60 : 0; }
+      S.all_off(); S.nextChan = 0; for (int i = 0; i < 4; i++) S.partChan[i] = 0;
+      float l[8], r[8];
+      int order[NCHAN], n = 0;
+      for (int note = 36; note < 36 + NCHAN; note++) {
+          S.midi_in(0x90, note, 100); S.render(l, r, 4);
+          int got = -1;                                    // the channel this note landed on
+          for (int i = 0; i < NCHAN; i++) if (S.ch[i].active && S.ch[i].note == note) got = i;
+          order[n++] = got;
+      }
+      bool rr = true;
+      for (int i = 0; i < NCHAN; i++) rr = rr && order[i] == (i + 1) % NCHAN;
+      ck("allocation is round robin: 32 notes land on channels 1..31 then 0", rr);
+      // the 33rd, above every held note: the unit took channel 2, which held note 37
+      int before = -1;
+      for (int i = 0; i < NCHAN; i++) if (S.ch[i].note == 37) before = i;
+      S.midi_in(0x90, 100, 100); S.render(l, r, 4);
+      int took = -1;
+      for (int i = 0; i < NCHAN; i++) if (S.ch[i].active && S.ch[i].note == 100) took = i;
+      ck("the 33rd note steals the channel the unit stole (ch 2)", took == 2 && before == 2);
       S.all_off(); init_perf(S.perf); }
 
     printf(g_fails ? "selftest: %d FAILURES\n" : "selftest: ok\n", g_fails);

@@ -32,9 +32,39 @@ void Synth::note_on(int part, int note, int vel) {
         }
         note = target;
     }
+    // FUN_0000f7dc, measured against the unit (FS1R.unlock 2026-09-25-7). Three things, none of which
+    // the old "first free, else oldest" did:
+    //  1. allocation is ROUND ROBIN from the last channel allocated, not the lowest free one. Filling an
+    //     empty machine with 32 notes puts them on channels 1..31 then 0, which is what the unit did.
+    //  2. when nothing is free, the part to take from is the one furthest over its own note reserve.
+    //     The reserves cannot oversubscribe the 32 channels: writing 32 to part 2 with parts 3 and 4
+    //     holding 8 each read back as 16, i.e. 32 - (0 + 8 + 8), so a part's effective reserve is what
+    //     is left after the others. (FUN_00030796 clamps parameter writes against a per-parameter
+    //     table; the sum rule is the reading that fits the one measured point, 2026-09-25-7.)
+    //  3. within that part the walk starts after the part's own cursor and takes the first channel whose
+    //     stored note is ABOVE the arriving one; failing that, the lowest stored note it saw.
     Chan* c = nullptr;
-    for (auto& x : ch) if (!x.active) { c = &x; break; }
-    if (!c) { c = &ch[0]; for (auto& x : ch) if (x.age < c->age) c = &x; }
+    for (int k = 1; k <= NCHAN; k++) { Chan& x = ch[(nextChan + k) % NCHAN]; if (!x.active) { c = &x; break; } }
+    if (!c) {
+        int best = part, excess = -1;
+        for (int k = 0; k < 4; k++) {
+            int p = (part + k) & 3, others = 0, n = 0;
+            for (int q = 0; q < 4; q++) if (q != p) others += perf.part[q].p[0x00];
+            int res = clampi(perf.part[p].p[0x00], 0, std::max(0, NCHAN - others));
+            for (auto& x : ch) if (x.active && x.part == p) n++;
+            if (n > res && n - res > excess) { excess = n - res; best = p; }
+        }
+        int thr = note, fb = -1;
+        for (int k = 1; k <= NCHAN; k++) {
+            int i = (partChan[best] + k) % NCHAN;
+            if (!ch[i].active || ch[i].part != best) continue;
+            if (thr < ch[i].note) { c = &ch[i]; break; }
+            if (fb >= 0) { c = &ch[fb]; break; }
+            fb = i; thr = ch[i].note;
+        }
+        if (!c) c = &ch[fb >= 0 ? fb : 0];
+    }
+    nextChan = int(c - ch); partChan[part] = nextChan;
     Chan& C = *c; bool sync = V.lfo1sync != 0; uint32_t keepPhase = C.lfoPhase;
     // FUN_00023000: the firmware damps the channel it is about to take, it does not silence it. The mask
     // it is called with comes out of the one-hot table at 0x35B260 indexed by the allocated channel, and
