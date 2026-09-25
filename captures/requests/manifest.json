@@ -5896,6 +5896,551 @@
    "parts": 2
   },
   {
+   "file": "05b_unvoiced2.mid",
+   "segments": [
+    {
+     "id": "ubw36-0",
+     "what": "unvoiced formant at 1 kHz, bandwidth 0, skirt 0, resonance 0, note 36",
+     "pins": [
+      "NOISE_OCT"
+     ],
+     "measure": "spectrum",
+     "note": 36,
+     "velocity": 100,
+     "t_on": 3.4,
+     "t_off": 6.4,
+     "t_end": 7.1,
+     "steady": [
+      4.0,
+      6.2
+     ]
+    },
+    {
+     "id": "ubw36-4",
+     "what": "unvoiced formant at 1 kHz, bandwidth 4, skirt 0, resonance 0, note 36",
+     "pins": [
+      "NOISE_OCT"
+     ],
+     "measure": "spectrum",
+     "note": 36,
+     "velocity": 100,
+     "t_on": 7.6,
+     "t_off": 10.6,
+     "t_end": 11.3,
+     "steady": [
+      8.2,
+      10.4
+     ]
+    },
+    {
+     "id": "ubw36-8",
+     "what": "unvoiced formant at 1 kHz, bandwidth 8, skirt 0, resonance 0, note 36",
+     "pins": [
+      "NOISE_OCT"
+     ],
+     "measure": "spectrum",
+     "note": 36,
+     "velocity": 100,
+     "t_on": 11.8,
+     "t_off": 14.8,
+     "t_end": 15.5,
+     "steady": [
+      12.4,
+      14.6
+     ]
+    },
+    {
+     "id": "ubw36-12",
+     "what": "unvoiced formant at 1 kHz, bandwidth 12, skirt 0, resonance 0, note 36",
+     "pins": [
+      "NOISE_OCT"
+     ],
+     "measure": "spectrum",
+     "note": 36,
+     "velocity": 100,
+     "t_on": 16.0,
+     "t_off": 19.0,
+     "t_end": 19.7,
+     "steady": [
+      16.6,
+      18.8
+     ]
+    },
+    {
+     "id": "ubw36-16",
+     "what": "unvoiced formant at 1 kHz, bandwidth 16, skirt 0, resonance 0, note 36",
+     "pins": [
+      "NOISE_OCT"
+     ],
+     "measure": "spectrum",
+     "note": 36,
+     "velocity": 100,
+     "t_on": 20.2,
+     "t_off": 23.2,
+     "t_end": 23.9,
+     "steady": [
+      20.8,
+      23.0
+     ]
+    },
+    {
+     "id": "ubw36-20",
+     "what": "unvoiced formant at 1 kHz, bandwidth 20, skirt 0, resonance 0, note 36",
+     "pins": [
+      "NOISE_OCT"
+     ],
+     "measure": "spectrum",
+     "note": 36,
+     "velocity": 100,
+     "t_on": 24.4,
+     "t_off": 27.4,
+     "t_end": 28.1,
+     "steady": [
+      25.0,
+      27.2
+     ]
+    },
+    {
+     "id": "ubw36-24",
+     "what": "unvoiced formant at 1 kHz, bandwidth 24, skirt 0, resonance 0, note 36",
+     "pins": [
+      "NOISE_OCT"
+     ],
+     "measure": "spectrum",
+     "note": 36,
+     "velocity": 100,
+     "t_on": 28.6,
+     "t_off": 31.6,
+     "t_end": 32.3,
+     "steady": [
+      29.2,
+      31.4
+     ]
+    },
+    {
+     "id": "ubw36-28",
+     "what": "unvoiced formant at 1 kHz, bandwidth 28, skirt 0, resonance 0, note 36",
+     "pins": [
+      "NOISE_OCT"
+     ],
+     "measure": "spectrum",
+     "note": 36,
+     "velocity": 100,
+     "t_on": 32.8,
+     "t_off": 35.8,
+     "t_end": 36.5,
+     "steady": [
+      33.4,
+      35.6
+     ]
+    },
+    {
+     "id": "ubw36-32",
+     "what": "unvoiced formant at 1 kHz, bandwidth 32, skirt 0, resonance 0, note 36",
+     "pins": [
+      "NOISE_OCT"
+     ],
+     "measure": "spectrum",
+     "note": 36,
+     "velocity": 100,
+     "t_on": 37.0,
+     "t_off": 40.0,
+     "t_end": 40.7,
+     "steady": [
+      37.6,
+      39.8
+     ]
+    },
+    {
+     "id": "ubw36-36",
+     "what": "unvoiced formant at 1 kHz, bandwidth 36, skirt 0, resonance 0, note 36",
+     "pins": [
+      "NOISE_OCT"
+     ],
+     "measure": "spectrum",
+     "note": 36,
+     "velocity": 100,
+     "t_on": 41.2,
+     "t_off": 44.2,
+     "t_end": 44.9,
+     "steady": [
+      41.8,
+      44.0
+     ]
+    },
+    {
+     "id": "ubw36-40",
+     "what": "unvoiced formant at 1 kHz, bandwidth 40, skirt 0, resonance 0, note 36",
+     "pins": [
+      "NOISE_OCT"
+     ],
+     "measure": "spectrum",
+     "note": 36,
+     "velocity": 100,
+     "t_on": 45.4,
+     "t_off": 48.4,
+     "t_end": 49.1,
+     "steady": [
+      46.0,
+      48.2
+     ]
+    },
+    {
+     "id": "ubw36-44",
+     "what": "unvoiced formant at 1 kHz, bandwidth 44, skirt 0, resonance 0, note 36",
+     "pins": [
+      "NOISE_OCT"
+     ],
+     "measure": "spectrum",
+     "note": 36,
+     "velocity": 100,
+     "t_on": 49.6,
+     "t_off": 52.6,
+     "t_end": 53.3,
+     "steady": [
+      50.2,
+      52.4
+     ]
+    },
+    {
+     "id": "ubw36-48",
+     "what": "unvoiced formant at 1 kHz, bandwidth 48, skirt 0, resonance 0, note 36",
+     "pins": [
+      "NOISE_OCT"
+     ],
+     "measure": "spectrum",
+     "note": 36,
+     "velocity": 100,
+     "t_on": 53.8,
+     "t_off": 56.8,
+     "t_end": 57.5,
+     "steady": [
+      54.4,
+      56.6
+     ]
+    },
+    {
+     "id": "ubw36-52",
+     "what": "unvoiced formant at 1 kHz, bandwidth 52, skirt 0, resonance 0, note 36",
+     "pins": [
+      "NOISE_OCT"
+     ],
+     "measure": "spectrum",
+     "note": 36,
+     "velocity": 100,
+     "t_on": 58.0,
+     "t_off": 61.0,
+     "t_end": 61.7,
+     "steady": [
+      58.6,
+      60.8
+     ]
+    },
+    {
+     "id": "ubw36-56",
+     "what": "unvoiced formant at 1 kHz, bandwidth 56, skirt 0, resonance 0, note 36",
+     "pins": [
+      "NOISE_OCT"
+     ],
+     "measure": "spectrum",
+     "note": 36,
+     "velocity": 100,
+     "t_on": 62.2,
+     "t_off": 65.2,
+     "t_end": 65.9,
+     "steady": [
+      62.8,
+      65.0
+     ]
+    },
+    {
+     "id": "ubw36-60",
+     "what": "unvoiced formant at 1 kHz, bandwidth 60, skirt 0, resonance 0, note 36",
+     "pins": [
+      "NOISE_OCT"
+     ],
+     "measure": "spectrum",
+     "note": 36,
+     "velocity": 100,
+     "t_on": 66.4,
+     "t_off": 69.4,
+     "t_end": 70.1,
+     "steady": [
+      67.0,
+      69.2
+     ]
+    },
+    {
+     "id": "ubw36-64",
+     "what": "unvoiced formant at 1 kHz, bandwidth 64, skirt 0, resonance 0, note 36",
+     "pins": [
+      "NOISE_OCT"
+     ],
+     "measure": "spectrum",
+     "note": 36,
+     "velocity": 100,
+     "t_on": 70.6,
+     "t_off": 73.6,
+     "t_end": 74.3,
+     "steady": [
+      71.2,
+      73.4
+     ]
+    },
+    {
+     "id": "ubw36-68",
+     "what": "unvoiced formant at 1 kHz, bandwidth 68, skirt 0, resonance 0, note 36",
+     "pins": [
+      "NOISE_OCT"
+     ],
+     "measure": "spectrum",
+     "note": 36,
+     "velocity": 100,
+     "t_on": 74.8,
+     "t_off": 77.8,
+     "t_end": 78.5,
+     "steady": [
+      75.4,
+      77.6
+     ]
+    },
+    {
+     "id": "ubw36-72",
+     "what": "unvoiced formant at 1 kHz, bandwidth 72, skirt 0, resonance 0, note 36",
+     "pins": [
+      "NOISE_OCT"
+     ],
+     "measure": "spectrum",
+     "note": 36,
+     "velocity": 100,
+     "t_on": 79.0,
+     "t_off": 82.0,
+     "t_end": 82.7,
+     "steady": [
+      79.6,
+      81.8
+     ]
+    },
+    {
+     "id": "ubw36-76",
+     "what": "unvoiced formant at 1 kHz, bandwidth 76, skirt 0, resonance 0, note 36",
+     "pins": [
+      "NOISE_OCT"
+     ],
+     "measure": "spectrum",
+     "note": 36,
+     "velocity": 100,
+     "t_on": 83.2,
+     "t_off": 86.2,
+     "t_end": 86.9,
+     "steady": [
+      83.8,
+      86.0
+     ]
+    },
+    {
+     "id": "ubw36-80",
+     "what": "unvoiced formant at 1 kHz, bandwidth 80, skirt 0, resonance 0, note 36",
+     "pins": [
+      "NOISE_OCT"
+     ],
+     "measure": "spectrum",
+     "note": 36,
+     "velocity": 100,
+     "t_on": 87.4,
+     "t_off": 90.4,
+     "t_end": 91.1,
+     "steady": [
+      88.0,
+      90.2
+     ]
+    },
+    {
+     "id": "ubw36-84",
+     "what": "unvoiced formant at 1 kHz, bandwidth 84, skirt 0, resonance 0, note 36",
+     "pins": [
+      "NOISE_OCT"
+     ],
+     "measure": "spectrum",
+     "note": 36,
+     "velocity": 100,
+     "t_on": 91.6,
+     "t_off": 94.6,
+     "t_end": 95.3,
+     "steady": [
+      92.2,
+      94.4
+     ]
+    },
+    {
+     "id": "ubw36-88",
+     "what": "unvoiced formant at 1 kHz, bandwidth 88, skirt 0, resonance 0, note 36",
+     "pins": [
+      "NOISE_OCT"
+     ],
+     "measure": "spectrum",
+     "note": 36,
+     "velocity": 100,
+     "t_on": 95.8,
+     "t_off": 98.8,
+     "t_end": 99.5,
+     "steady": [
+      96.4,
+      98.6
+     ]
+    },
+    {
+     "id": "ubw36-92",
+     "what": "unvoiced formant at 1 kHz, bandwidth 92, skirt 0, resonance 0, note 36",
+     "pins": [
+      "NOISE_OCT"
+     ],
+     "measure": "spectrum",
+     "note": 36,
+     "velocity": 100,
+     "t_on": 100.0,
+     "t_off": 103.0,
+     "t_end": 103.7,
+     "steady": [
+      100.6,
+      102.8
+     ]
+    },
+    {
+     "id": "ubw36-96",
+     "what": "unvoiced formant at 1 kHz, bandwidth 96, skirt 0, resonance 0, note 36",
+     "pins": [
+      "NOISE_OCT"
+     ],
+     "measure": "spectrum",
+     "note": 36,
+     "velocity": 100,
+     "t_on": 104.2,
+     "t_off": 107.2,
+     "t_end": 107.9,
+     "steady": [
+      104.8,
+      107.0
+     ]
+    },
+    {
+     "id": "ucentre36-250",
+     "what": "unvoiced formant at 250 Hz, bandwidth 40, skirt 2, note 36",
+     "pins": [
+      "NOISE_OCT"
+     ],
+     "measure": "spectrum",
+     "note": 36,
+     "velocity": 100,
+     "t_on": 108.4,
+     "t_off": 111.4,
+     "t_end": 112.1,
+     "steady": [
+      109.0,
+      111.2
+     ]
+    },
+    {
+     "id": "ucentre36-500",
+     "what": "unvoiced formant at 500 Hz, bandwidth 40, skirt 2, note 36",
+     "pins": [
+      "NOISE_OCT"
+     ],
+     "measure": "spectrum",
+     "note": 36,
+     "velocity": 100,
+     "t_on": 112.6,
+     "t_off": 115.6,
+     "t_end": 116.3,
+     "steady": [
+      113.2,
+      115.4
+     ]
+    },
+    {
+     "id": "ucentre36-1000",
+     "what": "unvoiced formant at 1000 Hz, bandwidth 40, skirt 2, note 36",
+     "pins": [
+      "NOISE_OCT"
+     ],
+     "measure": "spectrum",
+     "note": 36,
+     "velocity": 100,
+     "t_on": 116.8,
+     "t_off": 119.8,
+     "t_end": 120.5,
+     "steady": [
+      117.4,
+      119.6
+     ]
+    },
+    {
+     "id": "ucentre36-2000",
+     "what": "unvoiced formant at 2000 Hz, bandwidth 40, skirt 2, note 36",
+     "pins": [
+      "NOISE_OCT"
+     ],
+     "measure": "spectrum",
+     "note": 36,
+     "velocity": 100,
+     "t_on": 121.0,
+     "t_off": 124.0,
+     "t_end": 124.7,
+     "steady": [
+      121.6,
+      123.8
+     ]
+    },
+    {
+     "id": "ucentre36-4000",
+     "what": "unvoiced formant at 4000 Hz, bandwidth 40, skirt 2, note 36",
+     "pins": [
+      "NOISE_OCT"
+     ],
+     "measure": "spectrum",
+     "note": 36,
+     "velocity": 100,
+     "t_on": 125.2,
+     "t_off": 128.2,
+     "t_end": 128.9,
+     "steady": [
+      125.8,
+      128.0
+     ]
+    },
+    {
+     "id": "ucentre36-8000",
+     "what": "unvoiced formant at 8000 Hz, bandwidth 40, skirt 2, note 36",
+     "pins": [
+      "NOISE_OCT"
+     ],
+     "measure": "spectrum",
+     "note": 36,
+     "velocity": 100,
+     "t_on": 129.4,
+     "t_off": 132.4,
+     "t_end": 133.1,
+     "steady": [
+      130.0,
+      132.2
+     ]
+    }
+   ],
+   "marker_start": [
+    1.2,
+    1.5,
+    1.8
+   ],
+   "marker_end": [
+    133.6,
+    133.9,
+    134.2
+   ],
+   "duration_s": 135.32,
+   "sha1": "d76e4ac60a54bf618e6417c6392a7f283684d9f6",
+   "why": "the noise formant at a second fundamental, note 36"
+  },
+  {
    "file": "06_filter_1.mid",
    "segments": [
     {
@@ -8832,6 +9377,160 @@
    "parts": 2
   },
   {
+   "file": "08b_panlevel_perfpn.mid",
+   "segments": [
+    {
+     "id": "perfpan-0",
+     "what": "performance pan 0 (64 is centre): the last unmeasured term of the pan sum",
+     "pins": [
+      "pan law"
+     ],
+     "measure": "stereo",
+     "note": 60,
+     "velocity": 100,
+     "t_on": 4.1,
+     "t_off": 6.6,
+     "t_end": 7.3,
+     "steady": [
+      4.7,
+      6.4
+     ]
+    },
+    {
+     "id": "perfpan-16",
+     "what": "performance pan 16 (64 is centre): the last unmeasured term of the pan sum",
+     "pins": [
+      "pan law"
+     ],
+     "measure": "stereo",
+     "note": 60,
+     "velocity": 100,
+     "t_on": 8.5,
+     "t_off": 11.0,
+     "t_end": 11.7,
+     "steady": [
+      9.1,
+      10.8
+     ]
+    },
+    {
+     "id": "perfpan-32",
+     "what": "performance pan 32 (64 is centre): the last unmeasured term of the pan sum",
+     "pins": [
+      "pan law"
+     ],
+     "measure": "stereo",
+     "note": 60,
+     "velocity": 100,
+     "t_on": 12.9,
+     "t_off": 15.4,
+     "t_end": 16.1,
+     "steady": [
+      13.5,
+      15.2
+     ]
+    },
+    {
+     "id": "perfpan-48",
+     "what": "performance pan 48 (64 is centre): the last unmeasured term of the pan sum",
+     "pins": [
+      "pan law"
+     ],
+     "measure": "stereo",
+     "note": 60,
+     "velocity": 100,
+     "t_on": 17.3,
+     "t_off": 19.8,
+     "t_end": 20.5,
+     "steady": [
+      17.9,
+      19.6
+     ]
+    },
+    {
+     "id": "perfpan-64",
+     "what": "performance pan 64 (64 is centre): the last unmeasured term of the pan sum",
+     "pins": [
+      "pan law"
+     ],
+     "measure": "stereo",
+     "note": 60,
+     "velocity": 100,
+     "t_on": 21.7,
+     "t_off": 24.2,
+     "t_end": 24.9,
+     "steady": [
+      22.3,
+      24.0
+     ]
+    },
+    {
+     "id": "perfpan-80",
+     "what": "performance pan 80 (64 is centre): the last unmeasured term of the pan sum",
+     "pins": [
+      "pan law"
+     ],
+     "measure": "stereo",
+     "note": 60,
+     "velocity": 100,
+     "t_on": 26.1,
+     "t_off": 28.6,
+     "t_end": 29.3,
+     "steady": [
+      26.7,
+      28.4
+     ]
+    },
+    {
+     "id": "perfpan-96",
+     "what": "performance pan 96 (64 is centre): the last unmeasured term of the pan sum",
+     "pins": [
+      "pan law"
+     ],
+     "measure": "stereo",
+     "note": 60,
+     "velocity": 100,
+     "t_on": 30.5,
+     "t_off": 33.0,
+     "t_end": 33.7,
+     "steady": [
+      31.1,
+      32.8
+     ]
+    },
+    {
+     "id": "perfpan-112",
+     "what": "performance pan 112 (64 is centre): the last unmeasured term of the pan sum",
+     "pins": [
+      "pan law"
+     ],
+     "measure": "stereo",
+     "note": 60,
+     "velocity": 100,
+     "t_on": 34.9,
+     "t_off": 37.4,
+     "t_end": 38.1,
+     "steady": [
+      35.5,
+      37.2
+     ]
+    }
+   ],
+   "marker_start": [
+    1.2,
+    1.5,
+    1.8
+   ],
+   "marker_end": [
+    39.3,
+    39.6,
+    39.9
+   ],
+   "duration_s": 41.02,
+   "sha1": "646bf8d080bb7746fccd0d599eeecfab01477836",
+   "why": "the performance pan, which 08_panlevel leaves at centre"
+  },
+  {
    "file": "09_effects_1.mid",
    "segments": [
     {
@@ -11739,6 +12438,262 @@
    "parts": 2
   },
   {
+   "file": "12_fseqlevel.mid",
+   "segments": [
+    {
+     "id": "frmt-36",
+     "what": "formant operator on Fseq 34, note 36: the grain rate is the note",
+     "pins": [
+      "Fseq level: per grain or a slew"
+     ],
+     "measure": "envelope",
+     "note": 36,
+     "velocity": 100,
+     "t_on": 4.1,
+     "t_off": 8.1,
+     "t_end": 8.8,
+     "steady": [
+      4.7,
+      7.9
+     ]
+    },
+    {
+     "id": "frmt-48",
+     "what": "formant operator on Fseq 34, note 48: the grain rate is the note",
+     "pins": [
+      "Fseq level: per grain or a slew"
+     ],
+     "measure": "envelope",
+     "note": 48,
+     "velocity": 100,
+     "t_on": 9.3,
+     "t_off": 13.3,
+     "t_end": 14.0,
+     "steady": [
+      9.9,
+      13.1
+     ]
+    },
+    {
+     "id": "frmt-60",
+     "what": "formant operator on Fseq 34, note 60: the grain rate is the note",
+     "pins": [
+      "Fseq level: per grain or a slew"
+     ],
+     "measure": "envelope",
+     "note": 60,
+     "velocity": 100,
+     "t_on": 14.5,
+     "t_off": 18.5,
+     "t_end": 19.2,
+     "steady": [
+      15.1,
+      18.3
+     ]
+    },
+    {
+     "id": "frmt-72",
+     "what": "formant operator on Fseq 34, note 72: the grain rate is the note",
+     "pins": [
+      "Fseq level: per grain or a slew"
+     ],
+     "measure": "envelope",
+     "note": 72,
+     "velocity": 100,
+     "t_on": 19.7,
+     "t_off": 23.7,
+     "t_end": 24.4,
+     "steady": [
+      20.3,
+      23.5
+     ]
+    },
+    {
+     "id": "frmt-84",
+     "what": "formant operator on Fseq 34, note 84: the grain rate is the note",
+     "pins": [
+      "Fseq level: per grain or a slew"
+     ],
+     "measure": "envelope",
+     "note": 84,
+     "velocity": 100,
+     "t_on": 24.9,
+     "t_off": 28.9,
+     "t_end": 29.6,
+     "steady": [
+      25.5,
+      28.7
+     ]
+    },
+    {
+     "id": "frmt-96",
+     "what": "formant operator on Fseq 34, note 96: the grain rate is the note",
+     "pins": [
+      "Fseq level: per grain or a slew"
+     ],
+     "measure": "envelope",
+     "note": 96,
+     "velocity": 100,
+     "t_on": 30.1,
+     "t_off": 34.1,
+     "t_end": 34.8,
+     "steady": [
+      30.7,
+      33.9
+     ]
+    },
+    {
+     "id": "sine-36",
+     "what": "sine operator on the same frame level, note 36: no grain to hide a step in",
+     "pins": [
+      "Fseq level: per grain or a slew"
+     ],
+     "measure": "envelope",
+     "note": 36,
+     "velocity": 100,
+     "t_on": 35.3,
+     "t_off": 39.3,
+     "t_end": 40.0,
+     "steady": [
+      35.9,
+      39.1
+     ]
+    },
+    {
+     "id": "sine-60",
+     "what": "sine operator on the same frame level, note 60: no grain to hide a step in",
+     "pins": [
+      "Fseq level: per grain or a slew"
+     ],
+     "measure": "envelope",
+     "note": 60,
+     "velocity": 100,
+     "t_on": 40.5,
+     "t_off": 44.5,
+     "t_end": 45.2,
+     "steady": [
+      41.1,
+      44.3
+     ]
+    },
+    {
+     "id": "sine-84",
+     "what": "sine operator on the same frame level, note 84: no grain to hide a step in",
+     "pins": [
+      "Fseq level: per grain or a slew"
+     ],
+     "measure": "envelope",
+     "note": 84,
+     "velocity": 100,
+     "t_on": 45.7,
+     "t_off": 49.7,
+     "t_end": 50.4,
+     "steady": [
+      46.3,
+      49.5
+     ]
+    },
+    {
+     "id": "uv-36",
+     "what": "unvoiced operator on the frame's noise level, note 36",
+     "pins": [
+      "Fseq level: per grain or a slew"
+     ],
+     "measure": "envelope",
+     "note": 36,
+     "velocity": 100,
+     "t_on": 50.9,
+     "t_off": 54.9,
+     "t_end": 55.6,
+     "steady": [
+      51.5,
+      54.7
+     ]
+    },
+    {
+     "id": "uv-60",
+     "what": "unvoiced operator on the frame's noise level, note 60",
+     "pins": [
+      "Fseq level: per grain or a slew"
+     ],
+     "measure": "envelope",
+     "note": 60,
+     "velocity": 100,
+     "t_on": 56.1,
+     "t_off": 60.1,
+     "t_end": 60.8,
+     "steady": [
+      56.7,
+      59.9
+     ]
+    },
+    {
+     "id": "uv-84",
+     "what": "unvoiced operator on the frame's noise level, note 84",
+     "pins": [
+      "Fseq level: per grain or a slew"
+     ],
+     "measure": "envelope",
+     "note": 84,
+     "velocity": 100,
+     "t_on": 61.3,
+     "t_off": 65.3,
+     "t_end": 66.0,
+     "steady": [
+      61.9,
+      65.1
+     ]
+    },
+    {
+     "id": "frmt-rate200",
+     "what": "formant operator, note 60, Fseq at 16 frames a second",
+     "pins": [
+      "Fseq level: per grain or a slew"
+     ],
+     "measure": "envelope",
+     "note": 60,
+     "velocity": 100,
+     "t_on": 67.2,
+     "t_off": 71.2,
+     "t_end": 71.9,
+     "steady": [
+      67.8,
+      71.0
+     ]
+    },
+    {
+     "id": "frmt-rate5000",
+     "what": "formant operator, note 60, Fseq at 176 frames a second",
+     "pins": [
+      "Fseq level: per grain or a slew"
+     ],
+     "measure": "envelope",
+     "note": 60,
+     "velocity": 100,
+     "t_on": 73.1,
+     "t_off": 77.1,
+     "t_end": 77.8,
+     "steady": [
+      73.7,
+      76.9
+     ]
+    }
+   ],
+   "marker_start": [
+    1.2,
+    1.5,
+    1.8
+   ],
+   "marker_end": [
+    79.0,
+    79.3,
+    79.6
+   ],
+   "duration_s": 80.72,
+   "sha1": "bce62439f0d5fea40f5c7734aaaba5a43cefc8bb",
+   "why": "what the voiced level register does between Fseq frames"
+  },
+  {
    "file": "13_unvoiced3.mid",
    "segments": [
     {
@@ -13286,961 +14241,6 @@
    "duration_s": 183.32,
    "sha1": "005af0a758589ae0fcfcac3e0f58c1a7341dc631",
    "why": "the filter EG over six depths, and AM sensitivity at three LFO depths"
-  },
-  {
-   "file": "05b_unvoiced2.mid",
-   "segments": [
-    {
-     "id": "ubw36-0",
-     "what": "unvoiced formant at 1 kHz, bandwidth 0, skirt 0, resonance 0, note 36",
-     "pins": [
-      "NOISE_OCT"
-     ],
-     "measure": "spectrum",
-     "note": 36,
-     "velocity": 100,
-     "t_on": 3.4,
-     "t_off": 6.4,
-     "t_end": 7.1,
-     "steady": [
-      4.0,
-      6.2
-     ]
-    },
-    {
-     "id": "ubw36-4",
-     "what": "unvoiced formant at 1 kHz, bandwidth 4, skirt 0, resonance 0, note 36",
-     "pins": [
-      "NOISE_OCT"
-     ],
-     "measure": "spectrum",
-     "note": 36,
-     "velocity": 100,
-     "t_on": 7.6,
-     "t_off": 10.6,
-     "t_end": 11.3,
-     "steady": [
-      8.2,
-      10.4
-     ]
-    },
-    {
-     "id": "ubw36-8",
-     "what": "unvoiced formant at 1 kHz, bandwidth 8, skirt 0, resonance 0, note 36",
-     "pins": [
-      "NOISE_OCT"
-     ],
-     "measure": "spectrum",
-     "note": 36,
-     "velocity": 100,
-     "t_on": 11.8,
-     "t_off": 14.8,
-     "t_end": 15.5,
-     "steady": [
-      12.4,
-      14.6
-     ]
-    },
-    {
-     "id": "ubw36-12",
-     "what": "unvoiced formant at 1 kHz, bandwidth 12, skirt 0, resonance 0, note 36",
-     "pins": [
-      "NOISE_OCT"
-     ],
-     "measure": "spectrum",
-     "note": 36,
-     "velocity": 100,
-     "t_on": 16.0,
-     "t_off": 19.0,
-     "t_end": 19.7,
-     "steady": [
-      16.6,
-      18.8
-     ]
-    },
-    {
-     "id": "ubw36-16",
-     "what": "unvoiced formant at 1 kHz, bandwidth 16, skirt 0, resonance 0, note 36",
-     "pins": [
-      "NOISE_OCT"
-     ],
-     "measure": "spectrum",
-     "note": 36,
-     "velocity": 100,
-     "t_on": 20.2,
-     "t_off": 23.2,
-     "t_end": 23.9,
-     "steady": [
-      20.8,
-      23.0
-     ]
-    },
-    {
-     "id": "ubw36-20",
-     "what": "unvoiced formant at 1 kHz, bandwidth 20, skirt 0, resonance 0, note 36",
-     "pins": [
-      "NOISE_OCT"
-     ],
-     "measure": "spectrum",
-     "note": 36,
-     "velocity": 100,
-     "t_on": 24.4,
-     "t_off": 27.4,
-     "t_end": 28.1,
-     "steady": [
-      25.0,
-      27.2
-     ]
-    },
-    {
-     "id": "ubw36-24",
-     "what": "unvoiced formant at 1 kHz, bandwidth 24, skirt 0, resonance 0, note 36",
-     "pins": [
-      "NOISE_OCT"
-     ],
-     "measure": "spectrum",
-     "note": 36,
-     "velocity": 100,
-     "t_on": 28.6,
-     "t_off": 31.6,
-     "t_end": 32.3,
-     "steady": [
-      29.2,
-      31.4
-     ]
-    },
-    {
-     "id": "ubw36-28",
-     "what": "unvoiced formant at 1 kHz, bandwidth 28, skirt 0, resonance 0, note 36",
-     "pins": [
-      "NOISE_OCT"
-     ],
-     "measure": "spectrum",
-     "note": 36,
-     "velocity": 100,
-     "t_on": 32.8,
-     "t_off": 35.8,
-     "t_end": 36.5,
-     "steady": [
-      33.4,
-      35.6
-     ]
-    },
-    {
-     "id": "ubw36-32",
-     "what": "unvoiced formant at 1 kHz, bandwidth 32, skirt 0, resonance 0, note 36",
-     "pins": [
-      "NOISE_OCT"
-     ],
-     "measure": "spectrum",
-     "note": 36,
-     "velocity": 100,
-     "t_on": 37.0,
-     "t_off": 40.0,
-     "t_end": 40.7,
-     "steady": [
-      37.6,
-      39.8
-     ]
-    },
-    {
-     "id": "ubw36-36",
-     "what": "unvoiced formant at 1 kHz, bandwidth 36, skirt 0, resonance 0, note 36",
-     "pins": [
-      "NOISE_OCT"
-     ],
-     "measure": "spectrum",
-     "note": 36,
-     "velocity": 100,
-     "t_on": 41.2,
-     "t_off": 44.2,
-     "t_end": 44.9,
-     "steady": [
-      41.8,
-      44.0
-     ]
-    },
-    {
-     "id": "ubw36-40",
-     "what": "unvoiced formant at 1 kHz, bandwidth 40, skirt 0, resonance 0, note 36",
-     "pins": [
-      "NOISE_OCT"
-     ],
-     "measure": "spectrum",
-     "note": 36,
-     "velocity": 100,
-     "t_on": 45.4,
-     "t_off": 48.4,
-     "t_end": 49.1,
-     "steady": [
-      46.0,
-      48.2
-     ]
-    },
-    {
-     "id": "ubw36-44",
-     "what": "unvoiced formant at 1 kHz, bandwidth 44, skirt 0, resonance 0, note 36",
-     "pins": [
-      "NOISE_OCT"
-     ],
-     "measure": "spectrum",
-     "note": 36,
-     "velocity": 100,
-     "t_on": 49.6,
-     "t_off": 52.6,
-     "t_end": 53.3,
-     "steady": [
-      50.2,
-      52.4
-     ]
-    },
-    {
-     "id": "ubw36-48",
-     "what": "unvoiced formant at 1 kHz, bandwidth 48, skirt 0, resonance 0, note 36",
-     "pins": [
-      "NOISE_OCT"
-     ],
-     "measure": "spectrum",
-     "note": 36,
-     "velocity": 100,
-     "t_on": 53.8,
-     "t_off": 56.8,
-     "t_end": 57.5,
-     "steady": [
-      54.4,
-      56.6
-     ]
-    },
-    {
-     "id": "ubw36-52",
-     "what": "unvoiced formant at 1 kHz, bandwidth 52, skirt 0, resonance 0, note 36",
-     "pins": [
-      "NOISE_OCT"
-     ],
-     "measure": "spectrum",
-     "note": 36,
-     "velocity": 100,
-     "t_on": 58.0,
-     "t_off": 61.0,
-     "t_end": 61.7,
-     "steady": [
-      58.6,
-      60.8
-     ]
-    },
-    {
-     "id": "ubw36-56",
-     "what": "unvoiced formant at 1 kHz, bandwidth 56, skirt 0, resonance 0, note 36",
-     "pins": [
-      "NOISE_OCT"
-     ],
-     "measure": "spectrum",
-     "note": 36,
-     "velocity": 100,
-     "t_on": 62.2,
-     "t_off": 65.2,
-     "t_end": 65.9,
-     "steady": [
-      62.8,
-      65.0
-     ]
-    },
-    {
-     "id": "ubw36-60",
-     "what": "unvoiced formant at 1 kHz, bandwidth 60, skirt 0, resonance 0, note 36",
-     "pins": [
-      "NOISE_OCT"
-     ],
-     "measure": "spectrum",
-     "note": 36,
-     "velocity": 100,
-     "t_on": 66.4,
-     "t_off": 69.4,
-     "t_end": 70.1,
-     "steady": [
-      67.0,
-      69.2
-     ]
-    },
-    {
-     "id": "ubw36-64",
-     "what": "unvoiced formant at 1 kHz, bandwidth 64, skirt 0, resonance 0, note 36",
-     "pins": [
-      "NOISE_OCT"
-     ],
-     "measure": "spectrum",
-     "note": 36,
-     "velocity": 100,
-     "t_on": 70.6,
-     "t_off": 73.6,
-     "t_end": 74.3,
-     "steady": [
-      71.2,
-      73.4
-     ]
-    },
-    {
-     "id": "ubw36-68",
-     "what": "unvoiced formant at 1 kHz, bandwidth 68, skirt 0, resonance 0, note 36",
-     "pins": [
-      "NOISE_OCT"
-     ],
-     "measure": "spectrum",
-     "note": 36,
-     "velocity": 100,
-     "t_on": 74.8,
-     "t_off": 77.8,
-     "t_end": 78.5,
-     "steady": [
-      75.4,
-      77.6
-     ]
-    },
-    {
-     "id": "ubw36-72",
-     "what": "unvoiced formant at 1 kHz, bandwidth 72, skirt 0, resonance 0, note 36",
-     "pins": [
-      "NOISE_OCT"
-     ],
-     "measure": "spectrum",
-     "note": 36,
-     "velocity": 100,
-     "t_on": 79.0,
-     "t_off": 82.0,
-     "t_end": 82.7,
-     "steady": [
-      79.6,
-      81.8
-     ]
-    },
-    {
-     "id": "ubw36-76",
-     "what": "unvoiced formant at 1 kHz, bandwidth 76, skirt 0, resonance 0, note 36",
-     "pins": [
-      "NOISE_OCT"
-     ],
-     "measure": "spectrum",
-     "note": 36,
-     "velocity": 100,
-     "t_on": 83.2,
-     "t_off": 86.2,
-     "t_end": 86.9,
-     "steady": [
-      83.8,
-      86.0
-     ]
-    },
-    {
-     "id": "ubw36-80",
-     "what": "unvoiced formant at 1 kHz, bandwidth 80, skirt 0, resonance 0, note 36",
-     "pins": [
-      "NOISE_OCT"
-     ],
-     "measure": "spectrum",
-     "note": 36,
-     "velocity": 100,
-     "t_on": 87.4,
-     "t_off": 90.4,
-     "t_end": 91.1,
-     "steady": [
-      88.0,
-      90.2
-     ]
-    },
-    {
-     "id": "ubw36-84",
-     "what": "unvoiced formant at 1 kHz, bandwidth 84, skirt 0, resonance 0, note 36",
-     "pins": [
-      "NOISE_OCT"
-     ],
-     "measure": "spectrum",
-     "note": 36,
-     "velocity": 100,
-     "t_on": 91.6,
-     "t_off": 94.6,
-     "t_end": 95.3,
-     "steady": [
-      92.2,
-      94.4
-     ]
-    },
-    {
-     "id": "ubw36-88",
-     "what": "unvoiced formant at 1 kHz, bandwidth 88, skirt 0, resonance 0, note 36",
-     "pins": [
-      "NOISE_OCT"
-     ],
-     "measure": "spectrum",
-     "note": 36,
-     "velocity": 100,
-     "t_on": 95.8,
-     "t_off": 98.8,
-     "t_end": 99.5,
-     "steady": [
-      96.4,
-      98.6
-     ]
-    },
-    {
-     "id": "ubw36-92",
-     "what": "unvoiced formant at 1 kHz, bandwidth 92, skirt 0, resonance 0, note 36",
-     "pins": [
-      "NOISE_OCT"
-     ],
-     "measure": "spectrum",
-     "note": 36,
-     "velocity": 100,
-     "t_on": 100.0,
-     "t_off": 103.0,
-     "t_end": 103.7,
-     "steady": [
-      100.6,
-      102.8
-     ]
-    },
-    {
-     "id": "ubw36-96",
-     "what": "unvoiced formant at 1 kHz, bandwidth 96, skirt 0, resonance 0, note 36",
-     "pins": [
-      "NOISE_OCT"
-     ],
-     "measure": "spectrum",
-     "note": 36,
-     "velocity": 100,
-     "t_on": 104.2,
-     "t_off": 107.2,
-     "t_end": 107.9,
-     "steady": [
-      104.8,
-      107.0
-     ]
-    },
-    {
-     "id": "ucentre36-250",
-     "what": "unvoiced formant at 250 Hz, bandwidth 40, skirt 2, note 36",
-     "pins": [
-      "NOISE_OCT"
-     ],
-     "measure": "spectrum",
-     "note": 36,
-     "velocity": 100,
-     "t_on": 108.4,
-     "t_off": 111.4,
-     "t_end": 112.1,
-     "steady": [
-      109.0,
-      111.2
-     ]
-    },
-    {
-     "id": "ucentre36-500",
-     "what": "unvoiced formant at 500 Hz, bandwidth 40, skirt 2, note 36",
-     "pins": [
-      "NOISE_OCT"
-     ],
-     "measure": "spectrum",
-     "note": 36,
-     "velocity": 100,
-     "t_on": 112.6,
-     "t_off": 115.6,
-     "t_end": 116.3,
-     "steady": [
-      113.2,
-      115.4
-     ]
-    },
-    {
-     "id": "ucentre36-1000",
-     "what": "unvoiced formant at 1000 Hz, bandwidth 40, skirt 2, note 36",
-     "pins": [
-      "NOISE_OCT"
-     ],
-     "measure": "spectrum",
-     "note": 36,
-     "velocity": 100,
-     "t_on": 116.8,
-     "t_off": 119.8,
-     "t_end": 120.5,
-     "steady": [
-      117.4,
-      119.6
-     ]
-    },
-    {
-     "id": "ucentre36-2000",
-     "what": "unvoiced formant at 2000 Hz, bandwidth 40, skirt 2, note 36",
-     "pins": [
-      "NOISE_OCT"
-     ],
-     "measure": "spectrum",
-     "note": 36,
-     "velocity": 100,
-     "t_on": 121.0,
-     "t_off": 124.0,
-     "t_end": 124.7,
-     "steady": [
-      121.6,
-      123.8
-     ]
-    },
-    {
-     "id": "ucentre36-4000",
-     "what": "unvoiced formant at 4000 Hz, bandwidth 40, skirt 2, note 36",
-     "pins": [
-      "NOISE_OCT"
-     ],
-     "measure": "spectrum",
-     "note": 36,
-     "velocity": 100,
-     "t_on": 125.2,
-     "t_off": 128.2,
-     "t_end": 128.9,
-     "steady": [
-      125.8,
-      128.0
-     ]
-    },
-    {
-     "id": "ucentre36-8000",
-     "what": "unvoiced formant at 8000 Hz, bandwidth 40, skirt 2, note 36",
-     "pins": [
-      "NOISE_OCT"
-     ],
-     "measure": "spectrum",
-     "note": 36,
-     "velocity": 100,
-     "t_on": 129.4,
-     "t_off": 132.4,
-     "t_end": 133.1,
-     "steady": [
-      130.0,
-      132.2
-     ]
-    }
-   ],
-   "marker_start": [
-    1.2,
-    1.5,
-    1.8
-   ],
-   "marker_end": [
-    133.6,
-    133.9,
-    134.2
-   ],
-   "duration_s": 135.32,
-   "sha1": "d76e4ac60a54bf618e6417c6392a7f283684d9f6",
-   "why": "the noise formant at a second fundamental, note 36"
-  },
-  {
-   "file": "08b_panlevel_perfpn.mid",
-   "segments": [
-    {
-     "id": "perfpan-0",
-     "what": "performance pan 0 (64 is centre): the last unmeasured term of the pan sum",
-     "pins": [
-      "pan law"
-     ],
-     "measure": "stereo",
-     "note": 60,
-     "velocity": 100,
-     "t_on": 4.1,
-     "t_off": 6.6,
-     "t_end": 7.3,
-     "steady": [
-      4.7,
-      6.4
-     ]
-    },
-    {
-     "id": "perfpan-16",
-     "what": "performance pan 16 (64 is centre): the last unmeasured term of the pan sum",
-     "pins": [
-      "pan law"
-     ],
-     "measure": "stereo",
-     "note": 60,
-     "velocity": 100,
-     "t_on": 8.5,
-     "t_off": 11.0,
-     "t_end": 11.7,
-     "steady": [
-      9.1,
-      10.8
-     ]
-    },
-    {
-     "id": "perfpan-32",
-     "what": "performance pan 32 (64 is centre): the last unmeasured term of the pan sum",
-     "pins": [
-      "pan law"
-     ],
-     "measure": "stereo",
-     "note": 60,
-     "velocity": 100,
-     "t_on": 12.9,
-     "t_off": 15.4,
-     "t_end": 16.1,
-     "steady": [
-      13.5,
-      15.2
-     ]
-    },
-    {
-     "id": "perfpan-48",
-     "what": "performance pan 48 (64 is centre): the last unmeasured term of the pan sum",
-     "pins": [
-      "pan law"
-     ],
-     "measure": "stereo",
-     "note": 60,
-     "velocity": 100,
-     "t_on": 17.3,
-     "t_off": 19.8,
-     "t_end": 20.5,
-     "steady": [
-      17.9,
-      19.6
-     ]
-    },
-    {
-     "id": "perfpan-64",
-     "what": "performance pan 64 (64 is centre): the last unmeasured term of the pan sum",
-     "pins": [
-      "pan law"
-     ],
-     "measure": "stereo",
-     "note": 60,
-     "velocity": 100,
-     "t_on": 21.7,
-     "t_off": 24.2,
-     "t_end": 24.9,
-     "steady": [
-      22.3,
-      24.0
-     ]
-    },
-    {
-     "id": "perfpan-80",
-     "what": "performance pan 80 (64 is centre): the last unmeasured term of the pan sum",
-     "pins": [
-      "pan law"
-     ],
-     "measure": "stereo",
-     "note": 60,
-     "velocity": 100,
-     "t_on": 26.1,
-     "t_off": 28.6,
-     "t_end": 29.3,
-     "steady": [
-      26.7,
-      28.4
-     ]
-    },
-    {
-     "id": "perfpan-96",
-     "what": "performance pan 96 (64 is centre): the last unmeasured term of the pan sum",
-     "pins": [
-      "pan law"
-     ],
-     "measure": "stereo",
-     "note": 60,
-     "velocity": 100,
-     "t_on": 30.5,
-     "t_off": 33.0,
-     "t_end": 33.7,
-     "steady": [
-      31.1,
-      32.8
-     ]
-    },
-    {
-     "id": "perfpan-112",
-     "what": "performance pan 112 (64 is centre): the last unmeasured term of the pan sum",
-     "pins": [
-      "pan law"
-     ],
-     "measure": "stereo",
-     "note": 60,
-     "velocity": 100,
-     "t_on": 34.9,
-     "t_off": 37.4,
-     "t_end": 38.1,
-     "steady": [
-      35.5,
-      37.2
-     ]
-    }
-   ],
-   "marker_start": [
-    1.2,
-    1.5,
-    1.8
-   ],
-   "marker_end": [
-    39.3,
-    39.6,
-    39.9
-   ],
-   "duration_s": 41.02,
-   "sha1": "646bf8d080bb7746fccd0d599eeecfab01477836",
-   "why": "the performance pan, which 08_panlevel leaves at centre"
-  },
-  {
-   "file": "12_fseqlevel.mid",
-   "segments": [
-    {
-     "id": "frmt-36",
-     "what": "formant operator on Fseq 34, note 36: the grain rate is the note",
-     "pins": [
-      "Fseq level: per grain or a slew"
-     ],
-     "measure": "envelope",
-     "note": 36,
-     "velocity": 100,
-     "t_on": 4.1,
-     "t_off": 8.1,
-     "t_end": 8.8,
-     "steady": [
-      4.7,
-      7.9
-     ]
-    },
-    {
-     "id": "frmt-48",
-     "what": "formant operator on Fseq 34, note 48: the grain rate is the note",
-     "pins": [
-      "Fseq level: per grain or a slew"
-     ],
-     "measure": "envelope",
-     "note": 48,
-     "velocity": 100,
-     "t_on": 9.3,
-     "t_off": 13.3,
-     "t_end": 14.0,
-     "steady": [
-      9.9,
-      13.1
-     ]
-    },
-    {
-     "id": "frmt-60",
-     "what": "formant operator on Fseq 34, note 60: the grain rate is the note",
-     "pins": [
-      "Fseq level: per grain or a slew"
-     ],
-     "measure": "envelope",
-     "note": 60,
-     "velocity": 100,
-     "t_on": 14.5,
-     "t_off": 18.5,
-     "t_end": 19.2,
-     "steady": [
-      15.1,
-      18.3
-     ]
-    },
-    {
-     "id": "frmt-72",
-     "what": "formant operator on Fseq 34, note 72: the grain rate is the note",
-     "pins": [
-      "Fseq level: per grain or a slew"
-     ],
-     "measure": "envelope",
-     "note": 72,
-     "velocity": 100,
-     "t_on": 19.7,
-     "t_off": 23.7,
-     "t_end": 24.4,
-     "steady": [
-      20.3,
-      23.5
-     ]
-    },
-    {
-     "id": "frmt-84",
-     "what": "formant operator on Fseq 34, note 84: the grain rate is the note",
-     "pins": [
-      "Fseq level: per grain or a slew"
-     ],
-     "measure": "envelope",
-     "note": 84,
-     "velocity": 100,
-     "t_on": 24.9,
-     "t_off": 28.9,
-     "t_end": 29.6,
-     "steady": [
-      25.5,
-      28.7
-     ]
-    },
-    {
-     "id": "frmt-96",
-     "what": "formant operator on Fseq 34, note 96: the grain rate is the note",
-     "pins": [
-      "Fseq level: per grain or a slew"
-     ],
-     "measure": "envelope",
-     "note": 96,
-     "velocity": 100,
-     "t_on": 30.1,
-     "t_off": 34.1,
-     "t_end": 34.8,
-     "steady": [
-      30.7,
-      33.9
-     ]
-    },
-    {
-     "id": "sine-36",
-     "what": "sine operator on the same frame level, note 36: no grain to hide a step in",
-     "pins": [
-      "Fseq level: per grain or a slew"
-     ],
-     "measure": "envelope",
-     "note": 36,
-     "velocity": 100,
-     "t_on": 35.3,
-     "t_off": 39.3,
-     "t_end": 40.0,
-     "steady": [
-      35.9,
-      39.1
-     ]
-    },
-    {
-     "id": "sine-60",
-     "what": "sine operator on the same frame level, note 60: no grain to hide a step in",
-     "pins": [
-      "Fseq level: per grain or a slew"
-     ],
-     "measure": "envelope",
-     "note": 60,
-     "velocity": 100,
-     "t_on": 40.5,
-     "t_off": 44.5,
-     "t_end": 45.2,
-     "steady": [
-      41.1,
-      44.3
-     ]
-    },
-    {
-     "id": "sine-84",
-     "what": "sine operator on the same frame level, note 84: no grain to hide a step in",
-     "pins": [
-      "Fseq level: per grain or a slew"
-     ],
-     "measure": "envelope",
-     "note": 84,
-     "velocity": 100,
-     "t_on": 45.7,
-     "t_off": 49.7,
-     "t_end": 50.4,
-     "steady": [
-      46.3,
-      49.5
-     ]
-    },
-    {
-     "id": "uv-36",
-     "what": "unvoiced operator on the frame's noise level, note 36",
-     "pins": [
-      "Fseq level: per grain or a slew"
-     ],
-     "measure": "envelope",
-     "note": 36,
-     "velocity": 100,
-     "t_on": 50.9,
-     "t_off": 54.9,
-     "t_end": 55.6,
-     "steady": [
-      51.5,
-      54.7
-     ]
-    },
-    {
-     "id": "uv-60",
-     "what": "unvoiced operator on the frame's noise level, note 60",
-     "pins": [
-      "Fseq level: per grain or a slew"
-     ],
-     "measure": "envelope",
-     "note": 60,
-     "velocity": 100,
-     "t_on": 56.1,
-     "t_off": 60.1,
-     "t_end": 60.8,
-     "steady": [
-      56.7,
-      59.9
-     ]
-    },
-    {
-     "id": "uv-84",
-     "what": "unvoiced operator on the frame's noise level, note 84",
-     "pins": [
-      "Fseq level: per grain or a slew"
-     ],
-     "measure": "envelope",
-     "note": 84,
-     "velocity": 100,
-     "t_on": 61.3,
-     "t_off": 65.3,
-     "t_end": 66.0,
-     "steady": [
-      61.9,
-      65.1
-     ]
-    },
-    {
-     "id": "frmt-rate200",
-     "what": "formant operator, note 60, Fseq at 16 frames a second",
-     "pins": [
-      "Fseq level: per grain or a slew"
-     ],
-     "measure": "envelope",
-     "note": 60,
-     "velocity": 100,
-     "t_on": 67.2,
-     "t_off": 71.2,
-     "t_end": 71.9,
-     "steady": [
-      67.8,
-      71.0
-     ]
-    },
-    {
-     "id": "frmt-rate5000",
-     "what": "formant operator, note 60, Fseq at 176 frames a second",
-     "pins": [
-      "Fseq level: per grain or a slew"
-     ],
-     "measure": "envelope",
-     "note": 60,
-     "velocity": 100,
-     "t_on": 73.1,
-     "t_off": 77.1,
-     "t_end": 77.8,
-     "steady": [
-      73.7,
-      76.9
-     ]
-    }
-   ],
-   "marker_start": [
-    1.2,
-    1.5,
-    1.8
-   ],
-   "marker_end": [
-    79.0,
-    79.3,
-    79.6
-   ],
-   "duration_s": 80.72,
-   "sha1": "bce62439f0d5fea40f5c7734aaaba5a43cefc8bb",
-   "why": "what the voiced level register does between Fseq frames"
   },
   {
    "file": "15_filter.mid",
@@ -19766,6 +19766,164 @@
    "why": "the note-on damp rate (cal::DAMP_MS): how fast the chip fades a channel the allocator takes from a sounding note",
    "group": "damp",
    "group_number": 23
+  },
+  {
+   "file": "24_onset.mid",
+   "segments": [
+    {
+     "id": "onset-b016",
+     "what": "B016 Dyno Rose, its own performance bulk, note 72, struck eight times. The reported patch itself: our render puts a step 5.19 ms after each note-on, one tick period, and this says whether the unit does too",
+     "pins": [],
+     "measure": "onset",
+     "note": 72,
+     "velocity": 100,
+     "strikes": [
+      4.1,
+      5.1,
+      6.1,
+      7.1,
+      8.1,
+      9.1,
+      10.1,
+      11.1
+     ],
+     "t_on": 4.1,
+     "t_end": 12.1,
+     "carrier_hz": null,
+     "tick_ms": 5.2002,
+     "performance": "B016 Dyno Rose"
+    },
+    {
+     "id": "onset-plain",
+     "what": "one fixed sine carrier with every tick-driven update switched off: flat amplitude EG, flat PEG, flat frequency EG, LFO depths 0, filter off. Nothing updates on the tick, so there must be NO step one tick period after note-on. The control: if this segment steps, the tick model is wrong and the rest of the file cannot be read",
+     "pins": [],
+     "measure": "onset",
+     "note": 72,
+     "velocity": 100,
+     "strikes": [
+      13.8,
+      14.8,
+      15.8,
+      16.8,
+      17.8,
+      18.8,
+      19.8,
+      20.8
+     ],
+     "t_on": 13.8,
+     "t_end": 21.8,
+     "carrier_hz": 1002.134,
+     "tick_ms": 5.2002,
+     "control": true
+    },
+    {
+     "id": "onset-lfo",
+     "what": "a ratio-1 carrier with LFO1 at full pitch depth, speed 99, zero delay, key sync off and the operator's pitch mod sensitivity at 7. A fixed-frequency operator ignores the channel pitch, so this case cannot use one. The LFO value is recomputed by the tick, so if the step is the LFO's first value it shows here and not in onset-plain",
+     "pins": [],
+     "measure": "onset",
+     "note": 72,
+     "velocity": 100,
+     "strikes": [
+      23.5,
+      24.5,
+      25.5,
+      26.5,
+      27.5,
+      28.5,
+      29.5,
+      30.5
+     ],
+     "t_on": 23.5,
+     "t_end": 31.5,
+     "carrier_hz": 1002.134,
+     "tick_ms": 5.2002,
+     "control": false
+    },
+    {
+     "id": "onset-filter",
+     "what": "the same voice with the filter on, resonance up, and a wide fast filter EG. The cutoff coefficients and the filter EG are both tick-driven, so a step from the filter path appears here",
+     "pins": [],
+     "measure": "onset",
+     "note": 72,
+     "velocity": 100,
+     "strikes": [
+      33.2,
+      34.2,
+      35.2,
+      36.2,
+      37.2,
+      38.2,
+      39.2,
+      40.2
+     ],
+     "t_on": 33.2,
+     "t_end": 41.2,
+     "carrier_hz": 1002.134,
+     "tick_ms": 5.2002,
+     "control": false
+    },
+    {
+     "id": "onset-peg",
+     "what": "a ratio-1 carrier with a fast pitch EG starting well above centre, widest range. Also cannot be a fixed operator. The PEG is stepped by the tick and read by the register refresh, so a wrong first value shows as a step here",
+     "pins": [],
+     "measure": "onset",
+     "note": 72,
+     "velocity": 100,
+     "strikes": [
+      42.9,
+      43.9,
+      44.9,
+      45.9,
+      46.9,
+      47.9,
+      48.9,
+      49.9
+     ],
+     "t_on": 42.9,
+     "t_end": 50.9,
+     "carrier_hz": 1002.134,
+     "tick_ms": 5.2002,
+     "control": false
+    },
+    {
+     "id": "onset-feg",
+     "what": "the same voice with a fast operator frequency EG, init +25 ramping to centre. The FEG is a linear ramp stepped once per tick (docs/findings.md 2026-09-25), so a first-value error shows as a step here",
+     "pins": [],
+     "measure": "onset",
+     "note": 72,
+     "velocity": 100,
+     "strikes": [
+      52.6,
+      53.6,
+      54.6,
+      55.6,
+      56.6,
+      57.6,
+      58.6,
+      59.6
+     ],
+     "t_on": 52.6,
+     "t_end": 60.6,
+     "carrier_hz": 1002.134,
+     "tick_ms": 5.2002,
+     "control": false
+    }
+   ],
+   "marker_start": [
+    1.2,
+    1.5,
+    1.8
+   ],
+   "marker_end": [
+    62.3,
+    62.6,
+    62.9
+   ],
+   "duration_s": 64.02,
+   "sha1": "4f20aead84394cf510ab5a773f024ce3aadde47d",
+   "why": "whether the unit steps one control-tick (5.20 ms) after note-on the way our engine does on B016 Dyno Rose, and if so which tick-driven update is responsible",
+   "group": "onset",
+   "group_number": 24
   }
  ]
 }
