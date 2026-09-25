@@ -8,6 +8,34 @@ Entries that have a dedicated working document (`aeg.md`, `skirt.md`, `noise.md`
 
 ---
 
+## 2026-09-25, a fixed-frequency operator gets no frequency EG
+
+`24_onset`'s `onset-feg` segment was the one isolated subsystem that separated from the unit: **2.54x** its own body at the tick window against the unit's **0.98x**. It turned out not to be a step at all, and the flagged ratio was the analyzer reading a frequency sweep rather than a discontinuity — a carrier sliding down from well above its target has its largest first differences at the start, which is exactly where the window sits. Measuring the thing itself instead settles it.
+
+**The measurement.** Tracking the carrier's instantaneous frequency over the first 120 ms of each strike, median over the eight strikes, with the segment's own voice (a **fixed**-frequency sine at 1002 Hz, `feg_init` +25, attack time 20):
+
+| ms after note-on | unit | engine (before) | error |
+| --- | --- | --- | --- |
+| 0.00 | 1007.6 Hz | 1733.4 Hz | **+939 cents** |
+| 5.33 | 1007.6 Hz | 1575.0 Hz | +773 cents |
+| 10.67 | 1007.6 Hz | 1384.1 Hz | +550 cents |
+| 21.33 | 1007.6 Hz | 1058.9 Hz | +86 cents |
+| 26.67 and after | 1007.6 Hz | 1007.4 Hz | −0.3 cents |
+
+**The unit does not sweep at all.** It holds 1007.6 Hz flat from the first frame while the engine started 939 cents sharp and took 25 ms to ramp down, the two agreeing to 1 cent only once our ramp had finished. So a fixed-frequency operator gets no frequency EG.
+
+**Why this does not contradict the earlier FEG work.** The 2026-09-25 entry that made the FEG a linear ramp measured `07_modulation_2`'s six `feg-*` segments to 1 to 5 cents, and those segments are built with `sine(...)` — **ratio**-mode carriers. This one is `fixed=1`. The two results are consistent and together they say where the envelope acts: the FEG rides the note's pitch word, and a fixed operator never takes that word, it takes its own coarse and fine bytes (`notes.cpp` computes `freqWord` from `8 * (coarse * 128 + fine) + 0x28ED` for fixed and formant operators, and from the ratio tables plus `C.regPitch` otherwise). One guard in `render_chan`, `if (!v.fixed && s.feg.stage < 2)`.
+
+Formant operators (`form == 7`) also take an absolute word rather than the pitch, so the same argument would put them with the fixed ones — but **no capture drives a formant operator with a live FEG**, so they were left applying it rather than changed on a guess. That is the next thing a capture could settle cheaply.
+
+**Result.** Worst error over the sweep **939 → 11.3 cents**, mean **+111.7 → −1.2 cents**, and the residual 11.3 is the first analysis frame alone, where the window straddles note-on. `onset-feg` now reads **1.41x**, the same as the control, against the unit's 0.98x.
+
+**Scope.** Three of the nineteen render regression cases change: `perf-towarp`, `ctrl-freqbias` and `ctrl-freqbias-off`. Checking every case for a fixed operator with a non-flat FEG finds **exactly those two performances** (towarp has 2 such operators, the freqbias voice 183 has 3) and none in the other sixteen, so the change is confined to what it should touch.
+
+**The check.** `tools/fit_onset.py --check` is the gate: it fails if `onset-feg` reads more than 1.4x the control. Verified both ways — 1.41x passes with the fix, 2.54x fails without it. It lives there rather than in the engine selftest because the selftest could not be made to produce sound for this voice: `init_perf` leaves the part with no receive channel and algorithm 12 (where operator 1 is a modulator), and after fixing both the operator still rendered silent. Three attempts at a selftest version all passed identically with the fix in and out, which is worse than no test, so they were deleted. The lesson is in the skill: a new check has to be seen failing before it is worth keeping.
+
+---
+
 ## 2026-09-25, the unit does not step at the control tick: the B016 click is ours, and it is the insertion path
 
 `24_onset` was recorded (`FS1R.unlock/captures/2026-09-25-8`, gate clean, EPROM and stub matching, 63 s played) and it answers the question the previous entry asked.
